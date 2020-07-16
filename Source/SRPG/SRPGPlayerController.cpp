@@ -13,6 +13,40 @@ ASRPGPlayerController::ASRPGPlayerController()
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 }
 
+void ASRPGPlayerController::SetPlayerReference(ASRPGCharacter* ref_)
+{
+	player = ref_;
+	UE_LOG(LogTemp, Error, TEXT("PLAYER REF SET!!!!!"));
+}
+
+void ASRPGPlayerController::CheckCollisionUnderMouse()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Check Collision has been called"));
+	FHitResult hit;
+	GetHitResultUnderCursor(ECC_Visibility, false, hit);
+	if (hit.GetActor() != nullptr)
+	{
+		IInteractable* hitInteractable = Cast<IInteractable>(hit.GetActor());
+		if (hitInteractable)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
+			interacting = hitInteractable;
+			hitInteractable->Interact();
+			player->SetInteracting(interacting);
+		}
+		else
+		{
+			if (interacting != nullptr)
+			{
+				//UE_LOG(LogTemp, Error, TEXT("uninteracting"));
+				interacting->UnInteract();
+				interacting = nullptr;
+				player->SetInteracting(nullptr);
+			}
+		}
+	}
+}
+
 void ASRPGPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
@@ -37,6 +71,9 @@ void ASRPGPlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ASRPGPlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ASRPGPlayerController::OnResetVR);
+
+
+	InputComponent->BindAction("CheckMouse", IE_Pressed, this, &ASRPGPlayerController::CheckCollisionUnderMouse);
 }
 
 void ASRPGPlayerController::OnResetVR()
@@ -61,7 +98,6 @@ void ASRPGPlayerController::MoveToMouseCursor()
 		// Trace to see what is under the mouse cursor
 		FHitResult Hit;
 		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-
 		if (Hit.bBlockingHit)
 		{
 			// We hit something, move there
@@ -110,3 +146,4 @@ void ASRPGPlayerController::OnSetDestinationReleased()
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
 }
+

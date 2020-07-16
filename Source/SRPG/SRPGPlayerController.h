@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Hub/Interactable.h"
 #include "SRPGPlayerController.generated.h"
 
 UCLASS()
@@ -13,6 +14,10 @@ class ASRPGPlayerController : public APlayerController
 
 public:
 	ASRPGPlayerController();
+
+	void SetPlayerReference(class ASRPGCharacter* ref_);
+
+	void CheckCollisionUnderMouse();
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -38,6 +43,8 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+	class ASRPGCharacter* player;
+	IInteractable* interacting;
 };
 
 

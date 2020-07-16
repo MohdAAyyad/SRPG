@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
+#include "SRPGPlayerController.h"
 #include "Engine/World.h"
 
 ASRPGCharacter::ASRPGCharacter()
@@ -75,6 +76,23 @@ void ASRPGCharacter::Tick(float DeltaSeconds)
 				World->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
 				FQuat SurfaceRotation = HitResult.ImpactNormal.ToOrientationRotator().Quaternion();
 				CursorToWorld->SetWorldLocationAndRotation(HitResult.Location, SurfaceRotation);
+
+				//IInteractable* hitInteractable = Cast<IInteractable>(HitResult.GetActor());
+				//if (hitInteractable)
+				//{
+				//	UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
+				//	hitInteractable = interacting;
+				//	hitInteractable->Interact();
+				//}
+				//else
+				//{
+				//	//UE_LOG(LogTemp, Error, TEXT("interactable not found"));
+				//	if (interacting)
+				//	{
+				//		interacting->UnInteract();
+				//		interacting = nullptr;
+				//	}
+				//}
 			}
 		}
 		else if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -85,6 +103,48 @@ void ASRPGCharacter::Tick(float DeltaSeconds)
 			FRotator CursorR = CursorFV.Rotation();
 			CursorToWorld->SetWorldLocation(TraceHitResult.Location);
 			CursorToWorld->SetWorldRotation(CursorR);
+
+			//FHitResult hit;
+			////APlayerController* PC = Cast<APlayerController>(GetController());
+			//PC->GetHitResultUnderCursor(ECC_Visibility, false, hit);
+			//if (hit.GetActor() != nullptr)
+			//{
+			//	IInteractable* hitInteractable = Cast<IInteractable>(hit.GetActor());
+			//	if (hitInteractable)
+			//	{
+			//		UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
+			//		interacting = hitInteractable;
+			//		hitInteractable->Interact();
+			//	}
+			//	else
+			//	{
+
+			//		if (interacting != nullptr)
+			//		{
+			//			//UE_LOG(LogTemp, Error, TEXT("uninteracting"));
+			//			interacting->UnInteract();
+			//			interacting = nullptr;
+			//		}
+			//	}
+			//}
+			
 		}
 	}
 }
+
+void ASRPGCharacter::SetInteracting(IInteractable* ref_)
+{
+	interacting = ref_;
+}
+
+void ASRPGCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
+	if (controller)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player ref set"));
+		controller->SetPlayerReference(this);
+	}
+}
+
