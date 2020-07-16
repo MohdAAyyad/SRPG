@@ -5,6 +5,8 @@
 #include "SRPGCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "ExternalFileReader/ExternalFileReader.h"
+#include "Engine/Engine.h"
 // Sets default values
 ANPC::ANPC()
 {
@@ -13,13 +15,18 @@ ANPC::ANPC()
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	RootComponent = root;
 
-
+	// create the dialogue box and setup it's attributes 
 	startDialogueBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collider"));
 	startDialogueBox->SetupAttachment(root);
 	startDialogueBox->SetCollisionProfileName("NPCDialogue");
+	// same thing for mesh component
 	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeletal Mesh"));
 	meshComp->SetCollisionProfileName("Pawn");
 	meshComp->SetupAttachment(root);
+
+	//create the file reader
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
+
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +43,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 {
 	if (otherActor_ != nullptr && otherActor_ != this && overlappedComp_ != nullptr)
 	{
+		// check if we are being interacted with and process the logic 
 		if (interactedWith == true)
 		{
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
@@ -71,6 +79,9 @@ void ANPC::UnInteract()
 void ANPC::TestPrint()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
+	FDialogueTableStruct test = fileReader->FindDialogueTableRow(FName("1"));
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, test.line);
 }
 
 void ANPC::SetNPCLinesIndex(int index_)
