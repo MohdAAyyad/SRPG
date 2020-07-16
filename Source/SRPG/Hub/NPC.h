@@ -33,24 +33,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MeshComponent")
 		class USkeletalMeshComponent* meshComp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-		class USkeletalMesh* meshSkeletal;
 
 	// root of the scene
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root")
 	class USceneComponent* root;
 
 	UFUNCTION()
-	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+									 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+								     bool bFromSweep, const FHitResult& SweepResult);
 
-	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// overrides of the interface functions
 	void Interact() override;
 	void UnInteract() override;

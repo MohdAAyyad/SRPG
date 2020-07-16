@@ -4,7 +4,7 @@
 #include "NPC.h"
 #include "SRPGCharacter.h"
 #include "Components/BoxComponent.h"
-#include "Components/MeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 // Sets default values
 ANPC::ANPC()
 {
@@ -15,48 +15,38 @@ ANPC::ANPC()
 
 
 	startDialogueBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collider"));
-	startDialogueBox->SetupAttachment(RootComponent);
-	//startDialogueBox->SetCollisionProfileName("BlockAllDynamic");
-	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
-	//startDialogueBox->OnComponentEndOverlap.AddDynamic(this, &ANPC::UnInteract);
+	startDialogueBox->SetupAttachment(root);
+	startDialogueBox->SetCollisionProfileName("NPCDialogue");
 	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeletal Mesh"));
-	meshComp->SetupAttachment(startDialogueBox);
+	meshComp->SetCollisionProfileName("Pawn");
+	meshComp->SetupAttachment(root);
 }
 
 // Called when the game starts or when spawned
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
-
+	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
 	
 }
 
-void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
+						       UPrimitiveComponent * otherComp_, int32 otherBodyIndex_, 
+							bool bFromSweepO, const FHitResult & sweepResult_)
 {
-	if (interactedWith == true)
+	if (otherActor_ != nullptr && otherActor_ != this && overlappedComp_ != nullptr)
 	{
-		ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
-		if (OtherActor)
+		if (interactedWith == true)
 		{
-			TestPrint();
+			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
+			if (otherActor_)
+			{
+				TestPrint();
+				interactedWith = false;
+			}
 		}
 	}
 	
-}
-
-void ANPC::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	if (meshSkeletal)
-	{
-		meshComp->SetSkeletalMesh(meshSkeletal);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("mesh Skeletal not initialised"));
-	}
-
 }
 
 // Called every frame
@@ -65,13 +55,6 @@ void ANPC::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
-// Called to bind functionality to input
-//void ANPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-//{
-//	//Super::SetupPlayerInputComponent(PlayerInputComponent);
-//
-//}
 
 void ANPC::Interact()
 {
