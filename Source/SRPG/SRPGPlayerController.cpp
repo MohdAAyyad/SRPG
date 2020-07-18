@@ -21,7 +21,7 @@ void ASRPGPlayerController::SetPlayerReference(ASRPGCharacter* ref_)
 
 void ASRPGPlayerController::CheckCollisionUnderMouse()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Check Collision has been called"));
+	//UE_LOG(LogTemp, Warning, TEXT("Check Collision has been called"));
 	FHitResult hit;
 	GetHitResultUnderCursor(ECC_Visibility, false, hit);
 	if (hit.GetActor() != nullptr)

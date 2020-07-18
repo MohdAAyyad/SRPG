@@ -38,6 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root")
 	class USceneComponent* root;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
+		class UExternalFileReader* fileReader;
+
 	UFUNCTION()
 	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 									 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
