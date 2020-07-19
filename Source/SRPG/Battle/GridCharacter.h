@@ -29,6 +29,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
+		class UWidgetComponent* widgetComp;
+
 
 	bool bMoving;
 	TArray<FVector> movementPath;
@@ -47,8 +50,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void Selected();
-	void NotSelected();
+	virtual void Selected();
+	virtual void NotSelected();
 	void UpdateOriginTile(); //Called at the beginning of every player turn
 	void MoveToThisTile(ATile* target_);
 

@@ -31,6 +31,8 @@ void ABattleController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
+	SetInputMode(FInputModeGameAndUI());
+
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ABattleController::HandleMousePress);
 	InputComponent->BindAction("ResetView", IE_Released, this, &ABattleController::ResetView);
 

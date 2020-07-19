@@ -17,6 +17,7 @@
 #include "Engine/World.h"
 #include "Grid/Tile.h"
 #include "PathComponent.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -57,6 +58,9 @@ AGridCharacter::AGridCharacter()
 	bMoving = false;
 
 	pathComp = CreateDefaultSubobject<UPathComponent>(TEXT("Path Component"));
+	widgetComp = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	widgetComp->SetupAttachment(RootComponent);
+	widgetComp->SetVisibility(false);
 
 }
 
@@ -84,7 +88,8 @@ void AGridCharacter::Selected()
 {
 	if (originTile)
 	{
-		movementPath.Empty();
+		if(movementPath.Num()>0)
+			movementPath.Empty();
 		if(pathComp)
 			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
 	}
