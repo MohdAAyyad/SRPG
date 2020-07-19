@@ -20,6 +20,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// used for dialogue
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Line")
 	FString line;
 	// box component used to start dialogue with the player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -41,10 +42,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
 		class UExternalFileReader* fileReader;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC Widget")
+		class UWidgetComponent* widget;
+
 	UFUNCTION()
 	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 									 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 								     bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintCallable)
+		void LoadText();
+
+
 
 
 public:	
@@ -59,6 +68,5 @@ public:
 	void SetNPCLinesIndex(int index_);
 
 	virtual void EndDialogue(); // overriden by children to end the dialogue 
-
 
 };

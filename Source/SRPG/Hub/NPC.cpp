@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "UI/NPCWidgetComponent.h"
 #include "Engine/Engine.h"
 // Sets default values
 ANPC::ANPC()
@@ -26,7 +27,8 @@ ANPC::ANPC()
 
 	//create the file reader
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
-
+	// create the widget component
+	widget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget Component"));
 }
 
 // Called when the game starts or when spawned
@@ -49,12 +51,25 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
 			if (otherActor_)
 			{
-				TestPrint();
-				interactedWith = false;
+				if (widget)
+				{
+					widget->GetUserWidgetObject()->AddToViewport();
+				}
+				LoadText();
 			}
 		}
 	}
 	
+}
+
+
+void ANPC::LoadText()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
+	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName("1"));
+
+	line = file.line;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
 }
 
 // Called every frame
@@ -68,12 +83,20 @@ void ANPC::Interact()
 {
 	interactedWith = true;
 	UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
+	
+
 }
 
 void ANPC::UnInteract()
 {
 	interactedWith = false;
 	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
+	if (widget)
+	{
+		widget->GetUserWidgetObject()->RemoveFromViewport();
+	}
+	line = FString("");
+	//EndDialogue();
 }
 
 void ANPC::TestPrint()
@@ -81,7 +104,9 @@ void ANPC::TestPrint()
 	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
 	FDialogueTableStruct test = fileReader->FindDialogueTableRow(FName("1"));
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, test.line);
+	line = test.line;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
+
 }
 
 void ANPC::SetNPCLinesIndex(int index_)
@@ -100,5 +125,8 @@ void ANPC::SetNPCLinesIndex(int index_)
 void ANPC::EndDialogue()
 {
 	// 
+
+	
 }
+
 

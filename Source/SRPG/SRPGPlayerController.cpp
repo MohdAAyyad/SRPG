@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "SRPGCharacter.h"
+#include "Hub/NPC.h"
 #include "Engine/World.h"
 
 ASRPGPlayerController::ASRPGPlayerController()
@@ -82,9 +83,9 @@ void ASRPGPlayerController::MoveToMouseCursor()
 	// Trace to see what is under the mouse cursor
 	FHitResult Hit;
 	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
 	if (Hit.bBlockingHit)
 	{
-		// We hit something, move there
 		SetNewMoveDestination(Hit.ImpactPoint);
 	}
 }
