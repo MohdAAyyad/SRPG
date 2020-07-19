@@ -15,7 +15,7 @@ UPathComponent::UPathComponent()
 	targetTile = nullptr;
 
 	rowSpeed = 5;
-	depth = 2;
+	depth = 5;
 	// ...
 }
 

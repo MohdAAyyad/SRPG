@@ -75,6 +75,8 @@ void ATile::NotHighlighted()
 	if (originalMaterial)
 		mesh->SetMaterial(1, originalMaterial);
 
+	mesh->SetMaterial(2, mesh->GetMaterial(0));
+
 	bHighlighted = false;
 	gCost = hCost = fCost = 0; //Reset fCost. The starting tile always has 0 fcost
 }

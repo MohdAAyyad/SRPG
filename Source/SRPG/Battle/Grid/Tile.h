@@ -35,7 +35,6 @@ protected:
 		UMaterialInterface* pathMaterial;
 
 
-
 	class AGridManager* gridManager;
 	bool bHighlighted;
 
