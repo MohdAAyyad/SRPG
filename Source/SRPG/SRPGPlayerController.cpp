@@ -16,7 +16,6 @@ ASRPGPlayerController::ASRPGPlayerController()
 void ASRPGPlayerController::SetPlayerReference(ASRPGCharacter* ref_)
 {
 	player = ref_;
-	UE_LOG(LogTemp, Error, TEXT("PLAYER REF SET!!!!!"));
 }
 
 void ASRPGPlayerController::CheckCollisionUnderMouse()
@@ -29,7 +28,7 @@ void ASRPGPlayerController::CheckCollisionUnderMouse()
 		IInteractable* hitInteractable = Cast<IInteractable>(hit.GetActor());
 		if (hitInteractable)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
 			interacting = hitInteractable;
 			hitInteractable->Interact();
 			player->SetInteracting(interacting);
@@ -70,10 +69,7 @@ void ASRPGPlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ASRPGPlayerController::MoveToTouchLocation);
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ASRPGPlayerController::MoveToTouchLocation);
 
-	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ASRPGPlayerController::OnResetVR);
-
-
-	InputComponent->BindAction("CheckMouse", IE_Pressed, this, &ASRPGPlayerController::CheckCollisionUnderMouse);
+	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ASRPGPlayerController::CheckCollisionUnderMouse);
 }
 
 void ASRPGPlayerController::OnResetVR()

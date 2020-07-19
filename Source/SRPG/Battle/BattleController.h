@@ -16,6 +16,7 @@ class SRPG_API ABattleController : public APlayerController
 
 public:
 	ABattleController();
+	void SetBattlePawn(class ABattlePawn* pawn_);
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -26,20 +27,22 @@ protected:
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
 
-	/** Resets HMD orientation in VR. */
-	void OnResetVR();
-
-	/** Navigate player to the current mouse cursor location. */
-	void MoveToMouseCursor();
-
-	/** Navigate player to the current touch location. */
-	void MoveToTouchLocation(const ETouchIndex::Type FingerIndex, const FVector Location);
-
 	/** Navigate player to the given world location. */
-	void SetNewMoveDestination(const FVector DestLocation);
+	float SetNewMoveDestination(const FVector DestLocation);
 
 	/** Input handlers for SetDestination action. */
-	void OnSetDestinationPressed();
-	void OnSetDestinationReleased();
-	
+	void HandleMousePress();
+
+	class AGridCharacter* controlledCharacter;
+	ABattlePawn* battlePawn;
+	class ATile* targetTile;
+
+	bool bMovingCamera;
+
+	void MoveCamera();
+
+	void LookRate(float rate_);
+	void LookUpRate(float rate_);
+
+	void ResetView();
 };
