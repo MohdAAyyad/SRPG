@@ -134,7 +134,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 	int localDepth = depth_;
 	columnOffset = tileIndexInColumn - ConvertRowTocolumn(tileIndexInRows);
 	//Rows going upwards
-	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ && i < rowsNum; i++)
+	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ + 1 && i < rowsNum; i++)
 	{
 		tileIndexInColumn = ConvertRowTocolumn(i) + columnOffset;
 		if (tileIndexInColumn < columnTiles.Num())
@@ -153,7 +153,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 			}
 		}
 	}
-	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ && i < rowsNum; i++)
+	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ + 1 && i < rowsNum; i++)
 	{
 		tileIndexInColumn = ConvertRowTocolumn(i) + columnOffset;
 		if (tileIndexInColumn < columnTiles.Num())
