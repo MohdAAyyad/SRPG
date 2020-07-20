@@ -20,7 +20,8 @@ UExternalFileReader::UExternalFileReader()
 void UExternalFileReader::BeginPlay()
 {
 	Super::BeginPlay();
-
+	// arbitrary value that will be changed to the amount of tables we have
+	tables.Reserve(20);
 	// ...
 	
 }
