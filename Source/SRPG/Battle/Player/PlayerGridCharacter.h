@@ -16,11 +16,18 @@ class SRPG_API APlayerGridCharacter : public AGridCharacter
 
 protected:
 
+	APlayerGridCharacter();
 	UFUNCTION(BlueprintCallable)
 		void HighlightMovementPath();
 
 	UFUNCTION(BlueprintCallable)
 		void HighlightRegularAttackPath();
+
+	//PLACEHOLDERS. WILL GET ACTUAL RANGE FROM EQUIPMENT
+	UPROPERTY(EditAnywhere)
+		int attackRowSpeed;
+	UPROPERTY(EditAnywhere)
+		int attackDepth;
 public:
 	void Selected() override;
 	void NotSelected() override;

@@ -19,6 +19,12 @@
 #include "../PathComponent.h"
 #include "Components/WidgetComponent.h"
 
+
+APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
+{
+	attackRowSpeed = 2;
+	attackDepth = 2;
+}
 void APlayerGridCharacter::Selected()
 {
 	if (widgetComp)
@@ -36,13 +42,33 @@ void APlayerGridCharacter::HighlightMovementPath()
 {
 	if (originTile)
 	{
+		originTile->GetGridManager()->ClearHighlighted();
+
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 		if (pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),0);
 	}
 }
 void APlayerGridCharacter::HighlightRegularAttackPath()
 {
+		FHitResult hit;
+		FVector end = GetActorLocation();
+		ATile* tile;
+		end.Z -= 400.0f;
+		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
+		{
+			tile = Cast<ATile>(hit.Actor);
+		}
+		else
+		{
+			tile = originTile;
+		}
+
+		if (tile)
+		{
+			tile->GetGridManager()->ClearHighlighted();
+			tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, 1);
+		}
 
 }

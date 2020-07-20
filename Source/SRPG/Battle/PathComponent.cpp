@@ -72,7 +72,7 @@ TArray<FVector> UPathComponent::GetPath()
 					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 					&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
-					&& currentNode->GetImmediateNeighbors()[i]->GetHighlighted())
+					&& currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0)
 					open.Push(currentNode->GetImmediateNeighbors()[i]);
 			}
 
@@ -98,7 +98,7 @@ TArray<FVector> UPathComponent::GetPath()
 					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 					&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
-					&& currentNode->GetDiagonalNeighbors()[d]->GetHighlighted())
+					&& currentNode->GetDiagonalNeighbors()[d]->GetHighlighted()==0)
 					open.Push(currentNode->GetDiagonalNeighbors()[d]);
 			}
 

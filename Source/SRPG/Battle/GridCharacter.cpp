@@ -18,6 +18,7 @@
 #include "Grid/Tile.h"
 #include "PathComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Animation/GridCharacterAnimInstance.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -69,6 +70,8 @@ void AGridCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UpdateOriginTile(); //Placeholder. Will be removed once the battle manager is up and running
+
+	animInstance = Cast<UGridCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	
 }
 
@@ -91,7 +94,7 @@ void AGridCharacter::Selected()
 		if(movementPath.Num()>0)
 			movementPath.Empty();
 		if(pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),0);
 	}
 }
 void AGridCharacter::NotSelected()
@@ -157,3 +160,16 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	}
 }
 
+void AGridCharacter::AttackThisTile(ATile* target_)
+{
+	if (target_)
+	{
+		FVector direction = target_->GetActorLocation() - GetActorLocation();
+		FRotator rot = direction.Rotation();
+		rot.Roll = GetActorRotation().Roll;
+		rot.Pitch = GetActorRotation().Pitch;
+		SetActorRotation(rot);
+		if (animInstance)
+			animInstance->WeaponAttack();
+	}
+}

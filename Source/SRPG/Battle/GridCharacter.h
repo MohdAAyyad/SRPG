@@ -32,6 +32,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
 		class UWidgetComponent* widgetComp;
 
+	class UGridCharacterAnimInstance* animInstance;
+
 
 	bool bMoving;
 	TArray<FVector> movementPath;
@@ -54,5 +56,10 @@ public:
 	virtual void NotSelected();
 	void UpdateOriginTile(); //Called at the beginning of every player turn
 	void MoveToThisTile(ATile* target_);
+	void AttackThisTile(ATile* target_); //TODO Add a character to damage to the arguments
+	
+	//Animation related functions
+	UFUNCTION(BlueprintCallable) //Called from within the animation instance
+		virtual void ActivateWeaponAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
 };

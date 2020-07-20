@@ -81,11 +81,15 @@ void ABattleController::HandleMousePress()
 			if (targetTile)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Got Tile"));
-				// We hit a tile, move there
-					// set flag to keep updating destination until released
-				if (targetTile->GetHighlighted())
+
+				//0 Move 1 Attack 2 Heal
+				if (targetTile->GetHighlighted() == 0)
 				{
 					controlledCharacter->MoveToThisTile(targetTile);
+				}
+				else if (targetTile->GetHighlighted() == 1)
+				{
+					controlledCharacter->AttackThisTile(targetTile);
 				}
 				else
 				{

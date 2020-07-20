@@ -17,7 +17,7 @@ ATile::ATile()
 	mesh->SetupAttachment(root);
 
 	gridManager = nullptr;
-	bHighlighted = false;
+	HighlightedIndex = -1;
 
 	//Each tile will have 8 neighbors at max
 	immediateNeighbors.Reserve(4);
@@ -58,7 +58,7 @@ void ATile::SetGridManager(AGridManager* gridManager_)
 	gridManager = gridManager_;
 }
 
-void ATile::Highlighted()
+void ATile::Highlighted(int index_)
 {
 	if (bTraversable)
 	{
@@ -66,7 +66,7 @@ void ATile::Highlighted()
 		if (highlightedMaterial)
 			mesh->SetMaterial(1, highlightedMaterial);
 
-		bHighlighted = true;
+		HighlightedIndex = index_;
 	}
 }
 void ATile::NotHighlighted()
@@ -77,13 +77,13 @@ void ATile::NotHighlighted()
 
 	mesh->SetMaterial(2, mesh->GetMaterial(0));
 
-	bHighlighted = false;
+	HighlightedIndex = -1;
 	gCost = hCost = fCost = 0; //Reset fCost. The starting tile always has 0 fcost
 }
 
-bool ATile::GetHighlighted()
+int ATile::GetHighlighted()
 {
-	return bHighlighted;
+	return HighlightedIndex;
 }
 
 void ATile::AddImmediateNeighbor(ATile* tile_)

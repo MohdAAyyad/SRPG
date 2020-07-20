@@ -105,7 +105,7 @@ void AGridManager::BeginPlay()
 
 }
 
-void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_)
+void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int index_)
 {
 	if (tile_)
 	{
@@ -125,11 +125,11 @@ void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_)
 			//Get the column tile index
 			tileIndexInColumn = ConvertRowTocolumn(tileIndexInRows);
 		}
-		HighlightTiles(rowSpeed_, depth_);
+		HighlightTiles(rowSpeed_, depth_, index_);
 	}
 }
 
-void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
+void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 {
 	int localDepth = depth_;
 	columnOffset = tileIndexInColumn - ConvertRowTocolumn(tileIndexInRows);
@@ -143,7 +143,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 			{
 				if (columnTiles[tileIndexInColumn]->GetTraversable()) //If any of the tiles going upwards is non-traversable, then the next tile by default is non-traversable
 				{
-					columnTiles[tileIndexInColumn]->Highlighted();
+					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
 				}
 				else
@@ -160,7 +160,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 		{
 			if (columnTiles[tileIndexInColumn] != nullptr)
 			{
-				if (columnTiles[tileIndexInColumn]->GetHighlighted())
+				if (columnTiles[tileIndexInColumn]->GetHighlighted() == index_)
 				{
 					for (int d = 0; d < localDepth; d++)
 					{
@@ -172,7 +172,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 							{
 								if (columnTiles[tileIndexInColumn + d - 1]->GetTraversable()) //Is the one to my left traversable?
 								{
-									columnTiles[tileIndexInColumn + d]->Highlighted();
+									columnTiles[tileIndexInColumn + d]->Highlighted(index_);
 									highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
 								}
 								else
@@ -188,7 +188,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 							{
 								if (columnTiles[tileIndexInColumn - d + 1]->GetTraversable())
 								{
-									columnTiles[tileIndexInColumn - d]->Highlighted();
+									columnTiles[tileIndexInColumn - d]->Highlighted(index_);
 									highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
 								}
 								else
@@ -218,7 +218,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 			{
 				if (columnTiles[tileIndexInColumn]->GetTraversable())
 				{
-					columnTiles[tileIndexInColumn]->Highlighted();
+					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
 				}
 				else
@@ -237,7 +237,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 		{
 			if (columnTiles[tileIndexInColumn] != nullptr)
 			{
-				if (columnTiles[tileIndexInColumn]->GetHighlighted())
+				if (columnTiles[tileIndexInColumn]->GetHighlighted() == index_)
 				{
 					for (int d = 0; d < localDepth; d++)
 					{
@@ -248,7 +248,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 							{
 								if (columnTiles[tileIndexInColumn + d - 1]->GetTraversable())
 								{
-									columnTiles[tileIndexInColumn + d]->Highlighted();
+									columnTiles[tileIndexInColumn + d]->Highlighted(index_);
 									highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
 								}
 								else
@@ -263,7 +263,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_)
 							{
 								if (columnTiles[tileIndexInColumn - d + 1]->GetTraversable())
 								{
-									columnTiles[tileIndexInColumn - d]->Highlighted();
+									columnTiles[tileIndexInColumn - d]->Highlighted(index_);
 									highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
 								}
 								else
