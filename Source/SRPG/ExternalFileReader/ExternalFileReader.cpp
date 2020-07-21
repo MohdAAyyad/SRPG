@@ -27,7 +27,7 @@ void UExternalFileReader::BeginPlay()
 	
 }
 
-FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_)
+FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Dialogue Table"));
 	if (tables[index_])
