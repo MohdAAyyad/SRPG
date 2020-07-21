@@ -6,7 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
-#include "UI/NPCWidgetComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/Engine.h"
 // Sets default values
 ANPC::ANPC()
@@ -66,7 +66,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 void ANPC::LoadText()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
-	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName("1"));
+	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName("1"), 0);
 
 	line = file.line;
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
@@ -90,19 +90,13 @@ void ANPC::Interact()
 void ANPC::UnInteract()
 {
 	interactedWith = false;
-	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
-	if (widget)
-	{
-		widget->GetUserWidgetObject()->RemoveFromViewport();
-	}
-	line = FString("");
-	//EndDialogue();
+	EndDialogue();
 }
 
 void ANPC::TestPrint()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
-	FDialogueTableStruct test = fileReader->FindDialogueTableRow(FName("1"));
+	FDialogueTableStruct test = fileReader->FindDialogueTableRow(FName("1"), 0);
 
 	line = test.line;
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
@@ -124,9 +118,12 @@ void ANPC::SetNPCLinesIndex(int index_)
 
 void ANPC::EndDialogue()
 {
-	// 
-
-	
+	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
+	if (widget)
+	{
+		widget->GetUserWidgetObject()->RemoveFromViewport();
+	}
+	line = FString("");
 }
 
 

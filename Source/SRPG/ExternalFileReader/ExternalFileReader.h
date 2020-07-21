@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DialogueTableStruct.h"
+#include "FighterTableStruct.h"
 #include "Engine/DataTable.h"
 #include "ExternalFileReader.generated.h"
 
@@ -35,7 +36,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// finds a particular row if you know it's name 
-	FDialogueTableStruct FindDialogueTableRow(FName name_);
+	FDialogueTableStruct FindDialogueTableRow(FName name_, int index_);
+	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
+	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();
 

@@ -9,7 +9,7 @@
  * 
  */
 USTRUCT(BlueprintType)
-struct FDialogueTableStruct : public FTableRowBase
+struct SRPG_API FDialogueTableStruct : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 public:

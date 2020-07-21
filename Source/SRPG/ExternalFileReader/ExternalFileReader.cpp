@@ -35,12 +35,12 @@ void UExternalFileReader::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_)
+FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Dialogue Table"));
-	if (tables[0])
+	if (tables[index_])
 	{
-		FDialogueTableStruct* result = tables[0]->FindRow<FDialogueTableStruct>(name_, contextString, true);
+		FDialogueTableStruct* result = tables[index_]->FindRow<FDialogueTableStruct>(name_, contextString, true);
 		return *result;
 	}
 	else
@@ -48,8 +48,33 @@ FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_)
 		UE_LOG(LogTemp, Error, TEXT("Dialogue Table returned NULL"));
 		return FDialogueTableStruct();
 	}
+}
 
+FFighterTableStruct UExternalFileReader::FindFighterTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Fighter Table"));
+	if (tables[index_])
+	{
+		FFighterTableStruct* result = tables[index_]->FindRow<FFighterTableStruct>(name_, contextString, true);
+		return *result;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+		return FFighterTableStruct();
+	}
+}
 
+void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
+{
+	if (tables[index_])
+	{
+		tables[index_]->AddRow(rowName_, row_);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+	}
 }
 
 UExternalFileReader* UExternalFileReader::GetExternalFileReader()
