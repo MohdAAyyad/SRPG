@@ -25,19 +25,31 @@ protected:
 	//
 	int calculatedStatsIterator;
 	void EndDialogue() override;
-
-	UFUNCTION(BlueprintCallable)
+	void LoadText() override;
 	TArray<FFighter> GetAllFightersForSale();
 
-
+	FString fighterDisplayValue;
+	// array of all the names in the table
+	TArray<FName> rowNames;
+	// the current index that was selected 
+	int currentIndex;
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void ChooseFighter(int fighterIndex_);
+	UFUNCTION(BlueprintCallable)
 	void UpdateName(FString name_);
-
+	UFUNCTION(BlueprintCallable)
+	FString GetFighterInfo(int fighterIndex_);
 	UFUNCTION(BlueprintCallable)
 	TArray<int> LevelUpFighter();
 
+	UFUNCTION(BlueprintCallable)
+		FString PrintFighter1();
+	UFUNCTION(BlueprintCallable)
+		FString PrintFighter2();
+	UFUNCTION(BlueprintCallable)
+		FString PrintFighter3();
 	UFUNCTION(BlueprintCallable)
 	TArray<int> LevelDownFighter();
 

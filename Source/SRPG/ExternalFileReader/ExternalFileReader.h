@@ -19,6 +19,8 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		TArray<UDataTable*> tables;
+	// is this the first time running
+	bool firstTime;
 	// index 0 = dialogue table
 
 public:	
@@ -41,6 +43,9 @@ public:
 	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();
+
+	UDataTable* GetTable(int index_);
+
 
 		
 };

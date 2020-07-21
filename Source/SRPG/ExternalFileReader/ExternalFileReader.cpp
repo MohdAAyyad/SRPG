@@ -22,6 +22,7 @@ void UExternalFileReader::BeginPlay()
 	Super::BeginPlay();
 	// arbitrary value that will be changed to the amount of tables we have
 	tables.Reserve(20);
+	firstTime = true;
 	// ...
 	
 }
@@ -67,9 +68,22 @@ FFighterTableStruct UExternalFileReader::FindFighterTableRow(FName name_, int in
 
 void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
+	
 	if (tables[index_])
 	{
+		if (firstTime)
+		{
+			TArray<FName> rowNames;
+			rowNames = tables[index_]->GetRowNames();
+			for (auto n : rowNames)
+			{
+				tables[index_]->RemoveRow(n);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Deleted Equipped Fighter Table"));
+			firstTime = false;
+		}
 		tables[index_]->AddRow(rowName_, row_);
+		UE_LOG(LogTemp, Error, TEXT("Fighter Table Row Added!"));
 	}
 	else
 	{
@@ -80,5 +94,10 @@ void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFigh
 UExternalFileReader* UExternalFileReader::GetExternalFileReader()
 {
 	return this;
+}
+
+UDataTable * UExternalFileReader::GetTable(int index_)
+{
+	return tables[index_];
 }
 

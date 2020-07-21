@@ -51,7 +51,7 @@ protected:
 								     bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintCallable)
-		void LoadText();
+		virtual void LoadText();
 
 
 

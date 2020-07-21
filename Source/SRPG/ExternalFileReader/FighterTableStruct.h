@@ -18,44 +18,46 @@ public:
 
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int bpid; //EditAnywhere, BluePrintReadOnly //Used to know which BP corresponds to which fighter
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	FString name; //EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int hp;// EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int pip; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int atk; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int def; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int intl; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int spd; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int crit; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int hit; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int crd; // EditAnywhere, BluePrintReadOnly
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int weaponIndex; //The type of weapon this SFighter can equip.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int armorIndex; //The type of armor this SFighter can wear.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int equippedWeapon; //Used to get the weapon's stats from the equipment table
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int equippedArmor; //Used to get the armor's stats from the equipment table
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int equippedAccessory; //Used to get the accessory's stats from the equipment table
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int level;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int currentEXP;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int neededEXPToLevelUp;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	int emitterIndex; //For regular attacks
+	UPROPERTY(BlueprintReadWrite)
+	int id;
 };
