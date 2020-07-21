@@ -34,9 +34,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	// finds a particular row if you know it's name 
 	FDialogueTableStruct FindDialogueTableRow(FName name_, int index_);
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);

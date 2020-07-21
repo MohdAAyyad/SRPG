@@ -52,13 +52,18 @@ void APlayerGridCharacter::HighlightMovementPath()
 }
 void APlayerGridCharacter::HighlightRegularAttackPath()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Highlight regular attack path "));
 		FHitResult hit;
 		FVector end = GetActorLocation();
 		ATile* tile;
 		end.Z -= 400.0f;
 		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
 		{
+			UE_LOG(LogTemp,Warning,TEXT("Hit something"))
 			tile = Cast<ATile>(hit.Actor);
+
+			if(tile)
+				UE_LOG(LogTemp, Warning, TEXT("Got tile"))
 		}
 		else
 		{

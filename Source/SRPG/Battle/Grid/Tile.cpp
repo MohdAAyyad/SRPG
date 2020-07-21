@@ -63,8 +63,20 @@ void ATile::Highlighted(int index_)
 	if (bTraversable)
 	{
 		SetActorHiddenInGame(false);
-		if (highlightedMaterial)
-			mesh->SetMaterial(1, highlightedMaterial);
+		if (index_ == 0 || index_ == 1)
+		{
+			if (highlightedMaterial)
+				mesh->SetMaterial(1, highlightedMaterial);
+		}
+		else if (index_ == 2)
+		{
+			//Heal material
+		}
+		else if (index_ == 3)
+		{
+			if (pathMaterial)
+				mesh->SetMaterial(1, pathMaterial);
+		}
 
 		HighlightedIndex = index_;
 	}

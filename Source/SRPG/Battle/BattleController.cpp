@@ -12,6 +12,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/World.h"
+#include "BattleManager.h"
 
 ABattleController::ABattleController()
 {
@@ -19,6 +20,8 @@ ABattleController::ABattleController()
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	controlledCharacter = nullptr;
 	bMovingCamera = false;
+
+	btlManager = nullptr;
 }
 
 void ABattleController::PlayerTick(float DeltaTime)
@@ -60,47 +63,71 @@ void ABattleController::HandleMousePress()
 
 	if (hit.bBlockingHit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hit something"));
-		if (!controlledCharacter) //If we don't have a controller character, see if we've 
+		if (btlManager)
 		{
-			controlledCharacter = Cast<AGridCharacter>(hit.Actor);
-			if (controlledCharacter)
+			if (btlManager->GetPhase() == 0) //Deployment phase
 			{
-				controlledCharacter->Selected();
-				SetViewTargetWithBlend(controlledCharacter, 0.35f);
-				if (battlePawn)
-					battlePawn->SetUnderControl(false);
-			}
-			//UE_LOG(LogTemp, Warning, TEXT("Got player"));
-
-
-		}
-		else
-		{
-			targetTile = Cast<ATile>(hit.Actor);
-			if (targetTile)
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("Got Tile"));
-
-				//0 Move 1 Attack 2 Heal
-				if (targetTile->GetHighlighted() == 0)
+				targetTile = Cast<ATile>(hit.Actor);
+				if (targetTile)
 				{
-					controlledCharacter->MoveToThisTile(targetTile);
+					if (targetTile->GetHighlighted() == 3) //Deployment highlight index
+					{
+						btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
+					}
 				}
-				else if (targetTile->GetHighlighted() == 1)
+			}
+			if (btlManager->GetPhase() == 1) //Player phase
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Hit something"));
+				if (!controlledCharacter) //If we don't have a controller character, see if we've 
 				{
-					controlledCharacter->AttackThisTile(targetTile);
+					controlledCharacter = Cast<AGridCharacter>(hit.Actor);
+					if (controlledCharacter)
+					{
+						controlledCharacter->Selected();
+						SetViewTargetWithBlend(controlledCharacter, 0.35f);
+					}
+					//UE_LOG(LogTemp, Warning, TEXT("Got player"));
+
+
 				}
 				else
 				{
-					controlledCharacter->NotSelected();
-					controlledCharacter = nullptr;
+					targetTile = Cast<ATile>(hit.Actor);
+					if (targetTile)
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("Got Tile"));
+
+						//0 Move 1 Attack 2 Heal
+						if (targetTile->GetHighlighted() == 0)
+						{
+							controlledCharacter->MoveToThisTile(targetTile);
+						}
+						else if (targetTile->GetHighlighted() == 1)
+						{
+							controlledCharacter->AttackThisTile(targetTile);
+						}
+						else
+						{
+							controlledCharacter->NotSelected();
+							//Move the battle pawn to where the character is
+							if (battlePawn)
+							{
+								battlePawn->SetUnderControl(false);
+								battlePawn->SetActorLocation(FVector(controlledCharacter->GetActorLocation().X,
+									controlledCharacter->GetActorLocation().Y,
+									battlePawn->GetActorLocation().Z));
+							}
+
+							controlledCharacter = nullptr;
+						}
+					}
+					else
+					{
+						controlledCharacter->NotSelected();
+						controlledCharacter = nullptr;
+					}
 				}
-			}
-			else
-			{
-				controlledCharacter->NotSelected();
-				controlledCharacter = nullptr;
 			}
 		}
 	}
@@ -131,4 +158,9 @@ void ABattleController::SetBattlePawn(ABattlePawn* pawn_)
 			InputComponent->BindAxis("Zoom", battlePawn, &ABattlePawn::Zoom);
 		}
 	}
+}
+
+void ABattleController::SetBattleManager(ABattleManager* btlManger_)
+{
+	btlManager = btlManger_;
 }

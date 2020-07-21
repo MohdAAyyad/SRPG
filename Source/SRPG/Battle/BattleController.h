@@ -17,6 +17,7 @@ class SRPG_API ABattleController : public APlayerController
 public:
 	ABattleController();
 	void SetBattlePawn(class ABattlePawn* pawn_);
+	void SetBattleManager(class ABattleManager* btlMaanger_);
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -36,6 +37,7 @@ protected:
 	class AGridCharacter* controlledCharacter;
 	ABattlePawn* battlePawn;
 	class ATile* targetTile;
+	ABattleManager* btlManager;
 
 	bool bMovingCamera;
 

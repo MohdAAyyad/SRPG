@@ -46,5 +46,6 @@ public:
 	void ClearHighlighted();
 
 	void HighlightTiles(int rowSpeed_, int depth_, int index_);
+	void HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_);
 
 };
