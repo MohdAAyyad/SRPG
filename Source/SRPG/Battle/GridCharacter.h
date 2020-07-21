@@ -41,6 +41,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		class UPathComponent* pathComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Needed when we want to call functions of the btl manager from the player's UI (end turn for example)
+		class ABattleManager* btlManager;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,4 +65,5 @@ public:
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
 		virtual void ActivateWeaponAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
+	void SetBattleManager(ABattleManager* btlManager_);
 };

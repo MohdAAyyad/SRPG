@@ -280,6 +280,15 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 	}
 }
 
+void AGridManager::HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_)
+{
+	int columnTileIndex = ConvertRowTocolumn(rowIndex_) + offset_;
+	if (columnTileIndex >= 0 && columnTileIndex < columnTiles.Num())
+	{
+		UpdateCurrentTile(columnTiles[columnTileIndex], rowSpeed_, depth_, 3);
+	}
+}
+
 int AGridManager::ConvertRowTocolumn(int index_)
 {
 	//Under the assumption the grid is a square

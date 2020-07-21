@@ -19,6 +19,7 @@
 #include "PathComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Animation/GridCharacterAnimInstance.h"
+#include "BattleManager.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -62,6 +63,8 @@ AGridCharacter::AGridCharacter()
 	widgetComp = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
+
+	btlManager = nullptr;
 
 }
 
@@ -172,4 +175,9 @@ void AGridCharacter::AttackThisTile(ATile* target_)
 		if (animInstance)
 			animInstance->WeaponAttack();
 	}
+}
+
+void AGridCharacter::SetBattleManager(ABattleManager* btlManager_)
+{
+	btlManager = btlManager_;
 }

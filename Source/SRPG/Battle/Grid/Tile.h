@@ -36,7 +36,7 @@ protected:
 
 
 	class AGridManager* gridManager;
-	int HighlightedIndex;//0 move, 1 attack, 2 heal
+	int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment
 
 	//Need different arrays for different neighbors to make cost calculations easier
 	TArray<ATile*> immediateNeighbors;

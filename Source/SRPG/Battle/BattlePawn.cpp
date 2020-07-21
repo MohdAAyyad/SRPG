@@ -105,7 +105,11 @@ void ABattlePawn::Zoom(float rate_)
 {
 	if (bUnderControl)
 	{
-		mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
+		if (FMath::Abs(rate_) > 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Zoom"));
+			mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
+		}
 	}
 }
 
