@@ -53,7 +53,7 @@ TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
 			stats = ScaleStatsByLevel(increment, stats_);
 		}
 	}
-	else if (goalLevel_ < stats_[9] && goalLevel_ > 0)
+	else if (goalLevel_ < stats_[9] && stats_[9] > 0)
 	{
 		while (exit == false)
 		{
