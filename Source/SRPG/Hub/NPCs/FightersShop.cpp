@@ -76,6 +76,12 @@ void AFightersShop::ChooseFighter(int fighterIndex_)
 	UE_LOG(LogTemp, Warning, TEXT("Choose Fighter Called!"));
 	currentIndex = fighterIndex_;
 	haveChosenFighter = true;
+
+	if (hasLeveledUp)
+	{
+		hasLeveledUp = false;
+		statsAfterLevelUp = TArray<int>();
+	}
 	//fighters[]
 	//FFighter fighter;
 	//fighter.BPID = row.bpid;
@@ -137,9 +143,17 @@ FString AFightersShop::PrintFighter3()
 
 TArray<int> AFightersShop::LevelUpFighter()
 {
-	if (haveChosenFighter)
+	TArray<int> tempStats;
+
+	if (hasLeveledUp && haveChosenFighter)
 	{
-		TArray<int> tempStats;
+		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
+		statsAfterLevelUp = tempStats;
+		return tempStats;
+	}
+	else if (haveChosenFighter)
+	{
+		
 		FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
 		tempStats.Push(row.hp); // 0
 		tempStats.Push(row.pip); // 1
@@ -168,9 +182,17 @@ TArray<int> AFightersShop::LevelUpFighter()
 
 TArray<int> AFightersShop::LevelDownFighter()
 {
-	if (haveChosenFighter)
+	TArray<int> tempStats;
+	
+	if (hasLeveledUp && haveChosenFighter)
 	{
-		TArray<int> tempStats;
+		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] - 1, statsAfterLevelUp);
+		statsAfterLevelUp = tempStats;
+		return tempStats;
+	}
+	else if (haveChosenFighter)
+	{
+
 		FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
 		tempStats.Push(row.hp); // 0
 		tempStats.Push(row.pip); // 1
