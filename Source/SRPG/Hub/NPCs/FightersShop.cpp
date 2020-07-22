@@ -11,7 +11,8 @@ void AFightersShop::BeginPlay()
 {
 	Super::BeginPlay();
 	purchasedFighters = 1;
-
+	haveChosenFighter = false;
+	hasLeveledUp = false;
 }
 
 void AFightersShop::EndDialogue()
@@ -74,6 +75,7 @@ void AFightersShop::ChooseFighter(int fighterIndex_)
 	chosenFighter.emitterIndex = fighters[fighterIndex_].emitterIndex;
 	UE_LOG(LogTemp, Warning, TEXT("Choose Fighter Called!"));
 	currentIndex = fighterIndex_;
+	haveChosenFighter = true;
 	//fighters[]
 	//FFighter fighter;
 	//fighter.BPID = row.bpid;
@@ -104,10 +106,6 @@ FString AFightersShop::GetFighterInfo(int fighterIndex_)
 	return FString();
 }
 
-TArray<int> AFightersShop::LevelUpFighter()
-{
-	return TArray<int>();
-}
 
 FString AFightersShop::PrintFighter1()
 {
@@ -137,44 +135,122 @@ FString AFightersShop::PrintFighter3()
 	return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
 }
 
+TArray<int> AFightersShop::LevelUpFighter()
+{
+	if (haveChosenFighter)
+	{
+		TArray<int> tempStats;
+		FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
+		tempStats.Push(row.hp); // 0
+		tempStats.Push(row.pip); // 1
+		tempStats.Push(row.atk); // 2
+		tempStats.Push(row.def); // 3
+		tempStats.Push(row.intl); // 4
+		tempStats.Push(row.spd); // 5
+		tempStats.Push(row.crit); // 6
+		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.crd); // 8
+		tempStats.Push(row.level); // 9
+
+		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] + 1, tempStats);
+		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
+		statsAfterLevelUp = tempStats;
+		hasLeveledUp = true;
+		return tempStats;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FIGHTER NOT SELECTED!"));
+		return TArray<int>();
+	}
+
+}
+
 TArray<int> AFightersShop::LevelDownFighter()
 {
-	return TArray<int>();
+	if (haveChosenFighter)
+	{
+		TArray<int> tempStats;
+		FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
+		tempStats.Push(row.hp); // 0
+		tempStats.Push(row.pip); // 1
+		tempStats.Push(row.atk); // 2
+		tempStats.Push(row.def); // 3
+		tempStats.Push(row.intl); // 4
+		tempStats.Push(row.spd); // 5
+		tempStats.Push(row.crit); // 6
+		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.crd); // 8
+		tempStats.Push(row.level); // 9
+
+		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] - 1, tempStats);
+		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
+		statsAfterLevelUp = tempStats;
+		hasLeveledUp = true;
+		return tempStats;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FIGHTER NOT SELECTED!"));
+		return TArray<int>();
+	}
+
 }
 
 void AFightersShop::FinalizePurchase()
 {
 	// load all of the chosen fighters values into the data table;
+	if (haveChosenFighter)
+	{
+		FFighterTableStruct row;
+		row.bpid = chosenFighter.BPID;
+		row.name = chosenFighter.name;
+		row.level = chosenFighter.level;
+		row.currentEXP = chosenFighter.currentEXP;
+		row.neededEXPToLevelUp = chosenFighter.neededEXPToLevelUp;
+		row.weaponIndex = chosenFighter.weaponIndex;
+		row.armorIndex = chosenFighter.armorIndex;
+		row.equippedWeapon = chosenFighter.equippedWeapon;
+		row.equippedArmor = chosenFighter.equippedArmor;
+		row.equippedAccessory = chosenFighter.equippedAccessory;
+		row.emitterIndex = chosenFighter.emitterIndex;
+		// load the data not included in the FFighter Struct
+		FFighterTableStruct row2 = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
+		row.hp = row2.hp;
+		row.pip = row2.pip;
+		row.atk = row2.atk;
+		row.def = row2.def;
+		row.intl = row2.intl;
+		row.spd = row2.spd;
+		row.crit = row2.crit;
+		row.hit = row2.hit;
+		row.crd = row2.crd;
+		row.id = row2.id;
+		if (hasLeveledUp)
+		{
+			row.hp = statsAfterLevelUp[0];
+			row.pip = statsAfterLevelUp[1];
+			row.atk = statsAfterLevelUp[2];
+			row.def = statsAfterLevelUp[3];
+			row.intl = statsAfterLevelUp[4];
+			row.spd = statsAfterLevelUp[5];
+			row.crit = statsAfterLevelUp[6];
+			row.hit = statsAfterLevelUp[7];
+			row.crd = statsAfterLevelUp[8];
+		}
 
-	FFighterTableStruct row;
-	row.bpid = chosenFighter.BPID;
-	row.name = chosenFighter.name;
-	row.level = chosenFighter.level;
-	row.currentEXP = chosenFighter.currentEXP;
-	row.neededEXPToLevelUp = chosenFighter.neededEXPToLevelUp;
-	row.weaponIndex = chosenFighter.weaponIndex;
-	row.armorIndex = chosenFighter.armorIndex;
-	row.equippedWeapon = chosenFighter.equippedWeapon;
-	row.equippedArmor = chosenFighter.equippedArmor;
-	row.equippedAccessory = chosenFighter.equippedAccessory;
-	row.emitterIndex = chosenFighter.emitterIndex;
-	// load the data not included in the FFighter Struct
-	FFighterTableStruct row2 = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
-	row.hp = row2.hp;
-	row.pip = row2.pip;
-	row.atk = row2.atk;
-	row.def = row2.def;
-	row.intl = row2.intl;
-	row.spd = row2.spd;
-	row.crit = row2.crit;
-	row.hit = row2.hit;
-	row.crd = row2.crd;
-	row.id = row2.id;
-	// add the new row to the table
-	FName index = FName(*FString::FromInt(purchasedFighters));
-	fileReader->AddRowToFighterTable(index, 1, row);
-	purchasedFighters += 1;
-	UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
+		hasLeveledUp = false;
+		// add the new row to the table
+		FName index = FName(*FString::FromInt(purchasedFighters));
+		fileReader->AddRowToFighterTable(index, 1, row);
+		purchasedFighters += 1;
+		UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Fighter Selected!"));
+	}
+	
 }
 
 void AFightersShop::LoadText()

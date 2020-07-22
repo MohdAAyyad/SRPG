@@ -18,7 +18,6 @@ public:
 	{
 
 	}
-
 	// reference the list of blueprints used by btl manager 
 	UPROPERTY(BlueprintReadOnly)
 	int BPID;
@@ -68,9 +67,9 @@ public:
 	int emitterIndex;
 
 
-	void CalculatePrice();
+	void CalculatePrice(TArray<int> stats_);
 
-	void ScaleStatsByLevel(int newLevel_);
+	TArray<int> ScaleStatsByLevel(int newLevel_, TArray<int> stats_);
 
-	void LevelUpUntilGoal(int goalLevel_);
+	TArray<int> LevelUpUntilGoal(int goalLevel_, TArray<int> stats_);
 };

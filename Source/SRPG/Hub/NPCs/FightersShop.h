@@ -33,6 +33,11 @@ protected:
 	TArray<FName> rowNames;
 	// the current index that was selected 
 	int currentIndex;
+	//makes sure we've chosen a fighter before allowing anything to be pushed
+	bool haveChosenFighter;
+
+	bool hasLeveledUp;
+	TArray<int> statsAfterLevelUp;
 
 public:
 	UFUNCTION(BlueprintCallable)
