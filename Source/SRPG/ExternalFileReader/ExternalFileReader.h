@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "DialogueTableStruct.h"
 #include "FighterTableStruct.h"
-#include "Engine/DataTable.h"
+#include "ItemTableStruct.h"
 #include "ExternalFileReader.generated.h"
 
 
@@ -19,8 +19,10 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		TArray<UDataTable*> tables;
-	// is this the first time running
-	bool firstTime;
+	// is this the first time running for fighters
+	bool firstTimeFighter;
+	// is this the first time running for items
+	bool firstTimeItem;
 	// index 0 = dialogue table
 
 public:	
@@ -37,7 +39,11 @@ public:
 	// finds a particular row if you know it's name 
 	FDialogueTableStruct FindDialogueTableRow(FName name_, int index_);
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
+	FItemTableStruct FindItemTableRow(FName name_, int index_);
 	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
+	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
+
+
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();
 

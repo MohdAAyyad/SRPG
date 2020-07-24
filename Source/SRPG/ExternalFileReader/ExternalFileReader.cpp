@@ -21,8 +21,9 @@ void UExternalFileReader::BeginPlay()
 {
 	Super::BeginPlay();
 	// arbitrary value that will be changed to the amount of tables we have
-	tables.Reserve(20);
-	firstTime = true;
+	tables.Reserve(10);
+	firstTimeFighter = true;
+	firstTimeItem = true;
 	// ...
 	
 }
@@ -57,12 +58,42 @@ FFighterTableStruct UExternalFileReader::FindFighterTableRow(FName name_, int in
 	}
 }
 
+FItemTableStruct UExternalFileReader::FindItemTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Item Table"));
+	if (tables[index_])
+	{
+		//reset our owned values to 0 in the table
+		if (firstTimeItem)
+		{
+			TArray<FName> rowNames;
+			rowNames = tables[index_]->GetRowNames();
+			
+			for (auto n : rowNames)
+			{
+				FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(name_, contextString, true);
+				row->owned = 0;
+			}
+
+			firstTimeItem = false;
+		}
+		// otherwise return the result
+		FItemTableStruct* result = tables[index_]->FindRow<FItemTableStruct>(name_, contextString, true);
+		return *result;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
+		return FItemTableStruct();
+	}
+}
+
 void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
 	
 	if (tables[index_])
 	{
-		if (firstTime)
+		if (firstTimeFighter)
 		{
 			TArray<FName> rowNames;
 			rowNames = tables[index_]->GetRowNames();
@@ -71,7 +102,7 @@ void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFigh
 				tables[index_]->RemoveRow(n);
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Deleted Equipped Fighter Table"));
-			firstTime = false;
+			firstTimeFighter = false;
 		}
 		tables[index_]->AddRow(rowName_, row_);
 		UE_LOG(LogTemp, Error, TEXT("Fighter Table Row Added!"));
@@ -79,6 +110,20 @@ void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFigh
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+	}
+}
+
+void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)
+{
+	static const FString contextString(TEXT("Item Table"));
+	if (tables[index_])
+	{
+		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(rowName_, contextString, true);
+		row->owned += value_;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
 	}
 }
 
