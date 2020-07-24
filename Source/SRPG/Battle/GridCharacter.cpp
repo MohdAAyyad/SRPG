@@ -181,3 +181,18 @@ void AGridCharacter::SetBattleManager(ABattleManager* btlManager_)
 {
 	btlManager = btlManager_;
 }
+
+ATile* AGridCharacter::GetMyTile()
+{
+	FHitResult hit;
+	FVector end = GetActorLocation();
+	end.Z -= 400.0f;
+	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
+	{
+		ATile* tile_ = Cast<ATile>(hit.Actor);
+		if (tile_)
+			return tile_;
+	}
+
+	return nullptr;
+}

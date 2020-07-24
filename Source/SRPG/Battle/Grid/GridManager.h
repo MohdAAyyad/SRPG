@@ -47,5 +47,7 @@ public:
 
 	void HighlightTiles(int rowSpeed_, int depth_, int index_);
 	void HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_);
+	TArray<ATile*> GetHighlightedTiles();
+	ATile* GetTileFromRowAndOffset(int row_, int offset_);
 
 };

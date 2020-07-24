@@ -66,4 +66,5 @@ public:
 		virtual void ActivateWeaponAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
 	void SetBattleManager(ABattleManager* btlManager_);
+	ATile* GetMyTile(); //Returns the tile the character is standing on
 };
