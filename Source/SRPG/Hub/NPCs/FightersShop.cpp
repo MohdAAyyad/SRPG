@@ -118,7 +118,14 @@ FString AFightersShop::PrintFighter1()
 	GetAllFightersForSale();
 	FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[0], 0);
 	// load all of the stat values and print them to a string
-	return FString("HP: " + FString::FromInt(row.hp) + " PIP: "+ " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+	if (hasLeveledUp && currentIndex == 0)
+	{
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+	}
+	else
+	{
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+	}
 }
 
 FString AFightersShop::PrintFighter2()
@@ -127,8 +134,15 @@ FString AFightersShop::PrintFighter2()
 	//return FString("This is where the relevant stats for fighter 2 is displyed");
 	FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[1], 0);
 	// load all of the stat values and print them to a string
-	return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
 
+	if(hasLeveledUp && currentIndex == 1)
+	{
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+	}
+	else
+	{
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+	}
 }
 
 FString AFightersShop::PrintFighter3()
@@ -138,7 +152,14 @@ FString AFightersShop::PrintFighter3()
 	//return FString("This is where the relevant stats for fighter 3 is displyed");
 	FFighterTableStruct row = fileReader->FindFighterTableRow(rowNames[2], 0);
 	// load all of the stat values and print them to a string
-	return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+	if (hasLeveledUp && currentIndex == 2)
+	{
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+	}
+	else
+	{
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+	}
 }
 
 TArray<int> AFightersShop::LevelUpFighter()
