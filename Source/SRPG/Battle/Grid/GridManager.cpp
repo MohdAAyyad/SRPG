@@ -320,3 +320,18 @@ void AGridManager::ClearHighlighted()
 		highlightedTiles.Empty();
 	}
 }
+
+TArray<ATile*> AGridManager::GetHighlightedTiles()
+{
+	return highlightedTiles;
+}
+
+ATile* AGridManager::GetTileFromRowAndOffset(int row_, int offset_)
+{
+	int columnTileIndex = ConvertRowTocolumn(row_) + offset_;
+	if (columnTileIndex >= 0 && columnTileIndex < columnTiles.Num())
+	{
+		return columnTiles[columnTileIndex];
+	}
+	return nullptr;
+}

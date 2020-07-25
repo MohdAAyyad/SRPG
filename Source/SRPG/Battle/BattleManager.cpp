@@ -90,6 +90,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
+		deployedFighters.Push(bpidOfUnitToBeDeployedNext);
 		bpidOfUnitToBeDeployedNext = -1;
 	}
 }
