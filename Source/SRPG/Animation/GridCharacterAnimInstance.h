@@ -24,6 +24,8 @@ protected:
 		float forwardSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bWeaponAttack;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bHit;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -31,6 +33,7 @@ protected:
 public:
 
 	void WeaponAttack();
+	void GotHit();
 
 	
 };

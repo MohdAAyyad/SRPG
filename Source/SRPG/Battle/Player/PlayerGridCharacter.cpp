@@ -17,6 +17,7 @@
 #include "Engine/World.h"
 #include "../Grid/Tile.h"
 #include "../PathComponent.h"
+#include "../BattleManager.h"
 #include "Components/WidgetComponent.h"
 
 
@@ -27,8 +28,11 @@ APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 }
 void APlayerGridCharacter::Selected()
 {
-	if (widgetComp)
-		widgetComp->GetUserWidgetObject()->AddToViewport();
+	if (btlManager->GetPhase() == 1) //Player phase
+	{
+		if (widgetComp)
+			widgetComp->GetUserWidgetObject()->AddToViewport();
+	}
 }
 void APlayerGridCharacter::NotSelected()
 {
@@ -37,11 +41,15 @@ void APlayerGridCharacter::NotSelected()
 
 	if (originTile)
 		originTile->GetGridManager()->ClearHighlighted();
+
+	currentState = EGridCharState::IDLE;
 }
 void APlayerGridCharacter::HighlightMovementPath()
 {
 	if (originTile)
 	{
+		currentState = EGridCharState::IDLE;
+
 		originTile->GetGridManager()->ClearHighlighted();
 
 		if (movementPath.Num() > 0)
@@ -52,28 +60,18 @@ void APlayerGridCharacter::HighlightMovementPath()
 }
 void APlayerGridCharacter::HighlightRegularAttackPath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Highlight regular attack path "));
-		FHitResult hit;
-		FVector end = GetActorLocation();
-		ATile* tile;
-		end.Z -= 400.0f;
-		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
-		{
-			UE_LOG(LogTemp,Warning,TEXT("Hit something"))
-			tile = Cast<ATile>(hit.Actor);
+	ATile* tile = GetMyTile();
+	if (tile)
+	{
+		currentState = EGridCharState::ATTACKING;
+		tile->GetGridManager()->ClearHighlighted();
+		tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, 1);
+	}
+}
 
-			if(tile)
-				UE_LOG(LogTemp, Warning, TEXT("Got tile"))
-		}
-		else
-		{
-			tile = originTile;
-		}
 
-		if (tile)
-		{
-			tile->GetGridManager()->ClearHighlighted();
-			tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, 1);
-		}
-
+void APlayerGridCharacter::ActivateWeaponAttack()
+{
+	if (actionTarget)
+		actionTarget->GridCharTakeDamage(1.0f,this);
 }

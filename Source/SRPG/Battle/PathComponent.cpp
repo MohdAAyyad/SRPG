@@ -72,7 +72,9 @@ TArray<FVector> UPathComponent::GetPath()
 					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 					&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
-					&& currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0)
+					//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == 4)
+					//&& !currentNode->GetOccupied()
+					)
 					open.Push(currentNode->GetImmediateNeighbors()[i]);
 			}
 
@@ -98,19 +100,22 @@ TArray<FVector> UPathComponent::GetPath()
 					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 					&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
-					&& currentNode->GetDiagonalNeighbors()[d]->GetHighlighted()==0)
+					//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 0 || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 4)
+					//&& !currentNode->GetOccupied()
+					)
 					open.Push(currentNode->GetDiagonalNeighbors()[d]);
 			}
 
 		}
 	}
 
+	ChangeTargetTileIfItsOccupied();
 	UpdateMovementPath(targetTile);
-	currentTile->HighlightPath();
+	//currentTile->HighlightPath();
 
 	for (int i = 0; i < movementPath.Num(); i++)
 	{
-		movementPath[i]->HighlightPath();
+		//movementPath[i]->HighlightPath();
 		path.Push(movementPath[i]->GetActorLocation());
 	}
 	return path;
@@ -118,23 +123,29 @@ TArray<FVector> UPathComponent::GetPath()
 
 ATile* UPathComponent::GetTileWithMinFCost(TArray<ATile*> tiles_)
 {
-	int min = 0;
+	int min = 10000000;
 	ATile* minTile = nullptr;
 	if (tiles_.Num() > 0)
 	{
-		min = tiles_[0]->fCost;
-		minTile = tiles_[0];
+		if (tiles_[0] != nullptr)
+		{
+			min = tiles_[0]->fCost;
+			minTile = tiles_[0];
+		}
 		for (int i = 0; i < tiles_.Num(); i++)
 		{
-			if (tiles_[i]->fCost < min)
+			if (tiles_[i] != nullptr)
 			{
-				min = tiles_[i]->fCost;
-				minTile = tiles_[i];
-			}
-			else if (tiles_[i]->fCost == min && tiles_[i]->hCost < minTile->hCost)
-			{
-				min = tiles_[i]->fCost;
-				minTile = tiles_[i];
+				if (tiles_[i]->fCost < min)
+				{
+					min = tiles_[i]->fCost;
+					minTile = tiles_[i];
+				}
+				else if (tiles_[i]->fCost == min && tiles_[i]->hCost < minTile->hCost)
+				{
+					min = tiles_[i]->fCost;
+					minTile = tiles_[i];
+				}
 			}
 		}
 	}
@@ -144,11 +155,14 @@ ATile* UPathComponent::GetTileWithMinFCost(TArray<ATile*> tiles_)
 
 void UPathComponent::UpdateMovementPath(ATile* tile_)
 {
-	if (tile_->GetParentTile() != nullptr && !movementPath.Contains(tile_))
+	if (tile_)
 	{
-		movementPath.Push(tile_);
-		if (tile_->GetParentTile() != currentTile)
-			UpdateMovementPath(tile_->GetParentTile());
+		if (tile_->GetParentTile() != nullptr && !movementPath.Contains(tile_))
+		{
+			movementPath.Push(tile_);
+			if (tile_->GetParentTile() != currentTile)
+				UpdateMovementPath(tile_->GetParentTile());
+		}
 	}
 }
 
@@ -191,3 +205,16 @@ int UPathComponent::GetDepth()
 	return depth;
 }
 
+TArray<ATile*> UPathComponent::GetMovementPath()
+{
+	return movementPath;
+}
+
+void UPathComponent::ChangeTargetTileIfItsOccupied()
+{
+	if (targetTile->GetOccupied())
+	{
+		targetTile = targetTile->GetParentTile();
+		ChangeTargetTileIfItsOccupied();
+	}
+}

@@ -15,12 +15,16 @@ class SRPG_API AEnemyBaseGridCharacter : public AGridCharacter
 	GENERATED_BODY()
 protected:
 	AEnemyBaseGridCharacter();
+	void BeginPlay() override;
 	class AAIManager* aiManager;
 	class ATile* targetTile;
 	class APlayerGridCharacter* targetPlayer;
 	class AGridManager* gridManager;
 	UPROPERTY(EditAnywhere, Category = "Detection")
 		class UBoxComponent* detectionRadius;
+
+	class ABattleController* btlCtrl;
+
 
 	//Enemies move to this tile at the beginning
 	UPROPERTY(EditAnywhere, Category = "Targeting")
@@ -30,8 +34,21 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Targeting")
 		int attackRange; //PLACEHOLDER
 
+	UFUNCTION()
+		void DetectPlayer(UPrimitiveComponent* overlappedComponent_,
+			AActor* otherActor_,
+			UPrimitiveComponent* otherComp_,
+			int32 otherBodyIndex_,
+			bool bFromSweep_,
+			const FHitResult &sweepResult_);
+
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_);
-	void PickATargetTile();
-	void MoveToTarget();
+	void PickMovementDestination();
+	void EnableDetectionCollision();
+	void ExecuteChosenAttack();
+	virtual void Selected() override;
+	virtual void NotSelected() override;
+	virtual void ActivateWeaponAttack() override;
+	void MoveAccordingToPath() override;
 };

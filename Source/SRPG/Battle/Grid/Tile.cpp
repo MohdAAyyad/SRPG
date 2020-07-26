@@ -77,6 +77,11 @@ void ATile::Highlighted(int index_)
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
+		else if (index_ == 5) //When the player clicks on an enemy
+		{
+			if (pathMaterial)
+				mesh->SetMaterial(1, pathMaterial);
+		}
 
 		HighlightedIndex = index_;
 	}
@@ -131,6 +136,16 @@ bool ATile::GetTraversable()
 	return bTraversable;
 }
 
+bool ATile::GetOccupied()
+{
+	return bOccupied;
+}
+void ATile::SetOccupied(bool value_)
+{
+	bOccupied = value_;
+}
+
+
 ATile* ATile::GetParentTile()
 {
 	return parentTile;
@@ -143,12 +158,15 @@ void ATile::SetParentTile(ATile* tile_)
 
 void ATile::CalculateHCost(ATile* tile_)
 {
-	//hCost = FMath::Sqrt(FMath::Pow((GetActorLocation().X - tile_->GetActorLocation().X),2)
-				 //     + FMath::Pow((GetActorLocation().Y - tile_->GetActorLocation().Y), 2));
+	if (tile_)
+	{
+		//hCost = FMath::Sqrt(FMath::Pow((GetActorLocation().X - tile_->GetActorLocation().X),2)
+					 //     + FMath::Pow((GetActorLocation().Y - tile_->GetActorLocation().Y), 2));
 
-	//Manhatten
-	hCost = FMath::Abs(GetActorLocation().X - tile_->GetActorLocation().X)
-		+ FMath::Abs(GetActorLocation().Y - tile_->GetActorLocation().Y);
+		//Manhatten
+		hCost = FMath::Abs(GetActorLocation().X - tile_->GetActorLocation().X)
+			+ FMath::Abs(GetActorLocation().Y - tile_->GetActorLocation().Y);
+	}
 }
 
 void ATile::HighlightPath()
@@ -157,7 +175,7 @@ void ATile::HighlightPath()
 		mesh->SetMaterial(2, pathMaterial);
 }
 
-void  ATile::HighlightNeighbor()
+void ATile::HighlightNeighbor()
 {
 
 	for (int i = 0; i < immediateNeighbors.Num(); i++)
@@ -170,4 +188,3 @@ void  ATile::HighlightNeighbor()
 		diagonalNeighbors[i]->HighlightPath();
 	}
 }
-

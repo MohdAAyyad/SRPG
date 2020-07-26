@@ -18,9 +18,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere, Category = "Battle")
+
 		class ABattleManager* btlManager;
-	UPROPERTY(EditAnywhere, Category = "Battle")
 		class AGridManager* gridManager;
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
@@ -36,7 +35,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		int thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable;
 
-	TArray<class ATile*> enemyDeploymentTiles;
+	TArray<AEnemyBaseGridCharacter*> deployedEnemies;
+	int numberOfEnemiesWhichFinishedMoving; //When this number reaches the current number of troops, tell them to attack
 
 
 
@@ -45,5 +45,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void BeginEnemyTurn(); //Called from Battlemanager
+	void SetBattleAndGridManager(ABattleManager* btl_, AGridManager* grid_);
+	void FinishedMoving();
+	void FinishedAttacking();
+	void OrderEnemiesToAttackPlayer();
 
 };

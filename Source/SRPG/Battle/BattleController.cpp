@@ -7,6 +7,7 @@
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "GridCharacter.h"
+#include "AI/EnemyBaseGridCharacter.h"
 #include "Grid/Tile.h"
 #include "BattlePawn.h"
 #include "Camera/CameraComponent.h"
@@ -70,16 +71,17 @@ void ABattleController::HandleMousePress()
 				targetTile = Cast<ATile>(hit.Actor);
 				if (targetTile)
 				{
-					if (targetTile->GetHighlighted() == 3) //Deployment highlight index
+					if (targetTile->GetHighlighted() == 3 && !targetTile->GetOccupied()) //Deployment highlight index
 					{
 						btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
+						targetTile->SetOccupied(true);
 					}
 				}
 			}
-			if (btlManager->GetPhase() == 1) //Player phase
+			else
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Hit something"));
-				if (!controlledCharacter) //If we don't have a controller character, see if we've 
+				if (!controlledCharacter) //If we don't have a controlled character, control the character you just pressed on
 				{
 					controlledCharacter = Cast<AGridCharacter>(hit.Actor);
 					if (controlledCharacter)
@@ -91,8 +93,9 @@ void ABattleController::HandleMousePress()
 
 
 				}
-				else
+				else if(controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Apparently, we're idle"));
 					targetTile = Cast<ATile>(hit.Actor);
 					if (targetTile)
 					{
@@ -101,31 +104,32 @@ void ABattleController::HandleMousePress()
 						//0 Move 1 Attack 2 Heal
 						if (targetTile->GetHighlighted() == 0)
 						{
-							controlledCharacter->MoveToThisTile(targetTile);
-						}
-						else if (targetTile->GetHighlighted() == 1)
-						{
-							controlledCharacter->AttackThisTile(targetTile);
-						}
-						else
-						{
-							controlledCharacter->NotSelected();
-							//Move the battle pawn to where the character is
-							if (battlePawn)
-							{
-								battlePawn->SetUnderControl(false);
-								battlePawn->SetActorLocation(FVector(controlledCharacter->GetActorLocation().X,
-									controlledCharacter->GetActorLocation().Y,
-									battlePawn->GetActorLocation().Z));
-							}
-
-							controlledCharacter = nullptr;
+							if(!targetTile->GetOccupied()) //Move to this tile if there is nobody standing on it already
+								controlledCharacter->MoveToThisTile(targetTile);
 						}
 					}
 					else
 					{
 						controlledCharacter->NotSelected();
 						controlledCharacter = nullptr;
+					}
+				}
+				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::ATTACKING)
+				{
+					//Get the character
+					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+					if (targetChar)
+					{
+						//Get the tile
+						ATile* tile_ = targetChar->GetMyTile();
+						if (tile_)
+						{
+							//See if the tile is within attack range
+							if (tile_->GetHighlighted() == 1)
+							{
+								controlledCharacter->AttackThisTarget(targetChar);
+							}
+						}
 					}
 				}
 			}
@@ -163,4 +167,12 @@ void ABattleController::SetBattlePawn(ABattlePawn* pawn_)
 void ABattleController::SetBattleManager(ABattleManager* btlManger_)
 {
 	btlManager = btlManger_;
+}
+
+void ABattleController::FocusOnGridCharacter(AGridCharacter* chr_, float rate_)
+{
+	if (chr_)
+	{
+		SetViewTargetWithBlend(chr_, rate_);
+	}
 }

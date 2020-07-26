@@ -36,13 +36,14 @@ protected:
 
 
 	class AGridManager* gridManager;
-	int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment
+	int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment 4 reachable by enemy
 
 	//Need different arrays for different neighbors to make cost calculations easier
 	TArray<ATile*> immediateNeighbors;
 	TArray<ATile*> diagonalNeighbors;
 	ATile* parentTile; //The tile from where we evaluated this tile's costs
 	bool bTraversable;
+	bool bOccupied; //If the tile is used by an enemy or a player, it becomes occupied
 
 public:
 	class AGridManager* GetGridManager();
@@ -54,6 +55,8 @@ public:
 	void AddDiagonalNeighbor(ATile* tile_);
 
 	bool GetTraversable();
+	bool GetOccupied();
+	void SetOccupied(bool value_);
 
 	TArray<ATile*> GetImmediateNeighbors();
 	TArray<ATile*> GetDiagonalNeighbors();

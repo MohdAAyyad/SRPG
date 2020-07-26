@@ -49,5 +49,6 @@ public:
 	void HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_);
 	TArray<ATile*> GetHighlightedTiles();
 	ATile* GetTileFromRowAndOffset(int row_, int offset_);
+	TArray<ATile*> GetTilesWithinAttackRange(int range_, ATile* tile_); //Called by enemies to get the tiles that are within their attack range of their target
 
 };

@@ -22,14 +22,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void HighlightRegularAttackPath();
-
-	//PLACEHOLDERS. WILL GET ACTUAL RANGE FROM EQUIPMENT
-	UPROPERTY(EditAnywhere)
-		int attackRowSpeed;
-	UPROPERTY(EditAnywhere)
-		int attackDepth;
 public:
 	void Selected() override;
 	void NotSelected() override;
+	virtual void ActivateWeaponAttack() override;
 	
 };

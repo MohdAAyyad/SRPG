@@ -335,3 +335,59 @@ ATile* AGridManager::GetTileFromRowAndOffset(int row_, int offset_)
 	}
 	return nullptr;
 }
+
+
+TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
+{
+	TArray<ATile*> reachableAttackTiles;
+
+	if (tile_)
+	{
+		//Row tiles are inaccessible 
+		if (columnTiles.Contains(tile_))
+		{
+			//Get the column tile index
+			tileIndexInColumn = columnTiles.IndexOfByKey(tile_);
+			//Get the row tile index
+			tileIndexInRows = ConvertColumnToRow(tileIndexInColumn);
+		}
+
+		if (tileIndexInColumn + range_ < columnTiles.Num()) //Check to the right
+		{
+			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn + range_)) //Make sure we're on the same row
+			{
+				//Make sure the tile is traversable and not occupied before adding it to the reachable tiles
+				if(columnTiles[tileIndexInColumn + range_]->GetTraversable() && !columnTiles[tileIndexInColumn + range_]->GetOccupied())
+					reachableAttackTiles.Push(columnTiles[tileIndexInColumn + range_]);
+			}
+		}
+
+		if (tileIndexInColumn - range_ >= 0) //Left
+		{
+			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn - range_))
+			{
+				if (columnTiles[tileIndexInColumn - range_]->GetTraversable() && !columnTiles[tileIndexInColumn - range_]->GetOccupied())
+					reachableAttackTiles.Push(columnTiles[tileIndexInColumn - range_]);
+			}
+		}
+
+		if (tileIndexInColumn + (columnsNum - 1)*range_ < columnTiles.Num()) //Up
+		{
+			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn + (columnsNum - 1)*range_))
+			{
+				if (columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetOccupied())
+					reachableAttackTiles.Push(columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]);
+			}
+		}
+
+		if (tileIndexInColumn - (columnsNum - 1)*range_ >= 0) //Down
+		{
+			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn - (columnsNum - 1)*range_))
+			{
+				if (columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetOccupied())
+					reachableAttackTiles.Push(columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]);
+			}
+		}
+	}
+	return reachableAttackTiles;
+}

@@ -28,11 +28,13 @@ protected:
 	TArray<ATile*> movementPath;
 
 	ATile* GetTileWithMinFCost(TArray<ATile*> tiles_);
+	void ChangeTargetTileIfItsOccupied();
 
 public:	
 	void SetCurrentTile(ATile* tile_);
 	void SetTargetTile(ATile* tile_);
 	TArray<FVector> GetPath();
+	TArray<ATile*> GetMovementPath();
 
 	void UpdateMovementPath(ATile* tile_);
 	bool DoesOpenListHaveALowerFCost(TArray<ATile*> list_, int fCost_);

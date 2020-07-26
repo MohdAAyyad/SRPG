@@ -55,10 +55,17 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
-		TArray<int> deployedFighters; //Used to make sure the same unit is not spawned more than once
+		TArray<int> deployedFightersIndexes; //Used to make sure the same unit is not spawned more than once
+	TArray<AGridCharacter*> deployedUnits;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+		class AAIManager* aiManager; //Used to make sure the same unit is not spawned more than once
 
 	UFUNCTION(BlueprintCallable)
-		void DeployThisUnitNext(int bpid_); //Called from the UI 
+		void DeployThisUnitNext(int bpid_); //Called from the UI
+
+	UPROPERTY(BlueprintReadOnly)
+		int totalNumberOfPhasesElapsed;
 
 public:	
 	// Called every frame
@@ -70,5 +77,7 @@ public:
 		void NextPhase();
 	UFUNCTION(BlueprintCallable)
 		void EndDeployment(); //Called from the UI 
+
+	int GetTotalNumberOfPhasesElapsed();
 
 };

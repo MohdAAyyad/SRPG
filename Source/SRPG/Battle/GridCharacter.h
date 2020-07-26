@@ -12,6 +12,13 @@ class SRPG_API AGridCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	enum class EGridCharState : unsigned short
+	{
+		IDLE,
+		ATTACKING,
+		HEALING
+	};
+
 	// Sets default values for this character's properties
 	AGridCharacter();
 
@@ -44,22 +51,31 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Needed when we want to call functions of the btl manager from the player's UI (end turn for example)
 		class ABattleManager* btlManager;
 
+	EGridCharState currentState;
+
+	AGridCharacter* actionTarget;
+
+	//PLACEHOLDERS. WILL GET ACTUAL RANGE FROM EQUIPMENT
+	UPROPERTY(EditAnywhere)
+		int attackRowSpeed;
+	UPROPERTY(EditAnywhere)
+		int attackDepth;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	void MoveAccordingToPath();
-
+	virtual void MoveAccordingToPath();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Selected();
-	virtual void NotSelected();
+	UFUNCTION(BlueprintCallable) //Called from the UI when pressing on End Turn
+		virtual void NotSelected();
 	void UpdateOriginTile(); //Called at the beginning of every player turn
 	void MoveToThisTile(ATile* target_);
-	void AttackThisTile(ATile* target_); //TODO Add a character to damage to the arguments
+	void AttackThisTarget(AGridCharacter* target_); //TODO Add a character to damage to the arguments
 	
 	//Animation related functions
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
@@ -67,4 +83,9 @@ public:
 
 	void SetBattleManager(ABattleManager* btlManager_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on
+	void SetMoving(bool value_);
+
+	EGridCharState GetCurrentState();
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
+
 };

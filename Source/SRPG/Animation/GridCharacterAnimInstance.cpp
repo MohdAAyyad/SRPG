@@ -10,6 +10,7 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	ownerGridCharacter = nullptr;
 	forwardSpeed = 0.0f;
 	bWeaponAttack = false;
+	bHit = false;
 }
 void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
@@ -25,5 +26,12 @@ void UGridCharacterAnimInstance::UpdateAnimationProperties()
 
 void UGridCharacterAnimInstance::WeaponAttack()
 {
-	bWeaponAttack = true;
+	if(!bWeaponAttack)
+		bWeaponAttack = true;
+}
+
+void UGridCharacterAnimInstance::GotHit()
+{
+	if (!bHit)
+		bHit = true;
 }

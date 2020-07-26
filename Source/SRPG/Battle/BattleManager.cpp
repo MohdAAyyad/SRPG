@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "GridCharacter.h"
 #include "Grid/GridManager.h"
+#include "AI/AIManager.h"
 #include "Components/WidgetComponent.h"
 
 // Sets default values
@@ -20,6 +21,7 @@ ABattleManager::ABattleManager()
 	widgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	widgetComp->SetupAttachment(root);
 	widgetComp->SetVisibility(false);
+	totalNumberOfPhasesElapsed = 1;
 
 }
 
@@ -33,6 +35,8 @@ void ABattleManager::BeginPlay()
 		ctrl->SetBattleManager(this);
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->AddToViewport();
+	if (aiManager)
+		aiManager->SetBattleAndGridManager(this, gridManager);
 	if (gridManager)
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 
@@ -54,8 +58,22 @@ int ABattleManager::GetPhase()
 void ABattleManager::NextPhase()
 {
 	phase++;
-	if (phase > 3) //When the crowd phase ends, go back to the player phase
+
+	if (phase == 2)	//Enemy phase
+	{
+		if (aiManager)
+			aiManager->BeginEnemyTurn();
+	}
+	else if (phase > 3) //When the crowd phase ends, go back to the player phase
+	{
 		phase = 1;
+		totalNumberOfPhasesElapsed++;
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->UpdateOriginTile();
+		}
+	}
+			
 }
 void ABattleManager::DeployThisUnitNext(int bpid_)
 {
@@ -77,7 +95,10 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 	{
 		AGridCharacter* unit = GetWorld()->SpawnActor<AGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
+		{
 			unit->SetBattleManager(this);
+			deployedUnits.Push(unit);
+		}
 
 		//PLACEHOLDER
 		if (selectedFighters.Contains(bpidOfUnitToBeDeployedNext))
@@ -90,7 +111,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
-		deployedFighters.Push(bpidOfUnitToBeDeployedNext);
+		deployedFightersIndexes.Push(bpidOfUnitToBeDeployedNext);
 		bpidOfUnitToBeDeployedNext = -1;
 	}
 }
@@ -100,4 +121,9 @@ void ABattleManager::EndDeployment()
 	if (gridManager)
 		gridManager->ClearHighlighted();
 	NextPhase();
+}
+
+int ABattleManager::GetTotalNumberOfPhasesElapsed()
+{
+	return totalNumberOfPhasesElapsed;
 }

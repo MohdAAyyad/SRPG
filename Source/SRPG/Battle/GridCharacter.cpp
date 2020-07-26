@@ -19,6 +19,7 @@
 #include "PathComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Animation/GridCharacterAnimInstance.h"
+#include "Components/CapsuleComponent.h"
 #include "BattleManager.h"
 
 // Sets default values
@@ -64,7 +65,11 @@ AGridCharacter::AGridCharacter()
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
 
+	GetCapsuleComponent()->SetCollisionProfileName("GridCharacter");
+
 	btlManager = nullptr;
+
+	currentState = EGridCharState::IDLE;
 
 }
 
@@ -72,8 +77,7 @@ void AGridCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UpdateOriginTile(); //Placeholder. Will be removed once the battle manager is up and running
-
+	UpdateOriginTile(); 
 	animInstance = Cast<UGridCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	
 }
@@ -121,23 +125,21 @@ void AGridCharacter::MoveAccordingToPath()
 		{
 			movementPath.RemoveAt(movementPath.Num() - 1);
 			if (movementPath.Num() == 0)
+			{
+				ATile* tile_ = GetMyTile();
+				if (tile_)
+					tile_->SetOccupied(true);
 				bMoving = false;
+			}
 		}
 	}
 }
 
 void AGridCharacter::UpdateOriginTile()
 {
-	//Called at the beginning of every player turn by the battle manager
-	FHitResult hit;
-	FVector end = GetActorLocation();
-	if(movementPath.Num()>0)
-		movementPath.Empty();
-	end.Z -= 400.0f;
-	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
-	{
-		originTile = Cast<ATile>(hit.Actor);
-	}
+	originTile = GetMyTile();
+	if(originTile)
+		originTile->SetOccupied(true);
 }
 
 void AGridCharacter::MoveToThisTile(ATile* target_)
@@ -146,34 +148,31 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	{
 		if (pathComp)
 		{
+			if (originTile)
+				originTile->SetOccupied(false);
 			pathComp->SetTargetTile(target_);
-
-			FHitResult hit;
-			FVector end = GetActorLocation();
-			end.Z -= 400.0f;
-			if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
-			{
-				ATile* tile_ = Cast<ATile>(hit.Actor);
-				if(tile_)
-					pathComp->SetCurrentTile(tile_);
-			}			
+			pathComp->SetCurrentTile(GetMyTile());
 			movementPath = pathComp->GetPath();
 			bMoving = true;
 		}
 	}
 }
 
-void AGridCharacter::AttackThisTile(ATile* target_)
+void AGridCharacter::AttackThisTarget(AGridCharacter* target_)
 {
 	if (target_)
 	{
+		actionTarget = target_;
 		FVector direction = target_->GetActorLocation() - GetActorLocation();
 		FRotator rot = direction.Rotation();
 		rot.Roll = GetActorRotation().Roll;
 		rot.Pitch = GetActorRotation().Pitch;
 		SetActorRotation(rot);
 		if (animInstance)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Called anim instance weapon attack"));
 			animInstance->WeaponAttack();
+		}
 	}
 }
 
@@ -195,4 +194,26 @@ ATile* AGridCharacter::GetMyTile()
 	}
 
 	return nullptr;
+}
+
+void AGridCharacter::SetMoving(bool value_)
+{
+	bMoving = value_;
+}
+
+AGridCharacter::EGridCharState AGridCharacter::GetCurrentState()
+{
+	return currentState;
+}
+
+void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
+{
+	//Rotate the character to face the attacker
+	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
+	FRotator rot = direction.Rotation();
+	rot.Roll = GetActorRotation().Roll;
+	rot.Pitch = GetActorRotation().Pitch;
+	SetActorRotation(rot);
+	if (animInstance)
+		animInstance->GotHit();
 }

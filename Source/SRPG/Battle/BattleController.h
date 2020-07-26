@@ -40,11 +40,9 @@ protected:
 	ABattleManager* btlManager;
 
 	bool bMovingCamera;
-
-	void MoveCamera();
-
-	void LookRate(float rate_);
-	void LookUpRate(float rate_);
-
 	void ResetView();
+
+public:
+	void FocusOnGridCharacter(AGridCharacter* chr_, float rate_);
+
 };
