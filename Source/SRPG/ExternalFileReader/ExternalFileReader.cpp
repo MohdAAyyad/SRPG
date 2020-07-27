@@ -24,6 +24,7 @@ void UExternalFileReader::BeginPlay()
 	tables.Reserve(10);
 	firstTimeFighter = true;
 	firstTimeItem = true;
+	firstTimeEquipment = true;
 	// ...
 	
 }
@@ -68,10 +69,9 @@ FItemTableStruct UExternalFileReader::FindItemTableRow(FName name_, int index_)
 		{
 			TArray<FName> rowNames;
 			rowNames = tables[index_]->GetRowNames();
-			
 			for (auto n : rowNames)
 			{
-				FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(name_, contextString, true);
+				FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
 				row->owned = 0;
 			}
 
@@ -85,6 +85,34 @@ FItemTableStruct UExternalFileReader::FindItemTableRow(FName name_, int index_)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
 		return FItemTableStruct();
+	}
+}
+
+FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Equipment Table"));
+	if (tables[index_])
+	{
+		if (firstTimeEquipment)
+		{
+			TArray<FName> rowNames;
+			rowNames = tables[index_]->GetRowNames();
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+				row->owned = 0;
+			}
+			firstTimeEquipment = false;
+		}
+
+		FEquipmentTableStruct* result = tables[index_]->FindRow<FEquipmentTableStruct>(name_, contextString, true);
+		return *result;
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		return FEquipmentTableStruct();
 	}
 }
 
@@ -116,9 +144,51 @@ void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFigh
 void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)
 {
 	static const FString contextString(TEXT("Item Table"));
+	//reset our owned values to 0 in the table
+	if (firstTimeItem)
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[index_]->GetRowNames();
+		for (auto n : rowNames)
+		{
+			FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
+			row->owned = 0;
+		}
+
+		firstTimeItem = false;
+	}
+
 	if (tables[index_])
 	{
 		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(rowName_, contextString, true);
+		row->owned += value_;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
+	}
+}
+
+void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_)
+{
+	static const FString contextString(TEXT("Equipment Table"));
+	//reset our owned values to 0 in the table
+	if (firstTimeEquipment)
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[index_]->GetRowNames();
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+			row->owned = 0;
+		}
+
+		firstTimeEquipment = false;
+	}
+
+	if (tables[index_])
+	{
+		FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(rowName_, contextString, true);
 		row->owned += value_;
 	}
 	else
