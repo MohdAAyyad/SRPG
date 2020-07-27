@@ -42,5 +42,9 @@ public:
 
 	int GetRowSpeed();
 	int GetDepth();
+
+	void AdjustPath(ATile* tile_, TArray<FVector>& move_);
+
+
 		
 };

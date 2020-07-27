@@ -170,7 +170,6 @@ void AGridCharacter::AttackThisTarget(AGridCharacter* target_)
 		SetActorRotation(rot);
 		if (animInstance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Called anim instance weapon attack"));
 			animInstance->WeaponAttack();
 		}
 	}

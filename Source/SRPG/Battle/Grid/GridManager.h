@@ -22,9 +22,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		USceneComponent* root;
 	UPROPERTY(EditAnywhere, Category = "Grid")
-		float rowsNum;
+		int rowsNum;
 	UPROPERTY(EditAnywhere, Category = "Grid")
-		float columnsNum;
+		int columnsNum;
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		float tileSize;
 	UPROPERTY(EditAnywhere, Category = "Grid")

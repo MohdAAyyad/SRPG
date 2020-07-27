@@ -78,14 +78,13 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 void AAIManager::FinishedMoving()
 {
 	numberOfEnemiesWhichFinishedMoving++;
-
 	if (numberOfEnemiesWhichFinishedMoving == thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable)
 		OrderEnemiesToAttackPlayer();
 }
 void AAIManager::FinishedAttacking()
 {
 	numberOfEnemiesWhichFinishedMoving--;
-	if (numberOfEnemiesWhichFinishedMoving >= 0)
+	if (numberOfEnemiesWhichFinishedMoving > 0)
 		OrderEnemiesToAttackPlayer();
 }
 

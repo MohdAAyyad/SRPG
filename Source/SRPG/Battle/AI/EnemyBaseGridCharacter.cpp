@@ -66,7 +66,7 @@ void AEnemyBaseGridCharacter::PickMovementDestination()
 			TArray<ATile*> rangeTiles;
 			//Get the tiles that put the enemy within range of the player.
 			rangeTiles = gridManager->GetTilesWithinAttackRange(attackRange, targetPlayer->GetMyTile());
-			if (!rangeTiles.Contains(GetMyTile())) //Check if we're not within attacking range
+			if (!rangeTiles.Contains(originTile)) //Check if we're not within attacking range
 			{
 				targetTile = nullptr;
 				bGoingToMove = true;
@@ -77,16 +77,24 @@ void AEnemyBaseGridCharacter::PickMovementDestination()
 					if (rangeTiles[i]->GetOccupied())
 					{
 						rangeTiles.RemoveAt(i);
+						UE_LOG(LogTemp, Warning, TEXT("Removed range tile at i %d"), i);
 					}
 				}
 
 				if(rangeTiles.Num()>0)
 					targetTile = rangeTiles[0];
 
+				//TODO
+				//What if 5 enemies and 1 player remain
+				// What if all the range tiles are occupied
+
 				if (!targetTile)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from smh"));
 					targetTile = targetPlayer->GetMyTile();
+				}
 			}
-			else //We're not going to move so return the originTIle occupied bool to true
+			else //We're not going to move so return the originTile occupied bool to true
 			{
 				if (originTile)
 					originTile->SetOccupied(true);
@@ -109,7 +117,7 @@ void AEnemyBaseGridCharacter::PickMovementDestination()
 			movementPath = pathComp->GetPath(); //Get the whole path towards the target
 			TArray<ATile*> tPath = pathComp->GetMovementPath();
 			//Remove the non-highlighted tiles so you don't go to a tile that's out of reach
-			for (int i = tPath.Num() - 1; i > -1; i--)
+			for (int i = 0; i < tPath.Num(); i++)
 			{
 				if (tPath[i]->GetHighlighted() != 4)
 				{
@@ -117,7 +125,10 @@ void AEnemyBaseGridCharacter::PickMovementDestination()
 					movementPath.RemoveAt(i);
 				}
 			}
-			tPath[tPath.Num() - 1]->SetOccupied(true); //Set it to occupied before actually moving to avoid two enemies deciding to go for the same tile
+			//Make sure the last tile we can reach is not occupied. 
+			//Set it to occupied as well before actually moving to avoid two enemies deciding to go for the same tile
+			pathComp->AdjustPath(tPath[0], movementPath);
+			 
 		}
 		gridManager->ClearHighlighted(); //Need to clear highlighted here so that different enemies don't get the highlighted tiles of each other
 	}
@@ -153,12 +164,13 @@ void AEnemyBaseGridCharacter::EnableDetectionCollision()
 
 	//The reason PickMovementDestination function call is delayed is to avoid a race condition between it and DetectPlayer
 	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, this, &AEnemyBaseGridCharacter::PickMovementDestination, 0.1f, false);
+	GetWorld()->GetTimerManager().SetTimer(handle, this, &AEnemyBaseGridCharacter::PickMovementDestination, GetWorld()->GetDeltaSeconds(), false);
 }
 
 void AEnemyBaseGridCharacter::Selected()
 {
-	if(gridManager && pathComp)
+	UpdateOriginTile();
+	if(gridManager && pathComp && originTile)
 		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), 5);
 }
 
@@ -172,7 +184,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 {
 	if (gridManager)
 	{
-		gridManager->UpdateCurrentTile(GetMyTile(), attackRowSpeed, attackDepth,4);
+		gridManager->UpdateCurrentTile(originTile, attackRowSpeed, attackDepth,4);
 		if (targetPlayer)
 		{
 			if (targetPlayer->GetMyTile()->GetHighlighted() == 4) //Is the player within attack range
@@ -180,12 +192,18 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 				if (btlCtrl)
 					btlCtrl->FocusOnGridCharacter(this,0.25f);
 				AttackThisTarget(targetPlayer);
+				gridManager->ClearHighlighted(); //Need to clear highlighted to make sure enemies don't attack the player when they're out of range when multiple enemies are targeting the same player
 			}
 			else
 			{
 				if (aiManager)
 					aiManager->FinishedAttacking();
 			}
+		}
+		else //If you don't have a target yet, finish the attacking phase
+		{
+			if (aiManager)
+				aiManager->FinishedAttacking();
 		}
 	}
 }
@@ -212,9 +230,7 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 			movementPath.RemoveAt(movementPath.Num() - 1);
 			if (movementPath.Num() == 0)
 			{
-				ATile* tile_ = GetMyTile();
-				if (tile_)
-					tile_->SetOccupied(true);
+				UpdateOriginTile();
 				bMoving = false;
 				if (aiManager)
 					aiManager->FinishedMoving();

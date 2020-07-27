@@ -172,7 +172,7 @@ void ATile::CalculateHCost(ATile* tile_)
 void ATile::HighlightPath()
 {
 	if (pathMaterial)
-		mesh->SetMaterial(2, pathMaterial);
+		mesh->SetMaterial(1, pathMaterial);
 }
 
 void ATile::HighlightNeighbor()

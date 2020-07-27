@@ -95,7 +95,6 @@ void ABattleController::HandleMousePress()
 				}
 				else if(controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Apparently, we're idle"));
 					targetTile = Cast<ATile>(hit.Actor);
 					if (targetTile)
 					{

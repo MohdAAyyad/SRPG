@@ -22,6 +22,8 @@ UPathComponent::UPathComponent()
 void UPathComponent::SetTargetTile(ATile* tile_)
 {
 	targetTile = tile_;
+
+	ChangeTargetTileIfItsOccupied();
 }
 
 void UPathComponent::SetCurrentTile(ATile* tile_)
@@ -109,7 +111,6 @@ TArray<FVector> UPathComponent::GetPath()
 		}
 	}
 
-	ChangeTargetTileIfItsOccupied();
 	UpdateMovementPath(targetTile);
 	//currentTile->HighlightPath();
 
@@ -214,7 +215,27 @@ void UPathComponent::ChangeTargetTileIfItsOccupied()
 {
 	if (targetTile->GetOccupied())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Target ummm yeahhh"));
 		targetTile = targetTile->GetParentTile();
 		ChangeTargetTileIfItsOccupied();
+	}
+}
+
+void UPathComponent::AdjustPath(ATile* tile_, TArray<FVector>& move_)
+{
+	if (tile_->GetOccupied())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Tile ummm yeahhh"));
+		tile_ = tile_->GetParentTile();
+		if (move_.Num() > 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Removing from move_"));
+			move_.RemoveAt(0);
+		}
+		AdjustPath(tile_, move_);
+	}
+	else
+	{
+		tile_->SetOccupied(true);
 	}
 }
