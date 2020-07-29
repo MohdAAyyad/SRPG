@@ -20,6 +20,9 @@ void AItemShop::BeginPlay()
 
 void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
 {
+	// will put a statement for price checking once money is integrated 
+
+	// look for item index inside our table and add to the owned column
 	FName converted = FName(*FString::FromInt(itemIndex_));
 	fileReader->AddOwnedValueItemTable(converted, 0, amountToBuy_);
 
@@ -28,7 +31,9 @@ void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
 
 void AItemShop::BuyEquipment(int equipmentIndex_, int amountToBuy_)
 {
-	// will fill out functionality for equipment purchase later
+	// will put a statement for price checking once money is integrated
+
+	// look for equipment index inside our table and add to the owned column
 	FName converted = FName(*FString::FromInt(equipmentIndex_));
 	fileReader->AddOwnedValueEquipmentTable(converted, 1, amountToBuy_);
 
