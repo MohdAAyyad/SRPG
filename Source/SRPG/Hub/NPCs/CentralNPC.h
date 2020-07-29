@@ -42,6 +42,11 @@ protected:
 	void SpendTime(); //calls update time slot in hub manager and passes in the time cost. Must be called at the end of simulate activity unless otherwise specified
 	void EndDialogue() override;
 
+	UFUNCTION(BlueprintCallable)
+	FString GetChanceOfSuccessString();
+	UFUNCTION(BlueprintCallable)
+		FString GetEndOfActivityLine();
+
 	void LoadText() override;
 	void BeginPlay() override;
 public:

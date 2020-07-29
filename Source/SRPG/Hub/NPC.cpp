@@ -134,7 +134,7 @@ void ANPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
-	line = FString("");
+	//line = FString("");
 }
 
 

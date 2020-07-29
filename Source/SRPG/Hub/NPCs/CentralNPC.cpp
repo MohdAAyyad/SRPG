@@ -11,7 +11,7 @@ void ACentralNPC::BeginPlay()
 	// start the chance of success at a random number between 35/65
 	chanceOfSuccess = FMath::RandRange(35, 65);
 
-	activityEndLine = "Activity Failed";
+	activityEndLine = "";
 	activityAlreadyDone = false;
 }
 
@@ -34,14 +34,22 @@ bool ACentralNPC::IsActivityAffordable()
 
 void ACentralNPC::SpendCost()
 {
-	if (IsActivityAffordable())
+	if (activityAlreadyDone)
 	{
-		SimulateActivity();
+		line = "Sorry bud you've already done this before";
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Not enough money to activate event"));
+		if (IsActivityAffordable())
+		{
+			SimulateActivity();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Not enough money to activate event"));
+		}
 	}
+	
 }
 
 void ACentralNPC::SimulateActivity()
@@ -54,7 +62,10 @@ void ACentralNPC::SimulateActivity()
 	// if the result is within the chance of success
 	if (result <= chanceOfSuccess)
 	{
+		// success state
 		activityEndLine = "Activity Success!";
+		// lines would be loaded in via file but for now is just just predetermined
+		line = "Well, you succeded. I guess";
 		switch (rewardIndex)
 		{
 			case 0:
@@ -71,9 +82,15 @@ void ACentralNPC::SimulateActivity()
 				break;
 		}
 	}
+	else
+	{
+		// fail state
+		line = "Well that's a fail there";
+		activityEndLine = "Activity Failed";
+	}
 
 	// regardless of the result we have already done the activity
-	activityAlreadyDone = false;
+	activityAlreadyDone = true;
 }
 
 void ACentralNPC::SpendTime()
@@ -88,7 +105,18 @@ void ACentralNPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
-	line = FString("");
+	//line = FString("");
+}
+
+FString ACentralNPC::GetChanceOfSuccessString()
+{
+	FString converted = FString::FromInt(chanceOfSuccess);
+	return converted;
+}
+
+FString ACentralNPC::GetEndOfActivityLine()
+{
+	return activityEndLine;
 }
 
 void ACentralNPC::LoadText()
