@@ -18,6 +18,7 @@ void ACentralNPC::BeginPlay()
 void ACentralNPC::UpdateChanceOfSuccess(float value_)
 {
 	// adds to our current chance of success value by the input value
+	UE_LOG(LogTemp, Warning, TEXT("Updated Chance of Success by %f"), value_);
 	chanceOfSuccess += value_;
 }
 
@@ -63,9 +64,11 @@ void ACentralNPC::SimulateActivity()
 	if (result <= chanceOfSuccess)
 	{
 		// success state
+		FActivityDialogueTableStruct row = fileReader->GetPositiveCentral(activityIndex, 0);
+		line = row.dialogue;
 		activityEndLine = "Activity Success!";
 		// lines would be loaded in via file but for now is just just predetermined
-		line = "Well, you succeded. I guess";
+		//line = "Well, you succeded. I guess";
 		switch (rewardIndex)
 		{
 			case 0:
@@ -85,7 +88,9 @@ void ACentralNPC::SimulateActivity()
 	else
 	{
 		// fail state
-		line = "Well that's a fail there";
+		FActivityDialogueTableStruct row = fileReader->GetNegativeCentral(activityIndex, 0);
+		line = row.dialogue;
+		//line = "Well that's a fail there";
 		activityEndLine = "Activity Failed";
 	}
 

@@ -8,6 +8,7 @@
 #include "FighterTableStruct.h"
 #include "ItemTableStruct.h"
 #include "EquipmentTableStruct.h"
+#include "ActivityDialogueTableStruct.h"
 #include "ExternalFileReader.generated.h"
 
 
@@ -44,9 +45,15 @@ public:
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
 	FItemTableStruct FindItemTableRow(FName name_, int index_);
 	FEquipmentTableStruct FindEquipmentTableRow(FName name_, int index_);
+	FActivityDialogueTableStruct FindActivityDialogueTableRow(FName name_, int index_);
+	FActivityDialogueTableStruct GetPositiveBranch(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetNegativeBranch(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
 	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+	
 
 
 	//gets a ref to this external file reader

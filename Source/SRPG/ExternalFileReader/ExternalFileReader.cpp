@@ -116,6 +116,137 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	}
 }
 
+FActivityDialogueTableStruct UExternalFileReader::FindActivityDialogueTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Activity Dialogue Table"));
+	if (tables[index_])
+	{
+		FActivityDialogueTableStruct* result = tables[index_]->FindRow<FActivityDialogueTableStruct>(name_, contextString, true);
+		return *result;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Activity Dialogue Table returned NULL"));
+		return FActivityDialogueTableStruct();
+	}
+}
+
+FActivityDialogueTableStruct UExternalFileReader::GetPositiveBranch(int activityIndex_, int tableIndex_)
+{
+	if (tables[tableIndex_])
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+		// loop through all the rows and find the row that matches the activity index, is a branch, and is positive
+		for (auto n : rowNames)
+		{
+			FActivityDialogueTableStruct result = FindActivityDialogueTableRow(n, tableIndex_);
+
+			if (result.activityIndex == activityIndex_ && result.branchOrCentral == 0 && result.positiveOrNegative == 1)
+			{
+				// return it
+				return result;
+			}
+		}
+		UE_LOG(LogTemp, Error, TEXT("No Row Found"));
+		// if nothing is found return an empty struct
+		return FActivityDialogueTableStruct();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Activity Table returned NULL"));
+		// if NULL return empty
+		return FActivityDialogueTableStruct();
+	}
+}
+
+FActivityDialogueTableStruct UExternalFileReader::GetNegativeBranch(int activityIndex_, int tableIndex_)
+{
+	if (tables[tableIndex_])
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+		// loop through all the rows and find the row that matches the activity index, is a branch, and is negative
+		for (auto n : rowNames)
+		{
+			FActivityDialogueTableStruct result = FindActivityDialogueTableRow(n, tableIndex_);
+
+			if (result.activityIndex == activityIndex_ && result.branchOrCentral == 0 && result.positiveOrNegative == 0)
+			{
+				// return it
+				return result;
+			}
+		}
+		UE_LOG(LogTemp, Error, TEXT("No Row Found"));
+		// if nothing is found return an empty struct
+		return FActivityDialogueTableStruct();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Activity Table returned NULL"));
+		// if NULL return empty
+		return FActivityDialogueTableStruct();
+	}
+}
+
+FActivityDialogueTableStruct UExternalFileReader::GetPositiveCentral(int activityIndex_, int tableIndex_)
+{
+	if (tables[tableIndex_])
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+		// loop through all the rows and find the row that matches the activity index, is a central, and is positive
+		for (auto n : rowNames)
+		{
+			FActivityDialogueTableStruct result = FindActivityDialogueTableRow(n, tableIndex_);
+
+			if (result.activityIndex == activityIndex_ && result.branchOrCentral == 1 && result.positiveOrNegative == 1)
+			{
+				// return it
+				return result;
+			}
+		}
+		UE_LOG(LogTemp, Error, TEXT("No Row Found"));
+		// if nothing is found return an empty struct
+		return FActivityDialogueTableStruct();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Activity Table returned NULL"));
+		// if NULL return empty
+		return FActivityDialogueTableStruct();
+	}
+}
+
+FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activityIndex_, int tableIndex_)
+{
+	if (tables[tableIndex_])
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+		// loop through all the rows and find the row that matches the activity index, is a central, and is positive
+		for (auto n : rowNames)
+		{
+			FActivityDialogueTableStruct result = FindActivityDialogueTableRow(n, tableIndex_);
+
+			if (result.activityIndex == activityIndex_ && result.branchOrCentral == 1 && result.positiveOrNegative == 0)
+			{
+				// return it
+				return result;
+			}
+		}
+		UE_LOG(LogTemp, Error, TEXT("No Row Found"));
+		// if nothing is found return an empty struct
+		return FActivityDialogueTableStruct();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Activity Table returned NULL"));
+		// if NULL return empty
+		return FActivityDialogueTableStruct();
+	}
+}
+
 void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
 	

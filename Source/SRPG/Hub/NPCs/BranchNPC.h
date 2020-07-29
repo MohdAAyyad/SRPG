@@ -21,6 +21,7 @@ protected:
 
 	void EndDialogue() override;
 	void LoadText() override;
+	void BeginPlay() override;
 
 public:
 	void SetCentralNPC(class ACentralNPC* ref_);
