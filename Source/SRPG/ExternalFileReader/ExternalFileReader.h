@@ -7,6 +7,8 @@
 #include "DialogueTableStruct.h"
 #include "FighterTableStruct.h"
 #include "ItemTableStruct.h"
+#include "EquipmentTableStruct.h"
+#include "ActivityDialogueTableStruct.h"
 #include "ExternalFileReader.generated.h"
 
 
@@ -23,6 +25,8 @@ protected:
 	bool firstTimeFighter;
 	// is this the first time running for items
 	bool firstTimeItem;
+	// first time running equipment
+	bool firstTimeEquipment;
 	// index 0 = dialogue table
 
 public:	
@@ -40,8 +44,16 @@ public:
 	FDialogueTableStruct FindDialogueTableRow(FName name_, int index_);
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
 	FItemTableStruct FindItemTableRow(FName name_, int index_);
+	FEquipmentTableStruct FindEquipmentTableRow(FName name_, int index_);
+	FActivityDialogueTableStruct FindActivityDialogueTableRow(FName name_, int index_);
+	FActivityDialogueTableStruct GetPositiveBranch(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetNegativeBranch(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
 	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
+	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+	
 
 
 	//gets a ref to this external file reader

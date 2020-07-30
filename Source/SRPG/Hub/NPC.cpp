@@ -36,7 +36,7 @@ void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
 	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
-	
+	UE_LOG(LogTemp, Warning, TEXT("Begin play on NPC"));
 }
 
 void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
@@ -46,18 +46,31 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 	if (otherActor_ != nullptr && otherActor_ != this && overlappedComp_ != nullptr)
 	{
 		// check if we are being interacted with and process the logic 
-		if (interactedWith == true)
+		if (interactedWith)
 		{
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
-			if (otherActor_)
+			if (player)
 			{
 				if (widget)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
+					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
 				}
 				LoadText();
 			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("OTHER ACTOR IS NULL"));
+			}
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
 	}
 	
 }
@@ -83,8 +96,6 @@ void ANPC::Interact()
 {
 	interactedWith = true;
 	UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
-	
-
 }
 
 void ANPC::UnInteract()
@@ -123,7 +134,7 @@ void ANPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
-	line = FString("");
+	//line = FString("");
 }
 
 

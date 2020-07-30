@@ -28,5 +28,7 @@ public:
 		FString GetItemName(int itemIndex_);
 	UFUNCTION(BlueprintCallable)
 		int GetItemStatIndex(int index_);
+	UFUNCTION(BlueprintCallable)
+		FString GetEquipmentName(int itemIndex_);
 
 };
