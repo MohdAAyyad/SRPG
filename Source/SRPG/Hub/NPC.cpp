@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Components/WidgetComponent.h"
+#include "SRPGCharacter.h"
 #include "Engine/Engine.h"
 // Sets default values
 ANPC::ANPC()
@@ -51,6 +52,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
 			if (player)
 			{
+				playerRef = player;
 				if (widget)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
@@ -134,6 +136,8 @@ void ANPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
+	// sets our player ref back to nothing
+	playerRef = nullptr;
 	//line = FString("");
 }
 

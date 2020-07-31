@@ -17,7 +17,7 @@ void ABranchNPC::EndDialogue()
 
 void ABranchNPC::LoadText()
 {
-	if (hasUpdatedCentral == false && central && chanceOfSuccessEffect > 0)
+	if (hasUpdatedCentral == false && central && chanceOfSuccessEffect >= 0)
 	{
 		//line = "I'm sure if you were to talk to the guy over there, things could go your way.";
 		FActivityDialogueTableStruct row = fileReader->GetPositiveBranch(central->GetCentralActivityIndex(), 0);
