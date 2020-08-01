@@ -2,11 +2,9 @@
 
 
 #include "Tournament.h"
-
-ATournament::ATournament()
-{
-
-}
+#include "Components/WidgetComponent.h"
+#include "ExternalFileReader/ExternalFileReader.h"
+#include "SRPGCharacter.h"
 
 void ATournament::BeginPlay()
 {
@@ -15,6 +13,15 @@ void ATournament::BeginPlay()
 	op2SuccessChance = 100 - op1SuccessChance;
 
 	moneyCost = 0;
+}
+
+void ATournament::EndDialogue()
+{
+	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
+	if (widget)
+	{
+		widget->GetUserWidgetObject()->RemoveFromViewport();
+	}
 }
 
 void ATournament::TwoOpponents(int protagonistLevel_)
@@ -27,29 +34,33 @@ void ATournament::SetMoneyCost(int cost_, bool op_)
 	// true = op1, false = op2
 
 	// cost check for money here when functionality is added
-	if (betMoney - cost_ >= 0)
+	if (cost_ > 0)
 	{
-		moneyCost = cost_;
-
-		if (op_)
+		if (betMoney - cost_ >= 0)
 		{
-			hasBetOnOpponent = true;
-			UE_LOG(LogTemp, Warning, TEXT("Bet on opponent 1"));
-			//op1SuccessChance
+			moneyCost = cost_;
+
+			if (op_)
+			{
+				hasBetOnOpponent = true;
+				UE_LOG(LogTemp, Warning, TEXT("Bet on opponent 1"));
+				//op1SuccessChance
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Bet on opponent 2"));
+				hasBetOnOpponent = false;
+			}
+
+			SpendCost();
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Bet on opponent 2"));
-			hasBetOnOpponent = false;
+			// not enough money
+			UE_LOG(LogTemp, Warning, TEXT("Not enough money"));
 		}
-
-		SpendCost();
 	}
-	else
-	{
-		// not enough money
-		UE_LOG(LogTemp, Warning, TEXT("Not enough money"));
-	}
+	
 
 	
 }

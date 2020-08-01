@@ -43,6 +43,7 @@ void ABranchNPC::BeginPlay()
 {
 	Super::BeginPlay();
 	chanceOfSuccessEffect = FMath::RandRange(-35, 35);
+	hasUpdatedCentral = false;
 }
 
 void ABranchNPC::SetCentralNPC(ACentralNPC* ref_)

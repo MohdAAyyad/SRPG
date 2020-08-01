@@ -20,8 +20,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// used for dialogue
-	class ASRPGCharacter* playerRef;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Line")
 	FString line;
 	// box component used to start dialogue with the player

@@ -44,6 +44,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 						       UPrimitiveComponent * otherComp_, int32 otherBodyIndex_, 
 							bool bFromSweepO, const FHitResult & sweepResult_)
 {
+
 	if (otherActor_ != nullptr && otherActor_ != this && overlappedComp_ != nullptr)
 	{
 		// check if we are being interacted with and process the logic 
@@ -52,7 +53,6 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
 			if (player)
 			{
-				playerRef = player;
 				if (widget)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
@@ -69,11 +69,12 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 				UE_LOG(LogTemp, Error, TEXT("OTHER ACTOR IS NULL"));
 			}
 		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
+		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
-	}
+	
 	
 }
 
@@ -137,7 +138,6 @@ void ANPC::EndDialogue()
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
 	// sets our player ref back to nothing
-	playerRef = nullptr;
 	//line = FString("");
 }
 

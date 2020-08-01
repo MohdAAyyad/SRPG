@@ -14,7 +14,7 @@ class SRPG_API ATournament : public ACentralNPC
 {
 	GENERATED_BODY()
 protected:
-	ATournament();
+
 	// hubworld*
 	// random between 35-65
 
@@ -29,6 +29,7 @@ protected:
 	bool winner;
 
 	void BeginPlay() override;
+	void EndDialogue() override;
 	void TwoOpponents(int protagonistLevel_); // used to determine the levels of the opponents, always 1-3 levels above the players
 	UFUNCTION(BlueprintCallable)
 	void SetMoneyCost(int cost_, bool op_); /*Called from UI to update moneyCost when the player presses bet. Updates player
@@ -36,6 +37,7 @@ protected:
 	void SpendCost() override;
 	UFUNCTION(BlueprintCallable)
 	void SupportTeam(bool op1_); /*Called from UI.Spends Units and a time slot to increase op1(true) or op2(false) by 20 % */
+
 public:
 
 	UFUNCTION(BlueprintCallable)
