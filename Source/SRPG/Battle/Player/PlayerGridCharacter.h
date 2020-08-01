@@ -26,5 +26,6 @@ public:
 	void Selected() override;
 	void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
+	virtual void ActivateSkillAttack() override;
 	
 };

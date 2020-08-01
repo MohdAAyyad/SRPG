@@ -72,6 +72,26 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 
 void APlayerGridCharacter::ActivateWeaponAttack()
 {
+	//TODO
+	//Calculate hit and crit chances before applying damage
+	//Get the damage from the equipment
+	//Affect the crowd
 	if (actionTarget)
-		actionTarget->GridCharTakeDamage(1.0f,this);
+	{
+		actionTarget->GridCharTakeDamage(1.0f, this);
+	}
+}
+
+void APlayerGridCharacter::ActivateSkillAttack()
+{
+	//TODO 
+	//Remove used pips
+	//Calculate hit and crit chances
+	//Tell the battlemanager to spawn the emitter on the action target
+	//Affect the crowd
+	if (actionTarget)
+	{
+		actionTarget->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex, 
+										   skills[chosenSkill].statusEffect,this);
+	}
 }

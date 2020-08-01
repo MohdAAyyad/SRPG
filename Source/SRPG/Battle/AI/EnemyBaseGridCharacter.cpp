@@ -170,8 +170,12 @@ void AEnemyBaseGridCharacter::EnableDetectionCollision()
 void AEnemyBaseGridCharacter::Selected()
 {
 	UpdateOriginTile();
-	if(gridManager && pathComp && originTile)
+	if (gridManager && pathComp && originTile)
+	{
+		//Show the enemy's movement and attack ranges
 		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), 5);
+		gridManager->UpdateCurrentTile(originTile, attackRowSpeed, attackDepth, 1);
+	}
 }
 
 void AEnemyBaseGridCharacter::NotSelected()
@@ -191,7 +195,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 			{
 				if (btlCtrl)
 					btlCtrl->FocusOnGridCharacter(this,0.25f);
-				AttackThisTarget(targetPlayer);
+				AttackThisTarget(targetPlayer,false);
 				gridManager->ClearHighlighted(); //Need to clear highlighted to make sure enemies don't attack the player when they're out of range when multiple enemies are targeting the same player
 			}
 			else
