@@ -8,6 +8,7 @@
 
 void ATournament::BeginPlay()
 {
+	Super::BeginPlay();
 	// generate the chances of success
 	op1SuccessChance = FMath::RandRange(35, 65);
 	op2SuccessChance = 100 - op1SuccessChance;

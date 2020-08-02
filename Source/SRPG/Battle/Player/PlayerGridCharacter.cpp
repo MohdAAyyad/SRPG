@@ -76,9 +76,9 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 	//Calculate hit and crit chances before applying damage
 	//Get the damage from the equipment
 	//Affect the crowd
-	if (actionTarget)
+	if (actionTargets[0])
 	{
-		actionTarget->GridCharTakeDamage(1.0f, this);
+		actionTargets[0]->GridCharTakeDamage(1.0f, this);
 	}
 }
 
@@ -89,9 +89,14 @@ void APlayerGridCharacter::ActivateSkillAttack()
 	//Calculate hit and crit chances
 	//Tell the battlemanager to spawn the emitter on the action target
 	//Affect the crowd
-	if (actionTarget)
+	for (int i = 0; i < actionTargets.Num(); i++)
 	{
-		actionTarget->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex, 
-										   skills[chosenSkill].statusEffect,this);
+		if (actionTargets[i])
+		{
+			actionTargets[i]->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex,
+				skills[chosenSkill].statusEffect, this);
+		}
 	}
+
+	actionTargets.Empty();
 }

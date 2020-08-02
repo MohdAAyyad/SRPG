@@ -45,6 +45,10 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		int rge; //Skill range
 	UPROPERTY(BlueprintReadOnly)
+		int rows; //Row speed -- Used for targeting
+	UPROPERTY(BlueprintReadOnly)
+		int depths; //Depth speed -- Used for targeting
+	UPROPERTY(BlueprintReadOnly)
 		int animationIndex; //Determines the animation that will play
 	UPROPERTY(BlueprintReadOnly)
 		int statusEffect;// 0 None 1 Poison 2 Paralysis  3  Terrified 4 Bleeding

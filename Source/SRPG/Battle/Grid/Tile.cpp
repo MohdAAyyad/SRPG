@@ -4,6 +4,7 @@
 #include "Tile.h"
 #include "Components/StaticMeshComponent.h"
 #include "Obstacle.h"
+#include "../GridCharacter.h"
 
 // Sets default values
 ATile::ATile()
@@ -17,7 +18,7 @@ ATile::ATile()
 	mesh->SetupAttachment(root);
 
 	gridManager = nullptr;
-	HighlightedIndex = -1;
+	previousHighlightIndex = HighlightedIndex = -1;
 
 	//Each tile will have 8 neighbors at max
 	immediateNeighbors.Reserve(4);
@@ -62,6 +63,8 @@ void ATile::Highlighted(int index_)
 {
 	if (bTraversable)
 	{
+		if(index_ != HighlightedIndex)
+			previousHighlightIndex = HighlightedIndex;
 		SetActorHiddenInGame(false);
 		if (index_ == 0) //Move
 		{
@@ -94,6 +97,11 @@ void ATile::Highlighted(int index_)
 			if (skillsMaterial)
 				mesh->SetMaterial(1, skillsMaterial);
 		}
+		else if (index_ == 7) //Skills targeting
+		{
+			if (highlightedMaterial)
+				mesh->SetMaterial(1, highlightedMaterial);
+		}
 
 		HighlightedIndex = index_;
 	}
@@ -106,7 +114,7 @@ void ATile::NotHighlighted()
 
 	mesh->SetMaterial(2, mesh->GetMaterial(0));
 
-	HighlightedIndex = -1;
+	previousHighlightIndex = HighlightedIndex = -1;
 	gCost = hCost = fCost = 0; //Reset fCost. The starting tile always has 0 fcost
 }
 
@@ -199,4 +207,28 @@ void ATile::HighlightNeighbor()
 	{
 		diagonalNeighbors[i]->HighlightPath();
 	}
+}
+
+AGridCharacter* ATile::GetMyGridCharacter()
+{
+	FHitResult hit;
+	FVector end = GetActorLocation();
+	FVector start = GetActorLocation();
+	end.Z += 400.0f;
+	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Camera))
+	{
+		AGridCharacter* gchar = Cast<AGridCharacter>(hit.Actor);
+		return gchar;
+	}
+	return nullptr;
+}
+
+void ATile::GoBackToPreviousHighlight()
+{
+	HighlightedIndex = previousHighlightIndex;
+
+	if (HighlightedIndex == -1)
+		NotHighlighted();
+	else
+		Highlighted(HighlightedIndex);
 }

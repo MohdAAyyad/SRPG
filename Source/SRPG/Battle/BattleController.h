@@ -39,10 +39,18 @@ protected:
 	class ATile* targetTile;
 	ABattleManager* btlManager;
 
-	bool bMovingCamera;
+	//Skill targeting
+	bool bTargetingWithASkill;
+	int targetingRowSpeed;
+	int targetingDepthSpeed;
+	TArray<ATile*> targetingTiles;
+	TWeakObjectPtr<AActor,FWeakObjectPtr> previosulyTargetedActor;
+
 	void ResetView();
+	void TargetingWithASkill();
 
 public:
 	void FocusOnGridCharacter(AGridCharacter* chr_, float rate_);
+	void SetTargetingWithSkill(bool value_,int row_, int depth_);
 
 };

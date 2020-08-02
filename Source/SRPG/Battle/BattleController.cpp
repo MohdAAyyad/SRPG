@@ -14,20 +14,28 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/World.h"
 #include "BattleManager.h"
+#include "Grid/GridManager.h"
 
 ABattleController::ABattleController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	controlledCharacter = nullptr;
-	bMovingCamera = false;
-
+	bTargetingWithASkill = false;
+	targetingRowSpeed = 0;
+	targetingDepthSpeed = 0;
+	previosulyTargetedActor = nullptr;
 	btlManager = nullptr;
 }
 
 void ABattleController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+
+	if (bTargetingWithASkill) //Player is targeting with a skill. We need to show the tiles that can be attacked by the skill.
+	{
+		TargetingWithASkill();
+	}
 }
 
 void ABattleController::SetupInputComponent()
@@ -126,14 +134,60 @@ void ABattleController::HandleMousePress()
 							//See if the tile is within attack range
 							if (tile_->GetHighlighted() == 1)
 							{
-								controlledCharacter->AttackThisTarget(targetChar,false);
-							}
-							else if (tile_->GetHighlighted() == 6)
-							{
-								controlledCharacter->AttackThisTarget(targetChar, true);
+								controlledCharacter->AttackUsingWeapon(targetChar);
 							}
 						}
 					}
+				}
+				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::SKILLING)
+				{
+					//Get the character
+					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+					if (targetChar)
+					{
+						//Get the tile
+						ATile* tile_ = targetChar->GetMyTile();
+						if (tile_)
+						{
+							//See if the tile is within attack range and has been targeted
+							if (tile_->GetHighlighted() == 7)
+							{
+								TArray<AGridCharacter*> targetedCharacters;
+
+								for (int i = 0; i < targetingTiles.Num(); i++)
+								{
+									if(targetingTiles[i]->GetMyGridCharacter())
+										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
+								}
+								controlledCharacter->AttackUsingSkill(targetedCharacters);
+								bTargetingWithASkill = false;
+							}
+						}
+					}
+					else
+					{
+						//If the player presses on a tile, then check which characters are standing on the highlighted group of tiles and attack those
+						ATile* tile_ = Cast<ATile>(hit.Actor);
+						if (tile_)
+						{
+							if (tile_->GetHighlighted() == 7)
+							{
+								TArray<AGridCharacter*> targetedCharacters;
+
+								for (int i = 0; i < targetingTiles.Num(); i++)
+								{
+									if (targetingTiles[i]->GetMyGridCharacter())
+										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
+								}
+								if (targetedCharacters.Num() > 0)
+								{
+									controlledCharacter->AttackUsingSkill(targetedCharacters);
+									bTargetingWithASkill = false;
+								}
+							}
+						}
+					}
+
 				}
 			}
 		}
@@ -177,5 +231,101 @@ void ABattleController::FocusOnGridCharacter(AGridCharacter* chr_, float rate_)
 	if (chr_)
 	{
 		SetViewTargetWithBlend(chr_, rate_);
+	}
+}
+
+
+void ABattleController::SetTargetingWithSkill(bool value_,int row_, int depth_)
+{
+	bTargetingWithASkill = value_;
+	targetingRowSpeed = row_;
+	targetingDepthSpeed = depth_;
+}
+
+void ABattleController::TargetingWithASkill()
+{
+	FHitResult hit;
+	GetHitResultUnderCursor(ECC_Camera, false, hit);
+	if (hit.bBlockingHit)
+	{
+		if (hit.Actor != previosulyTargetedActor) //Only update when we actually move the mouse over new tiles/characters
+		{
+			previosulyTargetedActor = hit.Actor;
+
+			int lastIndexOfCurrentlyHighlightedTiles;
+			ATile* targetTile;
+			TArray<ATile*> allHighlightedTiles;
+			//Check if we're hovering over a tile
+			targetTile = Cast<ATile>(hit.Actor);
+			if (targetTile)
+			{
+				if (targetTile->GetHighlighted() == 6) //Make sure the tile is highlighted for skill usage
+				{
+					if (targetingTiles.Num() > 0)
+					{
+						for (int i = 0; i < targetingTiles.Num(); i++)
+						{
+							targetingTiles[i]->GoBackToPreviousHighlight();
+						}
+						targetingTiles.Empty();
+					}
+					//Get the first index of the tiles you're about to highlight
+					lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
+					targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, 7);
+					allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
+					//Push the tiles into the targetingTiles array
+					for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
+					{
+						targetingTiles.Push(allHighlightedTiles[i]);
+
+					}
+				}
+			}
+			else //Next check if we're hovering over a character
+			{
+				AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+				if (targetChar)
+				{
+					targetTile = targetChar->GetMyTile();
+					if (targetTile)
+					{
+						if (targetTile->GetHighlighted() == 6)
+						{
+							if (targetingTiles.Num() > 0)
+							{
+								//Reset the targeting tiles to highlight 6
+								for (int i = 0; i < targetingTiles.Num(); i++)
+								{
+									targetingTiles[i]->GoBackToPreviousHighlight();
+								}
+								targetingTiles.Empty();
+							}
+							//Get the first index of the tiles you're about to highlight
+							lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
+							targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, 7);
+							allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
+							//Push the tiles into the targetingTiles array
+							for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
+							{
+								targetingTiles.Push(allHighlightedTiles[i]);
+							}
+						}
+
+					}
+				}
+				else
+				{
+					if (targetingTiles.Num() > 0)
+					{
+						//Reset the targeting tiles to highlight 6
+						for (int i = 0; i < targetingTiles.Num(); i++)
+						{
+							targetingTiles[i]->GoBackToPreviousHighlight();
+						}
+						targetingTiles.Empty();
+					}
+				}
+			}
+		}
 	}
 }

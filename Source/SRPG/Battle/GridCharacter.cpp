@@ -22,6 +22,7 @@
 #include "Components/CapsuleComponent.h"
 #include "BattleManager.h"
 #include "../ExternalFileReader/ExternalFileReader.h"
+#include "BattleController.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -163,11 +164,11 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	}
 }
 
-void AGridCharacter::AttackThisTarget(AGridCharacter* target_, bool skill_)
+void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_)
 {
 	if (target_)
 	{
-		actionTarget = target_;
+		actionTargets.Push(target_);
 		FVector direction = target_->GetActorLocation() - GetActorLocation();
 		FRotator rot = direction.Rotation();
 		rot.Roll = GetActorRotation().Roll;
@@ -175,13 +176,27 @@ void AGridCharacter::AttackThisTarget(AGridCharacter* target_, bool skill_)
 		SetActorRotation(rot);
 		if (animInstance)
 		{
-			if (skill_)
+			animInstance->WeaponAttack();
+		}
+	}
+}
+
+void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_)
+{
+	if (targets_.Num()>0)
+	{
+		if (targets_[0]) //Rotate towards one of the targets
+		{
+			actionTargets = targets_;
+			FVector direction = actionTargets[0]->GetActorLocation() - GetActorLocation();
+			FRotator rot = direction.Rotation();
+			rot.Roll = GetActorRotation().Roll;
+			rot.Pitch = GetActorRotation().Pitch;
+			SetActorRotation(rot);
+
+			if (animInstance) //Play the animation
 			{
 				animInstance->SkillAttack(chosenSkillAnimIndex);
-			}
-			else
-			{
-				animInstance->WeaponAttack();
 			}
 		}
 	}
@@ -261,7 +276,10 @@ void AGridCharacter::UseSkill(int index_)
 			chosenSkillAnimIndex = skills[index_].animationIndex;
 			tile_->GetGridManager()->ClearHighlighted();
 			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, 6);
-			currentState = EGridCharState::ATTACKING;
+			currentState = EGridCharState::SKILLING;
+			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
+			if (btlctrl)
+				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths);
 		}
 	}
 }

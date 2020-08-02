@@ -17,6 +17,7 @@ public:
 	{
 		IDLE,
 		ATTACKING,
+		SKILLING,
 		HEALING
 	};
 
@@ -55,7 +56,7 @@ protected:
 		class ABattleManager* btlManager;
 
 	EGridCharState currentState;
-	AGridCharacter* actionTarget;
+	TArray<AGridCharacter*> actionTargets;
 
 	TArray<FSkillTableStruct> skills;
 	int chosenSkill;
@@ -80,7 +81,7 @@ public:
 		virtual void NotSelected();
 	void UpdateOriginTile(); //Called at the beginning of every player turn
 	void MoveToThisTile(ATile* target_);
-	void AttackThisTarget(AGridCharacter* target_, bool skill_); //TODO Add a character to damage to the arguments
+	
 	
 	//Animation related functions
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
@@ -88,6 +89,8 @@ public:
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
 		virtual void ActivateSkillAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
+	void AttackUsingWeapon(AGridCharacter* target_);
+	void AttackUsingSkill(TArray<AGridCharacter*> targets_);
 
 	void SetBattleManager(ABattleManager* btlManager_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on
@@ -96,6 +99,7 @@ public:
 	EGridCharState GetCurrentState();
 	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
+
 
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
