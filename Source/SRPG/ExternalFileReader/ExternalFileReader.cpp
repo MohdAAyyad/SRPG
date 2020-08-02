@@ -338,3 +338,25 @@ UDataTable * UExternalFileReader::GetTable(int index_)
 	return tables[index_];
 }
 
+
+TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int currentLevel_)
+{
+	static const FString contextString(TEXT("Skills Table"));
+	TArray<FName> rowNames;
+	TArray<FSkillTableStruct*> skills;
+	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+
+	for (auto n : rowNames)
+	{
+		FSkillTableStruct* row = tables[0]->FindRow<FSkillTableStruct>(n, contextString, true);
+		
+		//If we have the right weapon and the correct level, then this is valid information
+		if (row->weaponIndex == weaponIndex_ && row->levelToUnlock <= currentLevel_) 
+		{
+			skills.Push(row);
+		}
+	}
+
+	return skills;
+}
+

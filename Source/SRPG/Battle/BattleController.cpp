@@ -126,7 +126,11 @@ void ABattleController::HandleMousePress()
 							//See if the tile is within attack range
 							if (tile_->GetHighlighted() == 1)
 							{
-								controlledCharacter->AttackThisTarget(targetChar);
+								controlledCharacter->AttackThisTarget(targetChar,false);
+							}
+							else if (tile_->GetHighlighted() == 6)
+							{
+								controlledCharacter->AttackThisTarget(targetChar, true);
 							}
 						}
 					}

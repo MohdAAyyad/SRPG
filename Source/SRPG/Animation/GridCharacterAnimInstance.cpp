@@ -11,6 +11,7 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	forwardSpeed = 0.0f;
 	bWeaponAttack = false;
 	bHit = false;
+	skillIndex = -1;
 }
 void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
@@ -34,4 +35,10 @@ void UGridCharacterAnimInstance::GotHit()
 {
 	if (!bHit)
 		bHit = true;
+}
+
+void UGridCharacterAnimInstance::SkillAttack(int index_)
+{
+	if(skillIndex == -1)
+		skillIndex = index_;
 }

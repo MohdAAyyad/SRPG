@@ -63,24 +63,36 @@ void ATile::Highlighted(int index_)
 	if (bTraversable)
 	{
 		SetActorHiddenInGame(false);
-		if (index_ == 0 || index_ == 1)
+		if (index_ == 0) //Move
+		{
+			if (pathMaterial)
+				mesh->SetMaterial(1, pathMaterial);
+		}
+		else if (index_ == 1) //Attack
 		{
 			if (highlightedMaterial)
 				mesh->SetMaterial(1, highlightedMaterial);
 		}
-		else if (index_ == 2)
+		else if (index_ == 2)//Items 
 		{
-			//Heal material
+			if (itemMaterial)
+				mesh->SetMaterial(1, itemMaterial);
 		}
-		else if (index_ == 3)
+		else if (index_ == 3) //Deployment
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
+		//4 enemy highlights. No changes to materials.
 		else if (index_ == 5) //When the player clicks on an enemy
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
+		}
+		else if(index_ == 6) //Skills
+		{
+			if (skillsMaterial)
+				mesh->SetMaterial(1, skillsMaterial);
 		}
 
 		HighlightedIndex = index_;

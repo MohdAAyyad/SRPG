@@ -21,6 +21,7 @@
 #include "Animation/GridCharacterAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "BattleManager.h"
+#include "../ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -65,11 +66,15 @@ AGridCharacter::AGridCharacter()
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
 
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
+
 	GetCapsuleComponent()->SetCollisionProfileName("GridCharacter");
 
 	btlManager = nullptr;
 
 	currentState = EGridCharState::IDLE;
+	chosenSkill = 0;
+	chosenSkillAnimIndex = 0;
 
 }
 
@@ -158,7 +163,7 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	}
 }
 
-void AGridCharacter::AttackThisTarget(AGridCharacter* target_)
+void AGridCharacter::AttackThisTarget(AGridCharacter* target_, bool skill_)
 {
 	if (target_)
 	{
@@ -170,7 +175,14 @@ void AGridCharacter::AttackThisTarget(AGridCharacter* target_)
 		SetActorRotation(rot);
 		if (animInstance)
 		{
-			animInstance->WeaponAttack();
+			if (skill_)
+			{
+				animInstance->SkillAttack(chosenSkillAnimIndex);
+			}
+			else
+			{
+				animInstance->WeaponAttack();
+			}
 		}
 	}
 }
@@ -215,4 +227,59 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 	SetActorRotation(rot);
 	if (animInstance)
 		animInstance->GotHit();
+}
+
+TArray<FSkillTableStruct>AGridCharacter::GetCharacterSkills()
+{
+	if (skills.Num() == 0) //No need to access the table every time we need to use a skill
+	{
+		if (fileReader)
+		{
+			TArray<FSkillTableStruct*> skillPtrs = fileReader->GetSkills(weaponIndex, currentLevel);
+			for (auto n : skillPtrs)
+			{
+				skills.Push(*n);
+			}
+		}
+	}
+
+	return skills;
+}
+
+
+void AGridCharacter::UseSkill(int index_)
+{
+	//TODO check if we have enough pips first.
+	if (index_ >= 0 && index_ < skills.Num())
+	{
+		ATile* tile_ = GetMyTile();
+		if (tile_)
+		{
+			int rowSpeed_ = skills[index_].rge;
+			int depth_ = rowSpeed_ + 1;
+			chosenSkill = index_;
+			chosenSkillAnimIndex = skills[index_].animationIndex;
+			tile_->GetGridManager()->ClearHighlighted();
+			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, 6);
+			currentState = EGridCharState::ATTACKING;
+		}
+	}
+}
+
+void AGridCharacter::GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_)
+{
+	//PLACEHOLDER
+	//Rotate the character to face the attacker
+	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
+	FRotator rot = direction.Rotation();
+	rot.Roll = GetActorRotation().Roll;
+	rot.Pitch = GetActorRotation().Pitch;
+	SetActorRotation(rot);
+	if (animInstance)
+		animInstance->GotHit();
+
+	//TODO
+	//Affect the correct stat 
+	//Play the correct reaction animation
+	//Apply the status effects should they exist
 }

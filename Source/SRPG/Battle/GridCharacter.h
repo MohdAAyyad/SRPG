@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../ExternalFileReader/FSkillTableStruct.h"
 #include "GridCharacter.generated.h"
 
 UCLASS()
@@ -41,6 +42,8 @@ protected:
 
 	class UGridCharacterAnimInstance* animInstance;
 
+	UPROPERTY(EditAnywhere)
+		class UExternalFileReader* fileReader;
 
 	bool bMoving;
 	TArray<FVector> movementPath;
@@ -52,19 +55,21 @@ protected:
 		class ABattleManager* btlManager;
 
 	EGridCharState currentState;
-
 	AGridCharacter* actionTarget;
 
-	//PLACEHOLDERS. WILL GET ACTUAL RANGE FROM EQUIPMENT
-	UPROPERTY(EditAnywhere)
-		int attackRowSpeed;
-	UPROPERTY(EditAnywhere)
-		int attackDepth;
+	TArray<FSkillTableStruct> skills;
+	int chosenSkill;
+	int chosenSkillAnimIndex;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void MoveAccordingToPath();
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FSkillTableStruct> GetCharacterSkills();
+	UFUNCTION(BlueprintCallable)
+		void UseSkill(int index_);
 
 public:	
 	// Called every frame
@@ -75,11 +80,14 @@ public:
 		virtual void NotSelected();
 	void UpdateOriginTile(); //Called at the beginning of every player turn
 	void MoveToThisTile(ATile* target_);
-	void AttackThisTarget(AGridCharacter* target_); //TODO Add a character to damage to the arguments
+	void AttackThisTarget(AGridCharacter* target_, bool skill_); //TODO Add a character to damage to the arguments
 	
 	//Animation related functions
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
 		virtual void ActivateWeaponAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
+	UFUNCTION(BlueprintCallable) //Called from within the animation instance
+		virtual void ActivateSkillAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
+
 
 	void SetBattleManager(ABattleManager* btlManager_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on
@@ -87,5 +95,20 @@ public:
 
 	EGridCharState GetCurrentState();
 	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
+	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
+
+
+	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
+protected:
+
+	//PLACEHOLDERS. WILL GET THIS STUFF FROM THE TABLES
+	UPROPERTY(EditAnywhere)
+		int attackRowSpeed;
+	UPROPERTY(EditAnywhere)
+		int attackDepth;
+	UPROPERTY(EditAnywhere)
+		int weaponIndex;
+	UPROPERTY(EditAnywhere)
+		int currentLevel;
 
 };

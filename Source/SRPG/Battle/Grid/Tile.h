@@ -33,6 +33,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Tile")
 		UMaterialInterface* pathMaterial;
+	UPROPERTY(EditAnywhere, Category = "Tile")
+		UMaterialInterface* skillsMaterial;
+	UPROPERTY(EditAnywhere, Category = "Tile")
+		UMaterialInterface* itemMaterial;
 
 
 	class AGridManager* gridManager;

@@ -26,6 +26,8 @@ protected:
 		bool bWeaponAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bHit;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int skillIndex;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -34,6 +36,7 @@ public:
 
 	void WeaponAttack();
 	void GotHit();
+	void SkillAttack(int index_);
 
 	
 };
