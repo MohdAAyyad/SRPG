@@ -46,6 +46,11 @@ public:
 	and wins give the player 1.5 times the bet. Called when all the timeslots are used up and the next opponent
 	is not a story mission or when the player manually simulates the result by interacting with the tourney npc.
 	After it finishes, calls intermdiate's SetNextOpponent. Turns bActivityHasAlreadyBeenDone to true*/
+	UFUNCTION(BlueprintCallable)
+	int GetOp1Chance();
+	UFUNCTION(BlueprintCallable)
+	int GetOp2Chance();
+
 
 
 };
