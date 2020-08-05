@@ -13,7 +13,7 @@ void ATournament::BeginPlay()
 	op1SuccessChance = FMath::RandRange(35, 65);
 	op2SuccessChance = 100 - op1SuccessChance;
 
-	moneyCost = 0;
+	//moneyCost = 0;
 }
 
 void ATournament::EndDialogue()
@@ -114,5 +114,16 @@ void ATournament::SimulateMatch()
 	op1SuccessChance = FMath::RandRange(35, 65);
 	op2SuccessChance = 100 - op1SuccessChance;
 	moneyCost = 0;
+	activityAlreadyDone = true;
 	UE_LOG(LogTemp, Warning, TEXT("Regenerated Numbers"));
+}
+
+int ATournament::GetOp1Chance()
+{
+	return op1SuccessChance;
+}
+
+int ATournament::GetOp2Chance()
+{
+	return op2SuccessChance;
 }
