@@ -156,7 +156,7 @@ void ABattleController::HandleMousePress()
 
 								for (int i = 0; i < targetingTiles.Num(); i++)
 								{
-									if(targetingTiles[i]->GetMyGridCharacter())
+									if (targetingTiles[i]->GetMyGridCharacter())
 										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
 								}
 								controlledCharacter->AttackUsingSkill(targetedCharacters);
@@ -164,31 +164,47 @@ void ABattleController::HandleMousePress()
 							}
 						}
 					}
-					else
+				}
+				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::HEALING)
+				{
+					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+					if (targetChar)
 					{
-						//If the player presses on a tile, then check which characters are standing on the highlighted group of tiles and attack those
-						ATile* tile_ = Cast<ATile>(hit.Actor);
+						//Get the tile
+						ATile* tile_ = targetChar->GetMyTile();
 						if (tile_)
 						{
-							if (tile_->GetHighlighted() == 7)
+							if (tile_->GetHighlighted() == 2)
 							{
-								TArray<AGridCharacter*> targetedCharacters;
-
-								for (int i = 0; i < targetingTiles.Num(); i++)
-								{
-									if (targetingTiles[i]->GetMyGridCharacter())
-										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
-								}
-								if (targetedCharacters.Num() > 0)
-								{
-									controlledCharacter->AttackUsingSkill(targetedCharacters);
-									bTargetingWithASkill = false;
-								}
+								controlledCharacter->UseItemOnOtherChar(targetChar);
 							}
 						}
 					}
-
 				}
+				else
+				{
+					//If the player presses on a tile, then check which characters are standing on the highlighted group of tiles and attack those
+					ATile* tile_ = Cast<ATile>(hit.Actor);
+					if (tile_)
+					{
+						if (tile_->GetHighlighted() == 7)
+						{
+							TArray<AGridCharacter*> targetedCharacters;
+
+							for (int i = 0; i < targetingTiles.Num(); i++)
+							{
+								if (targetingTiles[i]->GetMyGridCharacter())
+									targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
+							}
+							if (targetedCharacters.Num() > 0)
+							{
+								controlledCharacter->AttackUsingSkill(targetedCharacters);
+								bTargetingWithASkill = false;
+							}
+						}
+					}
+				}
+
 			}
 		}
 	}

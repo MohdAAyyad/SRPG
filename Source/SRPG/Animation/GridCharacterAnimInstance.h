@@ -28,6 +28,8 @@ protected:
 		bool bHit;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int skillIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool useItem;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -37,6 +39,7 @@ public:
 	void WeaponAttack();
 	void GotHit();
 	void SkillAttack(int index_);
+	void SetUseItem();
 
 	
 };

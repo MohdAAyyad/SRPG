@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Battle/GridCharacter.h"
+#include "ExternalFileReader/ItemTableStruct.h"
 #include "PlayerGridCharacter.generated.h"
 
 /**
@@ -22,10 +23,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void HighlightRegularAttackPath();
+
 public:
 	void Selected() override;
 	void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
 	virtual void ActivateSkillAttack() override;
+
 	
 };

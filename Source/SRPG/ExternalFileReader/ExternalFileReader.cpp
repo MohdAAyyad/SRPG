@@ -276,23 +276,27 @@ void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int
 {
 	static const FString contextString(TEXT("Item Table"));
 	//reset our owned values to 0 in the table
-	if (firstTimeItem)
-	{
-		TArray<FName> rowNames;
-		rowNames = tables[index_]->GetRowNames();
-		for (auto n : rowNames)
-		{
-			FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
-			row->owned = 0;
-		}
+//	if (firstTimeItem)
+//	{
+	//	TArray<FName> rowNames;
+	//	rowNames = tables[index_]->GetRowNames();
+	//	for (auto n : rowNames)
+	//	{
+	//		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
+	//		row->owned = 0;
+	//	}
 
-		firstTimeItem = false;
-	}
+//		firstTimeItem = false;
+//	}
 
 	if (tables[index_])
 	{
 		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(rowName_, contextString, true);
-		row->owned += value_;
+		if (row)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Found Row"));
+			row->owned += value_;
+		}
 	}
 	else
 	{
@@ -341,7 +345,7 @@ UDataTable * UExternalFileReader::GetTable(int index_)
 
 TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int currentLevel_)
 {
-	static const FString contextString(TEXT("Skills Table"));
+	static const FString contextString(TEXT("Trying to get the skills from the table"));
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
 	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
@@ -361,3 +365,57 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int 
 	return skills;
 }
 
+
+TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
+{
+	static const FString contextString(TEXT("Trying to get the items from the table"));
+	TArray<FName> rowNames;
+	TArray<FItemTableStruct> items;
+	rowNames = tables[1]->GetRowNames(); //Will only be accessed by fighters in the battle. 1 for items.
+
+	for (auto n : rowNames)
+	{
+		FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(n, contextString, true);
+		if (row->owned > 0)
+		{
+			items.Push(*row);
+		}
+	}
+
+	return items;
+}
+
+int UExternalFileReader::GetItemStatIndex(FName itemName_)
+{
+	static const FString contextString(TEXT("Trying to get item's stat index from table"));
+	FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(itemName_, contextString, true);
+
+	if(row)
+		return row->statIndex;
+
+	return 0;
+}
+int UExternalFileReader::GetItemValue(FName itemName_)
+{
+	static const FString contextString(TEXT("Trying to get item's value from table"));
+	FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(itemName_, contextString, true);
+
+	if (row)
+		return row->value;
+
+	return 0;
+}
+
+
+FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
+{
+	FString n = name_.ToString();
+
+	if (n == "Healing Potion")
+		return FName(TEXT("1"));
+
+	if (n == "PIP restore")
+		return FName(TEXT("2"));
+
+	return FName(TEXT(""));
+}

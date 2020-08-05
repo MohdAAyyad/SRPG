@@ -42,3 +42,9 @@ void UGridCharacterAnimInstance::SkillAttack(int index_)
 	if(skillIndex == -1)
 		skillIndex = index_;
 }
+
+void UGridCharacterAnimInstance::SetUseItem()
+{
+	if(!useItem)
+		useItem = true;
+}

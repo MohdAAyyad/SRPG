@@ -301,3 +301,44 @@ void AGridCharacter::GridCharReactToSkill(float value_, int statIndex_, int stat
 	//Play the correct reaction animation
 	//Apply the status effects should they exist
 }
+
+
+
+
+TArray<FItemTableStruct> AGridCharacter::GetOwnedItems()
+{
+	if (fileReader)
+		return fileReader->GetAllOwnedItems();
+
+	return TArray<FItemTableStruct>();
+}
+
+void AGridCharacter::HighlightItemUsage(FName itemName_)
+{
+	ATile* tile_ = GetMyTile();
+	if (tile_)
+	{
+		tile_->GetGridManager()->ClearHighlighted();
+		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, 2); //Items always cover 1 tile only
+		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
+		currentState = EGridCharState::HEALING;
+		UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
+	}
+}
+
+void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
+{
+	if (target_ && fileReader)
+	{
+		target_->GridCharReactToItem(fileReader->GetItemStatIndex(chosenItem), fileReader->GetItemValue(chosenItem));
+		fileReader->AddOwnedValueItemTable(chosenItem, 1, -1);
+	}
+
+}
+
+void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Reacting to item"));
+	if (animInstance)
+		animInstance->SetUseItem();
+}

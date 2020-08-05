@@ -19,6 +19,7 @@
 #include "../PathComponent.h"
 #include "../BattleManager.h"
 #include "Components/WidgetComponent.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()

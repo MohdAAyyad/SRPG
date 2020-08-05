@@ -52,9 +52,13 @@ public:
 	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
 	TArray<FSkillTableStruct*> GetSkills(int weaponIndex_, int currentLevel_);
+	TArray<FItemTableStruct> GetAllOwnedItems();
+	int GetItemStatIndex(FName itemName_);
+	int GetItemValue(FName itemName_);
 	void AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+	FName ConvertItemNameToNameUsedInTable(FName name_);
 	
 
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../ExternalFileReader/FSkillTableStruct.h"
+#include "../ExternalFileReader/ItemTableStruct.h"
 #include "GridCharacter.generated.h"
 
 UCLASS()
@@ -72,6 +73,14 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void UseSkill(int index_);
 
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FItemTableStruct> GetOwnedItems(); //Called by the UI
+	UFUNCTION(BlueprintCallable)
+		void HighlightItemUsage(FName itemName_); //Called by UI to highlight the tiles
+
+	FName chosenItem;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -99,7 +108,9 @@ public:
 	EGridCharState GetCurrentState();
 	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
-
+	void GridCharReactToItem(int statIndex_, int value_);
+	void UseItemOnOtherChar(AGridCharacter* target_);
+	
 
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
