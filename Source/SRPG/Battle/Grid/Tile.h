@@ -41,6 +41,7 @@ protected:
 
 	class AGridManager* gridManager;
 	int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment 4 reachable by enemy
+	int previousHighlightIndex;
 
 	//Need different arrays for different neighbors to make cost calculations easier
 	TArray<ATile*> immediateNeighbors;
@@ -53,6 +54,7 @@ public:
 	class AGridManager* GetGridManager();
 	void SetGridManager(class AGridManager* gridManager_);
 	void Highlighted(int index_);
+	void GoBackToPreviousHighlight();
 	void NotHighlighted();
 	int  GetHighlighted();
 	void AddImmediateNeighbor(ATile* tile_);
@@ -75,4 +77,6 @@ public:
 
 	void HighlightPath();
 	void HighlightNeighbor();
+
+	class AGridCharacter* GetMyGridCharacter();
 };

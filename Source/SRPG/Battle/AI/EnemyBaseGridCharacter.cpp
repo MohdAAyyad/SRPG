@@ -195,7 +195,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 			{
 				if (btlCtrl)
 					btlCtrl->FocusOnGridCharacter(this,0.25f);
-				AttackThisTarget(targetPlayer,false);
+				AttackUsingWeapon(targetPlayer);
 				gridManager->ClearHighlighted(); //Need to clear highlighted to make sure enemies don't attack the player when they're out of range when multiple enemies are targeting the same player
 			}
 			else
@@ -214,8 +214,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 
 void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 {
-	if (actionTarget)
-		actionTarget->GridCharTakeDamage(1.0f, this);
+	if (actionTargets[0])
+		actionTargets[0]->GridCharTakeDamage(1.0f, this);
 	if (aiManager)
 		aiManager->FinishedAttacking();
 }
