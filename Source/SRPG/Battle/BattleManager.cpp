@@ -8,6 +8,9 @@
 #include "Grid/GridManager.h"
 #include "AI/AIManager.h"
 #include "Components/WidgetComponent.h"
+#include "Battle/Crowd/BattleCrowd.h"
+#include "Definitions.h"
+#include "Player/PlayerGridCharacter.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -59,14 +62,19 @@ void ABattleManager::NextPhase()
 {
 	phase++;
 
-	if (phase == 2)	//Enemy phase
+	if (phase == BTL_ENM)	//Enemy phase
 	{
 		if (aiManager)
 			aiManager->BeginEnemyTurn();
 	}
-	else if (phase > 3) //When the crowd phase ends, go back to the player phase
+	else if (phase == BTL_CRD)
 	{
-		phase = 1;
+			if (crdManager)
+				crdManager->StartCrowdPhase();
+	}
+	else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
+	{
+		phase = BTL_PLY;
 		totalNumberOfPhasesElapsed++;
 		for (int i = 0; i < deployedUnits.Num(); i++)
 		{
@@ -77,6 +85,7 @@ void ABattleManager::NextPhase()
 }
 void ABattleManager::DeployThisUnitNext(int bpid_)
 {
+	//Used to keep track of which characters the player chooses to deploy
 	if (numberOfUnitsDeployed < maxNumberOfUnitsToDeploy)
 	{
 		bpidOfUnitToBeDeployedNext = bpid_;
@@ -89,14 +98,15 @@ void ABattleManager::DeployThisUnitNext(int bpid_)
 }
 void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from battle controller
 {
+	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
 	numberOfUnitsDeployed++;
 	tileLoc_.Z += 50.0f;
 	if (bpidOfUnitToBeDeployedNext != -1)
 	{
-		AGridCharacter* unit = GetWorld()->SpawnActor<AGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
+		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
-			unit->SetBattleManager(this);
+			unit->SetBtlAndCrdManagers(this,crdManager);
 			deployedUnits.Push(unit);
 		}
 
@@ -105,7 +115,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		{
 			selectedFighters.Remove(bpidOfUnitToBeDeployedNext);
 			if (selectedFighters.Num() < 1)
-				NextPhase();
+				EndDeployment();
 		}
 
 		if (widgetComp)
@@ -120,10 +130,70 @@ void ABattleManager::EndDeployment()
 {
 	if (gridManager)
 		gridManager->ClearHighlighted();
+
+	if (crdManager)
+	{
+		crdManager->CalculateFavorForTheFirstTime();
+		crdManager->AddCrowdWidgetToViewPort();
+	}
 	NextPhase();
 }
 
 int ABattleManager::GetTotalNumberOfPhasesElapsed()
 {
 	return totalNumberOfPhasesElapsed;
+}
+
+float ABattleManager::GetTotalStatFromDeployedPlayers(int statIndex_)
+{
+	float total = 0.0f;
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if(deployedUnits[i])
+			total += deployedUnits[i]->GetStat(statIndex_);
+	}
+
+	return total;
+}
+
+AGridCharacter* ABattleManager::GetPlayerWithHighestStat(int statIndex_)
+{
+	int max = 0;
+	AGridCharacter* result = nullptr;
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if (deployedUnits[i])
+		{
+			if (deployedUnits[i]->GetStat(statIndex_) > max)
+			{
+				result = deployedUnits[i];
+				max = deployedUnits[i]->GetStat(statIndex_);
+			}
+		}
+	}
+
+	return result;
+}
+AGridCharacter* ABattleManager::GetPlayerWithLowestStat(int statIndex_)
+{
+	int min = 10000;
+	AGridCharacter* result = nullptr;
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if (deployedUnits[i])
+		{
+			if (deployedUnits[i]->GetStat(statIndex_) < min)
+			{
+				result = deployedUnits[i];
+				min = deployedUnits[i]->GetStat(statIndex_);
+			}
+		}
+	}
+
+	return result;
+}
+
+TArray<APlayerGridCharacter*> ABattleManager::GetDeployedPlayers()
+{
+	return deployedUnits;
 }

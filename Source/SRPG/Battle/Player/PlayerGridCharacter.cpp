@@ -19,7 +19,8 @@
 #include "../PathComponent.h"
 #include "../BattleManager.h"
 #include "Components/WidgetComponent.h"
-#include "ExternalFileReader/ExternalFileReader.h"
+#include "Definitions.h"
+#include "../Crowd/BattleCrowd.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
@@ -29,7 +30,7 @@ APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 }
 void APlayerGridCharacter::Selected()
 {
-	if (btlManager->GetPhase() == 1) //Player phase
+	if (btlManager->GetPhase() == BTL_PLY) //Player phase
 	{
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
@@ -56,7 +57,7 @@ void APlayerGridCharacter::HighlightMovementPath()
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 		if (pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),0);
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV);
 	}
 }
 void APlayerGridCharacter::HighlightRegularAttackPath()
@@ -66,7 +67,7 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 	{
 		currentState = EGridCharState::ATTACKING;
 		tile->GetGridManager()->ClearHighlighted();
-		tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, 1);
+		tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, TILE_ATK);
 	}
 }
 
@@ -80,6 +81,16 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 	if (actionTargets[0])
 	{
 		actionTargets[0]->GridCharTakeDamage(1.0f, this);
+		
+		//Placeholder must be done in stat component
+		currentCrdPoints += CRD_ATK;
+		if (currentCrdPoints >= 100)
+		{
+			currentCrdPoints -= 100;
+			crd += 1;
+			if (crdManager)
+				crdManager->UpdateFavor(true);
+		}
 	}
 }
 
@@ -96,6 +107,16 @@ void APlayerGridCharacter::ActivateSkillAttack()
 		{
 			actionTargets[i]->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex,
 				skills[chosenSkill].statusEffect, this);
+
+			//Placeholder must be done in stat component
+			currentCrdPoints += skills[chosenSkill].fls;
+			if (currentCrdPoints >= 100)
+			{
+				currentCrdPoints -= 100;
+				crd += 1;
+				if (crdManager)
+					crdManager->UpdateFavor(true);
+			}
 		}
 	}
 
