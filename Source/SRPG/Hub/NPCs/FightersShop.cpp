@@ -6,6 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "Definitions.h"
 
 void AFightersShop::BeginPlay()
 {
@@ -120,7 +121,15 @@ FString AFightersShop::PrintFighter1()
 	// load all of the stat values and print them to a string
 	if (hasLeveledUp && currentIndex == 0)
 	{
-		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[STAT_HP]) +
+			" PIP: " + FString::FromInt(statsAfterLevelUp[STAT_PIP]) +
+			" ATK: " + FString::FromInt(statsAfterLevelUp[STAT_ATK]) +
+			" DEF: " + FString::FromInt(statsAfterLevelUp[STAT_DEF]) +
+			" INT: " + FString::FromInt(statsAfterLevelUp[STAT_INT]) +
+			" SPD: " + FString::FromInt(statsAfterLevelUp[STAT_SPD]) +
+			" CRIT: " + FString::FromInt(statsAfterLevelUp[STAT_CRT]) +
+			" HIT: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
+			" CRD: " + FString::FromInt(statsAfterLevelUp[STAT_CRD]));
 	}
 	else
 	{
@@ -154,7 +163,15 @@ FString AFightersShop::PrintFighter3()
 	// load all of the stat values and print them to a string
 	if (hasLeveledUp && currentIndex == 2)
 	{
-		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[STAT_HP]) +
+					   " PIP: " + FString::FromInt(statsAfterLevelUp[STAT_PIP]) +
+					   " ATK: " + FString::FromInt(statsAfterLevelUp[STAT_ATK]) +
+					   " DEF: " + FString::FromInt(statsAfterLevelUp[STAT_DEF]) +
+					   " INT: " + FString::FromInt(statsAfterLevelUp[STAT_INT]) +
+					   " SPD: " + FString::FromInt(statsAfterLevelUp[STAT_SPD]) +
+					   " CRIT: " + FString::FromInt(statsAfterLevelUp[STAT_CRT]) +
+					   " HIT: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
+					   " CRD: " + FString::FromInt(statsAfterLevelUp[STAT_CRD]));
 	}
 	else
 	{
@@ -271,15 +288,15 @@ void AFightersShop::FinalizePurchase()
 		row.id = row2.id;
 		if (hasLeveledUp)
 		{
-			row.hp = statsAfterLevelUp[0];
-			row.pip = statsAfterLevelUp[1];
-			row.atk = statsAfterLevelUp[2];
-			row.def = statsAfterLevelUp[3];
-			row.intl = statsAfterLevelUp[4];
-			row.spd = statsAfterLevelUp[5];
-			row.crit = statsAfterLevelUp[6];
-			row.hit = statsAfterLevelUp[7];
-			row.crd = statsAfterLevelUp[8];
+			row.hp = statsAfterLevelUp[STAT_HP];
+			row.pip = statsAfterLevelUp[STAT_PIP];
+			row.atk = statsAfterLevelUp[STAT_ATK];
+			row.def = statsAfterLevelUp[STAT_DEF];
+			row.intl = statsAfterLevelUp[STAT_INT];
+			row.spd = statsAfterLevelUp[STAT_SPD];
+			row.crit = statsAfterLevelUp[STAT_CRT];
+			row.hit = statsAfterLevelUp[STAT_HIT];
+			row.crd = statsAfterLevelUp[STAT_CRD];
 		}
 
 		hasLeveledUp = false;

@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "BattleManager.h"
 #include "Grid/GridManager.h"
+#include "Definitions.h"
 
 ABattleController::ABattleController()
 {
@@ -74,12 +75,12 @@ void ABattleController::HandleMousePress()
 	{
 		if (btlManager)
 		{
-			if (btlManager->GetPhase() == 0) //Deployment phase
+			if (btlManager->GetPhase() == BTL_DEP) //Deployment phase
 			{
 				targetTile = Cast<ATile>(hit.Actor);
 				if (targetTile)
 				{
-					if (targetTile->GetHighlighted() == 3 && !targetTile->GetOccupied()) //Deployment highlight index
+					if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
 					{
 						btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
 						targetTile->SetOccupied(true);
@@ -109,7 +110,7 @@ void ABattleController::HandleMousePress()
 						//UE_LOG(LogTemp, Warning, TEXT("Got Tile"));
 
 						//0 Move 1 Attack 2 Heal
-						if (targetTile->GetHighlighted() == 0)
+						if (targetTile->GetHighlighted() == TILE_MOV)
 						{
 							if(!targetTile->GetOccupied()) //Move to this tile if there is nobody standing on it already
 								controlledCharacter->MoveToThisTile(targetTile);
@@ -132,7 +133,7 @@ void ABattleController::HandleMousePress()
 						if (tile_)
 						{
 							//See if the tile is within attack range
-							if (tile_->GetHighlighted() == 1)
+							if (tile_->GetHighlighted() == TILE_ATK)
 							{
 								controlledCharacter->AttackUsingWeapon(targetChar);
 							}
@@ -150,7 +151,7 @@ void ABattleController::HandleMousePress()
 						if (tile_)
 						{
 							//See if the tile is within attack range and has been targeted
-							if (tile_->GetHighlighted() == 7)
+							if (tile_->GetHighlighted() == TILE_SKLT)
 							{
 								TArray<AGridCharacter*> targetedCharacters;
 
@@ -174,7 +175,7 @@ void ABattleController::HandleMousePress()
 						ATile* tile_ = targetChar->GetMyTile();
 						if (tile_)
 						{
-							if (tile_->GetHighlighted() == 2)
+							if (tile_->GetHighlighted() == TILE_ITM)
 							{
 								controlledCharacter->UseItemOnOtherChar(targetChar);
 							}
@@ -187,7 +188,7 @@ void ABattleController::HandleMousePress()
 					ATile* tile_ = Cast<ATile>(hit.Actor);
 					if (tile_)
 					{
-						if (tile_->GetHighlighted() == 7)
+						if (tile_->GetHighlighted() == TILE_SKLT)
 						{
 							TArray<AGridCharacter*> targetedCharacters;
 
@@ -202,6 +203,10 @@ void ABattleController::HandleMousePress()
 								bTargetingWithASkill = false;
 							}
 						}
+					}
+					else
+					{
+							controlledCharacter->NotSelected();
 					}
 				}
 
@@ -275,7 +280,7 @@ void ABattleController::TargetingWithASkill()
 			targetTile = Cast<ATile>(hit.Actor);
 			if (targetTile)
 			{
-				if (targetTile->GetHighlighted() == 6) //Make sure the tile is highlighted for skill usage
+				if (targetTile->GetHighlighted() == TILE_SKL) //Make sure the tile is highlighted for skill usage
 				{
 					if (targetingTiles.Num() > 0)
 					{
@@ -287,7 +292,7 @@ void ABattleController::TargetingWithASkill()
 					}
 					//Get the first index of the tiles you're about to highlight
 					lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
-					targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, 7);
+					targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
 					allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
 					//Push the tiles into the targetingTiles array
 					for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
@@ -305,7 +310,7 @@ void ABattleController::TargetingWithASkill()
 					targetTile = targetChar->GetMyTile();
 					if (targetTile)
 					{
-						if (targetTile->GetHighlighted() == 6)
+						if (targetTile->GetHighlighted() == TILE_SKL)
 						{
 							if (targetingTiles.Num() > 0)
 							{
@@ -318,7 +323,7 @@ void ABattleController::TargetingWithASkill()
 							}
 							//Get the first index of the tiles you're about to highlight
 							lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
-							targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, 7);
+							targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
 							allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
 							//Push the tiles into the targetingTiles array
 							for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)

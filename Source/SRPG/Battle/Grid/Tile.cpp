@@ -5,6 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Obstacle.h"
 #include "../GridCharacter.h"
+#include "Definitions.h"
+#include "CollisionQueryParams.h"
 
 // Sets default values
 ATile::ATile()
@@ -38,7 +40,8 @@ void ATile::BeginPlay()
 	FVector start = GetActorLocation();
 	end.Z += 400.0f;
 	//start.Z += 100.0F;
-	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Visibility))
+	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility, queryParms))
 	{
 		AObstacle* obstacle = Cast<AObstacle>(hit.Actor);
 		if (obstacle)
@@ -66,38 +69,38 @@ void ATile::Highlighted(int index_)
 		if(index_ != HighlightedIndex)
 			previousHighlightIndex = HighlightedIndex;
 		SetActorHiddenInGame(false);
-		if (index_ == 0) //Move
+		if (index_ == TILE_MOV) //Move
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
-		else if (index_ == 1) //Attack
+		else if (index_ == TILE_ATK) //Attack
 		{
 			if (highlightedMaterial)
 				mesh->SetMaterial(1, highlightedMaterial);
 		}
-		else if (index_ == 2)//Items 
+		else if (index_ == TILE_ITM)//Items 
 		{
 			if (itemMaterial)
 				mesh->SetMaterial(1, itemMaterial);
 		}
-		else if (index_ == 3) //Deployment
+		else if (index_ == TILE_DEP) //Deployment
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
 		//4 enemy highlights. No changes to materials.
-		else if (index_ == 5) //When the player clicks on an enemy
+		else if (index_ == TILE_ENMH) //When the player clicks on an enemy
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
-		else if(index_ == 6) //Skills
+		else if(index_ == TILE_SKL) //Skills
 		{
 			if (skillsMaterial)
 				mesh->SetMaterial(1, skillsMaterial);
 		}
-		else if (index_ == 7) //Skills targeting
+		else if (index_ == TILE_SKLT) //Skills targeting
 		{
 			if (highlightedMaterial)
 				mesh->SetMaterial(1, highlightedMaterial);
@@ -215,7 +218,8 @@ AGridCharacter* ATile::GetMyGridCharacter()
 	FVector end = GetActorLocation();
 	FVector start = GetActorLocation();
 	end.Z += 400.0f;
-	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Camera))
+	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Camera, queryParms))
 	{
 		AGridCharacter* gchar = Cast<AGridCharacter>(hit.Actor);
 		return gchar;

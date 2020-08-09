@@ -41,6 +41,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
 		class UWidgetComponent* widgetComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
+		UWidgetComponent* widgetOnTopOfHead;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
+		bool bChampion;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
+		bool bVillain;
+	UPROPERTY(EditAnywhere, Category = "Champion")
+		class UParticleSystemComponent* champParticles;
+	UPROPERTY(EditAnywhere, Category = "Champion")
+		UParticleSystemComponent* villainParticles;
 
 	class UGridCharacterAnimInstance* animInstance;
 
@@ -53,8 +63,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		class UPathComponent* pathComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Needed when we want to call functions of the btl manager from the player's UI (end turn for example)
+	UPROPERTY(BlueprintReadOnly, Category = "Battle") //Needed when we want to call functions of the btl manager from the player's UI (end turn for example)
 		class ABattleManager* btlManager;
+	class ABattleCrowd* crdManager;
 
 	EGridCharState currentState;
 	TArray<AGridCharacter*> actionTargets;
@@ -101,7 +112,7 @@ public:
 	void AttackUsingWeapon(AGridCharacter* target_);
 	void AttackUsingSkill(TArray<AGridCharacter*> targets_);
 
-	void SetBattleManager(ABattleManager* btlManager_);
+	void SetBtlAndCrdManagers(ABattleManager* btlManager_,ABattleCrowd* crd_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on
 	void SetMoving(bool value_);
 
@@ -110,6 +121,10 @@ public:
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
 	void GridCharReactToItem(int statIndex_, int value_);
 	void UseItemOnOtherChar(AGridCharacter* target_);
+	float GetStat(int statIndex_);
+
+	void SetChampionOrVillain(bool value_);
+	void UnElect(); //Called by battle crowd when 3 crowd turns pass
 	
 
 
@@ -125,5 +140,9 @@ protected:
 		int weaponIndex;
 	UPROPERTY(EditAnywhere)
 		int currentLevel;
+	UPROPERTY(EditAnywhere)
+		int crd;
+	UPROPERTY(EditAnywhere)
+		int currentCrdPoints;
 
 };

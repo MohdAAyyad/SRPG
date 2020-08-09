@@ -50,4 +50,9 @@ public:
 	void FinishedAttacking();
 	void OrderEnemiesToAttackPlayer();
 
+	float GetTotalStatFromDeployedEnemies(int statIndex_);
+
+	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_);
+	AGridCharacter* GetEnemyWithLowestStat(int statIndex_);
+
 };

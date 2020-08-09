@@ -4,6 +4,7 @@
 #include "GridManager.h"
 #include "Tile.h"
 #include "Engine/World.h"
+#include "Definitions.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -285,7 +286,7 @@ void AGridManager::HighlightDeploymentTiles(int rowIndex_, int offset_, int rowS
 	int columnTileIndex = ConvertRowTocolumn(rowIndex_) + offset_;
 	if (columnTileIndex >= 0 && columnTileIndex < columnTiles.Num())
 	{
-		UpdateCurrentTile(columnTiles[columnTileIndex], rowSpeed_, depth_, 3);
+		UpdateCurrentTile(columnTiles[columnTileIndex], rowSpeed_, depth_, TILE_DEP);
 	}
 }
 

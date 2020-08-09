@@ -357,7 +357,7 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int 
 		//If we have the right weapon and the correct level, then this is valid information
 		if (row->weaponIndex == weaponIndex_ && row->levelToUnlock <= currentLevel_) 
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+			//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
 			skills.Push(row);
 		}
 	}

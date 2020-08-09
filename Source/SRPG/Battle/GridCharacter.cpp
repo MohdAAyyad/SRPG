@@ -23,6 +23,10 @@
 #include "BattleManager.h"
 #include "../ExternalFileReader/ExternalFileReader.h"
 #include "BattleController.h"
+#include "Definitions.h"
+#include "Crowd/BattleCrowd.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "CollisionQueryParams.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -63,9 +67,27 @@ AGridCharacter::AGridCharacter()
 	bMoving = false;
 
 	pathComp = CreateDefaultSubobject<UPathComponent>(TEXT("Path Component"));
+
 	widgetComp = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
+
+	
+	widgetOnTopOfHead = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("OnTopOfHeadWidget"));
+	widgetOnTopOfHead->SetupAttachment(RootComponent);
+	widgetOnTopOfHead->SetWidgetSpace(EWidgetSpace::Screen);
+	widgetOnTopOfHead->SetVisibility(false);
+	widgetOnTopOfHead->AddRelativeLocation(FVector(0.0f, 0.0f, 260.0f));
+
+	champParticles = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
+	champParticles->SetupAttachment(RootComponent);
+	champParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+
+	villainParticles = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Villain Particles"));
+	villainParticles->SetupAttachment(RootComponent);
+	villainParticles->AddRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
+	villainParticles->AddRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
+
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 
@@ -76,6 +98,10 @@ AGridCharacter::AGridCharacter()
 	currentState = EGridCharState::IDLE;
 	chosenSkill = 0;
 	chosenSkillAnimIndex = 0;
+	currentCrdPoints = 0;
+	crd = 0;
+	bChampion = bVillain = false;
+
 
 }
 
@@ -85,7 +111,23 @@ void AGridCharacter::BeginPlay()
 
 	UpdateOriginTile(); 
 	animInstance = Cast<UGridCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+
+	if(champParticles)
+		champParticles->DeactivateSystem();
+
+	if(villainParticles)
+		villainParticles->DeactivateSystem();
 	
+}
+
+void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCrowd* crd_)
+{
+	btlManager = btlManager_;
+	crdManager = crd_;
+	currentCrdPoints += CRD_DEP; //Deployment adds points
+	ATile* tile = GetMyTile();
+	if(tile)
+		tile->SetOccupied(true);
 }
 
 // Called every frame
@@ -107,7 +149,7 @@ void AGridCharacter::Selected()
 		if(movementPath.Num()>0)
 			movementPath.Empty();
 		if(pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),0);
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV);
 	}
 }
 void AGridCharacter::NotSelected()
@@ -202,17 +244,13 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_)
 	}
 }
 
-void AGridCharacter::SetBattleManager(ABattleManager* btlManager_)
-{
-	btlManager = btlManager_;
-}
-
 ATile* AGridCharacter::GetMyTile()
 {
 	FHitResult hit;
 	FVector end = GetActorLocation();
 	end.Z -= 400.0f;
-	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility))
+	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility, queryParms))
 	{
 		ATile* tile_ = Cast<ATile>(hit.Actor);
 		if (tile_)
@@ -275,7 +313,7 @@ void AGridCharacter::UseSkill(int index_)
 			chosenSkill = index_;
 			chosenSkillAnimIndex = skills[index_].animationIndex;
 			tile_->GetGridManager()->ClearHighlighted();
-			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, 6);
+			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL);
 			currentState = EGridCharState::SKILLING;
 			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
 			if (btlctrl)
@@ -319,7 +357,7 @@ void AGridCharacter::HighlightItemUsage(FName itemName_)
 	if (tile_)
 	{
 		tile_->GetGridManager()->ClearHighlighted();
-		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, 2); //Items always cover 1 tile only
+		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM); //Items always cover 1 tile only
 		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
 		currentState = EGridCharState::HEALING;
 		UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
@@ -341,4 +379,46 @@ void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 	UE_LOG(LogTemp, Warning, TEXT("Reacting to item"));
 	if (animInstance)
 		animInstance->SetUseItem();
+}
+
+
+float AGridCharacter::GetStat(int statIndex_)
+{
+	//TODO
+	//Pass the statindex_ to the stats component
+	
+	//Placeholder: For now, all we need is CRD
+	return static_cast<float>(crd);
+}
+
+
+void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
+{
+	if (value_)
+	{
+		bChampion = true;
+		villainParticles->DeactivateSystem();
+		if (champParticles)
+			champParticles->ActivateSystem(true);
+
+	}
+	else
+	{
+		bVillain = true;
+		if (champParticles)
+			champParticles->DeactivateSystem();
+		if (villainParticles)
+			villainParticles->ActivateSystem(true);
+
+	}
+}
+
+
+void  AGridCharacter::UnElect()
+{
+	bChampion = bVillain = false;
+	if (champParticles)
+		champParticles->DeactivateSystem();
+	if (villainParticles)
+		villainParticles->DeactivateSystem();
 }
