@@ -13,7 +13,7 @@
 AAIManager::AAIManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	numberOfEnemiesWhichFinishedMoving = 0;
+	numberOfEnemiesWhichFinishedMoving = -1;
 
 }
 
@@ -32,14 +32,10 @@ void AAIManager::Tick(float DeltaTime)
 
 void AAIManager::BeginEnemyTurn()
 {
+	numberOfEnemiesWhichFinishedMoving = -1;
 	for (int i = 0; i < deployedEnemies.Num(); i++)
 	{
-		deployedEnemies[i]->EnableDetectionCollision();
-	}
-
-	for (int i = 0; i < deployedEnemies.Num(); i++)
-	{
-		deployedEnemies[i]->SetMoving(true);
+		deployedEnemies[i]->StartEnemyTurn();
 	}
 }
 
@@ -62,7 +58,7 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 			int enemyIndex = FMath::RandRange(0, enemiesBPs.Num() - 1);
 			int tileIndex = FMath::RandRange(0, enemyDeploymentTiles.Num() - 1);
 			
-			if (enemyDeploymentTiles[tileIndex]->GetOccupied()) //Make sure the tile has never been selected before to avoid two enemies being spawned on the same tile
+			if (enemyDeploymentTiles[tileIndex]->GetOccupied()) //Make sure the tile was never selected before to avoid two enemies being spawned on the same tile
 				continue;
 
 
@@ -88,29 +84,29 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 
 void AAIManager::FinishedMoving()
 {
+
 	//Called by enemies when they finish moving. Used to know when to tell the enemies to attack
 	numberOfEnemiesWhichFinishedMoving++;
-	if (numberOfEnemiesWhichFinishedMoving == thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable)
+	UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable - 1);
+	if (numberOfEnemiesWhichFinishedMoving == (thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable - 1))
 		OrderEnemiesToAttackPlayer();
 }
 void AAIManager::FinishedAttacking()
 {
 	//When an enemy finishes attacking, this function is called so we can tell the next one to attack.
 	numberOfEnemiesWhichFinishedMoving--;
-	if (numberOfEnemiesWhichFinishedMoving > 0)
+	if (numberOfEnemiesWhichFinishedMoving >= 0 && numberOfEnemiesWhichFinishedMoving < deployedEnemies.Num())
 		OrderEnemiesToAttackPlayer();
 }
 
 void AAIManager::OrderEnemiesToAttackPlayer()
 {
 	//Attacking happens one at a time
-	if (numberOfEnemiesWhichFinishedMoving - 1 < deployedEnemies.Num() && numberOfEnemiesWhichFinishedMoving - 1 >= 0)
+	if (deployedEnemies[numberOfEnemiesWhichFinishedMoving])
 	{
-		if (deployedEnemies[numberOfEnemiesWhichFinishedMoving - 1])
-		{
-			deployedEnemies[numberOfEnemiesWhichFinishedMoving - 1]->ExecuteChosenAttack();
-		}
+		deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAttack();
 	}
+	UE_LOG(LogTemp, Warning, TEXT("--------"));
 }
 
 

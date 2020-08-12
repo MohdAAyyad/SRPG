@@ -49,65 +49,68 @@ TArray<FVector> UPathComponent::GetPath()
 	{
 		currentNode = GetTileWithMinFCost(open);
 
-		open.Remove(currentNode);
-
-		if (currentNode == targetTile) //We've found the goal, get out
-			break;
-
-		closed.Push(currentNode); //The current node has been visited
-
-		//Update parent nodes for immediate neighbors
-		for (int i = 0; i < currentNode->GetImmediateNeighbors().Num(); i++)
+		if (currentNode)
 		{
-			if (currentNode->GetImmediateNeighbors()[i] != nullptr)
+			open.Remove(currentNode);
+
+			if (currentNode == targetTile) //We've found the goal, get out
+				break;
+
+			closed.Push(currentNode); //The current node has been visited
+
+			//Update parent nodes for immediate neighbors
+			for (int i = 0; i < currentNode->GetImmediateNeighbors().Num(); i++)
 			{
-				if (closed.Contains(currentNode->GetImmediateNeighbors()[i])) //If the neighbor has already been visited, move on to the next one
-					continue;
+				if (currentNode->GetImmediateNeighbors()[i] != nullptr)
+				{
+					if (closed.Contains(currentNode->GetImmediateNeighbors()[i])) //If the neighbor has already been visited, move on to the next one
+						continue;
 
-				currentNode->GetImmediateNeighbors()[i]->SetParentTile(currentNode); // Update the parent of the tile
-				if (currentNode->gCost + 10 < currentNode->GetImmediateNeighbors()[i]->gCost) //Update the gcost of the neighbor only if the new gcost is smaller than the previous one
-					currentNode->GetImmediateNeighbors()[i]->gCost = currentNode->gCost + 10; //Distance between node and imm neighbor is assumed 10
-				currentNode->GetImmediateNeighbors()[i]->CalculateHCost(targetTile);
-				currentNode->GetImmediateNeighbors()[i]->fCost = currentNode->GetImmediateNeighbors()[i]->gCost + currentNode->GetImmediateNeighbors()[i]->hCost;
+					currentNode->GetImmediateNeighbors()[i]->SetParentTile(currentNode); // Update the parent of the tile
+					if (currentNode->gCost + 10 < currentNode->GetImmediateNeighbors()[i]->gCost) //Update the gcost of the neighbor only if the new gcost is smaller than the previous one
+						currentNode->GetImmediateNeighbors()[i]->gCost = currentNode->gCost + 10; //Distance between node and imm neighbor is assumed 10
+					currentNode->GetImmediateNeighbors()[i]->CalculateHCost(targetTile);
+					currentNode->GetImmediateNeighbors()[i]->fCost = currentNode->GetImmediateNeighbors()[i]->gCost + currentNode->GetImmediateNeighbors()[i]->hCost;
 
-				if (!open.Contains(currentNode->GetImmediateNeighbors()[i])
-					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
-					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
-					&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
-					//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == 4)
-					//&& !currentNode->GetOccupied()
-					)
-					open.Push(currentNode->GetImmediateNeighbors()[i]);
+					if (!open.Contains(currentNode->GetImmediateNeighbors()[i])
+						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
+						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
+						&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
+						//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == 4)
+						//&& !currentNode->GetOccupied()
+						)
+						open.Push(currentNode->GetImmediateNeighbors()[i]);
+				}
+
+
 			}
 
-
-		}
-
-		//Same as before but for diagonal neighbors
-		//Update parent for diagonal neighbors 
-		for (int d = 0; d < currentNode->GetDiagonalNeighbors().Num(); d++)
-		{
-			if (currentNode->GetDiagonalNeighbors()[d] != nullptr)
+			//Same as before but for diagonal neighbors
+			//Update parent for diagonal neighbors 
+			for (int d = 0; d < currentNode->GetDiagonalNeighbors().Num(); d++)
 			{
-				if (closed.Contains(currentNode->GetDiagonalNeighbors()[d]))
-					continue;
+				if (currentNode->GetDiagonalNeighbors()[d] != nullptr)
+				{
+					if (closed.Contains(currentNode->GetDiagonalNeighbors()[d]))
+						continue;
 
-				currentNode->GetDiagonalNeighbors()[d]->SetParentTile(currentNode);
-				if (currentNode->gCost + 14 < currentNode->GetDiagonalNeighbors()[d]->gCost)
-					currentNode->GetDiagonalNeighbors()[d]->gCost = currentNode->gCost + 14; //Distance between node and imm neighbor is assumed 10
-				currentNode->GetDiagonalNeighbors()[d]->CalculateHCost(targetTile);
-				currentNode->GetDiagonalNeighbors()[d]->fCost = currentNode->GetDiagonalNeighbors()[d]->gCost + currentNode->GetDiagonalNeighbors()[d]->hCost;
+					currentNode->GetDiagonalNeighbors()[d]->SetParentTile(currentNode);
+					if (currentNode->gCost + 14 < currentNode->GetDiagonalNeighbors()[d]->gCost)
+						currentNode->GetDiagonalNeighbors()[d]->gCost = currentNode->gCost + 14; //Distance between node and imm neighbor is assumed 10
+					currentNode->GetDiagonalNeighbors()[d]->CalculateHCost(targetTile);
+					currentNode->GetDiagonalNeighbors()[d]->fCost = currentNode->GetDiagonalNeighbors()[d]->gCost + currentNode->GetDiagonalNeighbors()[d]->hCost;
 
-				if (!open.Contains(currentNode->GetDiagonalNeighbors()[d])
-					&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
-					&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
-					&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
-					//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 0 || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 4)
-					//&& !currentNode->GetOccupied()
-					)
-					open.Push(currentNode->GetDiagonalNeighbors()[d]);
+					if (!open.Contains(currentNode->GetDiagonalNeighbors()[d])
+						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
+						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
+						&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
+						//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 0 || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 4)
+						//&& !currentNode->GetOccupied()
+						)
+						open.Push(currentNode->GetDiagonalNeighbors()[d]);
+				}
+
 			}
-
 		}
 	}
 

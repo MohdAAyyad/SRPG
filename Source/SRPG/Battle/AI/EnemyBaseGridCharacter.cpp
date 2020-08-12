@@ -32,6 +32,7 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	targetItem = nullptr;
 	attackRange = 0;
 	bWillMoveAgain = true;
+	bCannotFindTile = false;
 
 }
 
@@ -45,6 +46,23 @@ void AEnemyBaseGridCharacter::BeginPlay()
 
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 }
+
+void AEnemyBaseGridCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bCannotFindTile) //Necessary in case the enemy needed a new destiantion while transitioning between tiles
+	{
+		ATile* myTile_ = GetMyTile();
+
+		if (myTile_)
+		{
+			bCannotFindTile = false;
+			bMoving = false;
+			MoveCloserToTargetPlayer(myTile_);
+		}
+	}
+}
 void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_)
 {
 	//Called by AI Manager on Beginplay
@@ -53,156 +71,89 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	btlManager = bref_;
 }
 
-void AEnemyBaseGridCharacter::PickMovementDestination()
+void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 {
-
-	//Assuming we are going to move
-	if (originTile)
-		originTile->SetOccupied(false);
-
+	ATile* myTile_ = startingTile_;
+	if (!myTile_)
+		myTile_ = GetMyTile();
 	bool bGoingToMove = false;
 
-	//Highlight your movement tiles
-	if (gridManager && pathComp)
+	if (myTile_)
 	{
-		gridManager->ClearHighlighted();
-		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM); //4 Reachable by enemy
-		//Checks if we have a player reference first, otherwise, move to target tile
-		if (targetPlayer)
+		//Highlight your movement tiles
+		if (gridManager && pathComp)
 		{
-			TArray<ATile*> rangeTiles;
-			//Get the tiles that put the enemy within range of the player.
-			rangeTiles = gridManager->GetTilesWithinAttackRange(attackRange, targetPlayer->GetMyTile());
-			if (!rangeTiles.Contains(GetMyTile())) //Check if we're not within attacking range
+			gridManager->ClearHighlighted();
+			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM); //4 Reachable by enemy
+			//Checks if we have a player reference first, otherwise, move to target tile
+			if (targetPlayer)
 			{
-				targetTile = nullptr;
-				bGoingToMove = true;
-
-				//Remove the occupied range tiles from the considered set of target tiles
-				for (int i = rangeTiles.Num()-1 ; i > -1 ; i--)
+				TArray<ATile*> rangeTiles;
+				//Get the tiles that put the enemy within range of the player.
+				rangeTiles = gridManager->GetTilesWithinAttackRange(attackRange, targetPlayer->GetMyTile());
+				if (!rangeTiles.Contains(myTile_)) //Check if we're not within attacking range
 				{
-					if (rangeTiles[i]->GetOccupied())
+					if (myTile_)
+						myTile_->SetOccupied(false);
+					targetTile = nullptr;
+					bGoingToMove = true;
+
+					//Remove the occupied range tiles from the considered set of target tiles
+					for (int i = rangeTiles.Num() - 1; i > -1; i--)
 					{
-						rangeTiles.RemoveAt(i);
-						//UE_LOG(LogTemp, Warning, TEXT("Removed range tile at i %d"), i);
+						if (rangeTiles[i]->GetOccupied())
+						{
+							rangeTiles.RemoveAt(i);
+							//UE_LOG(LogTemp, Warning, TEXT("Removed range tile at i %d"), i);
+						}
+					}
+
+					if (rangeTiles.Num() > 0)
+						targetTile = rangeTiles[0];
+
+					//TODO
+					//What if 5 enemies and 1 player remain
+					// What if all the range tiles are occupied
+
+					if (!targetTile)
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from smh"));
+						targetTile = targetPlayer->GetMyTile();
 					}
 				}
-
-				if(rangeTiles.Num()>0)
-					targetTile = rangeTiles[0];
-
-				//TODO
-				//What if 5 enemies and 1 player remain
-				// What if all the range tiles are occupied
-
-				if (!targetTile)
+				else //We're not going to move so return myTile_ occupied bool to true
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from smh"));
-					targetTile = targetPlayer->GetMyTile();
+					if (myTile_)
+						myTile_->SetOccupied(true);
+					if (aiManager)
+						aiManager->FinishedMoving();
 				}
 			}
-			else //We're not going to move so return the originTile occupied bool to true
+			else
 			{
-				ATile* tile_ = GetMyTile();
-				if (tile_)
-					tile_->SetOccupied(true);
-				if (aiManager)
-					aiManager->FinishedMoving();
+				//We don't have a player target, find the closest one.
+				FindTheClosestPlayer();
+				return;
 			}
+			if (bGoingToMove)
+			{
+				MoveToTheTileWithinRangeOfThisTile(myTile_, targetTile);
+			}
+			gridManager->ClearHighlighted(); //Need to clear highlighted here so that different enemies don't get the highlighted tiles of each other
 		}
-		else
-		{
-			//We don't have a player target, find the closest one.
-			FindTheClosestPlayer();
-			return;
-		}
-		if (bGoingToMove)
-		{
-			MoveToTheTileWithinRangeOfThisTile(targetTile);
-		}
-		gridManager->ClearHighlighted(); //Need to clear highlighted here so that different enemies don't get the highlighted tiles of each other
+
+		bWillMoveAgain = false; //Pickmovment destination is always the last one to be called in terms of movement
 	}
-
-	bWillMoveAgain = false; //Pickmovment destination is always the last one to be called in terms of movement
-}
-
-
-void AEnemyBaseGridCharacter::DetectItem(UPrimitiveComponent* overlappedComponent_,
-	AActor* otherActor_,
-	UPrimitiveComponent* otherComp_,
-	int32 otherBodyIndex_,
-	bool bFromSweep_,
-	const FHitResult &sweepResult_)
-{
-	if (btlManager)
+	else //Only calculate the path if we have our current tile, otherwise, find your tile
 	{
-		if (btlManager->GetPhase() == BTL_ENM)
-		{
-			if (otherActor_ != nullptr && otherActor_ != this && otherComp_ != nullptr)
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("Found Another actor"));
-				/*if (!targetPlayer)
-				{
-					//TODO compare the new target with the original one before commiting to it.
-					targetPlayer = Cast< APlayerGridCharacter>(otherActor_);
-					if (targetPlayer)
-						UE_LOG(LogTemp, Warning, TEXT("Found player"));
-				}
-				*/
-				//TODO
-				//Check if you need that item 
-				ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
-				if (item_)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Found item"));
-					crdItems.Push(item_);
-				}
-
-			}
-		}
+		bCannotFindTile = true;
 	}
 }
-
-void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_,
-	AActor* otherActor_,
-	UPrimitiveComponent* otherComp_,
-	int32 otherBodyIndex_,
-	bool bFromSweep_,
-	const FHitResult &sweepResult_)
-{
-	if (btlManager)
-	{
-		if (btlManager->GetPhase() == BTL_ENM)
-		{
-			if (otherActor_ != nullptr && otherActor_ != this && otherComp_ != nullptr)
-			{
-				ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
-
-				if (item_) //If we've reached the item we planned to reach then obtain it and go to the closes player
-				{
-					//TODO
-					//Get the item's value
-
-					bWillMoveAgain = true;
-					item_->Obtained(GetActorLocation());
-
-					PickMovementDestination();
-
-					if (item_ != targetItem)//We've obtained an item that we did not mark, we need to let it tell the enemy that marked that it's gone
-						item_->ItemWasObtainedByAnEnemyThatDidNotMarkIt();
-				}
-			}
-		}
-	}
-}
-
-void AEnemyBaseGridCharacter::EnableDetectionCollision()
+void AEnemyBaseGridCharacter::StartEnemyTurn()
 {
 	bWillMoveAgain = true; //Ready to obtain a new item
 	targetItem = nullptr;
-	//The reason CheckIfWeHaveAnyTargetItems function call is delayed is to avoid a race condition between it and DetectItem
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, this, &AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems, 0.3f, false);
+	CheckIfWeHaveAnyTargetItems();
 
 }
 
@@ -227,30 +178,41 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 {
 	if (gridManager)
 	{
-		gridManager->UpdateCurrentTile(originTile, attackRowSpeed, attackDepth,4);
-		if (targetPlayer)
+		ATile* myTile_ = GetMyTile();
+		if (myTile_)
 		{
-			if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range
+			gridManager->ClearHighlighted();
+			gridManager->UpdateCurrentTile(myTile_, attackRowSpeed, attackDepth, TILE_ENM);
+			if (targetPlayer)
 			{
-				if (btlCtrl)
-					btlCtrl->FocusOnGridCharacter(this,0.25f);
-				AttackUsingWeapon(targetPlayer);
-				gridManager->ClearHighlighted(); //Need to clear highlighted to make sure enemies don't attack the player when they're out of range when multiple enemies are targeting the same player
+				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range
+				{
+					if (btlCtrl)
+						btlCtrl->FocusOnGridCharacter(this, 0.25f);
+					AttackUsingWeapon(targetPlayer);
+				}
+				else
+				{
+					if (aiManager)
+						aiManager->FinishedAttacking();
+
+					if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
+						crdItems.Empty();
+				}
 			}
-			else
+			else //If you don't have a target yet, finish the attacking phase
 			{
 				if (aiManager)
 					aiManager->FinishedAttacking();
-
-				if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
+				if (crdItems.Num() > 0)
 					crdItems.Empty();
 			}
 		}
-		else //If you don't have a target yet, finish the attacking phase
+		else //Could not find the tile, don't break, finish the turn instead
 		{
 			if (aiManager)
 				aiManager->FinishedAttacking();
-			if (crdItems.Num() > 0) //Look 
+			if (crdItems.Num() > 0)
 				crdItems.Empty();
 		}
 	}
@@ -287,13 +249,14 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 			movementPath.RemoveAt(movementPath.Num() - 1);
 			if (movementPath.Num() == 0)
 			{
-				UpdateOriginTile();
 				bMoving = false;
 				if (!bWillMoveAgain) //If we have obtained an item, we're still gonna call pick movement destination so don't finish moving just yet
-					// Will be false, once pick movement destination is called
+					// Will be false, once pickMovementDestination is called. If we have an  item pickMovementDestination will be called after colliding with the item
 				{
 					if (aiManager)
+					{
 						aiManager->FinishedMoving();
+					}
 				}
 			}
 		}
@@ -322,35 +285,42 @@ void AEnemyBaseGridCharacter::FindTheClosestPlayer()
 			}
 		}
 
-		PickMovementDestination(); //Try again
+		MoveCloserToTargetPlayer(nullptr); //Try again
 	}
 }
 
-void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* tile_)
+void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_, ATile* targetTile_)
 {
-	if (tile_)
+	if (targetTile_)
 	{
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 
-		pathComp->SetCurrentTile(originTile);
-		pathComp->SetTargetTile(tile_);
+		ATile* myTile_ = startingTile_;
+		if (!myTile_)
+			myTile_ = GetMyTile();
+		pathComp->SetCurrentTile(myTile_);
+		pathComp->SetTargetTile(targetTile_);
 		movementPath = pathComp->GetPath(); //Get the whole path towards the target
 		TArray<ATile*> tPath = pathComp->GetMovementPath();
 		//Remove the non-highlighted tiles so you don't go to a tile that's out of reach
-		for (int i = 0; i < tPath.Num(); i++)
+		if (!targetItem) //If we have a target item, that means we've already checked whether there's a path to that item. No need to check again
 		{
-			if (tPath[i]->GetHighlighted() != TILE_ENM)
+			for (int i = 0; i < tPath.Num(); i++)
 			{
-				tPath.RemoveAt(i);
-				movementPath.RemoveAt(i);
+				if (tPath[i]->GetHighlighted() != TILE_ENM)
+				{
+					tPath.RemoveAt(i);
+					movementPath.RemoveAt(i);
+				}
 			}
 		}
 		//Make sure the last tile we can reach is not occupied. 
 		//Set it to occupied as well before actually moving to avoid two enemies deciding to go for the same tile
-		if(tPath.Num() > 0 && pathComp)
+		if(tPath.Num() > 0 && movementPath.Num()>0 && pathComp)
 			pathComp->AdjustPath(tPath[0], movementPath);
 
+		//Adjust path also sets the occupied flag on the final tile we can reach
 		bMoving = true;
 
 	}
@@ -360,8 +330,14 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* tile_)
 void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 {
 	UpdateOriginTile();
+
+	//Assuming we are going to move
+	if (originTile)
+		originTile->SetOccupied(false);
+
 	if (crdItems.Num() > 0)
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("crdItems > 0"));
 		if (gridManager)
 		{
 			gridManager->ClearHighlighted();
@@ -379,10 +355,13 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 					ATile* tile_ = crdItems[i]->GetMyTile();
 					if (tile_)
 					{
+						//UE_LOG(LogTemp, Warning, TEXT("Got item's tile %d"), tile_->GetHighlighted());
 						if (tile_->GetHighlighted() == TILE_ENM)
 						{
+						//	UE_LOG(LogTemp, Warning, TEXT("Item's tile is reachable"));
 							if (crdItems[i]->MarkItem(this)) //True, means we've marked this items as our target and no other enemy should go for it
 							{
+							//	UE_LOG(LogTemp, Warning, TEXT("Item has been marked"));
 								targetItem = crdItems[i];
 								break;
 							}
@@ -392,25 +371,73 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 				}
 			}
 		}
-		crdItems.Empty();
 	}		
 
 	if (targetItem) //If we have a target item, then go there
 	{
-		MoveToTheTileWithinRangeOfThisTile(targetItem->GetMyTile());
+		//UE_LOG(LogTemp, Warning, TEXT("Move to get item"));
+		MoveToTheTileWithinRangeOfThisTile(nullptr, targetItem->GetMyTile());
 	}
 	else //Otherwise, just go to your target player
 	{
-		PickMovementDestination();
+		//UE_LOG(LogTemp, Warning, TEXT("Couldn't find item so now going after player"));
+		MoveCloserToTargetPlayer(nullptr);
 	}
 }
 
-void AEnemyBaseGridCharacter::ItemIsUnreachable()
+void AEnemyBaseGridCharacter::ItemIsUnreachable(ATile* startingTile_)
 {
 	targetItem = nullptr;
-	if (bMoving)
-		bMoving = false;
+
 	if (movementPath.Num() > 0)
 		movementPath.Empty();
-	PickMovementDestination();
+
+	MoveCloserToTargetPlayer(startingTile_);
+}
+
+void AEnemyBaseGridCharacter::DetectItem(UPrimitiveComponent* overlappedComponent_,
+	AActor* otherActor_,
+	UPrimitiveComponent* otherComp_,
+	int32 otherBodyIndex_,
+	bool bFromSweep_,
+	const FHitResult &sweepResult_)
+{
+	if (otherActor_ != nullptr && otherActor_ != this && otherComp_ != nullptr)
+	{
+		ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
+		if (item_)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Found item"));
+			crdItems.Push(item_);
+		}
+
+	}
+}
+
+void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_,
+	AActor* otherActor_,
+	UPrimitiveComponent* otherComp_,
+	int32 otherBodyIndex_,
+	bool bFromSweep_,
+	const FHitResult &sweepResult_)
+{
+	if (otherActor_ != nullptr && otherActor_ != this && otherComp_ != nullptr)
+	{
+		ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
+
+		if (item_) //If we've reached the item we planned to reach then obtain it and go to the closest player
+		{
+			//TODO
+			//Get the item's value and update stats
+
+			item_->Obtained(GetActorLocation());
+
+			if (item_ != targetItem)//We've obtained an item that we did not mark, we need to let it tell the enemy that marked that it's gone
+				item_->ItemWasObtainedByAnEnemyThatDidNotMarkIt();
+
+			ItemIsUnreachable(item_->GetMyTile()); //You got the item, reset and go to the player starting from the item_ tile
+
+			item_->Destroy();
+		}
+	}
 }

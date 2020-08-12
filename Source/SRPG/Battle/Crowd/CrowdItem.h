@@ -41,6 +41,7 @@ protected:
 	class ABattleManager* btlManager;
 	class ABattleCrowd* crdManager;
 	class AEnemyBaseGridCharacter* markedByThisEnemy;
+	class ATile* myTile;
 
 	bool bMarkedByEnemy; //Used to make sure two enemies don't go after the same item
 
@@ -62,7 +63,7 @@ public:
 	bool MarkItem(AEnemyBaseGridCharacter* markingEnemy_); //Called by enemies to make sure no one else takes this item. Return true if operation was a success
 	int GetStat();
 	int GetValue();
-	class ATile* GetMyTile();
+	ATile* GetMyTile();
 	void Obtained(FVector loc_);
 	void ItemWasObtainedByAnEnemyThatDidNotMarkIt();
 

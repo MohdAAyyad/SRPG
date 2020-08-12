@@ -250,6 +250,7 @@ ATile* AGridCharacter::GetMyTile()
 	FVector end = GetActorLocation();
 	end.Z -= 400.0f;
 	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+	queryParms.AddIgnoredActor(this);
 	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility, queryParms))
 	{
 		ATile* tile_ = Cast<ATile>(hit.Actor);

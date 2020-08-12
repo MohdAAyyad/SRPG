@@ -32,6 +32,7 @@ ACrowdItem::ACrowdItem()
 	particles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particles"));
 	particles->SetupAttachment(root);
 	markedByThisEnemy = nullptr;
+	myTile = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +47,8 @@ void ACrowdItem::BeginPlay()
 
 	if (spawnParticles)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), spawnParticles, GetActorLocation(), GetActorRotation());
+
+	GetMyTile();
 	
 }
 
@@ -133,18 +136,20 @@ int ACrowdItem::GetValue()
 
 ATile* ACrowdItem::GetMyTile()
 {
-	FHitResult hit;
-	FVector end = GetActorLocation();
-	end.Z -= 400.0f;
-	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
-	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility, queryParms))
+	if (!myTile)
 	{
-		ATile* tile_ = Cast<ATile>(hit.Actor);
-		if (tile_)
-			return tile_;
+		FHitResult hit;
+		FVector end = GetActorLocation();
+		end.Z -= 400.0f;
+		FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+		queryParms.AddIgnoredActor(this);
+		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Visibility, queryParms))
+		{
+			myTile = Cast<ATile>(hit.Actor);
+		}
 	}
 
-	return nullptr;
+	return myTile;
 }
 
 void ACrowdItem::Obtained(FVector loc_)
@@ -154,14 +159,11 @@ void ACrowdItem::Obtained(FVector loc_)
 
 	if (crdManager)
 		crdManager->RemoveSpawnedItem(this);
-
-	Destroy(); //Placeholder
-
 }
 
 void ACrowdItem::ItemWasObtainedByAnEnemyThatDidNotMarkIt()
 {
 	if (markedByThisEnemy)
-		markedByThisEnemy->ItemIsUnreachable();
+		markedByThisEnemy->ItemIsUnreachable(nullptr);
 }
 
