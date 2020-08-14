@@ -29,7 +29,7 @@ protected:
 	TArray<ACrowdItem*> crdItems;
 
 	bool bWillMoveAgain; //Need to make sure that once we've collided with an item, we don't tell that AI Manager that we've finished moving but rather move towards the player
-
+	bool bCannotFindTile; //Sometimes GetMyTile() will return nullptr when the character calls the function while transitioning from one tile to the next. This bool is used to call GetMyTile() on tick until we find a tile (i.e the character will not stop moving) --> Necessary when obtaining items as the enemy might obtain the item while in between tiles
 
 	UPROPERTY(EditAnywhere, Category = "Targeting")
 		int attackRange; //PLACEHOLDER
@@ -51,17 +51,19 @@ protected:
 			const FHitResult &sweepResult_);
 
 	void FindTheClosestPlayer();
-	void MoveToTheTileWithinRangeOfThisTile(ATile* tile_);
+	void MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_,ATile* targetTile_);
 	void CheckIfWeHaveAnyTargetItems();
+
+	void Tick(float DeltaTime) override;
 
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);
-	void PickMovementDestination();
-	void EnableDetectionCollision();
+	void MoveCloserToTargetPlayer(ATile* startingTile_);
+	void StartEnemyTurn();
 	void ExecuteChosenAttack();
 	virtual void Selected() override;
 	virtual void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
 	void MoveAccordingToPath() override;
-	void ItemIsUnreachable(); //Called by the marked item when it's not obtained within the same turn or is obtained by someone else
+	void ItemIsUnreachable(ATile* startingTile_); //Called by the marked item when it's not obtained within the same turn or is obtained by someone else
 };
