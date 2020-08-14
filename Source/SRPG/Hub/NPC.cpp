@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "SRPGCharacter.h"
 #include "Engine/Engine.h"
+#include "Hub/HubWorldManager.h"
 // Sets default values
 ANPC::ANPC()
 {
@@ -37,7 +38,7 @@ void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
 	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
-	UE_LOG(LogTemp, Warning, TEXT("Begin play on NPC"));
+	//UE_LOG(LogTemp, Warning, TEXT("Begin play on NPC"));
 }
 
 void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
@@ -66,12 +67,12 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("OTHER ACTOR IS NULL"));
+				//UE_LOG(LogTemp, Error, TEXT("OTHER ACTOR IS NULL"));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
+			//UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
 		}
 	}
 	
@@ -128,6 +129,14 @@ void ANPC::SetNPCLinesIndex(int index_)
 		UE_LOG(LogTemp, Error, TEXT("Invalid Input for NPCLineIndex"));
 	}
 
+}
+
+void ANPC::SetHubManager(AHubWorldManager* manager_)
+{
+	if (manager_)
+	{
+		hubManager = manager_;
+	}
 }
 
 void ANPC::EndDialogue()

@@ -20,8 +20,10 @@ protected:
 	virtual void BeginPlay() override;
 	// player ref
 	class ASRPGCharacter* player;
+	UPROPERTY(EditAnywhere)
 	USceneComponent* root;
 	// npc locations, manually chosen used to spawn NPC's
+	UPROPERTY(EditAnywhere)
 	TArray<AActor*> NPCLocations;
 	// randomly chosen
 	UPROPERTY(EditAnywhere)
@@ -32,6 +34,12 @@ protected:
 	// randomly chosen, 6 at max
 	UPROPERTY(EditAnywhere)
 	TArray<class ANPC*> regularNPCs;
+	UPROPERTY(EditAnywhere)
+	TArray<class ATournament*> tournamentNPCs;
+	UPROPERTY(EditAnywhere)
+	TArray<class AItemShop*> itemShopNPCs;
+	UPROPERTY(EditAnywhere)
+	TArray<class AFightersShop*> fighterShopNPCs;
 
 	UPROPERTY(EditAnywhere)
 	class ATournament* tournament;
@@ -43,9 +51,12 @@ protected:
 	int timeSlots;
 	UPROPERTY(EditAnywhere)
 	int maxTimeSlots;
-
-
-
+	// ensures that a NPC cannot spawn in the same place
+	TArray<bool> hasSpawned;
+	// save an array of the npcs spawned
+	TArray<class ANPC*> npcs;
+	// is this the first time the manager is spawning npcs (also called after a reset)
+	bool firstTimeSpawn;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -56,5 +67,14 @@ public:
 	int GetCurrentTimeSlotsCount();
 	void UpdateTimeSlots(int value_);
 	void UpdateJournal(bool battle_, FString line_);
-
+	// how many NPC's to spawn and what type
+	void SpawnNPCs(int num_, int type_);
+	void SpawnDefaultNPCs(AActor* a_);
+	void SpawnCentralNPCs(AActor* a_);
+	void SpawnBranchNPCs(AActor* a_);
+	void SpawnTournamentNPC(AActor* a_);
+	void SpawnItemShop(AActor* a_);
+	void SpawnFighterShop(AActor* a_);
+	// go through and remove the npcs
+	void DeleteNPCs();
 };

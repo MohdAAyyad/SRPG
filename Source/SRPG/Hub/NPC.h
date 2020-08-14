@@ -52,8 +52,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void LoadText();
-
-
+	// gives us a ref to the hubmanager for time managment purposes
+	class AHubWorldManager* hubManager;
 
 
 public:	
@@ -66,7 +66,7 @@ public:
 	void TestPrint();
 
 	void SetNPCLinesIndex(int index_);
-
+	void SetHubManager(class AHubWorldManager* manager_);
 	virtual void EndDialogue(); // overriden by children to end the dialogue 
 
 };
