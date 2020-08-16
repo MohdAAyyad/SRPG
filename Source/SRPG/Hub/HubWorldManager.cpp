@@ -9,6 +9,7 @@
 #include "SRPGPlayerController.h"
 #include "Engine/World.h"
 #include "SRPGCharacter.h"
+#include "Intermediary/Intermediate.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -42,6 +43,7 @@ void AHubWorldManager::BeginPlay()
 	SpawnNPCs(1, 3);
 	SpawnNPCs(1, 4);
 	SpawnNPCs(1, 5);
+
 }
 
 // Called every frame
@@ -113,57 +115,38 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 				// in the future we would do some RNG to determine what type of NPC is spawned but for now we'll keep it simple
 				if (j == spawnChance && hasSpawned[j] == false && spawned < num_)
 				{
-					// future is now bitch
 					switch (type_)
 					{
 					 case 0 :
-					 {
 						 SpawnDefaultNPCs(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-						break;
 					 case 1:
-					 {
 						 SpawnCentralNPCs(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-						break;
 					 case 2:
-					 {
 						 SpawnBranchNPCs(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-						 break;
 					 case 3:
-					 {
 						 SpawnTournamentNPC(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-						 break;
 					 case 4:
-					 {
 						 SpawnItemShop(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-					 break;
 					 case 5:
-					 {
 						 SpawnFighterShop(a);
 						 hasSpawned[j] = true;
 						 spawned++;
 						 break;
-					 }
-					 break;
 					}
 					
 				}

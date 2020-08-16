@@ -122,5 +122,17 @@
 #define CRD_HYP 100
 #endif
 
+#ifndef ARCH_ATK
+#define ARCH_ATK 0
+#endif
+
+#ifndef ARCH_DEF
+#define ARCH_DEF 1
+#endif
+
+#ifndef ARCH_INT
+#define ARCH_INT 2
+#endif
+
 
 #include "CoreMinimal.h"

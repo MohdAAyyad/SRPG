@@ -4,6 +4,8 @@
 #include "SRPGPlayerController.h"
 #include "SRPGCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 
 ASRPGGameMode::ASRPGGameMode()
 {
@@ -16,4 +18,12 @@ ASRPGGameMode::ASRPGGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+void ASRPGGameMode::SwitchLevel(FName levelName_)
+{
+
+	//TODO
+	//Add a level sequence
+	UGameplayStatics::OpenLevel(GetWorld(), levelName_);
 }

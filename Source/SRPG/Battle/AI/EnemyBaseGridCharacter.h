@@ -58,6 +58,7 @@ protected:
 
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);
+	void ScaleLevelBaseOnArchetype(int level_, int archetype_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
 	void StartEnemyTurn();
 	void ExecuteChosenAttack();

@@ -296,10 +296,10 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 
-		ATile* myTile_ = startingTile_;
-		if (!myTile_)
-			myTile_ = GetMyTile();
-		pathComp->SetCurrentTile(myTile_);
+		if (!startingTile_) //No need to turn bCannotFindTile to true as startingTile_ will be a nullptr only when trying to get an item which always happens at the beginning of the turn which means the enemy is still standing.
+			startingTile_ = GetMyTile();
+
+		pathComp->SetCurrentTile(startingTile_);
 		pathComp->SetTargetTile(targetTile_);
 		movementPath = pathComp->GetPath(); //Get the whole path towards the target
 		TArray<ATile*> tPath = pathComp->GetMovementPath();
@@ -441,3 +441,18 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 		}
 	}
 }
+
+void AEnemyBaseGridCharacter::ScaleLevelBaseOnArchetype(int level_, int archetype_)
+{
+	//TODO
+}
+
+///Summary of movement
+/*
+- The enemy's detectItems collider collides with items and those are pushed into the crdItems array.
+- On the beginning of the enemy's turn, the enemy checks whether any of the items inside the array are reachable and can be marked (i.e. haven't been marked by a different enemy yet)
+- If an enemy finds such an item, it'll go to it, once the collision occurs with the item, ItemIsUnreachable is called which calls MoveCloserToTargetPlayer and passes in the item's tile as the starting tile.
+- The enemy starts moving from the item's tile to a tile close to the player and within the enemy's attack range.
+- If the enemy does not find a reachable item, then they go straight to the player from their current tile.
+
+*/

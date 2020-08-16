@@ -99,7 +99,7 @@ void ANPC::Tick(float DeltaTime)
 void ANPC::Interact()
 {
 	interactedWith = true;
-	UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
 }
 
 void ANPC::UnInteract()

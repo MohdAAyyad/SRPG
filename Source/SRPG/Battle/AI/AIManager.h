@@ -4,7 +4,37 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ExternalFileReader/FOpponentStruct.h"
 #include "AIManager.generated.h"
+
+USTRUCT(BlueprintType)
+struct SRPG_API FAIDeploymentStruct
+{
+	GENERATED_USTRUCT_BODY()
+
+	FAIDeploymentStruct()
+	{
+		enemyRowDeploymentIndex =
+			enemyDeploymentOffset =
+			enemyDeploymentRowSpeed =
+			enemyDeploymentDepth =
+			maxNumOfEnemiesForThisNode =
+			currentNumOfEnemiesForThisNode = 0;
+	}
+
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		int enemyRowDeploymentIndex;
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		int enemyDeploymentOffset;
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		int enemyDeploymentRowSpeed;
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		int enemyDeploymentDepth;
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		int maxNumOfEnemiesForThisNode;
+
+		int currentNumOfEnemiesForThisNode;
+};
 
 UCLASS()
 class SRPG_API AAIManager : public AActor
@@ -25,20 +55,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<TSubclassOf<class AEnemyBaseGridCharacter>> enemiesBPs;
 	UPROPERTY(EditAnywhere, Category = "Enemies")
-		int enemyRowDeploymentIndex;
-	UPROPERTY(EditAnywhere, Category = "Enemies")
-		int enemyDeploymentOffset;
-	UPROPERTY(EditAnywhere, Category = "Enemies")
-		int enemyDeploymentRowSpeed;
-	UPROPERTY(EditAnywhere, Category = "Enemies")
-		int enemyDeploymentDepth;
-	UPROPERTY(EditAnywhere, Category = "Enemies")
-		int thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable;
+		TArray<FAIDeploymentStruct> depNodes;
 
 	TArray<AEnemyBaseGridCharacter*> deployedEnemies;
 	int numberOfEnemiesWhichFinishedMoving; //When this number reaches the current number of troops, tell them to attack
 
-
+	FOpponentStruct nextOp;
 
 public:	
 	// Called every frame
