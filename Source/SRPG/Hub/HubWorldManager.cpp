@@ -2,13 +2,10 @@
 
 
 #include "HubWorldManager.h"
-#include "Hub/NPCs/BranchNPC.h"
-#include "Hub/NPCs/Tournament.h"
-#include "Hub/NPCs/ItemShop.h"
-#include "Hub/NPCs/FightersShop.h"
 #include "SRPGPlayerController.h"
 #include "Engine/World.h"
 #include "SRPGCharacter.h"
+#include "Intermediary/Intermediate.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -31,7 +28,7 @@ void AHubWorldManager::BeginPlay()
 	}
 	// sets the current time slots to our max time slots
 	timeSlots = maxTimeSlots;
-	hasSpawned.Init(false, NPCLocations.Num());
+	hasSpawned.Init(false, npcLocations.Num());
 
 
 	SpawnNPCs(6, 0);
@@ -39,9 +36,9 @@ void AHubWorldManager::BeginPlay()
 	SpawnNPCs(1, 0);
 	SpawnNPCs(1, 1);
 	SpawnNPCs(1, 2);
-	SpawnNPCs(1, 3);
-	SpawnNPCs(1, 4);
-	SpawnNPCs(1, 5);
+	//SpawnNPCs(1, 3);
+	//SpawnNPCs(1, 4);
+	//SpawnNPCs(1, 5);
 }
 
 // Called every frame
@@ -93,84 +90,50 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 	// spawn NPC's based on the actor locations
 	// check to see if world is null
 	int spawned = 0;
-	//TArray<bool> hasSpawned;
+
 	// this is the maximum amount of times the while loop will be allowed to run
 	// takes the possible locations and multiplies it by the number of npcs it should spawn, adds 5 for good mesure
-	int maxLoopCount = NPCLocations.Num() * num_ + 5;
+	int maxLoopCount = npcLocations.Num() * num_ + 5;
 	int totalLoopCount = 0;
 	while (spawned < num_)
 	{
 		
-		int spawnChance = FMath::RandRange(0, NPCLocations.Num());
-		int j = 0;
+		int spawnChance = FMath::RandRange(0, npcLocations.Num());
+		int i = 0;
 
 		if (GetWorld())
 		{
 			// i'll make this more intelligent with selecting certain places to spawn it
 			// make an array to tell what locations we've already spawned
-			for (auto a : NPCLocations)
+			for (auto a : npcLocations)
 			{
 				// in the future we would do some RNG to determine what type of NPC is spawned but for now we'll keep it simple
-				if (j == spawnChance && hasSpawned[j] == false && spawned < num_)
+				if (i == spawnChance && hasSpawned[i] == false && spawned < num_)
 				{
-					// future is now bitch
 					switch (type_)
 					{
-					 case 0 :
-					 {
-						 SpawnDefaultNPCs(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
+					case 0:
+						SpawnDefaultNPCs(a);
+						hasSpawned[i] = true;
+						spawned++;
 						break;
-					 case 1:
-					 {
-						 SpawnCentralNPCs(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
+					case 1:
+						SpawnCentralNPCs(a);
+						hasSpawned[i] = true;
+						spawned++;
 						break;
-					 case 2:
-					 {
-						 SpawnBranchNPCs(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
-						 break;
-					 case 3:
-					 {
-						 SpawnTournamentNPC(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
-						 break;
-					 case 4:
-					 {
-						 SpawnItemShop(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
-					 break;
-					 case 5:
-					 {
-						 SpawnFighterShop(a);
-						 hasSpawned[j] = true;
-						 spawned++;
-						 break;
-					 }
-					 break;
+					case 2:
+						SpawnBranchNPCs(a);
+						hasSpawned[i] = true;
+						spawned++;
+						break;
 					}
-					
 				}
 
-				j++;
 			}
 		}
+
+		i++;
 		totalLoopCount++;
 		// if we aren't able to find a valid location in a certain amount of loops 
 		if (totalLoopCount >= maxLoopCount)
@@ -186,7 +149,7 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 void AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 {
 	//spawnChance = FMath::RandRange(j + 1, NPCLocations.Num());
-	ANPC* npc = GetWorld()->SpawnActor<ANPC>(regularNPCs[0]->GetClass(), a_->GetActorTransform());
+	ANPC* npc = GetWorld()->SpawnActor<ANPC>(regularNPCs[0], a_->GetActorTransform());
 	if (npc)
 	{
 		npc->SetNPCLinesIndex(2);
@@ -198,7 +161,7 @@ void AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 
 void AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 {
-	ACentralNPC* centralNpc = GetWorld()->SpawnActor<ACentralNPC>(centralNPCs[0]->GetClass(), a_->GetActorTransform());
+	ACentralNPC* centralNpc = GetWorld()->SpawnActor<ACentralNPC>(centralNPCs[0], a_->GetActorTransform());
 	if (centralNpc)
 	{
 		centralNpc->SetHubManager(this);
@@ -210,7 +173,7 @@ void AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 
 void AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 {
-	ABranchNPC* branchNpc = GetWorld()->SpawnActor<ABranchNPC>(branchNPCs[0]->GetClass(), a_->GetActorTransform());
+	ABranchNPC* branchNpc = GetWorld()->SpawnActor<ABranchNPC>(branchNPCs[0], a_->GetActorTransform());
 	if (branchNpc)
 	{
 		branchNpc->SetHubManager(this);
@@ -219,39 +182,41 @@ void AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Branch NPC"));
 }
 
-void AHubWorldManager::SpawnTournamentNPC(AActor* a_)
-{
-	ATournament* tournamentNpc = GetWorld()->SpawnActor<ATournament>(tournamentNPCs[0]->GetClass(), a_->GetActorTransform());
-	tournament = tournamentNpc;
-	if (tournamentNpc)
-	{
-		tournamentNpc->SetHubManager(this);
-		npcs.Push(tournamentNpc);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Spawned Tournament NPC"));
-}
+//leaving this in here in case funcionality wants to be re-added
 
-void AHubWorldManager::SpawnItemShop(AActor* a_)
-{
-	AItemShop* itemShop = GetWorld()->SpawnActor<AItemShop>(itemShopNPCs[0]->GetClass(), a_->GetActorTransform());
-	if (itemShop)
-	{
-		itemShop->SetHubManager(this);
-		npcs.Push(itemShop);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Spawned ItemShop NPC"));
-}
-
-void AHubWorldManager::SpawnFighterShop(AActor* a_)
-{
-	AFightersShop* fighterShop = GetWorld()->SpawnActor<AFightersShop>(fighterShopNPCs[0]->GetClass(), a_->GetActorTransform());
-	if (fighterShop)
-	{
-		fighterShop->SetHubManager(this);
-		npcs.Push(fighterShop);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Spawned FighterShop NPC"));
-}
+//void AHubWorldManager::SpawnTournamentNPC(AActor* a_)
+//{
+//	ATournament* tournamentNpc = GetWorld()->SpawnActor<ATournament>(tournamentNPCs[0]->GetClass(), a_->GetActorTransform());
+//	tournament = tournamentNpc;
+//	if (tournamentNpc)
+//	{
+//		tournamentNpc->SetHubManager(this);
+//		npcs.Push(tournamentNpc);
+//	}
+//	UE_LOG(LogTemp, Warning, TEXT("Spawned Tournament NPC"));
+//}
+//
+//void AHubWorldManager::SpawnItemShop(AActor* a_)
+//{
+//	AItemShop* itemShop = GetWorld()->SpawnActor<AItemShop>(itemShopNPCs[0]->GetClass(), a_->GetActorTransform());
+//	if (itemShop)
+//	{
+//		itemShop->SetHubManager(this);
+//		npcs.Push(itemShop);
+//	}
+//	UE_LOG(LogTemp, Warning, TEXT("Spawned ItemShop NPC"));
+//}
+//
+//void AHubWorldManager::SpawnFighterShop(AActor* a_)
+//{
+//	AFightersShop* fighterShop = GetWorld()->SpawnActor<AFightersShop>(fighterShopNPCs[0]->GetClass(), a_->GetActorTransform());
+//	if (fighterShop)
+//	{
+//		fighterShop->SetHubManager(this);
+//		npcs.Push(fighterShop);
+//	}
+//	UE_LOG(LogTemp, Warning, TEXT("Spawned FighterShop NPC"));
+//}
 
 void AHubWorldManager::DeleteNPCs()
 {
@@ -270,7 +235,7 @@ void AHubWorldManager::DeleteNPCs()
 		npcs.RemoveAt(i, 1, true);
 	}
 	// reset the array
-	hasSpawned.Init(false, NPCLocations.Num());
+	hasSpawned.Init(false, npcLocations.Num());
 
 }
 

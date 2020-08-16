@@ -28,7 +28,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float successRewards; // affects a stat based on the reward index
 	FString activityEndLine;// updated after activity succeeds or fails
-	bool activityAlreadyDone; // if true the percentage UI widget will not be added to the ui
+	UPROPERTY(BlueprintReadOnly)
+		bool activityAlreadyDone; // if true the percentage UI widget will not be added to the ui
 
 	UFUNCTION(BlueprintCallable)
 	bool IsActivityAffordable(); /*Checks if the player has enough 

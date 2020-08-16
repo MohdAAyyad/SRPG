@@ -274,13 +274,13 @@ void ABattleController::TargetingWithASkill()
 			previosulyTargetedActor = hit.Actor;
 
 			int lastIndexOfCurrentlyHighlightedTiles;
-			ATile* targetTile;
+			ATile* targetTile_ = nullptr;
 			TArray<ATile*> allHighlightedTiles;
 			//Check if we're hovering over a tile
-			targetTile = Cast<ATile>(hit.Actor);
-			if (targetTile)
+			targetTile_ = Cast<ATile>(hit.Actor);
+			if (targetTile_)
 			{
-				if (targetTile->GetHighlighted() == TILE_SKL) //Make sure the tile is highlighted for skill usage
+				if (targetTile_->GetHighlighted() == TILE_SKL) //Make sure the tile is highlighted for skill usage
 				{
 					if (targetingTiles.Num() > 0)
 					{
@@ -291,9 +291,9 @@ void ABattleController::TargetingWithASkill()
 						targetingTiles.Empty();
 					}
 					//Get the first index of the tiles you're about to highlight
-					lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
-					targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
-					allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
+					lastIndexOfCurrentlyHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles().Num();
+					targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
+					allHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles();
 					//Push the tiles into the targetingTiles array
 					for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
 					{
@@ -307,10 +307,10 @@ void ABattleController::TargetingWithASkill()
 				AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
 				if (targetChar)
 				{
-					targetTile = targetChar->GetMyTile();
-					if (targetTile)
+					targetTile_ = targetChar->GetMyTile();
+					if (targetTile_)
 					{
-						if (targetTile->GetHighlighted() == TILE_SKL)
+						if (targetTile_->GetHighlighted() == TILE_SKL)
 						{
 							if (targetingTiles.Num() > 0)
 							{
@@ -322,9 +322,9 @@ void ABattleController::TargetingWithASkill()
 								targetingTiles.Empty();
 							}
 							//Get the first index of the tiles you're about to highlight
-							lastIndexOfCurrentlyHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles().Num();
-							targetTile->GetGridManager()->UpdateCurrentTile(targetTile, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
-							allHighlightedTiles = targetTile->GetGridManager()->GetHighlightedTiles();
+							lastIndexOfCurrentlyHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles().Num();
+							targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
+							allHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles();
 							//Push the tiles into the targetingTiles array
 							for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
 							{

@@ -201,26 +201,28 @@ void ABattleCrowd::ElectChampionAndVillain()
 	{
 		if (btlManager && aiManager)
 		{
-			AGridCharacter* villain = nullptr;
+			AGridCharacter* villain_ = nullptr;
 
 			if (playerFavor <= 0.3f) //Elect a villain from the player camp
 			{
-				villain = btlManager->GetPlayerWithLowestStat(STAT_CRD);
+				villain_ = btlManager->GetPlayerWithLowestStat(STAT_CRD);
 			}
 			else //Otherwise, elect an enemy to be the villain
 			{
-				villain = aiManager->GetEnemyWithLowestStat(STAT_CRD);
+				villain_ = aiManager->GetEnemyWithLowestStat(STAT_CRD);
 			}
 
 			//TODO
 			//Call the needed functions on the villain
-			villain->SetChampionOrVillain(false);
+			villain_->SetChampionOrVillain(false);
 		}
 	}
 }
 void ABattleCrowd::CalculateFavorForTheFirstTime()
 {
-	float totalCRD, playerCRD, enemyCRD = 0.0f;
+	float totalCRD = 0.0f; 
+	float playerCRD = 0.0f; 
+	float enemyCRD = 0.0f;
 
 	if (aiManager && btlManager)
 	{

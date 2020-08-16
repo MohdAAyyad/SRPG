@@ -6,6 +6,7 @@
 #include "../Grid/GridManager.h"
 #include "../Grid/Tile.h"
 #include "Engine/World.h"
+#include "Intermediary/Intermediate.h"
 #include "EnemyBaseGridCharacter.h"
 
 
@@ -14,7 +15,6 @@ AAIManager::AAIManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	numberOfEnemiesWhichFinishedMoving = -1;
-
 }
 
 // Called when the game starts or when spawned
@@ -46,39 +46,61 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 	gridManager = grid_;
 	TArray<ATile*> enemyDeploymentTiles;
 
+	//Get the next opponent
+	nextOp = Intermediate::GetInstance()->GetNextOpponent();
+	int nodeIndex = 0;
+
 	if (gridManager)
 	{
-		gridManager->HighlightDeploymentTiles(enemyRowDeploymentIndex, enemyDeploymentOffset,
-			enemyDeploymentRowSpeed, enemyDeploymentDepth);
+		gridManager->ClearHighlighted();
 
-		enemyDeploymentTiles = gridManager->GetHighlightedTiles();
-
-		for (int i = 0; i < thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable;)
+		if (depNodes.Num() > 0)
 		{
-			int enemyIndex = FMath::RandRange(0, enemiesBPs.Num() - 1);
-			int tileIndex = FMath::RandRange(0, enemyDeploymentTiles.Num() - 1);
-			
-			if (enemyDeploymentTiles[tileIndex]->GetOccupied()) //Make sure the tile was never selected before to avoid two enemies being spawned on the same tile
-				continue;
-
-
-			FVector loc = enemyDeploymentTiles[tileIndex]->GetActorLocation();
-			loc.Z += 50.0f;
-			AEnemyBaseGridCharacter* enemy = GetWorld()->SpawnActor<AEnemyBaseGridCharacter>(enemiesBPs[enemyIndex], loc, FRotator(0.0f, 180.0f, 0.0f));
-
-			if (enemy)
+			UE_LOG(LogTemp, Warning, TEXT("Num of troops %d"), nextOp.numberOfTroops);
+			while (deployedEnemies.Num() < nextOp.numberOfTroops && nodeIndex < depNodes.Num()) //Potential issue: What if the total num of enemies exceeds the total num of enemies allowed on nodes?
 			{
-				enemy->SetManagers(this, gridManager,btlManager);
-				deployedEnemies.Push(enemy);
-				enemyDeploymentTiles[tileIndex]->SetOccupied(true);
-				i++;
+				//Highlight the tiles for the current node
+				if (depNodes[nodeIndex].currentNumOfEnemiesForThisNode < depNodes[nodeIndex].maxNumOfEnemiesForThisNode)
+				{
+					gridManager->HighlightDeploymentTiles(depNodes[nodeIndex].enemyRowDeploymentIndex, depNodes[nodeIndex].enemyDeploymentOffset,
+						depNodes[nodeIndex].enemyDeploymentRowSpeed, depNodes[nodeIndex].enemyDeploymentDepth);
 
-				//TODO
-				//Use the information obtained from the SOppOnent struct coming from the intermediate to update the stats of the enemies
+					enemyDeploymentTiles = gridManager->GetHighlightedTiles();
+				}				
 
+				//Go through the tiles 
+				for (;depNodes[nodeIndex].currentNumOfEnemiesForThisNode < depNodes[nodeIndex].maxNumOfEnemiesForThisNode && deployedEnemies.Num() < nextOp.numberOfTroops;)
+				{
+					int enemyIndex = FMath::RandRange(0, enemiesBPs.Num() - 1);
+					int tileIndex = FMath::RandRange(0, enemyDeploymentTiles.Num() - 1);
+
+					if (enemyDeploymentTiles[tileIndex]->GetOccupied()) //Make sure the tile was never selected before to avoid two enemies being spawned on the same tile
+						continue;		// Potential infinite loop: If all the tiles are occupied, then infinite loop
+
+
+					//Spawn the enemy and pass on the needed information
+					FVector loc = enemyDeploymentTiles[tileIndex]->GetActorLocation();
+					loc.Z += 50.0f;
+					AEnemyBaseGridCharacter* enemy = GetWorld()->SpawnActor<AEnemyBaseGridCharacter>(enemiesBPs[enemyIndex], loc, FRotator(0.0f, 180.0f, 0.0f));
+
+					if (enemy)
+					{
+						enemy->SetManagers(this, gridManager, btlManager);
+						enemy->ScaleLevelBaseOnArchetype(nextOp.level, nextOp.archtype);
+						deployedEnemies.Push(enemy);
+						enemyDeploymentTiles[tileIndex]->SetOccupied(true);
+						depNodes[nodeIndex].currentNumOfEnemiesForThisNode++;
+					}
+				}
+
+				//Reset and get ready for the next node
+				if (enemyDeploymentTiles.Num() > 0)
+					enemyDeploymentTiles.Empty();
+
+				gridManager->ClearHighlighted();
+				nodeIndex++;
 			}
 		}
-		gridManager->ClearHighlighted();
 	}
 }
 
@@ -87,8 +109,8 @@ void AAIManager::FinishedMoving()
 
 	//Called by enemies when they finish moving. Used to know when to tell the enemies to attack
 	numberOfEnemiesWhichFinishedMoving++;
-	UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable - 1);
-	if (numberOfEnemiesWhichFinishedMoving == (thisIntShouldBeReplacedWithTheSOpponentNumberOfTroopsVariable - 1))
+	//UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, nextOp.numberOfTroops - 1);
+	if (numberOfEnemiesWhichFinishedMoving == (nextOp.numberOfTroops - 1))
 		OrderEnemiesToAttackPlayer();
 }
 void AAIManager::FinishedAttacking()
@@ -106,7 +128,7 @@ void AAIManager::OrderEnemiesToAttackPlayer()
 	{
 		deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAttack();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("--------"));
+//	UE_LOG(LogTemp, Warning, TEXT("--------"));
 }
 
 

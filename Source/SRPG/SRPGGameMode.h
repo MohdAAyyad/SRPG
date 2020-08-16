@@ -13,6 +13,7 @@ class ASRPGGameMode : public AGameModeBase
 
 public:
 	ASRPGGameMode();
+	void SwitchLevel(FName levelName);
 };
 
 

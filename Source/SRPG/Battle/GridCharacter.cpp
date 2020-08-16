@@ -68,22 +68,22 @@ AGridCharacter::AGridCharacter()
 
 	pathComp = CreateDefaultSubobject<UPathComponent>(TEXT("Path Component"));
 
-	widgetComp = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	widgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
 
 	
-	widgetOnTopOfHead = CreateAbstractDefaultSubobject<UWidgetComponent>(TEXT("OnTopOfHeadWidget"));
+	widgetOnTopOfHead = CreateDefaultSubobject<UWidgetComponent>(TEXT("OnTopOfHeadWidget"));
 	widgetOnTopOfHead->SetupAttachment(RootComponent);
 	widgetOnTopOfHead->SetWidgetSpace(EWidgetSpace::Screen);
 	widgetOnTopOfHead->SetVisibility(false);
 	widgetOnTopOfHead->AddRelativeLocation(FVector(0.0f, 0.0f, 260.0f));
 
-	champParticles = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
+	champParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
 	champParticles->SetupAttachment(RootComponent);
 	champParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
 
-	villainParticles = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Villain Particles"));
+	villainParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Villain Particles"));
 	villainParticles->SetupAttachment(RootComponent);
 	villainParticles->AddRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
 	villainParticles->AddRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
