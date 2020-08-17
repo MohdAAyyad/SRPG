@@ -31,11 +31,10 @@ void AHubWorldManager::BeginPlay()
 	hasSpawned.Init(false, npcLocations.Num());
 
 
-	SpawnNPCs(6, 0);
-	DeleteNPCs();
+
 	SpawnNPCs(1, 0);
-	SpawnNPCs(1, 1);
-	SpawnNPCs(1, 2);
+	SpawnNPCs(1, true);
+	SpawnNPCs(1, true);
 	//SpawnNPCs(1, 3);
 	//SpawnNPCs(1, 4);
 	//SpawnNPCs(1, 5);
@@ -130,10 +129,11 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 					}
 				}
 
+				i++;
 			}
 		}
 
-		i++;
+
 		totalLoopCount++;
 		// if we aren't able to find a valid location in a certain amount of loops 
 		if (totalLoopCount >= maxLoopCount)
@@ -146,7 +146,86 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 	
 }
 
-void AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
+void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
+{
+	// spawn NPC's based on the actor locations
+	// check to see if world is null
+	int spawned = 0;
+
+	// this is the maximum amount of times the while loop will be allowed to run
+	// takes the possible locations and multiplies it by the number of npcs it should spawn, adds 5 for good mesure
+	int maxLoopCount = npcLocations.Num() * num_ + 5;
+	int totalLoopCount = 0;
+	bool spawn = false;
+	while (spawned < num_)
+	{
+
+		int spawnChance = FMath::RandRange(0, npcLocations.Num());
+		int i = 0;
+
+		if (GetWorld())
+		{
+			for (auto a : npcLocations)
+			{
+				if (i == spawnChance && hasSpawned[i] == false && spawned < num_ && spawnBranch_ == false)
+				{
+					// spawn the central in isolation 
+					SpawnCentralNPCs(a);
+					hasSpawned[i] = true;
+					spawned++;
+				}
+				else if (i == spawnChance && hasSpawned[i] == false && spawned < num_ && spawnBranch_)
+				{
+					// spawn the central with a branch
+					ACentralNPC* centralNpc = SpawnCentralNPCs(a);
+					hasSpawned[i] = true;
+					spawned++;
+					// loop through again and find a second spot for the branch npc
+					int totalLoopMax2 = npcLocations.Num() * num_ + 5;
+					int currentLoop2 = 0;
+					while (spawn == false)
+					{
+						int spawnChance2 = FMath::RandRange(0, npcLocations.Num());
+						int j = 0;
+						for (auto a : npcLocations)
+						{
+							if (j == spawnChance2 && hasSpawned[j] == false)
+							{
+								ABranchNPC* branchNpc = SpawnBranchNPCs(a);
+								branchNpc->SetCentralNPC(centralNpc);
+								hasSpawned[j] = true;
+								spawn = true;
+							}
+
+							j++;
+
+						}
+						currentLoop2++;
+						if (currentLoop2 >= totalLoopMax2)
+						{
+							UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for Branch NPC. Branch NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+							break;
+						}
+					}
+					
+				}
+
+				i++;
+			}
+		}
+
+		totalLoopCount++;
+		// if we aren't able to find a valid location in a certain amount of loops 
+		if (totalLoopCount >= maxLoopCount)
+		{
+			// go home 
+			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. %d NPCs Failed to spawn. Make sure you have enough spawn points avaible."), num_ - spawned);
+			break;
+		}
+	}
+}
+
+ANPC* AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 {
 	//spawnChance = FMath::RandRange(j + 1, NPCLocations.Num());
 	ANPC* npc = GetWorld()->SpawnActor<ANPC>(regularNPCs[0], a_->GetActorTransform());
@@ -156,10 +235,11 @@ void AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 		npc->SetHubManager(this);
 		npcs.Push(npc);
 	}
+	return npc;
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Default NPC"));
 }
 
-void AHubWorldManager::SpawnCentralNPCs(AActor* a_)
+ACentralNPC* AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 {
 	ACentralNPC* centralNpc = GetWorld()->SpawnActor<ACentralNPC>(centralNPCs[0], a_->GetActorTransform());
 	if (centralNpc)
@@ -167,11 +247,12 @@ void AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 		centralNpc->SetHubManager(this);
 		npcs.Push(centralNpc);
 	}
+	return centralNpc;
 	// any information we need to give the NPC will be done here
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Central NPC"));
 }
 
-void AHubWorldManager::SpawnBranchNPCs(AActor* a_)
+ABranchNPC* AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 {
 	ABranchNPC* branchNpc = GetWorld()->SpawnActor<ABranchNPC>(branchNPCs[0], a_->GetActorTransform());
 	if (branchNpc)
@@ -179,6 +260,7 @@ void AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 		branchNpc->SetHubManager(this);
 		npcs.Push(branchNpc);
 	}
+	return branchNpc;
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Branch NPC"));
 }
 

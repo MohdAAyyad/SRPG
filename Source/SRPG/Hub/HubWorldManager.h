@@ -76,9 +76,11 @@ public:
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
 	void SpawnNPCs(int num_, int type_);
-	void SpawnDefaultNPCs(AActor* a_);
-	void SpawnCentralNPCs(AActor* a_);
-	void SpawnBranchNPCs(AActor* a_);
+	// used specifically for spawning central NPC's with a branch attached
+	void SpawnNPCs(int num_, bool spawnBranch_);
+	ANPC* SpawnDefaultNPCs(AActor* a_);
+	ACentralNPC* SpawnCentralNPCs(AActor* a_);
+	ABranchNPC* SpawnBranchNPCs(AActor* a_);
 	//void SpawnTournamentNPC(AActor* a_);
 	//void SpawnItemShop(AActor* a_);
 	//void SpawnFighterShop(AActor* a_);
