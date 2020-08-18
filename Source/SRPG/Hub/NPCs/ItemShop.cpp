@@ -6,6 +6,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Hub/HubWorldManager.h"
 
 void AItemShop::LoadText()
 {
@@ -43,7 +44,15 @@ void AItemShop::BuyEquipment(int equipmentIndex_, int amountToBuy_)
 int AItemShop::GetWorldLevel()
 {
 	//will fill in functionality later
-	return 0;
+	if (hubManager)
+	{
+		return hubManager->GetHubWorldLevel();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Hub Manager NULL"));
+		return 0;
+	}
 }
 
 FString AItemShop::GetItemName(int itemIndex_)

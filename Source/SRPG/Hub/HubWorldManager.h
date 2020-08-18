@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Hub/NPCs/BranchNPC.h"
+#include "Hub/NPCs/CentralNPC.h"
+#include "Hub/NPC.h"
 #include "HubWorldManager.generated.h"
 
 UCLASS()
@@ -24,25 +27,29 @@ protected:
 	USceneComponent* root;
 	// npc locations, manually chosen used to spawn NPC's
 	UPROPERTY(EditAnywhere)
-	TArray<AActor*> NPCLocations;
+	TArray<AActor*> npcLocations;
 	// randomly chosen
 	UPROPERTY(EditAnywhere)
-	TArray<class ACentralNPC*> centralNPCs;
+	TArray<TSubclassOf<ACentralNPC>> centralNPCs;
 	// randomly chosen after the central NPCs were spawned
 	UPROPERTY(EditAnywhere)
-	TArray<class ABranchNPC*> branchNPCs;
+	TArray<TSubclassOf<ABranchNPC>> branchNPCs;
 	// randomly chosen, 6 at max
 	UPROPERTY(EditAnywhere)
-	TArray<class ANPC*> regularNPCs;
-	UPROPERTY(EditAnywhere)
-	TArray<class ATournament*> tournamentNPCs;
-	UPROPERTY(EditAnywhere)
-	TArray<class AItemShop*> itemShopNPCs;
-	UPROPERTY(EditAnywhere)
-	TArray<class AFightersShop*> fighterShopNPCs;
+	TArray<TSubclassOf<ANPC>> regularNPCs;
+	//UPROPERTY(EditAnywhere)
+	//TArray<TSubclassOf<ATournament>> tournamentNPCs;
+	//UPROPERTY(EditAnywhere)
+	//TArray<TSubclassOf<AItemShop>> itemShopNPCs;
+	//UPROPERTY(EditAnywhere)
+	//TArray<TSubclassOf<AFightersShop>> fighterShopNPCs;
 
 	UPROPERTY(EditAnywhere)
 	class ATournament* tournament;
+	UPROPERTY(EditAnywhere)
+	class AItemShop* itemShop;
+	UPROPERTY(EditAnywhere)
+	class AFightersShop* fighterShop;
 
 	// initialises at level 2. Used by shops to determine what they can sell.
 	int hubWorldLevel;
@@ -69,12 +76,14 @@ public:
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
 	void SpawnNPCs(int num_, int type_);
-	void SpawnDefaultNPCs(AActor* a_);
-	void SpawnCentralNPCs(AActor* a_);
-	void SpawnBranchNPCs(AActor* a_);
-	void SpawnTournamentNPC(AActor* a_);
-	void SpawnItemShop(AActor* a_);
-	void SpawnFighterShop(AActor* a_);
+	// used specifically for spawning central NPC's with a branch attached
+	void SpawnNPCs(int num_, bool spawnBranch_);
+	ANPC* SpawnDefaultNPCs(AActor* a_);
+	ACentralNPC* SpawnCentralNPCs(AActor* a_);
+	ABranchNPC* SpawnBranchNPCs(AActor* a_);
+	//void SpawnTournamentNPC(AActor* a_);
+	//void SpawnItemShop(AActor* a_);
+	//void SpawnFighterShop(AActor* a_);
 	// go through and remove the npcs
 	void DeleteNPCs();
 };

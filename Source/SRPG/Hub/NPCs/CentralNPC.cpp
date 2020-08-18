@@ -4,6 +4,7 @@
 #include "CentralNPC.h"
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "Hub/HubWorldManager.h"
 
 void ACentralNPC::BeginPlay()
 {
@@ -101,6 +102,10 @@ void ACentralNPC::SimulateActivity()
 void ACentralNPC::SpendTime()
 {
 	// empty function because we don't have a hub world manager to handle time
+		if (hubManager)
+		{
+			hubManager->UpdateTimeSlots(-1);
+		}
 }
 
 void ACentralNPC::EndDialogue()
