@@ -10,6 +10,7 @@
 #include "ExternalFileReader/FOpponentStruct.h"
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -31,6 +32,8 @@ ATransitionToBattle::ATransitionToBattle()
 	widgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	widgetComp->SetupAttachment(root);
 	widgetComp->SetVisibility(false);
+
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
 	gameMode = nullptr;
 	tourney = nullptr;
@@ -72,6 +75,7 @@ void ATransitionToBattle::OverlapWithPlayer(UPrimitiveComponent* overlappedCompo
 
 			if (pChar)
 			{
+				UpdateRecruitedFighters();
 				if (widgetComp)
 					widgetComp->GetUserWidgetObject()->AddToViewport();
 			}
@@ -97,11 +101,58 @@ void ATransitionToBattle::EndDay()
 	//Gets the winner from tournament NPC and passes it to the intermediate
 
 	if (tourney)
-	{
 		Intermediate::GetInstance()->SetNextOpponent(tourney->SimulateMatch());
-		if(widgetComp)
-			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
-		if (gameMode)
-			gameMode->SwitchLevel(nextBattleLevel);
+}
+
+void ATransitionToBattle::UpdateRecruitedFighters() //Called when the player collides with the actor
+{
+	if (recruitedFighters.Num() > 0) //Need to reset the array in case the player buys new fighters then returns
+		recruitedFighters.Empty();
+
+	if (fileReader)
+	{
+		TArray<FFighterTableStruct*> rfighters = fileReader->GetAllRecruitedFighters();
+
+		for (auto r : rfighters)
+			recruitedFighters.Push(*r);
 	}
+}
+
+TArray<FFighterTableStruct> ATransitionToBattle::GetRecruitedFighters() //Called by the UI to display the fighters
+{
+	return recruitedFighters;
+}
+
+void ATransitionToBattle::RemoveRecruitedFighterAtIndex(int index_)
+{
+	if (indexesOfSelectedFighters.Contains(index_))
+	{
+		indexesOfSelectedFighters.RemoveAt(indexesOfSelectedFighters.IndexOfByKey(index_));
+	}
+}
+
+void ATransitionToBattle::AddFighterToSelectedFighters(int index_)
+{
+	//Stores the index of the array entry of recruited fighters
+	if (indexesOfSelectedFighters.Num() < Intermediate::GetInstance()->GetMaxDeploymentSize())
+	{
+		//Should check whether the array contains in the index first, but we'll do that through the UI by changing the add button to remove and have it call a different function
+		if (index_ >= 0 && index_ < recruitedFighters.Num())
+			indexesOfSelectedFighters.Push(index_);
+	}
+}
+
+void ATransitionToBattle::FinalizeFighterSelection()
+{
+	//Pass in the BPIDs to the intermediate
+	for (int i = 0; i < indexesOfSelectedFighters.Num(); i++)
+	{
+		if(indexesOfSelectedFighters[i] >= 0 && indexesOfSelectedFighters[i] < recruitedFighters.Num())
+			Intermediate::GetInstance()->AddFighterToSelected(recruitedFighters[indexesOfSelectedFighters[i]]);
+	}
+
+	if (widgetComp)
+		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	if (gameMode)
+		gameMode->SwitchLevel(nextBattleLevel);
 }

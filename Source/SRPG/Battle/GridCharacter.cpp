@@ -392,6 +392,11 @@ float AGridCharacter::GetStat(int statIndex_)
 	return static_cast<float>(crd);
 }
 
+void AGridCharacter::UpdateStats(TArray<int> stats_)
+{
+
+}
+
 
 void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
 {

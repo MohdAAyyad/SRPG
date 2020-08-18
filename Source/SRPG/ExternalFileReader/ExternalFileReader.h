@@ -52,6 +52,8 @@ public:
 	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
 	TArray<FSkillTableStruct*> GetSkills(int weaponIndex_, int currentLevel_);
+	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
+	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
 	int GetItemStatIndex(FName itemName_);
 	int GetItemValue(FName itemName_);

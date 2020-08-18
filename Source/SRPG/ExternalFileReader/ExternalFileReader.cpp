@@ -272,22 +272,45 @@ void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFigh
 	}
 }
 
+TArray<FFighterTableStruct*> UExternalFileReader::GetAllRecruitedFighters()
+{
+	//Called by the TransitionToBattle actor
+
+	static const FString contextString(TEXT("Trying to get the recruited fighters from the table"));
+	TArray<FName> rowNames;
+	TArray<FFighterTableStruct*> rfighters;
+	rowNames = tables[0]->GetRowNames(); //Will only be accessed by TransitionToBattle in the battle. 0 for Rfighters.
+
+	for (auto n : rowNames)
+	{
+		rfighters.Push(tables[0]->FindRow<FFighterTableStruct>(n, contextString, true));
+	}
+
+	return rfighters;
+}
+
+FFighterTableStruct UExternalFileReader::GetRecruitedFighterByID(int id_)
+{
+	static const FString contextString(TEXT("Trying to get the items from the table"));
+	TArray<FName> rowNames;
+	rowNames = tables[0]->GetRowNames(); //Called by battle manager to update the stats of the fighters
+
+	for (auto n : rowNames)
+	{
+		FFighterTableStruct* row = tables[0]->FindRow<FFighterTableStruct>(n, contextString, true);
+		if (row->id  == id_)
+		{
+			return *row;
+		}
+	}
+
+	return FFighterTableStruct();
+
+}
+
 void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)
 {
 	static const FString contextString(TEXT("Item Table"));
-	//reset our owned values to 0 in the table
-//	if (firstTimeItem)
-//	{
-	//	TArray<FName> rowNames;
-	//	rowNames = tables[index_]->GetRowNames();
-	//	for (auto n : rowNames)
-	//	{
-	//		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
-	//		row->owned = 0;
-	//	}
-
-//		firstTimeItem = false;
-//	}
 
 	if (tables[index_])
 	{

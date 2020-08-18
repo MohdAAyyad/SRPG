@@ -11,6 +11,7 @@
 #include "Battle/Crowd/BattleCrowd.h"
 #include "Definitions.h"
 #include "Player/PlayerGridCharacter.h"
+#include "Intermediary/Intermediate.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -24,8 +25,10 @@ ABattleManager::ABattleManager()
 	widgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	widgetComp->SetupAttachment(root);
 	widgetComp->SetVisibility(false);
+	
+	
 	totalNumberOfPhasesElapsed = 1;
-
+	indexOfSelectedFighterInSelectedFighters = 0;
 }
 
 // Called when the game starts or when spawned
@@ -42,6 +45,12 @@ void ABattleManager::BeginPlay()
 		aiManager->SetBattleAndGridManager(this, gridManager);
 	if (gridManager)
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
+
+
+	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
+	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
+	maxNumberOfUnitsToDeploy = Intermediate::GetInstance()->GetMaxDeploymentSize();
+	Intermediate::GetInstance()->ResetSelectedFighters();
 
 }
 
@@ -83,16 +92,22 @@ void ABattleManager::NextPhase()
 	}
 			
 }
-void ABattleManager::DeployThisUnitNext(int bpid_)
+void ABattleManager::DeployThisUnitNext(int index_)
 {
-	//Used to keep track of which characters the player chooses to deploy
-	if (numberOfUnitsDeployed < maxNumberOfUnitsToDeploy)
+	//Index of the element inside selectedFighters
+
+	if (index_ >= 0 && index_ < selectedFighters.Num())
 	{
-		bpidOfUnitToBeDeployedNext = bpid_;
-		if (bpidOfUnitToBeDeployedNext < fighters.Num() && bpidOfUnitToBeDeployedNext >= 0)
+		//Used to keep track of which characters the player chooses to deploy
+		if (numberOfUnitsDeployed < maxNumberOfUnitsToDeploy)
 		{
-			if (widgetComp)
-				widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+			bpidOfUnitToBeDeployedNext = selectedFighters[index_].bpid;
+			indexOfSelectedFighterInSelectedFighters = index_;
+			if (bpidOfUnitToBeDeployedNext < fighters.Num() && bpidOfUnitToBeDeployedNext >= 0)
+			{
+				if (widgetComp)
+					widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+			}
 		}
 	}
 }
@@ -106,14 +121,37 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
+			TArray<int> stats_;
+			stats_.Reserve(18);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hp);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].pip);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].atk);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].def);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].intl);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].spd);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crit);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hit);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crd);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].level);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].currentEXP);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].neededEXPToLevelUp);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].weaponIndex);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].armorIndex);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedWeapon);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedArmor);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedAccessory);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].emitterIndex);
+
+
 			unit->SetBtlAndCrdManagers(this,crdManager);
+			unit->UpdateStats(stats_);
 			deployedUnits.Push(unit);
 		}
 
-		//PLACEHOLDER
-		if (selectedFighters.Contains(bpidOfUnitToBeDeployedNext))
+		//Remove the fighter from the ones that can be deployed
+		if (indexOfSelectedFighterInSelectedFighters >= 0 && indexOfSelectedFighterInSelectedFighters < selectedFighters.Num())
 		{
-			selectedFighters.Remove(bpidOfUnitToBeDeployedNext);
+			selectedFighters.RemoveAt(indexOfSelectedFighterInSelectedFighters);
 			if (selectedFighters.Num() < 1)
 				EndDeployment();
 		}
@@ -121,7 +159,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
-		deployedFightersIndexes.Push(bpidOfUnitToBeDeployedNext);
+		deployedFightersIndexes.Push(indexOfSelectedFighterInSelectedFighters);
 		bpidOfUnitToBeDeployedNext = -1;
 	}
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ExternalFileReader/FighterTableStruct.h"
 #include "BattleManager.generated.h"
 
 UCLASS()
@@ -39,6 +40,8 @@ protected:
 		int bpidOfUnitToBeDeployedNext;
 	UPROPERTY(EditAnywhere, Category = "Deployment")
 		int maxNumberOfUnitsToDeploy;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Deployment")
+		TArray<UMaterialInterface*> fighterMaterials; //Ordered in the same way as the fighter BPs. Used by UI
 	
 	int numberOfUnitsDeployed;
 
@@ -49,9 +52,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Will be read by UI to show the phases
 		int phase; //0 deployment 1 player 2 enemy 3 crowd 4 end
 	
-	//PLACEHOLDER. WON'T BE NEEDED ONCE TABLES AND INTERMEDIATE ARE UP AND RUNNING
+	//Updated from the intermediate
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") 
-		TArray<int> selectedFighters;
+		TArray<FFighterTableStruct> selectedFighters;
+
+	int indexOfSelectedFighterInSelectedFighters;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")

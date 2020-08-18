@@ -23,10 +23,6 @@
 #endif
 
 #ifndef STAT_SPD
-#define STAT_SPD 4
-#endif
-
-#ifndef STAT_SPD
 #define STAT_SPD 5
 #endif
 
@@ -44,6 +40,38 @@
 
 #ifndef STAT_LVL
 #define STAT_LVL 9
+#endif
+
+#ifndef STAT_EXP
+#define STAT_EXP 10
+#endif
+
+#ifndef STAT_NXP
+#define STAT_NXP 11
+#endif
+
+#ifndef STAT_WPI
+#define STAT_WPI 12
+#endif
+
+#ifndef STAT_ARI
+#define STAT_ARI 13
+#endif
+
+#ifndef STAT_WPN
+#define STAT_WPN 14
+#endif
+
+#ifndef STAT_ARM
+#define STAT_ARM 15
+#endif
+
+#ifndef STAT_ACC
+#define STAT_ACC 16
+#endif
+
+#ifndef STAT_EMI
+#define STAT_EMI 17
 #endif
 
 #ifndef TILE_MOV

@@ -14,6 +14,8 @@ Intermediate::Intermediate()
 	currentMoney = 1000;
 	enemyStatDecreaseValue = 0;
 	enemyStatDecreaseIndex = 0;
+	maxDeploymentSize = 10;
+	currentDeploymentSize = 0;
 }
 
 Intermediate::~Intermediate()
@@ -42,7 +44,7 @@ int Intermediate::GetProtagonistLevel()
 void Intermediate::SetProtagonistLevel(int value_)
 {
 }
-void Intermediate::UpdateCurrentRosterSize(int value_) //Value_ can be + or -. 
+void Intermediate::UpdateCurrentRosterSize(int value_) //Value_ can be + or -.  //Called from the fighters shop and from the battle manager
 {
 }
 int Intermediate::GetCurrentRosterSize()
@@ -53,16 +55,34 @@ int Intermediate::GetMaxRosterSize()
 {
 	return maxRosterSize;
 }
+int Intermediate::GetMaxDeploymentSize()
+{
+	return maxDeploymentSize;
+}
+int Intermediate::GetCurrentDeploymentSize()
+{
+	return currentDeploymentSize;
+}
 int Intermediate::GetCurrentMoney()
 {
 	return currentMoney;
 }
-void Intermediate::AddFighterToSelected(int index_)
+void Intermediate::AddFighterToSelected(FFighterTableStruct fighter_)
 {
+	if (currentDeploymentSize < maxDeploymentSize)
+	{
+		selectedFighters.Push(fighter_);
+	}
 }
-TArray<int> Intermediate::GetSelectedFighters() //Called by the battle manager
+TArray<FFighterTableStruct> Intermediate::GetSelectedFighters() //Called by the battle manager
 {
 	return selectedFighters;
+}
+
+void Intermediate::ResetSelectedFighters()
+{
+	if (selectedFighters.Num() > 0)
+		selectedFighters.Empty(); //Needed to make sure the intermediate starts with a clean slate before every battle
 }
 void Intermediate::SpendMoney(int money_)
 {

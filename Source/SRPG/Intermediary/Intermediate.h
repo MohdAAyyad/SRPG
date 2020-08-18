@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include <memory.h>
 #include "../ExternalFileReader/FOpponentStruct.h"
+#include "../ExternalFileReader/FighterTableStruct.h"
 
 /**
  * 
@@ -19,10 +20,12 @@ protected:
 
 	int storyProgress; //Determines whether the next fight is a story fight or not. Increased by 1 after every victory.
 	int protagonistLevel;
-	TArray<int> selectedFighters; //The indexes of the fighters that are going to be used in the next battle
+	TArray<FFighterTableStruct> selectedFighters; //The indexes of the fighters that are going to be used in the next battle
 	TArray<int> unitsOnHold; //When the player engages in activities that use units, these units become on hold. If the activity fails, these units are removed from the currentRoster. The array saves the index of the units in the currentRoster array.
 	int maxRosterSize;
 	int currentRosterSize;
+	int maxDeploymentSize;
+	int currentDeploymentSize;
 	int currentMoney;
 	FOpponentStruct nextOpponent; //Value is passed on to the battle manager which passes it onto the enemy manager 
 							//to spawn the enemies.Used for enemy stat decrease activities 	
@@ -40,9 +43,12 @@ public:
 	void UpdateCurrentRosterSize(int value_); //Value_ can be + or -. 
 	int GetCurrentRosterSize();
 	int GetMaxRosterSize();
+	int GetMaxDeploymentSize();
+	int GetCurrentDeploymentSize();
 	int GetCurrentMoney();
-	void AddFighterToSelected(int index_);
-	TArray<int> GetSelectedFighters(); //Called by the battle manager
+	void AddFighterToSelected(FFighterTableStruct fighter_);
+	void ResetSelectedFighters();
+	TArray<FFighterTableStruct> GetSelectedFighters(); //Called by the battle manager
 	void SpendMoney(int money_);
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.

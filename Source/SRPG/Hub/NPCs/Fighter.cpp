@@ -2,6 +2,7 @@
 
 
 #include "Fighter.h"
+#include "Definitions.h"
 
 void FFighter::CalculatePrice(TArray<int> stats_)
 {
@@ -40,12 +41,12 @@ TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
 	// are we augmenting?
 	bool exit = false;
 
-	if (goalLevel_ > stats_[9])
+	if (goalLevel_ > stats_[STAT_LVL])
 	{
 		while (exit == false)
 		{
-			int increment = stats[9] + 1;
-			if (stats[9] == goalLevel_)
+			int increment = stats[STAT_LVL] + 1;
+			if (stats[STAT_LVL] == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
@@ -53,12 +54,12 @@ TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
 			stats = ScaleStatsByLevel(increment, stats_);
 		}
 	}
-	else if (goalLevel_ < stats_[9] && stats_[9] > 0)
+	else if (goalLevel_ < stats_[STAT_LVL] && stats_[STAT_LVL] > 0)
 	{
 		while (exit == false)
 		{
-			int decrement = stats[9] - 1;
-			if (stats[9] == goalLevel_)
+			int decrement = stats[STAT_LVL] - 1;
+			if (stats[STAT_LVL] == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
@@ -66,6 +67,9 @@ TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
 			stats = ScaleStatsByLevel(decrement, stats_);
 		}
 	}
+
+	stats[STAT_LVL] = goalLevel_;
+	level = goalLevel_;
 
 	return stats;
 

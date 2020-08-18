@@ -14,6 +14,8 @@ void AFightersShop::BeginPlay()
 	purchasedFighters = 1;
 	haveChosenFighter = false;
 	hasLeveledUp = false;
+
+	fighterID = 3; //0,1,2,3 are the main characters
 }
 
 void AFightersShop::EndDialogue()
@@ -285,7 +287,7 @@ void AFightersShop::FinalizePurchase()
 		row.crit = row2.crit;
 		row.hit = row2.hit;
 		row.crd = row2.crd;
-		row.id = row2.id;
+		row.id = ++fighterID; //Add 1 to fighter ID then make that equal to row id. Makes sure no two fighters have the same ID
 		if (hasLeveledUp)
 		{
 			row.hp = statsAfterLevelUp[STAT_HP];

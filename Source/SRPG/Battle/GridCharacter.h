@@ -54,7 +54,7 @@ protected:
 
 	class UGridCharacterAnimInstance* animInstance;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="File Reader")
 		class UExternalFileReader* fileReader;
 
 	bool bMoving;
@@ -126,6 +126,7 @@ public:
 	void SetChampionOrVillain(bool value_);
 	void UnElect(); //Called by battle crowd when 3 crowd turns pass
 	
+	void UpdateStats(TArray<int> stats_);
 
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS

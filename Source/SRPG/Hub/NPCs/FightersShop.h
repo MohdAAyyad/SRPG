@@ -65,6 +65,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	int purchasedFighters;
 
+	int fighterID; // Increased by 1 for every fighter. Used to make sure no two fighters are the same
+
 
 
 };

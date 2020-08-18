@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interactable.h"
+#include "../ExternalFileReader/FighterTableStruct.h"
 #include "TransitionToBattle.generated.h"
 
 UCLASS()
@@ -34,7 +35,15 @@ protected:
 		class ATournament* tourney;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Widget")
 		class UWidgetComponent* widgetComp;
+	UPROPERTY(EditAnywhere, Category = "FileReader")
+		class UExternalFileReader* fileReader;
 
+	TArray<FFighterTableStruct> recruitedFighters;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<int> indexesOfSelectedFighters; //Saves the indexes of fighters selected for the battle from the recruited fighters array
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TArray<UMaterialInterface*> fighterMaterials; //Ordered the same way as the BPs array
 	UPROPERTY(EditAnywhere)
 		FName nextBattleLevel;
 
@@ -49,6 +58,16 @@ protected:
 	UFUNCTION(BlueprintCallable) //Called from UI
 		void EndDay();
 
+	UFUNCTION(BlueprintCallable)
+		TArray<FFighterTableStruct> GetRecruitedFighters();
+	UFUNCTION(BlueprintCallable)
+		void RemoveRecruitedFighterAtIndex(int index_); //Used for removing selected fighters
+	UFUNCTION(BlueprintCallable)
+		void AddFighterToSelectedFighters(int index_);
+	UFUNCTION(BlueprintCallable)
+		void FinalizeFighterSelection(); //Passes in the indexes to the intermediate
+
+	void UpdateRecruitedFighters();
 
 public:	
 	// Called every frame
