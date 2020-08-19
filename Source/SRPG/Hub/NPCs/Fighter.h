@@ -67,9 +67,9 @@ public:
 	int emitterIndex;
 
 
-	void CalculatePrice(TArray<int> stats_);
+	void CalculatePrice(TArray<int>& stats_);
 
-	TArray<int> ScaleStatsByLevel(int newLevel_, TArray<int> stats_);
+	void  ScaleStatsByLevel(int newLevel_, TArray<int>& stats_);
 
-	TArray<int> LevelUpUntilGoal(int goalLevel_, TArray<int> stats_);
+	void LevelUpUntilGoal(int goalLevel_, TArray<int>& stats_);
 };

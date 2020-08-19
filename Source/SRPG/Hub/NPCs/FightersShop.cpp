@@ -135,7 +135,7 @@ FString AFightersShop::PrintFighter1()
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -152,7 +152,7 @@ FString AFightersShop::PrintFighter2()
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -177,7 +177,7 @@ FString AFightersShop::PrintFighter3()
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -187,7 +187,7 @@ TArray<int> AFightersShop::LevelUpFighter()
 
 	if (hasLeveledUp && haveChosenFighter)
 	{
-		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
+		chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
 		statsAfterLevelUp = tempStats;
 		return tempStats;
 	}
@@ -202,11 +202,11 @@ TArray<int> AFightersShop::LevelUpFighter()
 		tempStats.Push(row.intl); // 4
 		tempStats.Push(row.spd); // 5
 		tempStats.Push(row.crit); // 6
-		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.agl); // 7
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
-		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] + 1, tempStats);
+		chosenFighter.LevelUpUntilGoal(tempStats[9] + 1, tempStats);
 		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		statsAfterLevelUp = tempStats;
 		hasLeveledUp = true;
@@ -226,7 +226,7 @@ TArray<int> AFightersShop::LevelDownFighter()
 	
 	if (hasLeveledUp && haveChosenFighter)
 	{
-		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] - 1, statsAfterLevelUp);
+		chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] - 1, statsAfterLevelUp);
 		statsAfterLevelUp = tempStats;
 		return tempStats;
 	}
@@ -241,11 +241,11 @@ TArray<int> AFightersShop::LevelDownFighter()
 		tempStats.Push(row.intl); // 4
 		tempStats.Push(row.spd); // 5
 		tempStats.Push(row.crit); // 6
-		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.agl); // 7
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
-		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] - 1, tempStats);
+		chosenFighter.LevelUpUntilGoal(tempStats[9] - 1, tempStats);
 		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		statsAfterLevelUp = tempStats;
 		hasLeveledUp = true;
@@ -285,7 +285,7 @@ void AFightersShop::FinalizePurchase()
 		row.intl = row2.intl;
 		row.spd = row2.spd;
 		row.crit = row2.crit;
-		row.hit = row2.hit;
+		row.agl = row2.agl;
 		row.crd = row2.crd;
 		row.id = ++fighterID; //Add 1 to fighter ID then make that equal to row id. Makes sure no two fighters have the same ID
 		if (hasLeveledUp)
@@ -297,7 +297,7 @@ void AFightersShop::FinalizePurchase()
 			row.intl = statsAfterLevelUp[STAT_INT];
 			row.spd = statsAfterLevelUp[STAT_SPD];
 			row.crit = statsAfterLevelUp[STAT_CRT];
-			row.hit = statsAfterLevelUp[STAT_HIT];
+			row.agl = statsAfterLevelUp[STAT_HIT];
 			row.crd = statsAfterLevelUp[STAT_CRD];
 		}
 

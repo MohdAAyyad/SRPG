@@ -187,11 +187,11 @@ void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
 					{
 						int spawnChance2 = FMath::RandRange(0, npcLocations.Num());
 						int j = 0;
-						for (auto a : npcLocations)
+						for (auto b : npcLocations)
 						{
 							if (j == spawnChance2 && hasSpawned[j] == false)
 							{
-								ABranchNPC* branchNpc = SpawnBranchNPCs(a);
+								ABranchNPC* branchNpc = SpawnBranchNPCs(b);
 								branchNpc->SetCentralNPC(centralNpc);
 								hasSpawned[j] = true;
 								spawn = true;

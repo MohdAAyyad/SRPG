@@ -17,6 +17,9 @@
 #include "../Crowd/CrowdItem.h"
 #include "Components/CapsuleComponent.h"
 #include "Definitions.h"
+#include "../StatsComponent.h"
+#include "ExternalFileReader/FOpponentStruct.h"
+#include "Intermediary/Intermediate.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -30,9 +33,11 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	targetPlayer = nullptr;
 	targetTile = nullptr;
 	targetItem = nullptr;
-	attackRange = 0;
 	bWillMoveAgain = true;
 	bCannotFindTile = false;
+
+	attackRange = 0;
+	archetype = ARCH_ATK;
 
 }
 
@@ -45,6 +50,9 @@ void AEnemyBaseGridCharacter::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::TakeItem);
 
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
+
+	statsComp->InitStatsAtZero();
+	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, archetype);
 }
 
 void AEnemyBaseGridCharacter::Tick(float DeltaTime)
@@ -225,11 +233,8 @@ void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 	if (aiManager)
 		aiManager->FinishedAttacking();
 
-	//Placeholder must be done in stat component
-	if (currentCrdPoints >= 100)
+	if (statsComp->AddTempCRD(CRD_ATK))
 	{
-		currentCrdPoints -= 100;
-		crd += 1;
 		if (crdManager)
 			crdManager->UpdateFavor(false);
 	}

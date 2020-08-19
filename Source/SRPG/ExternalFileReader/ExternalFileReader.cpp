@@ -366,7 +366,7 @@ UDataTable * UExternalFileReader::GetTable(int index_)
 }
 
 
-TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int currentLevel_)
+TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int weaponIndex_, int currentLevel_)
 {
 	static const FString contextString(TEXT("Trying to get the skills from the table"));
 	TArray<FName> rowNames;
@@ -388,6 +388,29 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetSkills(int weaponIndex_, int 
 	return skills;
 }
 
+//TODO
+//Update the below function and the skills struct so that you can use armor skills
+TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int armodIndex_, int currentLevel_)
+{
+	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	TArray<FName> rowNames;
+	TArray<FSkillTableStruct*> skills;
+	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+
+	for (auto n : rowNames)
+	{
+		FSkillTableStruct* row = tables[0]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+		//If we have the right weapon and the correct level, then this is valid information
+		if (row->weaponIndex == armodIndex_ && row->levelToUnlock <= currentLevel_)
+		{
+			//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+			skills.Push(row);
+		}
+	}
+
+	return skills;
+}
 
 TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
 {
@@ -441,4 +464,23 @@ FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 		return FName(TEXT("2"));
 
 	return FName(TEXT(""));
+}
+
+TArray<int> UExternalFileReader::GetWeaponSpeeds(int weaponID_)
+{
+	TArray<int> result;
+	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	TArray<FName> rowNames;
+	TArray<FEquipmentTableStruct*> weapons;
+	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+
+	for (auto n : rowNames)
+	{
+		FEquipmentTableStruct* row = tables[0]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+		//TODO
+		//Compare the weaponID with the row's ID and calculate the speed
+	}
+
+	return result;
 }

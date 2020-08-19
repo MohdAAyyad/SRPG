@@ -121,6 +121,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
+
 			TArray<int> stats_;
 			stats_.Reserve(18);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hp);
@@ -130,7 +131,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].intl);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].spd);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crit);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hit);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].agl);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crd);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].level);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].currentEXP);
@@ -142,9 +143,9 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedAccessory);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].emitterIndex);
 
-
 			unit->SetBtlAndCrdManagers(this,crdManager);
 			unit->UpdateStats(stats_);
+			unit->UpdateArchType(selectedFighters[indexOfSelectedFighterInSelectedFighters].archetype);
 			deployedUnits.Push(unit);
 		}
 

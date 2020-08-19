@@ -4,7 +4,7 @@
 #include "Fighter.h"
 #include "Definitions.h"
 
-void FFighter::CalculatePrice(TArray<int> stats_)
+void FFighter::CalculatePrice(TArray<int>& stats_)
 {
 	for (int i = 0; i <= 8; i++)
 	{
@@ -12,7 +12,7 @@ void FFighter::CalculatePrice(TArray<int> stats_)
 	}
 }
 
-TArray<int> FFighter::ScaleStatsByLevel(int newLevel_, TArray<int> stats_)
+void FFighter::ScaleStatsByLevel(int newLevel_, TArray<int>& stats_)
 {
 	// hp = 0
 	// pip = 1
@@ -31,12 +31,10 @@ TArray<int> FFighter::ScaleStatsByLevel(int newLevel_, TArray<int> stats_)
 		stats_[i] += 1;
 	}
 	CalculatePrice(stats_);
-	return stats_;
 }
 
-TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
+void FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int>& stats_)
 {
-	TArray<int> stats = stats_;
 	// run a loop and recursively call scale stats untill we reach the end
 	// are we augmenting?
 	bool exit = false;
@@ -45,32 +43,30 @@ TArray<int> FFighter::LevelUpUntilGoal(int goalLevel_, TArray<int> stats_)
 	{
 		while (exit == false)
 		{
-			int increment = stats[STAT_LVL] + 1;
-			if (stats[STAT_LVL] == goalLevel_)
+			int increment = stats_[STAT_LVL] + 1;
+			if (stats_[STAT_LVL] == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
 			}
-			stats = ScaleStatsByLevel(increment, stats_);
+			ScaleStatsByLevel(increment, stats_);
 		}
 	}
 	else if (goalLevel_ < stats_[STAT_LVL] && stats_[STAT_LVL] > 0)
 	{
 		while (exit == false)
 		{
-			int decrement = stats[STAT_LVL] - 1;
-			if (stats[STAT_LVL] == goalLevel_)
+			int decrement = stats_[STAT_LVL] - 1;
+			if (stats_[STAT_LVL] == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
 			}
-			stats = ScaleStatsByLevel(decrement, stats_);
+			ScaleStatsByLevel(decrement, stats_);
 		}
 	}
 
-	stats[STAT_LVL] = goalLevel_;
+	stats_[STAT_LVL] = goalLevel_;
 	level = goalLevel_;
-
-	return stats;
 
 }

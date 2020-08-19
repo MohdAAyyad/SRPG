@@ -37,7 +37,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int crit; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
-	int hit; // EditAnywhere, BluePrintReadOnly
+	int agl; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
 	int crd; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
@@ -60,4 +60,6 @@ public:
 	int emitterIndex; //For regular attacks
 	UPROPERTY(BlueprintReadWrite)
 	int id;
+	UPROPERTY(BlueprintReadWrite)
+	int archetype;
 };
