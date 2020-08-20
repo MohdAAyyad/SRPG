@@ -187,7 +187,7 @@ TArray<int> AFightersShop::LevelUpFighter()
 
 	if (hasLeveledUp && haveChosenFighter)
 	{
-		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
+		chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
 		statsAfterLevelUp = tempStats;
 		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		return tempStats;
@@ -207,7 +207,7 @@ TArray<int> AFightersShop::LevelUpFighter()
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
-		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] + 1, tempStats);
+		chosenFighter.LevelUpUntilGoal(tempStats[9] + 1, tempStats);
 		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		statsAfterLevelUp = tempStats;
 		hasLeveledUp = true;
@@ -227,7 +227,7 @@ TArray<int> AFightersShop::LevelDownFighter()
 	
 	if (hasLeveledUp && haveChosenFighter)
 	{
-		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] - 1, statsAfterLevelUp);
+		chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] - 1, statsAfterLevelUp);
 		statsAfterLevelUp = tempStats;
 		return tempStats;
 	}
@@ -246,7 +246,7 @@ TArray<int> AFightersShop::LevelDownFighter()
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
-		tempStats = chosenFighter.LevelUpUntilGoal(tempStats[9] - 1, tempStats);
+		chosenFighter.LevelUpUntilGoal(tempStats[9] - 1, tempStats);
 		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		statsAfterLevelUp = tempStats;
 		hasLeveledUp = true;

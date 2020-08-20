@@ -17,9 +17,7 @@ public:
 	UPathComponent();
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Grid")
 		int rowSpeed;
-	UPROPERTY(EditAnywhere, Category = "Grid")
 		int depth;
 
 	class ATile* originTile;
@@ -40,6 +38,7 @@ public:
 	bool DoesOpenListHaveALowerFCost(TArray<ATile*> list_, int fCost_);
 	bool DoesClosedListHaveALowerFCost(TArray<ATile*> list_, int fCost_);
 
+	void UpdateSpeed(int spd_);
 	int GetRowSpeed();
 	int GetDepth();
 

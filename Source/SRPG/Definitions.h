@@ -74,6 +74,10 @@
 #define STAT_EMI 17
 #endif
 
+#ifndef STAT_WHT //Weapon hit
+#define STAT_WHT 18
+#endif
+
 #ifndef TILE_MOV
 #define TILE_MOV 0
 #endif
@@ -168,6 +172,16 @@
 
 #ifndef IMP_CRD_HG
 #define IMP_CRD_HG 5
+#ifndef ATKR_MISS
+#define ATKR_MISS 0
+#endif
+
+#ifndef ATKR_HIT
+#define ATKR_HIT 1
+#endif
+
+#ifndef ATKR_CRIT
+#define ATKR_CRIT 3
 #endif
 
 

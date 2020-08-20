@@ -199,6 +199,12 @@ bool UPathComponent::DoesClosedListHaveALowerFCost(TArray<ATile*> list_, int fCo
 	return false;
 }
 
+void UPathComponent::UpdateSpeed(int spd_)
+{
+	//Diamond shape is the default for everyone
+	rowSpeed = spd_;
+	depth = rowSpeed + 1;
+}
 
 int UPathComponent::GetRowSpeed()
 {

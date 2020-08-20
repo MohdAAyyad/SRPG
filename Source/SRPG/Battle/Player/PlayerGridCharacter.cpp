@@ -21,6 +21,7 @@
 #include "Components/WidgetComponent.h"
 #include "Definitions.h"
 #include "../Crowd/BattleCrowd.h"
+#include "../StatsComponent.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
@@ -82,12 +83,8 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 	{
 		actionTargets[0]->GridCharTakeDamage(1.0f, this);
 		
-		//Placeholder must be done in stat component
-		currentCrdPoints += CRD_ATK;
-		if (currentCrdPoints >= 100)
+		if (statsComp->AddTempCRD(CRD_ATK))
 		{
-			currentCrdPoints -= 100;
-			crd += 1;
 			if (crdManager)
 				crdManager->UpdateFavor(true);
 		}
@@ -108,12 +105,8 @@ void APlayerGridCharacter::ActivateSkillAttack()
 			actionTargets[i]->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex,
 				skills[chosenSkill].statusEffect, this);
 
-			//Placeholder must be done in stat component
-			currentCrdPoints += skills[chosenSkill].fls;
-			if (currentCrdPoints >= 100)
+			if (statsComp->AddTempCRD(skills[chosenSkill].fls))
 			{
-				currentCrdPoints -= 100;
-				crd += 1;
 				if (crdManager)
 					crdManager->UpdateFavor(true);
 			}

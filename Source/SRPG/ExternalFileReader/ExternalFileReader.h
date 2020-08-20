@@ -53,7 +53,9 @@ public:
 	FActivityDialogueTableStruct GetNegativeBranch(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
-	TArray<FSkillTableStruct*> GetSkills(int weaponIndex_, int currentLevel_);
+	TArray<FSkillTableStruct*> GetOffesniveSkills(int weaponIndex_, int currentLevel_);
+	TArray<FSkillTableStruct*> GetDefensiveSkills(int armodIndex_, int currentLevel_);
+	TArray<int> GetWeaponSpeeds(int weaponID_);
 	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();

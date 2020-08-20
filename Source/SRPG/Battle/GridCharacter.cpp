@@ -27,6 +27,7 @@
 #include "Crowd/BattleCrowd.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "CollisionQueryParams.h"
+#include "StatsComponent.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -91,6 +92,8 @@ AGridCharacter::AGridCharacter()
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 
+	statsComp = CreateDefaultSubobject<UStatsComponent>(TEXT("Stats Component"));
+
 	GetCapsuleComponent()->SetCollisionProfileName("GridCharacter");
 
 	btlManager = nullptr;
@@ -98,8 +101,6 @@ AGridCharacter::AGridCharacter()
 	currentState = EGridCharState::IDLE;
 	chosenSkill = 0;
 	chosenSkillAnimIndex = 0;
-	currentCrdPoints = 0;
-	crd = 0;
 	bChampion = bVillain = false;
 
 
@@ -117,6 +118,8 @@ void AGridCharacter::BeginPlay()
 
 	if(villainParticles)
 		villainParticles->DeactivateSystem();
+	//TODO
+	//Pass in the weapon's row and depth speeds and the weapon hit to the stats component
 	
 }
 
@@ -124,7 +127,7 @@ void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCr
 {
 	btlManager = btlManager_;
 	crdManager = crd_;
-	currentCrdPoints += CRD_DEP; //Deployment adds points
+	statsComp->AddTempCRD(CRD_DEP); //Deployment adds points
 	ATile* tile = GetMyTile();
 	if(tile)
 		tile->SetOccupied(true);
@@ -273,6 +276,9 @@ AGridCharacter::EGridCharState AGridCharacter::GetCurrentState()
 
 void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
 {
+	//TODO
+	//Updated the stats component
+
 	//Rotate the character to face the attacker
 	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
 	FRotator rot = direction.Rotation();
@@ -289,7 +295,7 @@ TArray<FSkillTableStruct>AGridCharacter::GetCharacterSkills()
 	{
 		if (fileReader)
 		{
-			TArray<FSkillTableStruct*> skillPtrs = fileReader->GetSkills(weaponIndex, currentLevel);
+			TArray<FSkillTableStruct*> skillPtrs = fileReader->GetOffesniveSkills(statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_LVL));
 			for (auto n : skillPtrs)
 			{
 				skills.Push(*n);
@@ -389,15 +395,25 @@ float AGridCharacter::GetStat(int statIndex_)
 	//Pass the statindex_ to the stats component
 	
 	//Placeholder: For now, all we need is CRD
-	return static_cast<float>(crd);
+	return static_cast<float>(statsComp->GetStatValue(statIndex_));
 }
 
-void AGridCharacter::UpdateStats(TArray<int> stats_)
+void AGridCharacter::UpdateStats(TArray<int>& stats_)
 {
+	//TODO 
+	//Get the skills index for the equipped weapon and armor and pass them to the stats
+	//Pass the weapon's HIT stat as the last value
+	statsComp->UpdateStats(stats_);
 
+	if (pathComp && statsComp)
+		pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
 }
 
-
+void AGridCharacter::UpdateArchType(int archtype_)
+{
+	//TODO
+	//Update the archetype in the stats component
+}
 void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
 {
 	if (value_)

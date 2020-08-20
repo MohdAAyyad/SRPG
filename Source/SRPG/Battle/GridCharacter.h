@@ -62,6 +62,8 @@ protected:
 	class ATile* originTile;
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		class UPathComponent* pathComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+		class UStatsComponent* statsComp;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Battle") //Needed when we want to call functions of the btl manager from the player's UI (end turn for example)
 		class ABattleManager* btlManager;
@@ -126,7 +128,8 @@ public:
 	void SetChampionOrVillain(bool value_);
 	void UnElect(); //Called by battle crowd when 3 crowd turns pass
 	
-	void UpdateStats(TArray<int> stats_);
+	void UpdateStats(TArray<int>& stats_);
+	void UpdateArchType(int archtype_);
 
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
@@ -137,13 +140,5 @@ protected:
 		int attackRowSpeed;
 	UPROPERTY(EditAnywhere)
 		int attackDepth;
-	UPROPERTY(EditAnywhere)
-		int weaponIndex;
-	UPROPERTY(EditAnywhere)
-		int currentLevel;
-	UPROPERTY(EditAnywhere)
-		int crd;
-	UPROPERTY(EditAnywhere)
-		int currentCrdPoints;
 
 };
