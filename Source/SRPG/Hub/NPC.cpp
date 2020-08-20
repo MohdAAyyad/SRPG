@@ -65,18 +65,8 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 				}
 				LoadText();
 			}
-			else
-			{
-				//UE_LOG(LogTemp, Error, TEXT("OTHER ACTOR IS NULL"));
-			}
-		}
-		else
-		{
-			//UE_LOG(LogTemp, Error, TEXT("INTERACTED WITH IS FALSE"));
 		}
 	}
-	
-	
 }
 
 

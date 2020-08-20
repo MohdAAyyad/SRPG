@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Definitions.h"
+#include "Intermediary/Intermediate.h"
 
 void AFightersShop::BeginPlay()
 {
@@ -63,8 +64,9 @@ TArray<FFighter> AFightersShop::GetAllFightersForSale()
 
 void AFightersShop::ChooseFighter(int fighterIndex_)
 {
+	// retrive all the info
 	TArray<FFighter> fighters = GetAllFightersForSale();
-	//chosenFighter = fighters[fighterIndex_];
+	//transfer data
 	chosenFighter.BPID = fighters[fighterIndex_].BPID;
 	chosenFighter.name = fighters[fighterIndex_].name;
 	chosenFighter.level = fighters[fighterIndex_].level;
@@ -79,26 +81,24 @@ void AFightersShop::ChooseFighter(int fighterIndex_)
 	UE_LOG(LogTemp, Warning, TEXT("Choose Fighter Called!"));
 	currentIndex = fighterIndex_;
 	haveChosenFighter = true;
-
+	FName converted = FName(*FString::FromInt(fighterIndex_ + 1));
+	FFighterTableStruct row = fileReader->FindFighterTableRow(converted, 0);
+	// fill the initial array
+	statsAfterLevelUp.Push(row.hp);
+	statsAfterLevelUp.Push(row.pip);
+	statsAfterLevelUp.Push(row.atk);
+	statsAfterLevelUp.Push(row.def);
+	statsAfterLevelUp.Push(row.intl);
+	statsAfterLevelUp.Push(row.spd); 
+	statsAfterLevelUp.Push(row.crit);
+	statsAfterLevelUp.Push(row.agl);
+	statsAfterLevelUp.Push(row.crd);
+	statsAfterLevelUp.Push(row.level);
 	if (hasLeveledUp)
 	{
 		hasLeveledUp = false;
-		statsAfterLevelUp = TArray<int>();
+		//statsAfterLevelUp = TArray<int>();
 	}
-	//fighters[]
-	//FFighter fighter;
-	//fighter.BPID = row.bpid;
-	//fighter.name = row.name;
-	//fighter.level = row.level;
-	//fighter.currentEXP = row.currentEXP;
-	//fighter.neededEXPToLevelUp = row.neededEXPToLevelUp;
-	//fighter.weaponIndex = row.weaponIndex;
-	//fighter.armorIndex = row.armorIndex;
-	//fighter.equippedWeapon = row.equippedWeapon;
-	//fighter.equippedArmor = row.equippedArmor;
-	//fighter.equippedAccessory = row.equippedAccessory;
-	//fighter.emitterIndex = row.emitterIndex;
-
 
 }
 
@@ -130,12 +130,12 @@ FString AFightersShop::PrintFighter1()
 			" INT: " + FString::FromInt(statsAfterLevelUp[STAT_INT]) +
 			" SPD: " + FString::FromInt(statsAfterLevelUp[STAT_SPD]) +
 			" CRIT: " + FString::FromInt(statsAfterLevelUp[STAT_CRT]) +
-			" HIT: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
+			" AGL: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
 			" CRD: " + FString::FromInt(statsAfterLevelUp[STAT_CRD]));
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " AGL: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -148,11 +148,11 @@ FString AFightersShop::PrintFighter2()
 
 	if(hasLeveledUp && currentIndex == 1)
 	{
-		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " HIT: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
+		return FString("HP: " + FString::FromInt(statsAfterLevelUp[0]) + " PIP: " + FString::FromInt(statsAfterLevelUp[1]) + " ATK: " + FString::FromInt(statsAfterLevelUp[2]) + " DEF: " + FString::FromInt(statsAfterLevelUp[3]) + " INT: " + FString::FromInt(statsAfterLevelUp[4]) + " SPD: " + FString::FromInt(statsAfterLevelUp[5]) + " CRIT: " + FString::FromInt(statsAfterLevelUp[6]) + " AGL: " + FString::FromInt(statsAfterLevelUp[7]) + " CRD: " + FString::FromInt(statsAfterLevelUp[8]));
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " AGL: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -172,12 +172,12 @@ FString AFightersShop::PrintFighter3()
 					   " INT: " + FString::FromInt(statsAfterLevelUp[STAT_INT]) +
 					   " SPD: " + FString::FromInt(statsAfterLevelUp[STAT_SPD]) +
 					   " CRIT: " + FString::FromInt(statsAfterLevelUp[STAT_CRT]) +
-					   " HIT: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
+					   " AGL: " + FString::FromInt(statsAfterLevelUp[STAT_HIT]) +
 					   " CRD: " + FString::FromInt(statsAfterLevelUp[STAT_CRD]));
 	}
 	else
 	{
-		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " HIT: " + FString::FromInt(row.hit) + " CRD: " + FString::FromInt(row.crd));
+		return FString("HP: " + FString::FromInt(row.hp) + " PIP: " + FString::FromInt(row.pip) + " ATK: " + FString::FromInt(row.atk) + " DEF: " + FString::FromInt(row.def) + " INT: " + FString::FromInt(row.intl) + " SPD: " + FString::FromInt(row.spd) + " CRIT: " + FString::FromInt(row.crit) + " AGL: " + FString::FromInt(row.agl) + " CRD: " + FString::FromInt(row.crd));
 	}
 }
 
@@ -189,6 +189,7 @@ TArray<int> AFightersShop::LevelUpFighter()
 	{
 		tempStats = chosenFighter.LevelUpUntilGoal(statsAfterLevelUp[9] + 1, statsAfterLevelUp);
 		statsAfterLevelUp = tempStats;
+		UE_LOG(LogTemp, Warning, TEXT("Leveled Up Fighter"));
 		return tempStats;
 	}
 	else if (haveChosenFighter)
@@ -202,7 +203,7 @@ TArray<int> AFightersShop::LevelUpFighter()
 		tempStats.Push(row.intl); // 4
 		tempStats.Push(row.spd); // 5
 		tempStats.Push(row.crit); // 6
-		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.agl); // 7
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
@@ -241,7 +242,7 @@ TArray<int> AFightersShop::LevelDownFighter()
 		tempStats.Push(row.intl); // 4
 		tempStats.Push(row.spd); // 5
 		tempStats.Push(row.crit); // 6
-		tempStats.Push(row.hit); // 7
+		tempStats.Push(row.agl); // 7
 		tempStats.Push(row.crd); // 8
 		tempStats.Push(row.level); // 9
 
@@ -261,58 +262,78 @@ TArray<int> AFightersShop::LevelDownFighter()
 
 void AFightersShop::FinalizePurchase()
 {
+	
 	// load all of the chosen fighters values into the data table;
+
+	FFighterTableStruct price = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
 	if (haveChosenFighter)
 	{
-		FFighterTableStruct row;
-		row.bpid = chosenFighter.BPID;
-		row.name = chosenFighter.name;
-		row.level = chosenFighter.level;
-		row.currentEXP = chosenFighter.currentEXP;
-		row.neededEXPToLevelUp = chosenFighter.neededEXPToLevelUp;
-		row.weaponIndex = chosenFighter.weaponIndex;
-		row.armorIndex = chosenFighter.armorIndex;
-		row.equippedWeapon = chosenFighter.equippedWeapon;
-		row.equippedArmor = chosenFighter.equippedArmor;
-		row.equippedAccessory = chosenFighter.equippedAccessory;
-		row.emitterIndex = chosenFighter.emitterIndex;
-		// load the data not included in the FFighter Struct
-		FFighterTableStruct row2 = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
-		row.hp = row2.hp;
-		row.pip = row2.pip;
-		row.atk = row2.atk;
-		row.def = row2.def;
-		row.intl = row2.intl;
-		row.spd = row2.spd;
-		row.crit = row2.crit;
-		row.hit = row2.hit;
-		row.crd = row2.crd;
-		row.id = ++fighterID; //Add 1 to fighter ID then make that equal to row id. Makes sure no two fighters have the same ID
-		if (hasLeveledUp)
+		CalculatePrice();
+		if (Intermediate::GetInstance()->GetCurrentMoney() > chosenFighter.price + price.value)
 		{
-			row.hp = statsAfterLevelUp[STAT_HP];
-			row.pip = statsAfterLevelUp[STAT_PIP];
-			row.atk = statsAfterLevelUp[STAT_ATK];
-			row.def = statsAfterLevelUp[STAT_DEF];
-			row.intl = statsAfterLevelUp[STAT_INT];
-			row.spd = statsAfterLevelUp[STAT_SPD];
-			row.crit = statsAfterLevelUp[STAT_CRT];
-			row.hit = statsAfterLevelUp[STAT_HIT];
-			row.crd = statsAfterLevelUp[STAT_CRD];
-		}
+			Intermediate::GetInstance()->SpendMoney(chosenFighter.price + price.value);
 
-		hasLeveledUp = false;
-		// add the new row to the table
-		FName index = FName(*FString::FromInt(purchasedFighters));
-		fileReader->AddRowToFighterTable(index, 1, row);
-		purchasedFighters += 1;
-		UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
+			FEquippedFightersTableStruct row;
+			row.bpid = chosenFighter.BPID;
+			row.name = chosenFighter.name;
+			row.level = chosenFighter.level;
+			row.currentEXP = chosenFighter.currentEXP;
+			row.neededEXPToLevelUp = chosenFighter.neededEXPToLevelUp;
+			row.weaponIndex = chosenFighter.weaponIndex;
+			row.armorIndex = chosenFighter.armorIndex;
+			row.equippedWeapon = chosenFighter.equippedWeapon;
+			row.equippedArmor = chosenFighter.equippedArmor;
+			row.equippedAccessory = chosenFighter.equippedAccessory;
+			row.emitterIndex = chosenFighter.emitterIndex;
+			// load the data not included in the FFighter Struct
+			FFighterTableStruct row2 = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
+			row.hp = row2.hp;
+			row.pip = row2.pip;
+			row.atk = row2.atk;
+			row.def = row2.def;
+			row.intl = row2.intl;
+			row.spd = row2.spd;
+			row.crit = row2.crit;
+			row.agl = row2.agl;
+			row.crd = row2.crd;
+			row.id = ++fighterID; //Add 1 to fighter ID then make that equal to row id. Makes sure no two fighters have the same ID
+			row.archetype = row2.archetype;
+			if (hasLeveledUp)
+			{
+				row.hp = statsAfterLevelUp[STAT_HP];
+				row.pip = statsAfterLevelUp[STAT_PIP];
+				row.atk = statsAfterLevelUp[STAT_ATK];
+				row.def = statsAfterLevelUp[STAT_DEF];
+				row.intl = statsAfterLevelUp[STAT_INT];
+				row.spd = statsAfterLevelUp[STAT_SPD];
+				row.crit = statsAfterLevelUp[STAT_CRT];
+				row.agl = statsAfterLevelUp[STAT_HIT];
+				row.crd = statsAfterLevelUp[STAT_CRD];
+			}
+
+			hasLeveledUp = false;
+			// add the new row to the table
+			FName index = FName(*FString::FromInt(purchasedFighters));
+			fileReader->AddRowToFighterTable(index, 1, row);
+			purchasedFighters += 1;
+			UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Not enough money"));
+		}
+		
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Fighter Selected!"));
 	}
 	
+}
+
+void AFightersShop::CalculatePrice()
+{
+	chosenFighter.CalculatePrice(statsAfterLevelUp);
 }
 
 void AFightersShop::LoadText()

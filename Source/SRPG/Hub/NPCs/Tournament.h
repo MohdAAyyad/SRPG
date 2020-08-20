@@ -50,6 +50,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void SupportTeam(bool op1_); /*Called from UI.Spends Units and a time slot to increase op1(true) or op2(false) by 20 % */
 
+
 	
 public:
 

@@ -162,5 +162,13 @@
 #define ARCH_INT 2
 #endif
 
+#ifndef IMP_CRD_LW
+#define IMP_CRD_LW 2
+#endif
+
+#ifndef IMP_CRD_HG
+#define IMP_CRD_HG 5
+#endif
+
 
 #include "CoreMinimal.h"

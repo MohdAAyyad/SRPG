@@ -5,6 +5,9 @@
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Hub/HubWorldManager.h"
+#include "SRPGCharacter.h"
+#include "Intermediary/Intermediate.h"
+#include "Definitions.h"
 
 void ACentralNPC::BeginPlay()
 {
@@ -30,8 +33,15 @@ int ACentralNPC::GetCentralActivityIndex()
 
 bool ACentralNPC::IsActivityAffordable()
 {
-	// sinces prices / money doesn't work yet it's always going to return true
-	return true;
+	// see if we can both afford the money cost and the time cost
+	if (Intermediate::GetInstance()->GetCurrentMoney() > 0 && hubManager->GetCurrentTimeSlotsCount() > timeCost)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void ACentralNPC::SpendCost()
@@ -69,21 +79,70 @@ void ACentralNPC::SimulateActivity()
 		line = row.dialogue;
 		activityEndLine = "Activity Success!";
 		// lines would be loaded in via file but for now is just just predetermined
-		//line = "Well, you succeded. I guess";
 		switch (rewardIndex)
 		{
 			case 0:
 				// augment the money of the player
+				Intermediate::GetInstance()->AddMoney(FMath::RandRange(200, 300));
 				break;
 			case 1:
+			{
+				// choose a stat to give one of to each party member
+				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
+
 				// augment a stat of the player
+				UDataTable* table = fileReader->GetTable(1);
+				TArray<FName> rowNames = table->GetRowNames();
+				for (auto n : rowNames)
+				{
+					FFighterTableStruct row2 = fileReader->FindFighterTableRow(n, 1);
+					switch (stat)
+					{
+					case 0:
+						row2.hp += 1;
+						break;
+					case 1:
+						row2.pip += 1;
+						break;
+					case 2:
+						row2.atk += 1;
+						break;
+					case 3:
+						row2.def += 1;
+						break;
+					case 4:
+						row2.intl += 1;
+						break;
+					case 5:
+						row2.spd += 1;
+						break;
+					case 6:
+						row2.crit += 1;
+						break;
+					case 7:
+						row2.agl += 1;
+						break;
+					case 8:
+						row2.crd += 1;
+						break;
+
+					}
+				}
+			}
 				break;
 			case 2:
 				//decrement a stat of the enemy
+			{
+				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
+				Intermediate::GetInstance()->EnemyStatsGoDown(1, stat);
+			}
 				break;
 			case 3:
 				// augment the crowd value
-				break;
+			{
+				Intermediate::GetInstance()->ImprovePlayerCRD(FMath::RandRange(IMP_CRD_LW, IMP_CRD_HG));
+			}
+			break;
 		}
 	}
 	else
@@ -102,9 +161,10 @@ void ACentralNPC::SimulateActivity()
 void ACentralNPC::SpendTime()
 {
 	// empty function because we don't have a hub world manager to handle time
-		if (hubManager)
+	// ^ comment aged well
+		if (hubManager && hubManager->GetCurrentTimeSlotsCount() - timeCost > 0)
 		{
-			hubManager->UpdateTimeSlots(-1);
+			hubManager->UpdateTimeSlots(-timeCost);
 		}
 }
 

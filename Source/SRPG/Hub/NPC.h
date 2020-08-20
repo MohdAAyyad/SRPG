@@ -54,8 +54,7 @@ protected:
 		virtual void LoadText();
 	// gives us a ref to the hubmanager for time managment purposes
 	class AHubWorldManager* hubManager;
-
-
+	// ref to the player once collided, can be used in blueprints for UI purposes
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

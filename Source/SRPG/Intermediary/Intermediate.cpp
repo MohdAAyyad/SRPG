@@ -86,11 +86,32 @@ void Intermediate::ResetSelectedFighters()
 }
 void Intermediate::SpendMoney(int money_)
 {
+	if (currentMoney - money_ > 0)
+	{
+		currentMoney -= money_;
+	}
+	else
+	{
+		currentMoney = 0;
+	}
 }
+void Intermediate::AddMoney(int money_)
+{
+	// if a negative number was input make it positive
+	if (money_ < 0)
+	{
+		money_ *= -1;
+	}
+
+	currentMoney += money_;
+
+}
+
 void Intermediate::SetNextOpponent(FOpponentStruct op_)
 {
 	nextOpponent = op_;
 }
+
 FOpponentStruct Intermediate::GetNextOpponent()
 {
 	return nextOpponent;
@@ -98,18 +119,27 @@ FOpponentStruct Intermediate::GetNextOpponent()
 void Intermediate::PlayerStatsGoUp(int value_, int statIndex_) //Called by central NPC when an activity succeeds 
 															 //and increases roster stats
 {
+
 } 
+
 void Intermediate::EnemyStatsGoDown(int value_, int statIndex_)//Passed to battle manager later on
 {
+
 } 
+
 void Intermediate::PutUnitOnHold(int index_)//Called from hubplayer or from tournament npc uictrl.
 {
+
 } 
+
 void Intermediate::PlayerUnitsAreRemoved(bool remove_)//Called from central NPC when activity fails. 
 													  //True: remove the units put on hold. 
 													 //False: return those units to the roster and remove them from the hold array.
 {
+
 } 
+
 void Intermediate::ImprovePlayerCRD(float value_)
 {
+
 }

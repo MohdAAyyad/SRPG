@@ -39,6 +39,9 @@ protected:
 	bool hasLeveledUp;
 	TArray<int> statsAfterLevelUp;
 
+	UPROPERTY(EditAnywhere)
+	class AHubWorldManager* hub;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void ChooseFighter(int fighterIndex_);
@@ -66,6 +69,9 @@ public:
 	int purchasedFighters;
 
 	int fighterID; // Increased by 1 for every fighter. Used to make sure no two fighters are the same
+
+	UFUNCTION(BlueprintCallable)
+	void CalculatePrice();
 
 
 

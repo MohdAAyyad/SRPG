@@ -4,21 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "EquipmentTableStruct.generated.h"
+#include "EquippedFightersTableStruct.generated.h"
+
 /**
  * 
  */
 USTRUCT(BlueprintType)
-struct SRPG_API FEquipmentTableStruct : public FTableRowBase
+struct SRPG_API FEquippedFightersTableStruct : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	FEquipmentTableStruct()
+
+	FEquippedFightersTableStruct()
 	{
 
 	}
+
 	UPROPERTY(BlueprintReadWrite)
-	int hp; // EditAnywhere, BluePrintReadOnly
+	int bpid; //EditAnywhere, BluePrintReadOnly //Used to know which BP corresponds to which fighter
+	UPROPERTY(BlueprintReadWrite)
+	FString name; //EditAnywhere, BluePrintReadOnly
+	UPROPERTY(BlueprintReadWrite)
+	int hp;// EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
 	int pip; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
@@ -32,25 +39,29 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int crit; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
-	int hit; // EditAnywhere, BluePrintReadOnly
+	int agl; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
 	int crd; // EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
-	int range; // EditAnywhere, BluePrintReadOnly
+	int weaponIndex; //The type of weapon this SFighter can equip.
 	UPROPERTY(BlueprintReadWrite)
-	FString name;//EditAnywhere, BluePrintReadOnly
+	int armorIndex; //The type of armor this SFighter can wear.
 	UPROPERTY(BlueprintReadWrite)
-	int equipmentIndex;//EditAnywhere, BluePrintReadOnly //0 weapon 1 armor 2 accessory
+	int equippedWeapon; //Used to get the weapon's stats from the equipment table
 	UPROPERTY(BlueprintReadWrite)
-	int weaponIndex;//EditAnywhere, BluePrintReadOnly //Only viable when this is a weapon. Determines what kind of weapon it is and who can equip it.
+	int equippedArmor; //Used to get the armor's stats from the equipment table
 	UPROPERTY(BlueprintReadWrite)
-	int armorIndex;//EditAnywhere, BluePrintReadOnly//Only viable when this is a piece of armor. Determines what kind of armor it is and who can wear it.
+	int equippedAccessory; //Used to get the accessory's stats from the equipment table
 	UPROPERTY(BlueprintReadWrite)
-	int owned; //How many pieces of that type of equipment we own.
+	int level;
 	UPROPERTY(BlueprintReadWrite)
-	int level; //Used to determine whether this item can be sold or not. Must be less or equal to world level.
+	int currentEXP;
 	UPROPERTY(BlueprintReadWrite)
-	int value; // cost of the item
+	int neededEXPToLevelUp;
 	UPROPERTY(BlueprintReadWrite)
-	int skillsIndex; // what skills can this equipment give to the player
+	int emitterIndex; //For regular attacks
+	UPROPERTY(BlueprintReadWrite)
+	int id;
+	UPROPERTY(BlueprintReadWrite)
+	int archetype;
 };

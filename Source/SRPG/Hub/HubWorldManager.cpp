@@ -29,7 +29,7 @@ void AHubWorldManager::BeginPlay()
 	// sets the current time slots to our max time slots
 	timeSlots = maxTimeSlots;
 	hasSpawned.Init(false, npcLocations.Num());
-
+	hubWorldLevel = 2;
 
 
 	SpawnNPCs(1, 0);
@@ -187,11 +187,11 @@ void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
 					{
 						int spawnChance2 = FMath::RandRange(0, npcLocations.Num());
 						int j = 0;
-						for (auto a : npcLocations)
+						for (auto a2 : npcLocations)
 						{
 							if (j == spawnChance2 && hasSpawned[j] == false)
 							{
-								ABranchNPC* branchNpc = SpawnBranchNPCs(a);
+								ABranchNPC* branchNpc = SpawnBranchNPCs(a2);
 								branchNpc->SetCentralNPC(centralNpc);
 								hasSpawned[j] = true;
 								spawn = true;

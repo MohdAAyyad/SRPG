@@ -16,6 +16,8 @@ class SRPG_API AItemShop : public ANPC
 protected:
 	void LoadText() override;
 	void BeginPlay() override;
+	UPROPERTY(EditAnywhere, Category = "Hub")
+	class AHubWorldManager* hub;
 public:
 	// how much is the player planning to buy. resets after a new item is selected
 	UFUNCTION(BlueprintCallable)

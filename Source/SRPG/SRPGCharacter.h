@@ -26,8 +26,8 @@ public:
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
 	void SetInteracting(IInteractable* ref_);
-	virtual void BeginPlay() override;
 
+	virtual void BeginPlay() override;
 
 private:
 	/** Top down camera */
@@ -44,7 +44,6 @@ private:
 	
 	//what thing are we interacting with
 	IInteractable* interacting; 
-
 
 };
 

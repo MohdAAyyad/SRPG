@@ -6,6 +6,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Intermediary/Intermediate.h"
 #include "SRPGCharacter.h"
+#include "Hub/HubWorldManager.h"
 
 
 ATournament::ATournament():ACentralNPC()

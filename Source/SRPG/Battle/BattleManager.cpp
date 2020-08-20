@@ -130,7 +130,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].intl);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].spd);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crit);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hit);
+			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].agl);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crd);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].level);
 			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].currentEXP);

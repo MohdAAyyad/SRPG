@@ -116,6 +116,21 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	}
 }
 
+FEquippedFightersTableStruct UExternalFileReader::FindEquippedFighterTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Equipped Fighters Table"));
+	if (tables[index_])
+	{
+		FEquippedFightersTableStruct* result = tables[index_]->FindRow<FEquippedFightersTableStruct>(name_, contextString, true);
+		return *result;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Equipped Fighters Table returned NULL"));
+		return FEquippedFightersTableStruct();
+	}
+}
+
 FActivityDialogueTableStruct UExternalFileReader::FindActivityDialogueTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Activity Dialogue Table"));
@@ -247,7 +262,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activit
 	}
 }
 
-void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
+void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FEquippedFightersTableStruct row_)
 {
 	
 	if (tables[index_])
@@ -360,7 +375,7 @@ UExternalFileReader* UExternalFileReader::GetExternalFileReader()
 	return this;
 }
 
-UDataTable * UExternalFileReader::GetTable(int index_)
+UDataTable* UExternalFileReader::GetTable(int index_)
 {
 	return tables[index_];
 }
