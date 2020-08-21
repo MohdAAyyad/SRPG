@@ -367,7 +367,7 @@ void AGridCharacter::HighlightItemUsage(FName itemName_)
 		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM); //Items always cover 1 tile only
 		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
 		currentState = EGridCharState::HEALING;
-		UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
+		//UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
 	}
 }
 

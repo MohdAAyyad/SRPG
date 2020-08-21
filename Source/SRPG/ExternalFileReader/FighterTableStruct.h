@@ -22,6 +22,8 @@ public:
 	int bpid; //EditAnywhere, BluePrintReadOnly //Used to know which BP corresponds to which fighter
 	UPROPERTY(BlueprintReadWrite)
 	FString name; //EditAnywhere, BluePrintReadOnly
+	UPROPERTY(BlueprintReadOnly)
+	FString description;
 	UPROPERTY(BlueprintReadWrite)
 	int hp;// EditAnywhere, BluePrintReadOnly
 	UPROPERTY(BlueprintReadWrite)
@@ -65,4 +67,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int archetype;
 
+	void CalculatePrice();
+	void ScaleStatsByLevel(int newLevel_);
+	void LevelUpUntilGoal(int goalLevel_);
 };

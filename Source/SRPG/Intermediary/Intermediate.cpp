@@ -11,11 +11,12 @@ Intermediate::Intermediate()
 	currentRosterSize = 4; //Starts with 4 main characters
 	storyProgress = 0;
 	protagonistLevel = 1;
-	currentMoney = 1000;
+	currentMoney = 5000;
 	enemyStatDecreaseValue = 0;
 	enemyStatDecreaseIndex = 0;
 	maxDeploymentSize = 10;
 	currentDeploymentSize = 0;
+	latestFighterID = 3;
 }
 
 Intermediate::~Intermediate()
@@ -142,4 +143,13 @@ void Intermediate::PlayerUnitsAreRemoved(bool remove_)//Called from central NPC 
 void Intermediate::ImprovePlayerCRD(float value_)
 {
 
+}
+
+int Intermediate::GetLatestFighterID()
+{
+	return latestFighterID;
+}
+void Intermediate::SetLatestFighterID(int id_)
+{
+	latestFighterID = id_;
 }

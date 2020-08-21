@@ -22,9 +22,6 @@ void UExternalFileReader::BeginPlay()
 	Super::BeginPlay();
 	// arbitrary value that will be changed to the amount of tables we have
 	tables.Reserve(10);
-	firstTimeFighter = true;
-	firstTimeItem = true;
-	firstTimeEquipment = true;
 	// ...
 	
 }
@@ -64,19 +61,6 @@ FItemTableStruct UExternalFileReader::FindItemTableRow(FName name_, int index_)
 	static const FString contextString(TEXT("Item Table"));
 	if (tables[index_])
 	{
-		//reset our owned values to 0 in the table
-		if (firstTimeItem)
-		{
-			TArray<FName> rowNames;
-			rowNames = tables[index_]->GetRowNames();
-			for (auto n : rowNames)
-			{
-				FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
-				row->owned = 0;
-			}
-
-			firstTimeItem = false;
-		}
 		// otherwise return the result
 		FItemTableStruct* result = tables[index_]->FindRow<FItemTableStruct>(name_, contextString, true);
 		return *result;
@@ -93,18 +77,6 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	static const FString contextString(TEXT("Equipment Table"));
 	if (tables[index_])
 	{
-		if (firstTimeEquipment)
-		{
-			TArray<FName> rowNames;
-			rowNames = tables[index_]->GetRowNames();
-			for (auto n : rowNames)
-			{
-				FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
-				row->owned = 0;
-			}
-			firstTimeEquipment = false;
-		}
-
 		FEquipmentTableStruct* result = tables[index_]->FindRow<FEquipmentTableStruct>(name_, contextString, true);
 		return *result;
 
@@ -116,18 +88,18 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	}
 }
 
-FEquippedFightersTableStruct UExternalFileReader::FindEquippedFighterTableRow(FName name_, int index_)
+FFighterTableStruct UExternalFileReader::FindEquippedFighterTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Equipped Fighters Table"));
 	if (tables[index_])
 	{
-		FEquippedFightersTableStruct* result = tables[index_]->FindRow<FEquippedFightersTableStruct>(name_, contextString, true);
+		FFighterTableStruct* result = tables[index_]->FindRow<FFighterTableStruct>(name_, contextString, true);
 		return *result;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Equipped Fighters Table returned NULL"));
-		return FEquippedFightersTableStruct();
+		return FFighterTableStruct();
 	}
 }
 
@@ -262,22 +234,11 @@ FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activit
 	}
 }
 
-void UExternalFileReader::AddRowToFighterTable(FName rowName_, int index_, FEquippedFightersTableStruct row_)
+void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
 	
 	if (tables[index_])
 	{
-		if (firstTimeFighter)
-		{
-			TArray<FName> rowNames;
-			rowNames = tables[index_]->GetRowNames();
-			for (auto n : rowNames)
-			{
-				tables[index_]->RemoveRow(n);
-			}
-			UE_LOG(LogTemp, Warning, TEXT("Deleted Equipped Fighter Table"));
-			firstTimeFighter = false;
-		}
 		tables[index_]->AddRow(rowName_, row_);
 		UE_LOG(LogTemp, Error, TEXT("Fighter Table Row Added!"));
 	}
@@ -345,19 +306,6 @@ void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int
 void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_)
 {
 	static const FString contextString(TEXT("Equipment Table"));
-	//reset our owned values to 0 in the table
-	if (firstTimeEquipment)
-	{
-		TArray<FName> rowNames;
-		rowNames = tables[index_]->GetRowNames();
-		for (auto n : rowNames)
-		{
-			FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
-			row->owned = 0;
-		}
-
-		firstTimeEquipment = false;
-	}
 
 	if (tables[index_])
 	{

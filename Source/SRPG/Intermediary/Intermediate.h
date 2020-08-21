@@ -31,6 +31,7 @@ protected:
 							//to spawn the enemies.Used for enemy stat decrease activities 	
 	int enemyStatDecreaseValue;
 	int enemyStatDecreaseIndex;
+	int latestFighterID;// Used to make sure that fighters all have a unique ID
 
 	static TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> instance;
 
@@ -44,6 +45,8 @@ public:
 	int GetCurrentRosterSize();
 	int GetMaxRosterSize();
 	int GetMaxDeploymentSize();
+	int GetLatestFighterID();
+	void SetLatestFighterID(int id_);
 	int GetCurrentDeploymentSize();
 	int GetCurrentMoney();
 	void AddFighterToSelected(FFighterTableStruct fighter_);

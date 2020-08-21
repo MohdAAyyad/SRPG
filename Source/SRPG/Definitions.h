@@ -172,6 +172,8 @@
 
 #ifndef IMP_CRD_HG
 #define IMP_CRD_HG 5
+#endif
+
 #ifndef ATKR_MISS
 #define ATKR_MISS 0
 #endif
