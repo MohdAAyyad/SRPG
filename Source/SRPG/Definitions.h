@@ -78,6 +78,34 @@
 #define STAT_WHT 18
 #endif
 
+#ifndef STAT_WSI //Weapon skills index
+#define STAT_WSI 19
+#endif
+
+#ifndef STAT_WSN //Weapon skills num
+#define STAT_WSN 20
+#endif
+
+#ifndef STAT_ASI
+#define STAT_ASI 21
+#endif
+
+#ifndef STAT_ASN
+#define STAT_ASN 22
+#endif
+
+#ifndef STAT_WRS  //Weapon row speed
+#define STAT_WRS 23
+#endif
+
+#ifndef STAT_WDS //Weapon row depth
+#define STAT_WDS 23
+#endif
+
+#ifndef STAT_ARCH //Archetype
+#define STAT_ARCH 24
+#endif
+
 #ifndef TILE_MOV
 #define TILE_MOV 0
 #endif

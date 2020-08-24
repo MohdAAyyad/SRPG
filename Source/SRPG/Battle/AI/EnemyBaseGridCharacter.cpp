@@ -37,8 +37,6 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	bCannotFindTile = false;
 
 	attackRange = 0;
-	archetype = ARCH_ATK;
-
 }
 
 void AEnemyBaseGridCharacter::BeginPlay()
@@ -51,8 +49,6 @@ void AEnemyBaseGridCharacter::BeginPlay()
 
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
-	statsComp->InitStatsAtZero();
-	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, archetype);
 }
 
 void AEnemyBaseGridCharacter::Tick(float DeltaTime)
@@ -77,6 +73,9 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	aiManager = ref_;
 	gridManager = gref_;
 	btlManager = bref_;
+
+	statsComp->InitStatsAtZero();
+	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 }
 
 void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)

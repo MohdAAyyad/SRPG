@@ -33,8 +33,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
 		int attackRange; //PLACEHOLDER
-	UPROPERTY(EditAnywhere, Category = "Stats")
-		int archetype;
 
 	UPROPERTY(EditAnywhere)
 		int currentLevel; //PLACEHOLDER

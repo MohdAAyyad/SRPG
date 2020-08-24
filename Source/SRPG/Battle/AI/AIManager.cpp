@@ -86,7 +86,6 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 					if (enemy)
 					{
 						enemy->SetManagers(this, gridManager, btlManager);
-						enemy->ScaleLevelBaseOnArchetype(nextOp.level, nextOp.archtype);
 						deployedEnemies.Push(enemy);
 						enemyDeploymentTiles[tileIndex]->SetOccupied(true);
 						depNodes[nodeIndex].currentNumOfEnemiesForThisNode++;

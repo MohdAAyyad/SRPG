@@ -22,12 +22,18 @@
 #include "Definitions.h"
 #include "../Crowd/BattleCrowd.h"
 #include "../StatsComponent.h"
+#include "Intermediary/Intermediate.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 {
 	attackRowSpeed = 2;
 	attackDepth = 2;
+}
+
+void APlayerGridCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 }
 void APlayerGridCharacter::Selected()
 {
@@ -64,11 +70,11 @@ void APlayerGridCharacter::HighlightMovementPath()
 void APlayerGridCharacter::HighlightRegularAttackPath()
 {
 	ATile* tile = GetMyTile();
-	if (tile)
+	if (tile && statsComp)
 	{
 		currentState = EGridCharState::ATTACKING;
 		tile->GetGridManager()->ClearHighlighted();
-		tile->GetGridManager()->UpdateCurrentTile(tile, attackRowSpeed, attackDepth, TILE_ATK);
+		tile->GetGridManager()->UpdateCurrentTile(tile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK);
 	}
 }
 
@@ -114,4 +120,41 @@ void APlayerGridCharacter::ActivateSkillAttack()
 	}
 
 	actionTargets.Empty();
+}
+
+void APlayerGridCharacter::SetFighterIndex(int index_)
+{
+	fighterIndex = index_;
+
+	if (statsComp)
+	{
+		TArray<FFighterTableStruct>selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
+		statsComp->PushAStat(selectedFighters[fighterIndex].hp);
+		statsComp->PushAStat(selectedFighters[fighterIndex].pip);
+		statsComp->PushAStat(selectedFighters[fighterIndex].atk);
+		statsComp->PushAStat(selectedFighters[fighterIndex].def);
+		statsComp->PushAStat(selectedFighters[fighterIndex].intl);
+		statsComp->PushAStat(selectedFighters[fighterIndex].spd);
+		UE_LOG(LogTemp, Warning, TEXT("Fighter index %d and speed %d"), fighterIndex, selectedFighters[fighterIndex].spd);
+		statsComp->PushAStat(selectedFighters[fighterIndex].crit);
+		statsComp->PushAStat(selectedFighters[fighterIndex].agl);
+		statsComp->PushAStat(selectedFighters[fighterIndex].crd);
+		statsComp->PushAStat(selectedFighters[fighterIndex].level);
+		statsComp->PushAStat(selectedFighters[fighterIndex].currentEXP);
+		statsComp->PushAStat(selectedFighters[fighterIndex].neededEXPToLevelUp);
+		statsComp->PushAStat(selectedFighters[fighterIndex].weaponIndex);
+		statsComp->PushAStat(selectedFighters[fighterIndex].armorIndex);
+		statsComp->PushAStat(selectedFighters[fighterIndex].equippedWeapon);
+		statsComp->PushAStat(selectedFighters[fighterIndex].equippedArmor);
+		statsComp->PushAStat(selectedFighters[fighterIndex].equippedAccessory);
+		statsComp->PushAStat(selectedFighters[fighterIndex].emitterIndex);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(0);
+		statsComp->PushAStat(selectedFighters[fighterIndex].archetype);
+		AddEquipmentStats();
+	}
 }

@@ -75,6 +75,8 @@ protected:
 	TArray<FSkillTableStruct> skills;
 	int chosenSkill;
 	int chosenSkillAnimIndex;
+	
+	int fighterIndex;
 
 protected:
 	// Called when the game starts or when spawned
@@ -127,10 +129,6 @@ public:
 
 	void SetChampionOrVillain(bool value_);
 	void UnElect(); //Called by battle crowd when 3 crowd turns pass
-	
-	void UpdateStats(TArray<int>& stats_);
-	void UpdateArchType(int archtype_);
-
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
 protected:
@@ -140,5 +138,8 @@ protected:
 		int attackRowSpeed;
 	UPROPERTY(EditAnywhere)
 		int attackDepth;
+
+
+	void AddEquipmentStats();
 
 };

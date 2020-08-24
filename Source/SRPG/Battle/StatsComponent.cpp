@@ -8,12 +8,8 @@
 UStatsComponent::UStatsComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	currentStats.Reserve(19);
+	currentStats.Reserve(25);
 	tempCRD = 0;
-	wpnSkillsIndex = 0;
-	wpnRowSpeed = 0;
-	wpnDepthSpeed = 0;
-	armSkillsIndex = 0;
 	maxHP = 0;
 	maxPip = 0;
 	archetype = 0;
@@ -21,10 +17,11 @@ UStatsComponent::UStatsComponent()
 	// ...
 }
 
-void UStatsComponent::UpdateStats(TArray<int>& currentStats_)
+void UStatsComponent::PushAStat(int statValue_)
 {
-	currentStats = currentStats_;
+	currentStats.Push(statValue_);
 }
+
 int UStatsComponent::CalculateHit(int otherAgi_)
 {
 	if (FMath::RandRange(0, 20) + currentStats[STAT_WHT] >= otherAgi_) //Hit
@@ -110,16 +107,6 @@ int UStatsComponent::GetStatValue(int stat_)
 
 	return 0;
 }
-
-void UStatsComponent::UpdateWpnArmSkillsIndexes(int wpn_, int wpnR_, int wpnD_, int wpnHit_, int arm_)
-{
-	wpnSkillsIndex = wpn_;
-	wpnRowSpeed = wpnR_;
-	wpnDepthSpeed = wpnD_;
-	armSkillsIndex = arm_;
-	currentStats.Push(wpnHit_); //Should be index 18
-}
-
 void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 {
 	//TODO
@@ -127,7 +114,7 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 
 void UStatsComponent::InitStatsAtZero()
 {
-	for (int i = 0; i < 19; i++)
+	for (int i = 0; i < 25; i++)
 		currentStats.Push(0);
 }
 

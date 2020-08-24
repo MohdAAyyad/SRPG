@@ -429,21 +429,31 @@ FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 	return FName(TEXT(""));
 }
 
-TArray<int> UExternalFileReader::GetWeaponSpeeds(int weaponID_)
+FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_)
 {
-	TArray<int> result;
-	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	static const FString contextString(TEXT("Trying to get the Weapons from the table"));
 	TArray<FName> rowNames;
-	TArray<FEquipmentTableStruct*> weapons;
-	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
-
-	for (auto n : rowNames)
+	FEquipmentTableStruct equip;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FEquipmentTableStruct* row = tables[0]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle.
 
-		//TODO
-		//Compare the weaponID with the row's ID and calculate the speed
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+			if (row->id == equipID_)
+			{
+				if (row->equipmentIndex == equipIndex_ || equipIndex_ == -1) //Accessories are -1 since they don't have an index
+				{
+					equip = *row;
+					return equip;
+				}
+
+			}
+
+		}
 	}
 
-	return result;
+	return equip;
 }

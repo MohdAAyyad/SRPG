@@ -28,6 +28,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "CollisionQueryParams.h"
 #include "StatsComponent.h"
+#include "Intermediary/Intermediate.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -104,6 +105,8 @@ AGridCharacter::AGridCharacter()
 	bChampion = bVillain = false;
 
 
+	fighterIndex = 0;
+
 }
 
 void AGridCharacter::BeginPlay()
@@ -118,16 +121,17 @@ void AGridCharacter::BeginPlay()
 
 	if(villainParticles)
 		villainParticles->DeactivateSystem();
-	//TODO
-	//Pass in the weapon's row and depth speeds and the weapon hit to the stats component
-	
+
 }
 
 void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCrowd* crd_)
 {
 	btlManager = btlManager_;
 	crdManager = crd_;
-	statsComp->AddTempCRD(CRD_DEP); //Deployment adds points
+	if (statsComp)
+	{
+		statsComp->AddTempCRD(CRD_DEP); //Deployment adds points
+	}
 	ATile* tile = GetMyTile();
 	if(tile)
 		tile->SetOccupied(true);
@@ -391,28 +395,45 @@ void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 
 float AGridCharacter::GetStat(int statIndex_)
 {
-	//TODO
 	//Pass the statindex_ to the stats component
-	
-	//Placeholder: For now, all we need is CRD
 	return static_cast<float>(statsComp->GetStatValue(statIndex_));
 }
 
-void AGridCharacter::UpdateStats(TArray<int>& stats_)
+void AGridCharacter::AddEquipmentStats()
 {
-	//TODO 
+
 	//Get the skills index for the equipped weapon and armor and pass them to the stats
 	//Pass the weapon's HIT stat as the last value
-	statsComp->UpdateStats(stats_);
 
-	if (pathComp && statsComp)
-		pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
-}
+	FEquipmentTableStruct weapon;
+	FEquipmentTableStruct armor;
+	FEquipmentTableStruct accessory;
 
-void AGridCharacter::UpdateArchType(int archtype_)
-{
-	//TODO
-	//Update the archetype in the stats component
+	//Get the stats of the equipment and add them to the character's stats
+	if (fileReader)
+	{
+		weapon = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_WPN), statsComp->GetStatValue(STAT_WPN));
+		armor = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_ARM), statsComp->GetStatValue(STAT_ARI));
+		accessory = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_ACC), -1);
+
+		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
+		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
+		statsComp->AddToStat(STAT_ATK, weapon.atk + armor.atk + accessory.atk);
+		statsComp->AddToStat(STAT_DEF, weapon.def + armor.def + accessory.def);
+		statsComp->AddToStat(STAT_INT, weapon.intl + armor.intl + accessory.intl);
+		statsComp->AddToStat(STAT_SPD, weapon.spd + armor.spd + accessory.spd);
+		statsComp->AddToStat(STAT_CRT, weapon.crit + armor.crit + accessory.crit);
+		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
+		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
+		statsComp->AddToStat(STAT_WSN, weapon.skillsN);
+		statsComp->AddToStat(STAT_ASI, weapon.skillsIndex);
+		statsComp->AddToStat(STAT_ASN, weapon.skillsN);
+		statsComp->AddToStat(STAT_WRS, weapon.range);
+		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
+
+	}
+		if (pathComp)
+			pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
 }
 void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
 {
@@ -436,7 +457,7 @@ void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false v
 }
 
 
-void  AGridCharacter::UnElect()
+void AGridCharacter::UnElect()
 {
 	bChampion = bVillain = false;
 	if (champParticles)

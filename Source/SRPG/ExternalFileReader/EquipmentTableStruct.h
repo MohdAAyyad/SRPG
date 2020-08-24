@@ -53,4 +53,8 @@ public:
 	int value; // cost of the item
 	UPROPERTY(BlueprintReadWrite)
 	int skillsIndex; // what skills can this equipment give to the player
+	UPROPERTY(BlueprintReadWrite)
+	int skillsN; //The number of skills this peice of equipment unlocks
+	UPROPERTY(BlueprintReadWrite)
+	int id;
 };
