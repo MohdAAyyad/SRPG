@@ -146,9 +146,9 @@ void AFightersShop::FinalizePurchase()
 	if (haveChosenFighter)
 	{
 		CalculatePrice();
-		if (Intermediate::GetInstance()->GetCurrentMoney() > chosenFighter.value + price.value)
+		if (Intermediate::GetInstance()->GetCurrentMoney() > chosenFighter.value)
 		{
-			Intermediate::GetInstance()->SpendMoney(chosenFighter.value + price.value);
+			Intermediate::GetInstance()->SpendMoney(chosenFighter.value);
 
 			FFighterTableStruct row;
 			row.bpid = chosenFighter.bpid;
