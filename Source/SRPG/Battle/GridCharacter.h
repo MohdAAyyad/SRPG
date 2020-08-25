@@ -43,9 +43,9 @@ protected:
 		class UWidgetComponent* widgetComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
 		UWidgetComponent* widgetOnTopOfHead;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
+	UPROPERTY(BlueprintReadOnly, Category = "Champion")
 		bool bChampion;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
+	UPROPERTY(BlueprintReadOnly, Category = "Champion")
 		bool bVillain;
 	UPROPERTY(EditAnywhere, Category = "Champion")
 		class UParticleSystemComponent* champParticles;
@@ -132,14 +132,6 @@ public:
 
 	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
 protected:
-
-	//PLACEHOLDERS. WILL GET THIS STUFF FROM THE TABLES
-	UPROPERTY(EditAnywhere)
-		int attackRowSpeed;
-	UPROPERTY(EditAnywhere)
-		int attackDepth;
-
-
-	void AddEquipmentStats();
+	virtual void AddEquipmentStats(int tableIndex_);
 
 };

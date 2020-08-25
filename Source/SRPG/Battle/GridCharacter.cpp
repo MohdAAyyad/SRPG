@@ -399,7 +399,7 @@ float AGridCharacter::GetStat(int statIndex_)
 	return static_cast<float>(statsComp->GetStatValue(statIndex_));
 }
 
-void AGridCharacter::AddEquipmentStats()
+void AGridCharacter::AddEquipmentStats(int tableIndex_)
 {
 
 	//Get the skills index for the equipped weapon and armor and pass them to the stats
@@ -412,10 +412,10 @@ void AGridCharacter::AddEquipmentStats()
 	//Get the stats of the equipment and add them to the character's stats
 	if (fileReader)
 	{
-		weapon = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_WPN), statsComp->GetStatValue(STAT_WPN));
-		armor = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_ARM), statsComp->GetStatValue(STAT_ARI));
-		accessory = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_ACC), -1);
-
+		weapon = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_WPN), EQU_WPN);
+		armor = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ARM), EQU_ARM);
+		accessory = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ACC), EQU_ACC);
+		
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
 		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_ATK, weapon.atk + armor.atk + accessory.atk);

@@ -99,11 +99,11 @@
 #endif
 
 #ifndef STAT_WDS //Weapon row depth
-#define STAT_WDS 23
+#define STAT_WDS 24
 #endif
 
 #ifndef STAT_ARCH //Archetype
-#define STAT_ARCH 24
+#define STAT_ARCH 25
 #endif
 
 #ifndef TILE_MOV
@@ -212,6 +212,18 @@
 
 #ifndef ATKR_CRIT
 #define ATKR_CRIT 3
+#endif
+
+#ifndef EQU_WPN
+#define EQU_WPN 0
+#endif
+
+#ifndef EQU_ARM
+#define EQU_ARM 1
+#endif
+
+#ifndef EQU_ACC
+#define EQU_ACC 2
 #endif
 
 

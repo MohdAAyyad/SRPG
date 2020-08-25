@@ -8,7 +8,7 @@
 UStatsComponent::UStatsComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	currentStats.Reserve(25);
+	currentStats.Reserve(26);
 	tempCRD = 0;
 	maxHP = 0;
 	maxPip = 0;
@@ -110,11 +110,53 @@ int UStatsComponent::GetStatValue(int stat_)
 void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 {
 	//TODO
+
+	//Binary increase based on archetype
+	// Non-archetype stats have 1 added every two levels while the archetype stat gets a 1 added for every level
+	int currentLevel = currentStats[STAT_LVL];
+	int increment = currentLevel % 2;
+	while (currentLevel < targetLevel_)
+	{
+		increment = currentLevel % 2;
+		currentStats[STAT_HP] += increment;
+		currentStats[STAT_PIP] += increment;
+		switch (archetype_)
+		{
+		case ARCH_ATK:
+			currentStats[STAT_ATK]++;
+			for (int i = STAT_ATK + 1; i < STAT_LVL; i++)
+				currentStats[i] += increment;
+			break;
+		case ARCH_DEF:
+			currentStats[STAT_ATK]+=increment;
+			currentStats[STAT_DEF]++;
+			for (int i = STAT_DEF + 1; i < STAT_LVL; i++)
+				currentStats[i] += increment;
+			break;
+		case ARCH_INT:
+			currentStats[STAT_ATK] += increment;
+			currentStats[STAT_DEF] += increment;
+			currentStats[STAT_INT]++;
+			for (int i = STAT_INT + 1; i < STAT_LVL; i++)
+				currentStats[i] += increment;
+			break;
+		default:
+			break;
+		}
+
+		currentLevel++;
+	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("Speed after scaling %d"), currentStats[STAT_SPD]);
+	currentStats[STAT_LVL] = targetLevel_;
 }
 
 void UStatsComponent::InitStatsAtZero()
 {
-	for (int i = 0; i < 25; i++)
+	for (int i = 0; i < 26; i++)
 		currentStats.Push(0);
+
+	currentStats[STAT_LVL] = 1; //Min level
+	currentStats[STAT_SPD] = 2; //Min speed
 }
 

@@ -18,7 +18,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Definitions.h"
 #include "../StatsComponent.h"
-#include "ExternalFileReader/FOpponentStruct.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 #include "Intermediary/Intermediate.h"
 
 
@@ -35,8 +35,8 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	targetItem = nullptr;
 	bWillMoveAgain = true;
 	bCannotFindTile = false;
-
-	attackRange = 0;
+	weaponIndex = 0;
+	armorIndex = 0;
 }
 
 void AEnemyBaseGridCharacter::BeginPlay()
@@ -75,7 +75,49 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	btlManager = bref_;
 
 	statsComp->InitStatsAtZero();
+	statsComp->AddToStat(STAT_WPI, weaponIndex);
+	statsComp->AddToStat(STAT_ARI, armorIndex);
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
+	AddEquipmentStats(1);
+}
+
+void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
+{
+
+	//Get the best equipment you can equip from the table
+
+	FEquipmentTableStruct weapon;
+	FEquipmentTableStruct armor;
+	FEquipmentTableStruct accessory;
+
+	//Get the stats of the equipment and add them to the character's stats
+	if (fileReader)
+	{
+		weapon = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_WPN, statsComp->GetStatValue(STAT_WPI));
+		armor = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ARM, statsComp->GetStatValue(STAT_ARI));
+		accessory = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
+		
+
+
+		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
+		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
+		statsComp->AddToStat(STAT_ATK, weapon.atk + armor.atk + accessory.atk);
+		statsComp->AddToStat(STAT_DEF, weapon.def + armor.def + accessory.def);
+		statsComp->AddToStat(STAT_INT, weapon.intl + armor.intl + accessory.intl);
+		statsComp->AddToStat(STAT_SPD, weapon.spd + armor.spd + accessory.spd);
+		statsComp->AddToStat(STAT_CRT, weapon.crit + armor.crit + accessory.crit);
+		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
+		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
+		statsComp->AddToStat(STAT_WSN, weapon.skillsN);
+		statsComp->AddToStat(STAT_ASI, weapon.skillsIndex);
+		statsComp->AddToStat(STAT_ASN, weapon.skillsN);
+		statsComp->AddToStat(STAT_WRS, weapon.range);
+		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
+
+	}
+
+	if (pathComp)
+		pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
 }
 
 void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
@@ -97,7 +139,7 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 			{
 				TArray<ATile*> rangeTiles;
 				//Get the tiles that put the enemy within range of the player.
-				rangeTiles = gridManager->GetTilesWithinAttackRange(attackRange, targetPlayer->GetMyTile());
+				rangeTiles = gridManager->GetTilesWithinAttackRange(statsComp->GetStatValue(STAT_WRS), targetPlayer->GetMyTile());
 				if (!rangeTiles.Contains(myTile_)) //Check if we're not within attacking range
 				{
 					if (myTile_)
@@ -171,7 +213,7 @@ void AEnemyBaseGridCharacter::Selected()
 	{
 		//Show the enemy's movement and attack ranges
 		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENMH);
-		gridManager->UpdateCurrentTile(originTile, attackRowSpeed, attackDepth, TILE_ATK);
+		gridManager->UpdateCurrentTile(originTile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK);
 	}
 }
 
@@ -189,7 +231,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 		if (myTile_)
 		{
 			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(myTile_, attackRowSpeed, attackDepth, TILE_ENM);
+			gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM);
 			if (targetPlayer)
 			{
 				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range

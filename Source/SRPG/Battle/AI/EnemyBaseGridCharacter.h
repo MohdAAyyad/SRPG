@@ -30,13 +30,11 @@ protected:
 
 	bool bWillMoveAgain; //Need to make sure that once we've collided with an item, we don't tell that AI Manager that we've finished moving but rather move towards the player
 	bool bCannotFindTile; //Sometimes GetMyTile() will return nullptr when the character calls the function while transitioning from one tile to the next. This bool is used to call GetMyTile() on tick until we find a tile (i.e the character will not stop moving) --> Necessary when obtaining items as the enemy might obtain the item while in between tiles
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-		int attackRange; //PLACEHOLDER
-
-	UPROPERTY(EditAnywhere)
-		int currentLevel; //PLACEHOLDER
-
+	
+	UPROPERTY(EditAnywhere, Category = "Equipment")
+		int weaponIndex;
+	UPROPERTY(EditAnywhere, Category = "Equipment")
+		int armorIndex;
 	UFUNCTION()
 		void DetectItem(UPrimitiveComponent* overlappedComponent_,
 			AActor* otherActor_,
@@ -56,6 +54,7 @@ protected:
 	void FindTheClosestPlayer();
 	void MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_,ATile* targetTile_);
 	void CheckIfWeHaveAnyTargetItems();
+	void AddEquipmentStats(int tableIndex_) override;
 
 	void Tick(float DeltaTime) override;
 

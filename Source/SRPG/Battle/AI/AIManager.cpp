@@ -56,7 +56,6 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 
 		if (depNodes.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Num of troops %d"), nextOp.numberOfTroops);
 			while (deployedEnemies.Num() < nextOp.numberOfTroops && nodeIndex < depNodes.Num()) //Potential issue: What if the total num of enemies exceeds the total num of enemies allowed on nodes?
 			{
 				//Highlight the tiles for the current node

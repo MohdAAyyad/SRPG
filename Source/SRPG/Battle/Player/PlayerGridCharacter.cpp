@@ -27,8 +27,6 @@
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 {
-	attackRowSpeed = 2;
-	attackDepth = 2;
 }
 
 void APlayerGridCharacter::BeginPlay()
@@ -134,8 +132,7 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(selectedFighters[fighterIndex].atk);
 		statsComp->PushAStat(selectedFighters[fighterIndex].def);
 		statsComp->PushAStat(selectedFighters[fighterIndex].intl);
-		statsComp->PushAStat(selectedFighters[fighterIndex].spd);
-		UE_LOG(LogTemp, Warning, TEXT("Fighter index %d and speed %d"), fighterIndex, selectedFighters[fighterIndex].spd);
+		statsComp->PushAStat(selectedFighters[fighterIndex].spd);		
 		statsComp->PushAStat(selectedFighters[fighterIndex].crit);
 		statsComp->PushAStat(selectedFighters[fighterIndex].agl);
 		statsComp->PushAStat(selectedFighters[fighterIndex].crd);
@@ -155,6 +152,6 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(selectedFighters[fighterIndex].archetype);
-		AddEquipmentStats();
+		AddEquipmentStats(2);
 	}
 }
