@@ -50,7 +50,6 @@ void ABattleManager::BeginPlay()
 	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
 	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
 	maxNumberOfUnitsToDeploy = Intermediate::GetInstance()->GetMaxDeploymentSize();
-	Intermediate::GetInstance()->ResetSelectedFighters();
 
 }
 
@@ -78,8 +77,15 @@ void ABattleManager::NextPhase()
 	}
 	else if (phase == BTL_CRD)
 	{
-			if (crdManager)
-				crdManager->StartCrowdPhase();
+		if (crdManager)
+		{
+			if (totalNumberOfPhasesElapsed == 1)
+			{
+				crdManager->CalculateFavorForTheFirstTime();
+				crdManager->AddCrowdWidgetToViewPort();
+			}
+			crdManager->StartCrowdPhase();
+		}
 	}
 	else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
 	{
@@ -95,7 +101,6 @@ void ABattleManager::NextPhase()
 void ABattleManager::DeployThisUnitNext(int index_)
 {
 	//Index of the element inside selectedFighters
-
 	if (index_ >= 0 && index_ < selectedFighters.Num())
 	{
 		//Used to keep track of which characters the player chooses to deploy
@@ -121,42 +126,11 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
-
-			TArray<int> stats_;
-			stats_.Reserve(18);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].hp);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].pip);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].atk);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].def);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].intl);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].spd);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crit);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].agl);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].crd);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].level);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].currentEXP);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].neededEXPToLevelUp);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].weaponIndex);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].armorIndex);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedWeapon);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedArmor);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].equippedAccessory);
-			stats_.Push(selectedFighters[indexOfSelectedFighterInSelectedFighters].emitterIndex);
-
+			
 			unit->SetBtlAndCrdManagers(this,crdManager);
-			unit->UpdateStats(stats_);
-			unit->UpdateArchType(selectedFighters[indexOfSelectedFighterInSelectedFighters].archetype);
+			unit->SetFighterIndex(indexOfSelectedFighterInSelectedFighters);
 			deployedUnits.Push(unit);
 		}
-
-		//Remove the fighter from the ones that can be deployed
-		if (indexOfSelectedFighterInSelectedFighters >= 0 && indexOfSelectedFighterInSelectedFighters < selectedFighters.Num())
-		{
-			selectedFighters.RemoveAt(indexOfSelectedFighterInSelectedFighters);
-			if (selectedFighters.Num() < 1)
-				EndDeployment();
-		}
-
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
@@ -170,11 +144,8 @@ void ABattleManager::EndDeployment()
 	if (gridManager)
 		gridManager->ClearHighlighted();
 
-	if (crdManager)
-	{
-		crdManager->CalculateFavorForTheFirstTime();
-		crdManager->AddCrowdWidgetToViewPort();
-	}
+	Intermediate::GetInstance()->ResetSelectedFighters();
+
 	NextPhase();
 }
 

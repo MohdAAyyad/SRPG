@@ -15,7 +15,9 @@ struct SRPG_API FEquipmentTableStruct : public FTableRowBase
 public:
 	FEquipmentTableStruct()
 	{
-
+		hp = pip = atk = def = intl = spd = crit = hit = crd = 
+		range = equipmentIndex = weaponIndex = armorIndex = 
+		owned = level = value = skillsIndex = skillsN = id = 0;
 	}
 	UPROPERTY(BlueprintReadWrite)
 	int hp; // EditAnywhere, BluePrintReadOnly
@@ -53,4 +55,8 @@ public:
 	int value; // cost of the item
 	UPROPERTY(BlueprintReadWrite)
 	int skillsIndex; // what skills can this equipment give to the player
+	UPROPERTY(BlueprintReadWrite)
+	int skillsN; //The number of skills this peice of equipment unlocks
+	UPROPERTY(BlueprintReadWrite)
+	int id;
 };

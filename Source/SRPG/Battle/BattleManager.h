@@ -58,7 +58,6 @@ protected:
 
 	int indexOfSelectedFighterInSelectedFighters;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
 		TArray<int> deployedFightersIndexes; //Used to make sure the same unit is not spawned more than once
 	TArray<class APlayerGridCharacter*> deployedUnits;

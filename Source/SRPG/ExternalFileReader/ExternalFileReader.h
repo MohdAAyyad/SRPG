@@ -48,7 +48,8 @@ public:
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
 	TArray<FSkillTableStruct*> GetOffesniveSkills(int weaponIndex_, int currentLevel_);
 	TArray<FSkillTableStruct*> GetDefensiveSkills(int armodIndex_, int currentLevel_);
-	TArray<int> GetWeaponSpeeds(int weaponID_);
+	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_);
+	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();

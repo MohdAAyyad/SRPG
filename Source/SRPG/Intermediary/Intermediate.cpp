@@ -11,7 +11,7 @@ Intermediate::Intermediate()
 	currentRosterSize = 4; //Starts with 4 main characters
 	storyProgress = 0;
 	protagonistLevel = 1;
-	currentMoney = 5000;
+	currentMoney = 50000;
 	enemyStatDecreaseValue = 0;
 	enemyStatDecreaseIndex = 0;
 	maxDeploymentSize = 10;

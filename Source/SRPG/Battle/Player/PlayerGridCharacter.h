@@ -24,11 +24,14 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void HighlightRegularAttackPath();
 
+	void BeginPlay() override;
+
 public:
 	void Selected() override;
 	void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
 	virtual void ActivateSkillAttack() override;
+	void SetFighterIndex(int index_);
 
 	
 };

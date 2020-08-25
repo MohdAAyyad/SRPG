@@ -2,7 +2,7 @@
 
 
 #include "ExternalFileReader.h"
-
+#include "Definitions.h"
 
 
 // Sets default values for this component's properties
@@ -429,21 +429,93 @@ FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 	return FName(TEXT(""));
 }
 
-TArray<int> UExternalFileReader::GetWeaponSpeeds(int weaponID_)
+FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_)
 {
-	TArray<int> result;
-	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	static const FString contextString(TEXT("Trying to get the Weapons from the table based on ID"));
 	TArray<FName> rowNames;
-	TArray<FEquipmentTableStruct*> weapons;
-	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
-
-	for (auto n : rowNames)
+	FEquipmentTableStruct equip;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FEquipmentTableStruct* row = tables[0]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle.
 
-		//TODO
-		//Compare the weaponID with the row's ID and calculate the speed
+		// UE_LOG(LogTemp, Warning, TEXT("Incoming equipIndex_ %d"), equipIndex_);
+
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+		//	UE_LOG(LogTemp, Warning, TEXT("Row equipmentIndex %d"), row->equipmentIndex);
+			if (row->id == equipID_)
+			{
+				if (row->equipmentIndex == equipIndex_)
+				{
+					equip = *row;
+					return equip;
+				}
+
+			}
+
+		}
 	}
 
-	return result;
+	return equip;
+}
+
+FEquipmentTableStruct UExternalFileReader::GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_)
+{
+	static const FString contextString(TEXT("Trying to get the Weapons from the table based on level"));
+	TArray<FName> rowNames;
+	FEquipmentTableStruct equip;
+	int maxLevel = -1;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by enemies in the battle.
+
+		for (auto n : rowNames)
+		{
+			//Find the max level equipment that matches your equipment index
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+			//UE_LOG(LogTemp, Warning, TEXT("Row details L: %d E: %d W: %d"), row->level, row->equipmentIndex, row->weaponIndex);
+			//UE_LOG(LogTemp, Warning, TEXT("Incoming details L: %d E: %d W: %d"), level_, equipIndex_, subIndex_);
+			//Check what type of equipment it is
+			// Then return the highest level equip-able piece of equipment of that type
+			if (equipIndex_ == EQU_WPN)
+			{
+				if (row->weaponIndex == subIndex_)
+				{
+					if (row->level <= level_ && row->level > maxLevel)
+					{
+						
+						equip = *row;
+						maxLevel = row->level;
+
+					}
+				}
+			}
+			else if(equipIndex_ == EQU_ARM)
+			{
+				if (row->armorIndex == subIndex_)
+				{
+					if (row->level <= level_ && row->level > maxLevel)
+					{
+						equip = *row;
+						maxLevel = row->level;
+
+					}
+				}
+			}
+			else if(equipIndex_ == EQU_ACC) //Accessories don't have a sub index
+			{
+				if (row->level <= level_ && row->level > maxLevel)
+				{
+					equip = *row;
+					maxLevel = row->level;
+
+				}
+			}
+
+		}
+	}
+
+	return equip;
 }
