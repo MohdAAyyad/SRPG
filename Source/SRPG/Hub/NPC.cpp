@@ -38,7 +38,20 @@ void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
 	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
+	// load a default conversation if nothing is selected
+	npcLineIndex = 0;
 	//UE_LOG(LogTemp, Warning, TEXT("Begin play on NPC"));
+	if (idle && meshComp)
+	{
+		meshComp->SetAnimation(idle);
+		meshComp->PlayAnimation(idle, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Idle Animation is NULL"));
+	}
+
+
 }
 
 void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
@@ -73,7 +86,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 void ANPC::LoadText()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
-	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName("1"), 0);
+	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
 
 	line = file.line;
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
@@ -98,27 +111,9 @@ void ANPC::UnInteract()
 	EndDialogue();
 }
 
-void ANPC::TestPrint()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
-	FDialogueTableStruct test = fileReader->FindDialogueTableRow(FName("1"), 0);
-
-	line = test.line;
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
-
-}
-
 void ANPC::SetNPCLinesIndex(int index_)
 {
-	if (index_ <= 2 && index_ >= 0)
-	{
-		npcLineIndex = index_;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid Input for NPCLineIndex"));
-	}
-
+	npcLineIndex = index_;
 }
 
 void ANPC::SetHubManager(AHubWorldManager* manager_)
@@ -136,8 +131,6 @@ void ANPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
-	// sets our player ref back to nothing
-	//line = FString("");
 }
 
 

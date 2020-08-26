@@ -45,6 +45,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC Widget")
 		class UWidgetComponent* widget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+		UAnimationAsset* idle;
+
 	UFUNCTION()
 	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 									 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
@@ -62,7 +65,6 @@ public:
 	// overrides of the interface functions
 	void Interact() override;
 	void UnInteract() override;
-	void TestPrint();
 
 	void SetNPCLinesIndex(int index_);
 	void SetHubManager(class AHubWorldManager* manager_);

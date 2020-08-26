@@ -7,6 +7,7 @@
 #include "Intermediary/Intermediate.h"
 #include "SRPGCharacter.h"
 #include "Hub/HubWorldManager.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 ATournament::ATournament():ACentralNPC()
@@ -29,6 +30,19 @@ void ATournament::BeginPlay()
 	op1.InitStruct(Intermediate::GetInstance()->GetProtagonistLevel(), Intermediate::GetInstance()->GetCurrentRosterSize());
 	op2 = FOpponentStruct();
 	op2.InitStruct(Intermediate::GetInstance()->GetProtagonistLevel(), Intermediate::GetInstance()->GetCurrentRosterSize());
+
+	fighterIndex = -1;
+	hasSupportedTeam = false;
+
+	if (idle && meshComp)
+	{
+		meshComp->SetAnimation(idle);
+		meshComp->PlayAnimation(idle, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Idle Animation is NULL"));
+	}
 }
 
 void ATournament::EndDialogue()
@@ -74,16 +88,26 @@ void ATournament::SupportTeam(bool op1_)
 {
 	//TODO
 	//Put units on hold on the intermediate
-	if (op1_)
+	if (fighterIndex > -1 && hasSupportedTeam == false)
 	{
-		op1SuccessChance += 20;
-		op2SuccessChance -= 20;
+		if (op1_)
+		{
+			op1SuccessChance += 20;
+			op2SuccessChance -= 20;
+			// put the unit selected on hold
+			Intermediate::GetInstance()->PutUnitOnHold(fighterIndex);
+			hasSupportedTeam = true;
+		}
+		else
+		{
+			op1SuccessChance -= 20;
+			op2SuccessChance += 20;
+
+			Intermediate::GetInstance()->PutUnitOnHold(fighterIndex);
+			hasSupportedTeam = true;
+		}
 	}
-	else
-	{
-		op1SuccessChance -= 20;
-		op2SuccessChance += 20;
-	}
+
 }
 
 FOpponentStruct ATournament::SimulateMatch()
@@ -111,6 +135,9 @@ FOpponentStruct ATournament::SimulateMatch()
 		activityAlreadyDone = true;
 
 	}
+
+	hasSupportedTeam = false;
+
 	if (winner)
 		return op1;
 
@@ -125,4 +152,13 @@ int ATournament::GetOp1Chance()
 int ATournament::GetOp2Chance()
 {
 	return op2SuccessChance;
+}
+
+void ATournament::EnterFighterIndex(int index_)
+{
+	if (index_ <= Intermediate::GetInstance()->GetCurrentRosterSize() && index_ > -1)
+	{
+		fighterIndex = index_;
+	}
+
 }

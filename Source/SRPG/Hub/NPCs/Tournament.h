@@ -49,8 +49,10 @@ protected:
 	void SpendCost() override;
 	UFUNCTION(BlueprintCallable)
 		void SupportTeam(bool op1_); /*Called from UI.Spends Units and a time slot to increase op1(true) or op2(false) by 20 % */
+	// which fighter have you chosen to support
+	int fighterIndex;
 
-
+	bool hasSupportedTeam;
 	
 public:
 
@@ -65,6 +67,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		int GetOp2Chance();
 
+	UFUNCTION(BlueprintCallable)
+	void EnterFighterIndex(int index_);
 
 
 };
