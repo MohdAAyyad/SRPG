@@ -46,14 +46,14 @@ public:
 	FActivityDialogueTableStruct GetNegativeBranch(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
-	TArray<FSkillTableStruct*> GetOffesniveSkills(int weaponIndex_, int currentLevel_);
-	TArray<FSkillTableStruct*> GetDefensiveSkills(int armodIndex_, int currentLevel_);
+	TArray<FSkillTableStruct*> GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
+	TArray<FSkillTableStruct*> GetDefensiveSkills(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_);
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
-	int GetItemStatIndex(FName itemName_);
+	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);

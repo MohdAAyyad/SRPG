@@ -78,7 +78,7 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	statsComp->AddToStat(STAT_WPI, weaponIndex);
 	statsComp->AddToStat(STAT_ARI, armorIndex);
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
-	AddEquipmentStats(1);
+	AddEquipmentStats(2);
 }
 
 void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
@@ -109,8 +109,8 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
 		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
 		statsComp->AddToStat(STAT_WSN, weapon.skillsN);
-		statsComp->AddToStat(STAT_ASI, weapon.skillsIndex);
-		statsComp->AddToStat(STAT_ASN, weapon.skillsN);
+		statsComp->AddToStat(STAT_ASI, armor.skillsIndex);
+		statsComp->AddToStat(STAT_ASN, armor.skillsN);
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
 

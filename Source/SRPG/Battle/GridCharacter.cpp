@@ -74,13 +74,6 @@ AGridCharacter::AGridCharacter()
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
 
-	
-	widgetOnTopOfHead = CreateDefaultSubobject<UWidgetComponent>(TEXT("OnTopOfHeadWidget"));
-	widgetOnTopOfHead->SetupAttachment(RootComponent);
-	widgetOnTopOfHead->SetWidgetSpace(EWidgetSpace::Screen);
-	widgetOnTopOfHead->SetVisibility(false);
-	widgetOnTopOfHead->AddRelativeLocation(FVector(0.0f, 0.0f, 260.0f));
-
 	champParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
 	champParticles->SetupAttachment(RootComponent);
 	champParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
@@ -293,27 +286,34 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 		animInstance->GotHit();
 }
 
-TArray<FSkillTableStruct>AGridCharacter::GetCharacterSkills()
+void AGridCharacter::UpdateCharacterSkills()
 {
 	if (skills.Num() == 0) //No need to access the table every time we need to use a skill
 	{
 		if (fileReader)
 		{
-			TArray<FSkillTableStruct*> skillPtrs = fileReader->GetOffesniveSkills(statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_LVL));
-			for (auto n : skillPtrs)
+			TArray<FSkillTableStruct*> weaponSkills = fileReader->GetOffesniveSkills(0, statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_WSN), statsComp->GetStatValue(STAT_WSI), statsComp->GetStatValue(STAT_LVL));
+			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
+			for (auto w : weaponSkills)
 			{
-				skills.Push(*n);
+				skills.Push(*w);
 			}
+
+			for (auto a : armorSkills)
+			{
+				skills.Push(*a);
+			}
+			
 		}
 	}
-
-	return skills;
 }
 
 
 void AGridCharacter::UseSkill(int index_)
 {
-	//TODO check if we have enough pips first.
+	//TODO 
+	//check if we have enough pips first.
+
 	if (index_ >= 0 && index_ < skills.Num())
 	{
 		ATile* tile_ = GetMyTile();
@@ -379,7 +379,7 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 {
 	if (target_ && fileReader)
 	{
-		target_->GridCharReactToItem(fileReader->GetItemStatIndex(chosenItem), fileReader->GetItemValue(chosenItem));
+		target_->GridCharReactToItem(fileReader->GetItemStatIndex(3,chosenItem), fileReader->GetItemValue(chosenItem));
 		fileReader->AddOwnedValueItemTable(chosenItem, 1, -1);
 	}
 
@@ -426,14 +426,16 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
 		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
 		statsComp->AddToStat(STAT_WSN, weapon.skillsN);
-		statsComp->AddToStat(STAT_ASI, weapon.skillsIndex);
-		statsComp->AddToStat(STAT_ASN, weapon.skillsN);
+		statsComp->AddToStat(STAT_ASI, armor.skillsIndex);
+		statsComp->AddToStat(STAT_ASN, armor.skillsN);
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
 
 	}
 		if (pathComp)
 			pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
+
+		UpdateCharacterSkills();
 }
 void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
 {

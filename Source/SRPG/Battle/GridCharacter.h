@@ -41,8 +41,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
 		class UWidgetComponent* widgetComp;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Champion")
-		UWidgetComponent* widgetOnTopOfHead;
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
 		bool bChampion;
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
@@ -72,7 +70,8 @@ protected:
 	EGridCharState currentState;
 	TArray<AGridCharacter*> actionTargets;
 
-	TArray<FSkillTableStruct> skills;
+	UPROPERTY(BlueprintReadOnly, Category = "Skills")
+		TArray<FSkillTableStruct> skills;
 	int chosenSkill;
 	int chosenSkillAnimIndex;
 	
@@ -83,8 +82,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void MoveAccordingToPath();
 
-	UFUNCTION(BlueprintCallable)
-		TArray<FSkillTableStruct> GetCharacterSkills();
+	void UpdateCharacterSkills();
 	UFUNCTION(BlueprintCallable)
 		void UseSkill(int index_);
 

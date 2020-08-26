@@ -329,22 +329,31 @@ UDataTable* UExternalFileReader::GetTable(int index_)
 }
 
 
-TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int weaponIndex_, int currentLevel_)
+TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
 {
 	static const FString contextString(TEXT("Trying to get the skills from the table"));
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
-	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+	int skillsAddedSoFar = 0;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
 
 	for (auto n : rowNames)
 	{
-		FSkillTableStruct* row = tables[0]->FindRow<FSkillTableStruct>(n, contextString, true);
-		
-		//If we have the right weapon and the correct level, then this is valid information
-		if (row->weaponIndex == weaponIndex_ && row->levelToUnlock <= currentLevel_) 
+		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
 		{
-			//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-			skills.Push(row);
+			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+			//If we have the right weapon and the correct level, then this is valid information
+			if (row->weaponIndex == weaponIndex_ && row->levelToUnlock <= currentLevel_)
+			{
+				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+				skills.Push(row);
+				skillsAddedSoFar++;
+			}
+		}
+		else //We've got enough skills, break
+		{
+			break;
 		}
 	}
 
@@ -353,22 +362,31 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int weaponInd
 
 //TODO
 //Update the below function and the skills struct so that you can use armor skills
-TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int armodIndex_, int currentLevel_)
+TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int tableIndex_,int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
 {
 	static const FString contextString(TEXT("Trying to get the skills from the table"));
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
-	rowNames = tables[0]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+	int skillsAddedSoFar = 0;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
 
 	for (auto n : rowNames)
 	{
-		FSkillTableStruct* row = tables[0]->FindRow<FSkillTableStruct>(n, contextString, true);
-
-		//If we have the right weapon and the correct level, then this is valid information
-		if (row->weaponIndex == armodIndex_ && row->levelToUnlock <= currentLevel_)
+		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
 		{
-			//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-			skills.Push(row);
+			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+			//If we have the right weapon and the correct level, then this is valid information
+			if (row->weaponIndex == armorIndex_ && row->levelToUnlock <= currentLevel_)
+			{
+				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+				skills.Push(row);
+				skillsAddedSoFar++;
+			}
+		}
+		else //We've got enough skills, break
+		{
+			break;
 		}
 	}
 
@@ -380,11 +398,11 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
 	TArray<FItemTableStruct> items;
-	rowNames = tables[1]->GetRowNames(); //Will only be accessed by fighters in the battle. 1 for items.
+	rowNames = tables[3]->GetRowNames(); //Will only be accessed by fighters in the battle. 1 for items.
 
 	for (auto n : rowNames)
 	{
-		FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(n, contextString, true);
+		FItemTableStruct* row = tables[3]->FindRow<FItemTableStruct>(n, contextString, true);
 		if (row->owned > 0)
 		{
 			items.Push(*row);
@@ -394,10 +412,10 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
 	return items;
 }
 
-int UExternalFileReader::GetItemStatIndex(FName itemName_)
+int UExternalFileReader::GetItemStatIndex(int tableIndex_, FName itemName_)
 {
 	static const FString contextString(TEXT("Trying to get item's stat index from table"));
-	FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(itemName_, contextString, true);
+	FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(itemName_, contextString, true);
 
 	if(row)
 		return row->statIndex;
