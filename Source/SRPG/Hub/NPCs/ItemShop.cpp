@@ -83,7 +83,7 @@ FString AItemShop::GetItemName(int itemIndex_)
 	// return the item name from the values input 
 	FName converted = FName(*FString::FromInt(itemIndex_));
 	FItemTableStruct row = fileReader->FindItemTableRow(converted, 0);
-	//UE_LOG(LogTemp, Warning, TEXT("GotItemName!"));
+	//UE_LOG(LogTemp, Warning, TEXT("GotItemName!"))
 	if (row.level <= GetWorldLevel())
 	{
 		return row.name;

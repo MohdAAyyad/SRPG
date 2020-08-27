@@ -59,4 +59,6 @@ public:
 	int skillsN; //The number of skills this peice of equipment unlocks
 	UPROPERTY(BlueprintReadWrite)
 	int id;
+	UPROPERTY(BlueprintReadWrite)
+	int emitterIndex;
 };

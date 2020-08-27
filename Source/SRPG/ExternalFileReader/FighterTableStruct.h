@@ -59,8 +59,6 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int neededEXPToLevelUp;
 	UPROPERTY(BlueprintReadWrite)
-	int emitterIndex; //For regular attacks
-	UPROPERTY(BlueprintReadWrite)
 	int id;
 	UPROPERTY(BlueprintReadWrite)
 	int value; // how much does this fighter cost to buy

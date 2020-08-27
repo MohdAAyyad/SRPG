@@ -144,7 +144,7 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedWeapon);
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedArmor);
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedAccessory);
-		statsComp->PushAStat(selectedFighters[fighterIndex].emitterIndex);
+//		statsComp->PushAStat(selectedFighters[fighterIndex].emitterIndex);
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);

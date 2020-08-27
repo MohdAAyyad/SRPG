@@ -81,7 +81,7 @@ void AFightersShop::ChooseFighter(int fighterIndex_)
 		chosenFighter.equippedWeapon = fighters[fighterIndex_].equippedWeapon;
 		chosenFighter.equippedArmor = fighters[fighterIndex_].equippedArmor;
 		chosenFighter.equippedAccessory = fighters[fighterIndex_].equippedAccessory;
-		chosenFighter.emitterIndex = fighters[fighterIndex_].emitterIndex;
+//		chosenFighter.emitterIndex = fighters[fighterIndex_].emitterIndex;
 
 		currentIndex = fighterIndex_;
 		haveChosenFighter = true;
@@ -161,7 +161,7 @@ void AFightersShop::FinalizePurchase()
 			row.equippedWeapon = chosenFighter.equippedWeapon;
 			row.equippedArmor = chosenFighter.equippedArmor;
 			row.equippedAccessory = chosenFighter.equippedAccessory;
-			row.emitterIndex = chosenFighter.emitterIndex;
+//			row.emitterIndex = chosenFighter.emitterIndex;
 			row.hp = chosenFighter.hp;
 			row.pip = chosenFighter.pip;
 			row.atk = chosenFighter.atk;
