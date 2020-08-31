@@ -425,7 +425,7 @@ int UExternalFileReader::GetItemStatIndex(int tableIndex_, FName itemName_)
 int UExternalFileReader::GetItemValue(FName itemName_)
 {
 	static const FString contextString(TEXT("Trying to get item's value from table"));
-	FItemTableStruct* row = tables[1]->FindRow<FItemTableStruct>(itemName_, contextString, true);
+	FItemTableStruct* row = tables[3]->FindRow<FItemTableStruct>(itemName_, contextString, true);
 
 	if (row)
 		return row->value;
@@ -439,15 +439,15 @@ FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 	FString n = name_.ToString();
 
 	if (n == "Healing Potion")
-		return FName(TEXT("1"));
+		return FName(TEXT("0"));
 
 	if (n == "PIP restore")
-		return FName(TEXT("2"));
+		return FName(TEXT("1"));
 
 	return FName(TEXT(""));
 }
 
-FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_)
+FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_, int subIndex_)
 {
 	static const FString contextString(TEXT("Trying to get the Weapons from the table based on ID"));
 	TArray<FName> rowNames;
@@ -463,12 +463,35 @@ FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int 
 			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
 
 		//	UE_LOG(LogTemp, Warning, TEXT("Row equipmentIndex %d"), row->equipmentIndex);
-			if (row->id == equipID_)
+			if (row->equipmentIndex == equipIndex_) //Is this the correct piece of equipment
 			{
-				if (row->equipmentIndex == equipIndex_)
+				switch (equipIndex_) //Find out what type of equipment this is
 				{
-					equip = *row;
-					return equip;
+				case EQU_WPN:
+					if(row->weaponIndex == subIndex_) //Is this the correct type of weapon?
+						if (row->id == equipID_) //Is this the correct ID within the weapon/weaponclass tree?
+						{
+							equip = *row;
+							return equip;
+
+						}
+					break;
+				case EQU_ARM:
+					if (row->armorIndex == subIndex_) //Is this the correct type of armor?
+						if (row->id == equipID_) //Is this the correct ID within the weapon/weaponclass tree?
+						{
+							equip = *row;
+							return equip;
+
+						}
+					break;
+				case EQU_ACC: //Accessories don't have sub indexes
+					if (row->id == equipID_) //Is this the correct ID within the weapon/weaponclass tree?
+					{
+						equip = *row;
+						return equip;
+					}
+					break;
 				}
 
 			}
@@ -497,38 +520,41 @@ FEquipmentTableStruct UExternalFileReader::GetEquipmentByLevel(int tableIndex_, 
 			//UE_LOG(LogTemp, Warning, TEXT("Incoming details L: %d E: %d W: %d"), level_, equipIndex_, subIndex_);
 			//Check what type of equipment it is
 			// Then return the highest level equip-able piece of equipment of that type
-			if (equipIndex_ == EQU_WPN)
+			if (row->equipmentIndex == equipIndex_)
 			{
-				if (row->weaponIndex == subIndex_)
+				switch (equipIndex_)
 				{
+				case EQU_WPN:
+					if (row->weaponIndex == subIndex_)
+					{
+						if (row->level <= level_ && row->level > maxLevel)
+						{
+
+							equip = *row;
+							maxLevel = row->level;
+
+						}
+					}
+					break;
+				case EQU_ARM:
+					if (row->armorIndex == subIndex_)
+					{
+						if (row->level <= level_ && row->level > maxLevel)
+						{
+							equip = *row;
+							maxLevel = row->level;
+
+						}
+					}
+					break;
+				case EQU_ACC:
 					if (row->level <= level_ && row->level > maxLevel)
 					{
-						
 						equip = *row;
 						maxLevel = row->level;
 
 					}
-				}
-			}
-			else if(equipIndex_ == EQU_ARM)
-			{
-				if (row->armorIndex == subIndex_)
-				{
-					if (row->level <= level_ && row->level > maxLevel)
-					{
-						equip = *row;
-						maxLevel = row->level;
-
-					}
-				}
-			}
-			else if(equipIndex_ == EQU_ACC) //Accessories don't have a sub index
-			{
-				if (row->level <= level_ && row->level > maxLevel)
-				{
-					equip = *row;
-					maxLevel = row->level;
-
+					break;
 				}
 			}
 

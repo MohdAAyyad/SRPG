@@ -57,6 +57,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		int statIndex; //Which stat this skill affects
 	UPROPERTY(BlueprintReadOnly)
-		int EquipmentSkillsIndex;
+		int equipmentSkillsIndex;
+	UPROPERTY(BlueprintReadOnly)
+		int pure; //Pure vertical horizontal
 
 };

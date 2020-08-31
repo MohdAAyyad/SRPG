@@ -3,6 +3,7 @@
 
 #include "PathComponent.h"
 #include "Grid/Tile.h"
+#include "Definitions.h"
 
 // Sets default values for this component's properties
 UPathComponent::UPathComponent()
@@ -76,7 +77,7 @@ TArray<FVector> UPathComponent::GetPath()
 						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
 						&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
-						//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()==0|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == 4)
+						//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()== TILE_MOV|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == TILE_ENM)
 						//&& !currentNode->GetOccupied()
 						)
 						open.Push(currentNode->GetImmediateNeighbors()[i]);
@@ -104,7 +105,7 @@ TArray<FVector> UPathComponent::GetPath()
 						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 						&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
-						//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 0 || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == 4)
+						//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == TILE_MOV || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == TILE_ENM)
 						//&& !currentNode->GetOccupied()
 						)
 						open.Push(currentNode->GetDiagonalNeighbors()[d]);
@@ -170,7 +171,7 @@ void UPathComponent::UpdateMovementPath(ATile* tile_)
 	}
 }
 
-bool UPathComponent::DoesOpenListHaveALowerFCost(TArray<ATile*> list_, int fCost_)
+bool UPathComponent::DoesOpenListHaveALowerFCost(TArray<ATile*>& list_, int fCost_)
 {
 	if (list_.Num() > 0)
 	{
@@ -184,7 +185,7 @@ bool UPathComponent::DoesOpenListHaveALowerFCost(TArray<ATile*> list_, int fCost
 	}
 	return false;
 }
-bool UPathComponent::DoesClosedListHaveALowerFCost(TArray<ATile*> list_, int fCost_)
+bool UPathComponent::DoesClosedListHaveALowerFCost(TArray<ATile*>& list_, int fCost_)
 {
 	if (list_.Num() > 0)
 	{
@@ -233,19 +234,22 @@ void UPathComponent::ChangeTargetTileIfItsOccupied()
 
 void UPathComponent::AdjustPath(ATile* tile_, TArray<FVector>& move_)
 {
-	if (tile_->GetOccupied())
+	if (tile_)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Tile ummm yeahhh"));
-		tile_ = tile_->GetParentTile();
-		if (move_.Num() > 0)
+		if (tile_->GetOccupied())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Removing from move_"));
-			move_.RemoveAt(0);
+			//UE_LOG(LogTemp, Warning, TEXT("Tile ummm yeahhh"));
+			tile_ = tile_->GetParentTile();
+			if (move_.Num() > 0)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Removing from move_"));
+				move_.RemoveAt(0);
+			}
+			AdjustPath(tile_, move_);
 		}
-		AdjustPath(tile_, move_);
-	}
-	else
-	{
-		tile_->SetOccupied(true);
+		else
+		{
+			tile_->SetOccupied(true);
+		}
 	}
 }

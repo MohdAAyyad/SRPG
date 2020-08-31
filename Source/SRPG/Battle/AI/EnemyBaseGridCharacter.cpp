@@ -113,7 +113,7 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_ASN, armor.skillsN);
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
-
+		statsComp->AddToStat(STAT_PURE, weapon.pure);
 	}
 
 	if (pathComp)
@@ -133,7 +133,7 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 		if (gridManager && pathComp)
 		{
 			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM); //4 Reachable by enemy
+			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM,0); //4 Reachable by enemy
 			//Checks if we have a player reference first, otherwise, move to target tile
 			if (targetPlayer)
 			{
@@ -212,8 +212,8 @@ void AEnemyBaseGridCharacter::Selected()
 	if (gridManager && pathComp && originTile)
 	{
 		//Show the enemy's movement and attack ranges
-		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENMH);
-		gridManager->UpdateCurrentTile(originTile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK);
+		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENMH,0);
+		gridManager->UpdateCurrentTile(originTile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK, statsComp->GetStatValue(STAT_PURE));
 	}
 }
 
@@ -231,7 +231,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 		if (myTile_)
 		{
 			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM);
+			gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
 			if (targetPlayer)
 			{
 				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range
@@ -387,7 +387,7 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 		if (gridManager)
 		{
 			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM);
+			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM,0);
 
 			for (int i = 0; i < crdItems.Num(); i++)
 			{

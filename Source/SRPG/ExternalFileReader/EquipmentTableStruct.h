@@ -61,4 +61,6 @@ public:
 	int id;
 	UPROPERTY(BlueprintReadWrite)
 	int emitterIndex;
+	UPROPERTY(BlueprintReadWrite)
+	int pure; //Pure vertical horizontal
 };

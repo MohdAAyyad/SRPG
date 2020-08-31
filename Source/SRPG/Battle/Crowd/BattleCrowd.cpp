@@ -133,7 +133,7 @@ void ABattleCrowd::SpawnItems()
 			if (gridManager)
 			{
 				gridManager->ClearHighlighted();
-				gridManager->UpdateCurrentTile(tile_, rowSpeedForSpawningItems, depthForSpawningItems, TILE_CRD);
+				gridManager->UpdateCurrentTile(tile_, rowSpeedForSpawningItems, depthForSpawningItems, TILE_CRD,0);
 			}
 		}
 	}
@@ -144,7 +144,7 @@ void ABattleCrowd::SpawnItems()
 			if (gridManager)
 			{
 				gridManager->ClearHighlighted();
-				gridManager->UpdateCurrentTile(neutralItemsTile, rowSpeedForSpawningItems, depthForSpawningItems, TILE_CRD);
+				gridManager->UpdateCurrentTile(neutralItemsTile, rowSpeedForSpawningItems, depthForSpawningItems, TILE_CRD,0);
 			}
 		}
 	}

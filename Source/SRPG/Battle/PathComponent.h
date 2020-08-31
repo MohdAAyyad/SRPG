@@ -35,8 +35,8 @@ public:
 	TArray<ATile*> GetMovementPath();
 
 	void UpdateMovementPath(ATile* tile_);
-	bool DoesOpenListHaveALowerFCost(TArray<ATile*> list_, int fCost_);
-	bool DoesClosedListHaveALowerFCost(TArray<ATile*> list_, int fCost_);
+	bool DoesOpenListHaveALowerFCost(TArray<ATile*>& list_, int fCost_);
+	bool DoesClosedListHaveALowerFCost(TArray<ATile*>& list_, int fCost_);
 
 	void UpdateSpeed(int spd_);
 	int GetRowSpeed();

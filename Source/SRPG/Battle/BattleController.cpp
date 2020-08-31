@@ -25,6 +25,7 @@ ABattleController::ABattleController()
 	bTargetingWithASkill = false;
 	targetingRowSpeed = 0;
 	targetingDepthSpeed = 0;
+	targetingPure = 0;
 	previosulyTargetedActor = nullptr;
 	btlManager = nullptr;
 }
@@ -256,11 +257,12 @@ void ABattleController::FocusOnGridCharacter(AGridCharacter* chr_, float rate_)
 }
 
 
-void ABattleController::SetTargetingWithSkill(bool value_,int row_, int depth_)
+void ABattleController::SetTargetingWithSkill(bool value_,int row_, int depth_, int pure_)
 {
 	bTargetingWithASkill = value_;
 	targetingRowSpeed = row_;
 	targetingDepthSpeed = depth_;
+	targetingPure = pure_;
 }
 
 void ABattleController::TargetingWithASkill()
@@ -292,7 +294,7 @@ void ABattleController::TargetingWithASkill()
 					}
 					//Get the first index of the tiles you're about to highlight
 					lastIndexOfCurrentlyHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles().Num();
-					targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
+					targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT, targetingPure);
 					allHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles();
 					//Push the tiles into the targetingTiles array
 					for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
@@ -323,7 +325,7 @@ void ABattleController::TargetingWithASkill()
 							}
 							//Get the first index of the tiles you're about to highlight
 							lastIndexOfCurrentlyHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles().Num();
-							targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT);
+							targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT, targetingPure);
 							allHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles();
 							//Push the tiles into the targetingTiles array
 							for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)

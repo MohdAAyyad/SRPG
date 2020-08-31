@@ -106,7 +106,7 @@ void AGridManager::BeginPlay()
 
 }
 
-void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int index_)
+void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int index_, int pure_)
 {
 	if (tile_)
 	{
@@ -126,7 +126,10 @@ void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int
 			//Get the column tile index
 			tileIndexInColumn = ConvertRowTocolumn(tileIndexInRows);
 		}
-		HighlightTiles(rowSpeed_, depth_, index_);
+		if (pure_ == 0) //False
+			HighlightTiles(rowSpeed_, depth_, index_);
+		else
+			HighlightTilesPure(rowSpeed_, depth_, index_);
 	}
 }
 
@@ -156,19 +159,19 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 	}
 	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ + 1 && i < rowsNum; i++)
 	{
+		//Get the columne index of the tile
 		tileIndexInColumn = ConvertRowTocolumn(i) + columnOffset;
 		if (tileIndexInColumn < columnTiles.Num())
 		{
 			if (columnTiles[tileIndexInColumn] != nullptr)
 			{
-				if (columnTiles[tileIndexInColumn]->GetHighlighted() == index_)
+				if (columnTiles[tileIndexInColumn]->GetHighlighted() == index_) //Make sure it's highlighted before highlighting the tiles on its right and left
 				{
 					for (int d = 0; d < localDepth; d++)
 					{
 						//If it's on the same row, that's fine
 						if (ConvertColumnToRow(tileIndexInColumn + d) == i)
 						{
-							//	UE_LOG(LogTemp, Warning, TEXT("tileIndexInColumn + d %d "), tileIndexInColumn + d);
 							if (tileIndexInColumn + d > 0 && tileIndexInColumn + d < columnTiles.Num())
 							{
 								if (columnTiles[tileIndexInColumn + d - 1]->GetTraversable()) //Is the one to my left traversable?
@@ -178,13 +181,12 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 								}
 								else
 								{
-									break;
+									break; //Otherwise, don't bother with the tiles on my left
 								}
 							}
 						}
-						if (ConvertColumnToRow(tileIndexInColumn - d) == i)
+						if (ConvertColumnToRow(tileIndexInColumn - d) == i) // Right tiles
 						{
-							//	UE_LOG(LogTemp, Warning, TEXT("tileIndexInColumn - d %d "), tileIndexInColumn - d);
 							if (tileIndexInColumn - d > 0 && tileIndexInColumn - d + 1 < columnTiles.Num())
 							{
 								if (columnTiles[tileIndexInColumn - d + 1]->GetTraversable())
@@ -207,7 +209,7 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 	}
 	localDepth = depth_;
 
-	//Rows going downwards
+	//Repeat the same process for rows going downwards
 
 	for (int j = tileIndexInRows; j >= tileIndexInRows - rowSpeed_ && j >= 0; j--)
 	{
@@ -281,12 +283,108 @@ void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 	}
 }
 
+void AGridManager::HighlightTilesPure(int rowSpeed_, int depth_, int index_)
+{
+	columnOffset = tileIndexInColumn - ConvertRowTocolumn(tileIndexInRows);
+	//Rows going upwards
+	for (int i = tileIndexInRows; i < tileIndexInRows + rowSpeed_ + 1 && i < rowsNum; i++)
+	{
+		tileIndexInColumn = ConvertRowTocolumn(i) + columnOffset;
+		if (tileIndexInColumn < columnTiles.Num())
+		{
+			if (columnTiles[tileIndexInColumn] != nullptr)
+			{
+				if (columnTiles[tileIndexInColumn]->GetTraversable()) //If any of the tiles going upwards is non-traversable, then the next tile by default is non-traversable
+				{
+					columnTiles[tileIndexInColumn]->Highlighted(index_);
+					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+	}
+	//Get the column index of the origin tile. We won't need to loop here as we won't go diagonally
+	tileIndexInColumn = ConvertRowTocolumn(tileIndexInRows) + columnOffset;
+	if (tileIndexInColumn < columnTiles.Num())
+	{
+		if (columnTiles[tileIndexInColumn] != nullptr)
+		{
+			if (columnTiles[tileIndexInColumn]->GetHighlighted() == index_) //Make sure it's highlighted before highlighting the tiles on its right and left
+			{
+				for (int d = 0; d < depth_; d++)
+				{
+					//If it's on the same row, that's fine
+					if (ConvertColumnToRow(tileIndexInColumn + d) == tileIndexInRows)
+					{
+						if (tileIndexInColumn + d > 0 && tileIndexInColumn + d < columnTiles.Num())
+						{
+							if (columnTiles[tileIndexInColumn + d - 1]->GetTraversable()) //Is the one to my left traversable?
+							{
+									columnTiles[tileIndexInColumn + d]->Highlighted(index_);
+									highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
+							}
+							else
+							{
+								break; //Otherwise, don't bother with the tiles on my left
+							}
+						}
+					}
+					if (ConvertColumnToRow(tileIndexInColumn - d) == tileIndexInRows) // Right tiles
+					{
+						if (tileIndexInColumn - d > 0 && tileIndexInColumn - d + 1 < columnTiles.Num())
+						{
+							if (columnTiles[tileIndexInColumn - d + 1]->GetTraversable())
+							{
+								columnTiles[tileIndexInColumn - d]->Highlighted(index_);
+								highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	//Highlight the rows going down
+
+	for (int j = tileIndexInRows; j >= tileIndexInRows - rowSpeed_ && j >= 0; j--)
+	{
+		tileIndexInColumn = ConvertRowTocolumn(j) + columnOffset;
+
+		if (tileIndexInColumn < columnTiles.Num())
+		{
+			if (columnTiles[tileIndexInColumn] != nullptr)
+			{
+				if (columnTiles[tileIndexInColumn]->GetTraversable())
+				{
+					columnTiles[tileIndexInColumn]->Highlighted(index_);
+					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	//No need to loop through the depth for downwards tiles as we are not going diagonally
+}
+
 void AGridManager::HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_)
 {
 	int columnTileIndex = ConvertRowTocolumn(rowIndex_) + offset_;
 	if (columnTileIndex >= 0 && columnTileIndex < columnTiles.Num())
 	{
-		UpdateCurrentTile(columnTiles[columnTileIndex], rowSpeed_, depth_, TILE_DEP);
+		UpdateCurrentTile(columnTiles[columnTileIndex], rowSpeed_, depth_, TILE_DEP, 0);
 	}
 }
 

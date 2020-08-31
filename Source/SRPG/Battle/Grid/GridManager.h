@@ -42,10 +42,11 @@ protected:
 
 
 public:
-	void UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_, int index_);
+	void UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_, int index_, int pure_);
 	void ClearHighlighted();
 
 	void HighlightTiles(int rowSpeed_, int depth_, int index_);
+	void HighlightTilesPure(int rowSpeed_, int depth_, int index_); //Pure vertical and horizontal highlight
 	void HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_);
 	TArray<ATile*> GetHighlightedTiles();
 	ATile* GetTileFromRowAndOffset(int row_, int offset_);

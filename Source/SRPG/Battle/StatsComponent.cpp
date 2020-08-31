@@ -12,9 +12,6 @@ UStatsComponent::UStatsComponent()
 	tempCRD = 0;
 	maxHP = 0;
 	maxPip = 0;
-	archetype = 0;
-
-	// ...
 }
 
 void UStatsComponent::PushAStat(int statValue_)
@@ -149,6 +146,7 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 
 	//UE_LOG(LogTemp, Warning, TEXT("Speed after scaling %d"), currentStats[STAT_SPD]);
 	currentStats[STAT_LVL] = targetLevel_;
+	currentStats[STAT_ARCH] = archetype_;
 }
 
 void UStatsComponent::InitStatsAtZero()

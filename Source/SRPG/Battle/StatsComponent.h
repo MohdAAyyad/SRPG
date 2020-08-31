@@ -23,7 +23,6 @@ protected:
 		int maxHP;
 	UPROPERTY(BlueprintReadOnly)
 		int maxPip;
-	int archetype;
 
 public:	
 	int CalculateHit(int otherAgi_);

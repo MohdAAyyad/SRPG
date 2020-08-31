@@ -70,8 +70,8 @@
 #define STAT_ACC 16
 #endif
 
-#ifndef STAT_EMI
-#define STAT_EMI 17
+#ifndef STAT_PURE //Weapon pure VH or not
+#define STAT_PURE 17
 #endif
 
 #ifndef STAT_WHT //Weapon hit

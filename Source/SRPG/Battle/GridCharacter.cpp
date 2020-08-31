@@ -149,7 +149,7 @@ void AGridCharacter::Selected()
 		if(movementPath.Num()>0)
 			movementPath.Empty();
 		if(pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV);
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV,0);
 	}
 }
 void AGridCharacter::NotSelected()
@@ -324,11 +324,11 @@ void AGridCharacter::UseSkill(int index_)
 			chosenSkill = index_;
 			chosenSkillAnimIndex = skills[index_].animationIndex;
 			tile_->GetGridManager()->ClearHighlighted();
-			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL);
+			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL, skills[index_].pure);
 			currentState = EGridCharState::SKILLING;
 			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
 			if (btlctrl)
-				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths);
+				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
 		}
 	}
 }
@@ -368,7 +368,7 @@ void AGridCharacter::HighlightItemUsage(FName itemName_)
 	if (tile_)
 	{
 		tile_->GetGridManager()->ClearHighlighted();
-		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM); //Items always cover 1 tile only
+		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM, 0); //Items always cover 1 tile only
 		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
 		currentState = EGridCharState::HEALING;
 		//UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
@@ -380,14 +380,14 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 	if (target_ && fileReader)
 	{
 		target_->GridCharReactToItem(fileReader->GetItemStatIndex(3,chosenItem), fileReader->GetItemValue(chosenItem));
-		fileReader->AddOwnedValueItemTable(chosenItem, 1, -1);
+		fileReader->AddOwnedValueItemTable(chosenItem, 3, -1);
 	}
 
 }
 
 void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Reacting to item"));
+	//UE_LOG(LogTemp, Warning, TEXT("Reacting to item"));
 	if (animInstance)
 		animInstance->SetUseItem();
 }
@@ -412,9 +412,9 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 	//Get the stats of the equipment and add them to the character's stats
 	if (fileReader)
 	{
-		weapon = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_WPN), EQU_WPN);
-		armor = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ARM), EQU_ARM);
-		accessory = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ACC), EQU_ACC);
+		weapon = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_WPN), EQU_WPN, statsComp->GetStatValue(STAT_WPI));
+		armor = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ARM), EQU_ARM, statsComp->GetStatValue(STAT_ARI));
+		accessory = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ACC), EQU_ACC, -1);
 		
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
 		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
@@ -430,6 +430,7 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_ASN, armor.skillsN);
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
+		statsComp->AddToStat(STAT_PURE, weapon.pure);
 
 	}
 		if (pathComp)

@@ -62,7 +62,7 @@ void APlayerGridCharacter::HighlightMovementPath()
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 		if (pathComp)
-			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV);
+			originTile->GetGridManager()->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(),TILE_MOV, 0);
 	}
 }
 void APlayerGridCharacter::HighlightRegularAttackPath()
@@ -72,7 +72,7 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 	{
 		currentState = EGridCharState::ATTACKING;
 		tile->GetGridManager()->ClearHighlighted();
-		tile->GetGridManager()->UpdateCurrentTile(tile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK);
+		tile->GetGridManager()->UpdateCurrentTile(tile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK, statsComp->GetStatValue(STAT_PURE));
 	}
 }
 
@@ -144,7 +144,7 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedWeapon);
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedArmor);
 		statsComp->PushAStat(selectedFighters[fighterIndex].equippedAccessory);
-//		statsComp->PushAStat(selectedFighters[fighterIndex].emitterIndex);
+		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(0);

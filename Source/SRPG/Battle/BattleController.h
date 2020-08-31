@@ -43,6 +43,7 @@ protected:
 	bool bTargetingWithASkill;
 	int targetingRowSpeed;
 	int targetingDepthSpeed;
+	int targetingPure;
 	TArray<ATile*> targetingTiles;
 	TWeakObjectPtr<AActor,FWeakObjectPtr> previosulyTargetedActor;
 
@@ -51,6 +52,6 @@ protected:
 
 public:
 	void FocusOnGridCharacter(AGridCharacter* chr_, float rate_);
-	void SetTargetingWithSkill(bool value_,int row_, int depth_);
+	void SetTargetingWithSkill(bool value_,int row_, int depth_, int pure_);
 
 };
