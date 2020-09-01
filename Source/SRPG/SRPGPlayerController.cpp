@@ -64,18 +64,9 @@ void ASRPGPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ASRPGPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ASRPGPlayerController::OnSetDestinationReleased);
-
-	// support touch devices 
-	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ASRPGPlayerController::MoveToTouchLocation);
-	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ASRPGPlayerController::MoveToTouchLocation);
-
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ASRPGPlayerController::CheckCollisionUnderMouse);
 }
 
-void ASRPGPlayerController::OnResetVR()
-{
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
 
 void ASRPGPlayerController::MoveToMouseCursor()
 {	

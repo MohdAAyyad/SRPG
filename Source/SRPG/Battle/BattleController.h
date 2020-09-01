@@ -47,11 +47,16 @@ protected:
 	TArray<ATile*> targetingTiles;
 	TWeakObjectPtr<AActor,FWeakObjectPtr> previosulyTargetedActor;
 
-	void ResetView();
 	void TargetingWithASkill();
+	void CancelCommand();
 
 public:
 	void FocusOnGridCharacter(AGridCharacter* chr_, float rate_);
 	void SetTargetingWithSkill(bool value_,int row_, int depth_, int pure_);
+	void ResetViewLock();
+	UFUNCTION(BlueprintCallable)
+		void ResetFocus();
+	void ResetControlledCharacter();
 
+	float focusRate;
 };

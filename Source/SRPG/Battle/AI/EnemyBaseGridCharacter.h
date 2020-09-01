@@ -24,7 +24,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Detection")
 		class UBoxComponent* detectionRadius;
 
-	class ABattleController* btlCtrl;
 	class ABattleManager* btlManager;
 	TArray<ACrowdItem*> crdItems;
 

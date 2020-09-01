@@ -25,7 +25,7 @@ ABattlePawn::ABattlePawn()
 	cameraBoom->SetupAttachment(root);
 	cameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
 	cameraBoom->TargetArmLength = 800.f;
-	cameraBoom->RelativeRotation = FRotator(-90.f, 0.f, 0.f);
+	cameraBoom->RelativeRotation = FRotator(-60.f, 0.f, 0.f);
 	cameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
 	// Create a camera...
@@ -44,6 +44,10 @@ ABattlePawn::ABattlePawn()
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	bUnderControl = true;
+	lockedOnTarget = nullptr;
+	bLockedOn = false;
+	lockOnRate = 0.075f;
+	originalFOV = 0.0f;
 
 }
 
@@ -68,38 +72,50 @@ void ABattlePawn::BeginPlay()
 		}
 	}
 
+	originalFOV = mainCamera->FieldOfView;
+
 }
 
 // Called every frame
 void ABattlePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bLockedOn)
+	{
+		//Follow the locked on target in the x-y plane
+		if (lockedOnTarget)
+		{
+			FVector loc = GetActorLocation();
+			FVector targetLoc = lockedOnTarget->GetActorLocation();
+			targetLoc.Z = loc.Z;
+			loc = FMath::Lerp(loc, targetLoc, lockOnRate);
+			if (mainCamera->FieldOfView != originalFOV)
+				mainCamera->SetFieldOfView(FMath::Lerp(mainCamera->FieldOfView, originalFOV, lockOnRate));
+			SetActorLocation(loc);
+		}
+	}
 
 }
 
 void ABattlePawn::MoveUpDown(float rate_)
 {
-	if (bUnderControl)
+	if (!bLockedOn)
 	{
 		FVector loc = GetActorLocation();
-		loc.X += rate_ * 300.0f * GetWorld()->DeltaTimeSeconds;
+		loc.X += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }
 void ABattlePawn::MoveRightLeft(float rate_)
 {
-	if (bUnderControl)
+	if (!bLockedOn)
 	{
 		FVector loc = GetActorLocation();
-		loc.Y += rate_ * 300.0f * GetWorld()->DeltaTimeSeconds;
+		loc.Y += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }
 
-void ABattlePawn::SetUnderControl(bool value_)
-{
-	bUnderControl = value_;
-}
 
 void ABattlePawn::Zoom(float rate_)
 {
@@ -110,5 +126,17 @@ void ABattlePawn::Zoom(float rate_)
 			mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
 		}
 	}
+}
+
+void ABattlePawn::LockOnActor(AActor* target_)
+{
+	lockedOnTarget = target_;
+	bLockedOn = true;
+}
+
+void ABattlePawn::ResetLock()
+{
+	bLockedOn = false;
+	lockedOnTarget = nullptr;
 }
 

@@ -47,8 +47,6 @@ void AEnemyBaseGridCharacter::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::TakeItem);
 
-	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
-
 }
 
 void AEnemyBaseGridCharacter::Tick(float DeltaTime)
@@ -236,9 +234,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 			{
 				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range
 				{
-					if (btlCtrl)
-						btlCtrl->FocusOnGridCharacter(this, 0.25f);
-					AttackUsingWeapon(targetPlayer);
+					btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
+					AttackUsingWeapon(targetPlayer, btlCtrl->focusRate);
 				}
 				else
 				{

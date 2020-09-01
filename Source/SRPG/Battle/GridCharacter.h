@@ -67,6 +67,8 @@ protected:
 		class ABattleManager* btlManager;
 	class ABattleCrowd* crdManager;
 
+	class ABattleController* btlCtrl;
+
 	EGridCharState currentState;
 	TArray<AGridCharacter*> actionTargets;
 
@@ -111,8 +113,10 @@ public:
 	UFUNCTION(BlueprintCallable) //Called from within the animation instance
 		virtual void ActivateSkillAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
-	void AttackUsingWeapon(AGridCharacter* target_);
-	void AttackUsingSkill(TArray<AGridCharacter*> targets_);
+	void AttackUsingWeapon(AGridCharacter* target_, float delay_);
+	void CompleteAttackUsingWeapon();
+	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_);
+	void CompleteAttackUsingSkill();
 
 	void SetBtlAndCrdManagers(ABattleManager* btlManager_,ABattleCrowd* crd_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on
