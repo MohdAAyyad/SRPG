@@ -29,6 +29,8 @@
 #include "CollisionQueryParams.h"
 #include "StatsComponent.h"
 #include "Intermediary/Intermediate.h"
+#include "BattleController.h"
+#include "TimerManager.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -51,8 +53,9 @@ AGridCharacter::AGridCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
-	CameraBoom->TargetArmLength = 800.f;
-	CameraBoom->RelativeRotation = FRotator(-60.f, 0.f, 0.f);
+	CameraBoom->TargetArmLength = 500.f;
+	CameraBoom->AddRelativeLocation(FVector(-10.f,0.0f,20.0f));
+	CameraBoom->RelativeRotation = FRotator(-25.0f, -60.0f, 0.f);
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
 	// Create a camera...
@@ -114,6 +117,8 @@ void AGridCharacter::BeginPlay()
 
 	if(villainParticles)
 		villainParticles->DeactivateSystem();
+
+	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
 }
 
@@ -178,6 +183,11 @@ void AGridCharacter::MoveAccordingToPath()
 				if (tile_)
 					tile_->SetOccupied(true);
 				bMoving = false;
+				if (btlCtrl)
+					btlCtrl->ResetViewLock();
+				NotSelected();
+				Selected();
+					
 			}
 		}
 	}
@@ -196,8 +206,6 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	{
 		if (pathComp)
 		{
-			if (originTile)
-				originTile->SetOccupied(false);
 			pathComp->SetTargetTile(target_);
 			pathComp->SetCurrentTile(GetMyTile());
 			movementPath = pathComp->GetPath();
@@ -206,7 +214,7 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 	}
 }
 
-void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_)
+void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
 {
 	if (target_)
 	{
@@ -216,14 +224,21 @@ void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_)
 		rot.Roll = GetActorRotation().Roll;
 		rot.Pitch = GetActorRotation().Pitch;
 		SetActorRotation(rot);
-		if (animInstance)
-		{
-			animInstance->WeaponAttack();
-		}
+		FTimerHandle attackDelayHandle;
+		//The delay here is needed to allow the camera enough time to focus on the character attacking
+		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::CompleteAttackUsingWeapon, delay_, false);
 	}
 }
 
-void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_)
+void AGridCharacter::CompleteAttackUsingWeapon()
+{
+	if (animInstance)
+	{
+		animInstance->WeaponAttack();
+	}
+}
+
+void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_)
 {
 	if (targets_.Num()>0)
 	{
@@ -236,11 +251,18 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_)
 			rot.Pitch = GetActorRotation().Pitch;
 			SetActorRotation(rot);
 
-			if (animInstance) //Play the animation
-			{
-				animInstance->SkillAttack(chosenSkillAnimIndex);
-			}
+			FTimerHandle attackDelayHandle;
+			//The delay here is needed to allow the camera enough time to focus on the character attacking
+			GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::CompleteAttackUsingSkill, delay_, false);
 		}
+	}
+}
+
+void AGridCharacter::CompleteAttackUsingSkill()
+{
+	if (animInstance) //Play the animation
+	{
+		animInstance->SkillAttack(chosenSkillAnimIndex);
 	}
 }
 

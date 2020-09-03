@@ -74,6 +74,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		int totalNumberOfPhasesElapsed;
 
+	class ABattleController* btlCtrl;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

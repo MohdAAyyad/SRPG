@@ -26,6 +26,9 @@ protected:
 
 	void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+		void RemoveWidgetFromVP();
+
 public:
 	void Selected() override;
 	void NotSelected() override;

@@ -23,6 +23,7 @@
 #include "../Crowd/BattleCrowd.h"
 #include "../StatsComponent.h"
 #include "Intermediary/Intermediate.h"
+#include "../BattleController.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
@@ -44,7 +45,10 @@ void APlayerGridCharacter::Selected()
 void APlayerGridCharacter::NotSelected()
 {
 	if (widgetComp)
-		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	{
+		if(widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	}
 
 	if (originTile)
 		originTile->GetGridManager()->ClearHighlighted();
@@ -153,5 +157,14 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(0);
 		statsComp->PushAStat(selectedFighters[fighterIndex].archetype);
 		AddEquipmentStats(2);
+	}
+}
+
+void APlayerGridCharacter::RemoveWidgetFromVP()
+{
+	if (widgetComp)
+	{
+		if (widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 	}
 }

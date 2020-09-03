@@ -28,6 +28,7 @@ ABattleController::ABattleController()
 	targetingPure = 0;
 	previosulyTargetedActor = nullptr;
 	btlManager = nullptr;
+	focusRate = 0.35f;
 }
 
 void ABattleController::PlayerTick(float DeltaTime)
@@ -43,12 +44,11 @@ void ABattleController::PlayerTick(float DeltaTime)
 void ABattleController::SetupInputComponent()
 {
 	// set up gameplay key bindings
-	Super::SetupInputComponent();
+	APlayerController::SetupInputComponent();
 
 	SetInputMode(FInputModeGameAndUI());
-
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ABattleController::HandleMousePress);
-	InputComponent->BindAction("ResetView", IE_Released, this, &ABattleController::ResetView);
+	InputComponent->BindAction("Cancel", IE_Pressed, this, &ABattleController::CancelCommand);
 
 }
 
@@ -90,17 +90,14 @@ void ABattleController::HandleMousePress()
 			}
 			else
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Hit something"));
 				if (!controlledCharacter) //If we don't have a controlled character, control the character you just pressed on
 				{
 					controlledCharacter = Cast<AGridCharacter>(hit.Actor);
 					if (controlledCharacter)
 					{
 						controlledCharacter->Selected();
-						SetViewTargetWithBlend(controlledCharacter, 0.35f);
+						//SetViewTargetWithBlend(controlledCharacter, 0.35f);
 					}
-					//UE_LOG(LogTemp, Warning, TEXT("Got player"));
-
 
 				}
 				else if(controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
@@ -108,13 +105,15 @@ void ABattleController::HandleMousePress()
 					targetTile = Cast<ATile>(hit.Actor);
 					if (targetTile)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("Got Tile"));
-
-						//0 Move 1 Attack 2 Heal
 						if (targetTile->GetHighlighted() == TILE_MOV)
 						{
-							if(!targetTile->GetOccupied()) //Move to this tile if there is nobody standing on it already
+							if (!targetTile->GetOccupied())//Move to this tile if there is nobody standing on it already
+							{
+								if(battlePawn)
+									battlePawn->LockOnActor(controlledCharacter);
+
 								controlledCharacter->MoveToThisTile(targetTile);
+							}
 						}
 					}
 					else
@@ -136,7 +135,8 @@ void ABattleController::HandleMousePress()
 							//See if the tile is within attack range
 							if (tile_->GetHighlighted() == TILE_ATK)
 							{
-								controlledCharacter->AttackUsingWeapon(targetChar);
+								FocusOnGridCharacter(controlledCharacter, focusRate);
+								controlledCharacter->AttackUsingWeapon(targetChar, focusRate);
 							}
 						}
 					}
@@ -161,7 +161,8 @@ void ABattleController::HandleMousePress()
 									if (targetingTiles[i]->GetMyGridCharacter())
 										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
 								}
-								controlledCharacter->AttackUsingSkill(targetedCharacters);
+								FocusOnGridCharacter(controlledCharacter, focusRate);
+								controlledCharacter->AttackUsingSkill(targetedCharacters,focusRate);
 								bTargetingWithASkill = false;
 							}
 						}
@@ -200,7 +201,8 @@ void ABattleController::HandleMousePress()
 							}
 							if (targetedCharacters.Num() > 0)
 							{
-								controlledCharacter->AttackUsingSkill(targetedCharacters);
+								FocusOnGridCharacter(controlledCharacter, focusRate);
+								controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
 								bTargetingWithASkill = false;
 							}
 						}
@@ -213,18 +215,6 @@ void ABattleController::HandleMousePress()
 
 			}
 		}
-	}
-}
-void ABattleController::ResetView()
-{
-	if (battlePawn)
-	{
-		SetViewTargetWithBlend(battlePawn, 0.3f);
-		battlePawn->SetUnderControl(true);
-	}
-	if (controlledCharacter)
-	{
-		controlledCharacter->NotSelected();
 	}
 }
 
@@ -351,4 +341,33 @@ void ABattleController::TargetingWithASkill()
 			}
 		}
 	}
+}
+
+void ABattleController::CancelCommand()
+{
+	//Return to the idle UI state
+	if (controlledCharacter)
+	{
+		controlledCharacter->NotSelected();
+		controlledCharacter->Selected();
+	}
+}
+
+void ABattleController::ResetViewLock()
+{
+	if (battlePawn)
+		battlePawn->ResetLock();
+}
+
+void ABattleController::ResetFocus()
+{
+	if (battlePawn)
+		SetViewTargetWithBlend(battlePawn, focusRate);
+}
+
+void ABattleController::ResetControlledCharacter()
+{
+	if (controlledCharacter)
+		controlledCharacter->NotSelected();
+	controlledCharacter = nullptr;
 }

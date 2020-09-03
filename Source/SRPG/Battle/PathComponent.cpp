@@ -30,6 +30,7 @@ void UPathComponent::SetTargetTile(ATile* tile_)
 void UPathComponent::SetCurrentTile(ATile* tile_)
 {
 	currentTile = tile_;
+	currentTile->SetOccupied(false);
 }
 
 TArray<FVector> UPathComponent::GetPath()

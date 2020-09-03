@@ -12,6 +12,7 @@
 #include "Definitions.h"
 #include "Player/PlayerGridCharacter.h"
 #include "Intermediary/Intermediate.h"
+#include "BattleController.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -50,6 +51,8 @@ void ABattleManager::BeginPlay()
 	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
 	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
 	maxNumberOfUnitsToDeploy = Intermediate::GetInstance()->GetMaxDeploymentSize();
+
+	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
 }
 
@@ -96,6 +99,9 @@ void ABattleManager::NextPhase()
 			deployedUnits[i]->UpdateOriginTile();
 		}
 	}
+
+	if (btlCtrl)
+		btlCtrl->ResetControlledCharacter();
 			
 }
 void ABattleManager::DeployThisUnitNext(int index_)

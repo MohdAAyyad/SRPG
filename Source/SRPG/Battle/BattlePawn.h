@@ -34,6 +34,10 @@ protected:
 
 	class ABattleController* pController;
 	bool bUnderControl;
+	bool bLockedOn;
+	AActor* lockedOnTarget;
+	float lockOnRate;
+	float originalFOV;
 
 public:
 	// Called every frame
@@ -41,6 +45,7 @@ public:
 
 	void MoveUpDown(float rate_);
 	void MoveRightLeft(float rate_);
-	void SetUnderControl(bool value_);
 	void Zoom(float rate_);
+	void LockOnActor(AActor* target_);
+	void ResetLock();
 };
