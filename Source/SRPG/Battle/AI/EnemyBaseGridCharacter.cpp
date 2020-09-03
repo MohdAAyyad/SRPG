@@ -42,6 +42,7 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 void AEnemyBaseGridCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateOriginTile();
 	if (detectionRadius)
 		detectionRadius->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::DetectItem);
 

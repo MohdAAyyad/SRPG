@@ -39,6 +39,9 @@ protected:
 	class ATile* targetTile;
 	ABattleManager* btlManager;
 
+	//Deployment
+	bool bReDeployingUnit; //Used to know whether the player wants to change the position of a deployed unit
+
 	//Skill targeting
 	bool bTargetingWithASkill;
 	int targetingRowSpeed;

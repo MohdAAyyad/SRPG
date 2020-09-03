@@ -87,6 +87,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void EndDeployment(); //Called from the UI 
 
+	int GetBpidOfUnitToBeDeployedNext();
 	int GetTotalNumberOfPhasesElapsed();
 
 	float GetTotalStatFromDeployedPlayers(int statIndex_);

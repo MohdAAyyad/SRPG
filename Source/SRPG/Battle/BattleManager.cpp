@@ -125,10 +125,10 @@ void ABattleManager::DeployThisUnitNext(int index_)
 void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from battle controller
 {
 	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
-	numberOfUnitsDeployed++;
-	tileLoc_.Z += 50.0f;
 	if (bpidOfUnitToBeDeployedNext != -1)
 	{
+		numberOfUnitsDeployed++;
+		tileLoc_.Z += 50.0f;
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
@@ -145,12 +145,22 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 	}
 }
 
+int ABattleManager::GetBpidOfUnitToBeDeployedNext()
+{
+	return bpidOfUnitToBeDeployedNext;
+}
+
 void ABattleManager::EndDeployment()
 {
 	if (gridManager)
 		gridManager->ClearHighlighted();
 
 	Intermediate::GetInstance()->ResetSelectedFighters();
+
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		deployedUnits[i]->UpdateOriginTile();
+	}
 
 	NextPhase();
 }
