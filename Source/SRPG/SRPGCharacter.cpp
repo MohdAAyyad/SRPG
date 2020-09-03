@@ -67,7 +67,7 @@ void ASRPGCharacter::Tick(float DeltaSeconds)
 		if (APlayerController* PC = Cast<APlayerController>(GetController()))
 		{
 			FHitResult TraceHitResult;
-			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
+			PC->GetHitResultUnderCursor(ECC_Visibility, false, TraceHitResult);
 			FVector CursorFV = TraceHitResult.ImpactNormal;
 			FRotator CursorR = CursorFV.Rotation();
 			CursorToWorld->SetWorldLocation(TraceHitResult.Location);

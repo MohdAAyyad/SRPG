@@ -109,7 +109,6 @@ void AGridCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UpdateOriginTile(); 
 	animInstance = Cast<UGridCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
 	if(champParticles)

@@ -16,6 +16,7 @@
 #include "BattleManager.h"
 #include "Grid/GridManager.h"
 #include "Definitions.h"
+#include "Kismet/GameplayStatics.h"
 
 ABattleController::ABattleController()
 {
@@ -29,6 +30,8 @@ ABattleController::ABattleController()
 	previosulyTargetedActor = nullptr;
 	btlManager = nullptr;
 	focusRate = 0.35f;
+
+	bReDeployingUnit = false;
 }
 
 void ABattleController::PlayerTick(float DeltaTime)
@@ -38,6 +41,30 @@ void ABattleController::PlayerTick(float DeltaTime)
 	if (bTargetingWithASkill) //Player is targeting with a skill. We need to show the tiles that can be attacked by the skill.
 	{
 		TargetingWithASkill();
+	}
+
+	if (bReDeployingUnit)
+	{
+		if (controlledCharacter)
+		{
+			float mouseX = 0.0f;
+			float mouseY = 0.0f;
+			GetMousePosition(mouseX, mouseY);
+			FVector loc_ = controlledCharacter->GetActorLocation();
+			FVector dir_ = FVector(0.0f,0.0f,1.0f);
+			UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(mouseX, mouseY), loc_, dir_);
+			UE_LOG(LogTemp,Warning,TEXT("Dir: %d %d %d"), dir_.X, dir_.Y, dir_.Z)
+			controlledCharacter->SetActorLocation(loc_);
+			
+
+			FHitResult TraceHitResult;
+			GetHitResultUnderCursor(ECC_Visibility, false, TraceHitResult);
+			FVector CursorFV = TraceHitResult.ImpactNormal;
+			FRotator CursorR = FRotator();
+			TraceHitResult.Location.Z += 300.0f;
+			controlledCharacter->SetActorLocation(TraceHitResult.Location);
+			controlledCharacter->SetActorRotation(CursorR);
+		}
 	}
 }
 
@@ -49,7 +76,6 @@ void ABattleController::SetupInputComponent()
 	SetInputMode(FInputModeGameAndUI());
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ABattleController::HandleMousePress);
 	InputComponent->BindAction("Cancel", IE_Pressed, this, &ABattleController::CancelCommand);
-
 }
 
 
@@ -79,12 +105,55 @@ void ABattleController::HandleMousePress()
 			if (btlManager->GetPhase() == BTL_DEP) //Deployment phase
 			{
 				targetTile = Cast<ATile>(hit.Actor);
-				if (targetTile)
+				if (targetTile) //Check if we press on a tile first
 				{
-					if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+					if (!bReDeployingUnit)
 					{
-						btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
-						targetTile->SetOccupied(true);
+						if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+						{
+							btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
+							targetTile->SetOccupied(true);
+						}
+					}
+					else
+					{
+						if (controlledCharacter) //If I am redeploying, I should have a controlled character
+						{
+							if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+							{
+								//Move the character to the new tile
+								bReDeployingUnit = false;
+								FVector loc = targetTile->GetActorLocation();
+								loc.Z += 50.0f;
+								controlledCharacter->SetActorLocation(loc);
+								targetTile->SetOccupied(true);								
+								controlledCharacter = nullptr;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (!bReDeployingUnit)
+					{
+						//Clicking on a character in dep phase means the player wishes to move the character
+						controlledCharacter = Cast<AGridCharacter>(hit.Actor);
+						if (controlledCharacter)
+						{
+							ATile* tile_ = controlledCharacter->GetMyTile();
+							if (tile_)
+							{
+								if (tile_->GetHighlighted() == TILE_DEP) //Make sure the character's tile is a deployment tile which ensures this is a player character not an enemy character
+								{
+									bReDeployingUnit = true;
+									tile_->SetOccupied(false);
+								}
+								else //Player clicked on an enemy. Reset.
+								{
+									controlledCharacter = nullptr;
+								}
+							}
+						}
 					}
 				}
 			}
