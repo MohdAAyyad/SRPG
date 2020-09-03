@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interactable.h"
+#include "Animation/NPCCharacterAnimInstance.h"
 #include "NPC.generated.h"
 
 UCLASS()
@@ -33,20 +34,19 @@ protected:
 	int npcLineIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MeshComponent")
-		class USkeletalMeshComponent* meshComp;
+	class USkeletalMeshComponent* meshComp;
 
 	// root of the scene
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root")
 	class USceneComponent* root;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
-		class UExternalFileReader* fileReader;
+	class UExternalFileReader* fileReader;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC Widget")
-		class UWidgetComponent* widget;
+	class UWidgetComponent* widget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-		UAnimationAsset* idle;
+	UNPCCharacterAnimInstance* animator;
 
 	UFUNCTION()
 	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 

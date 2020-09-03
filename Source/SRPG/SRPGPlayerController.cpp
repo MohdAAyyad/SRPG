@@ -28,7 +28,14 @@ void ASRPGPlayerController::CheckCollisionUnderMouse()
 		IInteractable* hitInteractable = Cast<IInteractable>(hit.GetActor());
 		if (hitInteractable)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Interact has been cast!"));
+			// remove the previous interacting 
+			if (interacting)
+			{
+				interacting->UnInteract();
+				interacting = nullptr;
+				player->SetInteracting(nullptr);
+			}
+			//set a new one
 			interacting = hitInteractable;
 			hitInteractable->Interact();
 			player->SetInteracting(interacting);
