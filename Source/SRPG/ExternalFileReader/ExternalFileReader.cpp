@@ -22,6 +22,8 @@ void UExternalFileReader::BeginPlay()
 	Super::BeginPlay();
 	// arbitrary value that will be changed to the amount of tables we have
 	tables.Reserve(10);
+	firstTimeItem = true;
+	firstTimeEquipment = true;
 	// ...
 	
 }
@@ -59,8 +61,21 @@ FFighterTableStruct UExternalFileReader::FindFighterTableRow(FName name_, int in
 FItemTableStruct UExternalFileReader::FindItemTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Item Table"));
+	
 	if (tables[index_])
 	{
+		// if it's the first time running the code go through and set the owned value to 0
+		if (firstTimeItem)
+		{
+			TArray<FName> rowNames; 
+			rowNames = tables[index_]->GetRowNames();
+			for (auto n : rowNames)
+			{
+				FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(n, contextString, true);
+				row->owned = 0;
+			}
+			firstTimeItem = false;
+		}
 		// otherwise return the result
 		FItemTableStruct* result = tables[index_]->FindRow<FItemTableStruct>(name_, contextString, true);
 		return *result;
@@ -77,6 +92,18 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	static const FString contextString(TEXT("Equipment Table"));
 	if (tables[index_])
 	{
+		if (firstTimeEquipment)
+		{
+			// if it's the first time reset the equipment table
+			TArray<FName> rowNames;
+			rowNames = tables[index_]->GetRowNames();
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+				row->owned = 0;
+			}
+			firstTimeItem = false;
+		}
 		FEquipmentTableStruct* result = tables[index_]->FindRow<FEquipmentTableStruct>(name_, contextString, true);
 		return *result;
 
@@ -328,6 +355,27 @@ UDataTable* UExternalFileReader::GetTable(int index_)
 	return tables[index_];
 }
 
+//NOTE:
+/* The name Input for the struct name must match the struct name. It is not case sensative. When you pass in the name make you 
+pass in the name of the file. EX: You would reference the item table struct as FItemTableStruct in code normally, but to pass
+it in here you would pass it in as ItemTableStruct since F is not part of the name. In short pass in the struct file name. */
+
+int UExternalFileReader::FindTableIndexInArray(FName structName_)
+{
+	int result = 0;
+	for (auto t : tables)
+	{
+		FName structQuery = t->GetRowStructName();
+		if (structQuery == structName_)
+		{
+			return result;
+		}
+		result++;
+	}
+	UE_LOG(LogTemp, Error, TEXT("Could not find valid table or invalid name input"));
+	return result;
+}
+
 
 TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
 {
@@ -562,4 +610,55 @@ FEquipmentTableStruct UExternalFileReader::GetEquipmentByLevel(int tableIndex_, 
 	}
 
 	return equip;
+}
+
+TArray<FItemTableStruct> UExternalFileReader::GetAllItems(int tableIndex_, int worldLevel_)
+{
+	static const FString contextString(TEXT("Getting all items"));
+	TArray<FItemTableStruct> results;
+	TArray<FName> rowNames;
+	if (tables[tableIndex_])
+	{
+		rowNames = tables[tableIndex_]->GetRowNames();
+
+		for (auto n : rowNames)
+		{
+			FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+			if (row->level <= worldLevel_)
+			{
+				results.Push(*row);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
+	}
+
+	return results;
+}
+
+TArray<FEquipmentTableStruct> UExternalFileReader::GetAllEquipment(int tableIndex_, int worldLevel_)
+{
+	static const FString contextString(TEXT("Getting all equipment"));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tables[tableIndex_])
+	{
+		rowNames = tables[tableIndex_]->GetRowNames();
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+			if (row->level <= worldLevel_)
+			{
+				results.Push(*row);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+	}
+
+	return results;
 }

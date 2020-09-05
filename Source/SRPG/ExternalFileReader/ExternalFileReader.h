@@ -33,6 +33,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	bool firstTimeItem;
+	bool firstTimeEquipment;
 
 public:	
 	// finds a particular row if you know it's name 
@@ -50,6 +52,8 @@ public:
 	TArray<FSkillTableStruct*> GetDefensiveSkills(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_, int subIndex_);
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
+	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
+	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
 	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
@@ -67,6 +71,7 @@ public:
 
 	UDataTable* GetTable(int index_);
 
-
+	// the name must match the class exactly
+	int FindTableIndexInArray(FName structName_);
 		
 };

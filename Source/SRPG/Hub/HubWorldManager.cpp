@@ -29,7 +29,7 @@ void AHubWorldManager::BeginPlay()
 	// sets the current time slots to our max time slots
 	timeSlots = maxTimeSlots;
 	hasSpawned.Init(false, npcLocations.Num());
-	hubWorldLevel = 2;
+	hubWorldLevel = 3;
 
 
 	SpawnNPCs(1, 0);

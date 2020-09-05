@@ -19,6 +19,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Hub")
 	class AHubWorldManager* hub;
 public:
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> itemTextures;
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> equipmentTextures;
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetItemTextureArray();
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetEquipmentTextureArray();
 	// how much is the player planning to buy. resets after a new item is selected
 	UFUNCTION(BlueprintCallable)
 		void BuyItem(int itemIndex_, int amountToBuy_);
@@ -32,5 +40,9 @@ public:
 		int GetItemStatIndex(int index_);
 	UFUNCTION(BlueprintCallable)
 		FString GetEquipmentName(int itemIndex_);
+	UFUNCTION(BlueprintCallable)
+	TArray<FItemTableStruct> GetAllAvailbleItems(int worldLevel_);
+	UFUNCTION(BlueprintCallable)
+	TArray<FEquipmentTableStruct> GetAllAvailbleEquipment(int worldLevel_);
 
 };
