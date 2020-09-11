@@ -179,8 +179,8 @@ void AGridCharacter::MoveAccordingToPath()
 			if (movementPath.Num() == 0)
 			{
 				ATile* tile_ = GetMyTile();
-				if (tile_)
-					tile_->SetOccupied(true);
+				//if (tile_)
+					//tile_->SetOccupied(true);
 				bMoving = false;
 				if (btlCtrl)
 					btlCtrl->ResetViewLock();
@@ -225,11 +225,11 @@ void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
 		SetActorRotation(rot);
 		FTimerHandle attackDelayHandle;
 		//The delay here is needed to allow the camera enough time to focus on the character attacking
-		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::CompleteAttackUsingWeapon, delay_, false);
+		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingWeapon, delay_, false);
 	}
 }
 
-void AGridCharacter::CompleteAttackUsingWeapon()
+void AGridCharacter::PlayAnimationAttackUsingWeapon()
 {
 	if (animInstance)
 	{
@@ -252,12 +252,12 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float de
 
 			FTimerHandle attackDelayHandle;
 			//The delay here is needed to allow the camera enough time to focus on the character attacking
-			GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::CompleteAttackUsingSkill, delay_, false);
+			GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingSkill, delay_, false);
 		}
 	}
 }
 
-void AGridCharacter::CompleteAttackUsingSkill()
+void AGridCharacter::PlayAnimationAttackUsingSkill()
 {
 	if (animInstance) //Play the animation
 	{
@@ -488,4 +488,11 @@ void AGridCharacter::UnElect()
 		champParticles->DeactivateSystem();
 	if (villainParticles)
 		villainParticles->DeactivateSystem();
+}
+
+void AGridCharacter::ResetCameraFocus()
+{
+	//Called from the UI once an attack finishes
+	if (btlCtrl)
+		btlCtrl->ResetFocus();
 }

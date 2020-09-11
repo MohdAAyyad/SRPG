@@ -50,12 +50,14 @@ protected:
 			bool bFromSweep_,
 			const FHitResult &sweepResult_);
 
-	void FindTheClosestPlayer();
+	void FindTheNextClosestPlayer(APlayerGridCharacter* currentTarget_);
 	void MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_,ATile* targetTile_);
 	void CheckIfWeHaveAnyTargetItems();
 	void AddEquipmentStats(int tableIndex_) override;
 
 	void Tick(float DeltaTime) override;
+
+	void ResetCameraFocus() override;
 
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);

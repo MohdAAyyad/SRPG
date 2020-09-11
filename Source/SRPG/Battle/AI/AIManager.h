@@ -59,7 +59,7 @@ protected:
 
 	TArray<AEnemyBaseGridCharacter*> deployedEnemies;
 	int numberOfEnemiesWhichFinishedMoving; //When this number reaches the current number of troops, tell them to attack
-
+	int numberOfEnemiesToldToMove;
 	FOpponentStruct nextOp;
 
 public:	
@@ -76,5 +76,9 @@ public:
 
 	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_);
 	AGridCharacter* GetEnemyWithLowestStat(int statIndex_);
+
+protected:
+
+	void TellDeployedEnemiesToMove();
 
 };

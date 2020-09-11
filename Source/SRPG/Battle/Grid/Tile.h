@@ -79,4 +79,6 @@ public:
 	void HighlightNeighbor();
 
 	class AGridCharacter* GetMyGridCharacter();
+
+	void NightBlues();
 };

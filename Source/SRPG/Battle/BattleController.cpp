@@ -46,24 +46,12 @@ void ABattleController::PlayerTick(float DeltaTime)
 	if (bReDeployingUnit)
 	{
 		if (controlledCharacter)
-		{
-			float mouseX = 0.0f;
-			float mouseY = 0.0f;
-			GetMousePosition(mouseX, mouseY);
-			FVector loc_ = controlledCharacter->GetActorLocation();
-			FVector dir_ = FVector(0.0f,0.0f,1.0f);
-			UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(mouseX, mouseY), loc_, dir_);
-			UE_LOG(LogTemp,Warning,TEXT("Dir: %d %d %d"), dir_.X, dir_.Y, dir_.Z)
-			controlledCharacter->SetActorLocation(loc_);
-			
-
+		{		
 			FHitResult TraceHitResult;
 			GetHitResultUnderCursor(ECC_Visibility, false, TraceHitResult);
 			FVector CursorFV = TraceHitResult.ImpactNormal;
-			FRotator CursorR = FRotator();
 			TraceHitResult.Location.Z += 300.0f;
 			controlledCharacter->SetActorLocation(TraceHitResult.Location);
-			controlledCharacter->SetActorRotation(CursorR);
 		}
 	}
 }
@@ -424,6 +412,7 @@ void ABattleController::CancelCommand()
 
 void ABattleController::ResetViewLock()
 {
+	//Stop being locked on to a target
 	if (battlePawn)
 		battlePawn->ResetLock();
 }

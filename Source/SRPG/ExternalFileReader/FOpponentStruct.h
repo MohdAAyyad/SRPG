@@ -26,8 +26,8 @@ struct SRPG_API FOpponentStruct
 	void InitStruct(int level_, int num_) //The level and num passed are obtained from the intemediate
 	{
 		archtype = FMath::RandRange(ARCH_ATK, ARCH_INT);
-		int numChance = FMath::RandRange(0, 8);
-		numberOfTroops = num_ + numChance;
+		int numChance = FMath::RandRange(0, 4);
 		level = level_ + 2;
+		numberOfTroops = num_ + numChance;
 	}
 };

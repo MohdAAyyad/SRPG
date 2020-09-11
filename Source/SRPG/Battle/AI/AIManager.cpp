@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "Intermediary/Intermediate.h"
 #include "EnemyBaseGridCharacter.h"
+#include "TimerManager.h"
 
 
 // Sets default values
@@ -15,6 +16,7 @@ AAIManager::AAIManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	numberOfEnemiesWhichFinishedMoving = -1;
+	numberOfEnemiesToldToMove = 0;
 }
 
 // Called when the game starts or when spawned
@@ -32,10 +34,27 @@ void AAIManager::Tick(float DeltaTime)
 
 void AAIManager::BeginEnemyTurn()
 {
-	numberOfEnemiesWhichFinishedMoving = -1;
-	for (int i = 0; i < deployedEnemies.Num(); i++)
+	/*for (int i = 0; i < deployedEnemies.Num(); i++)
 	{
 		deployedEnemies[i]->StartEnemyTurn();
+	}
+	*/
+	numberOfEnemiesWhichFinishedMoving = -1; //Reset
+	TellDeployedEnemiesToMove();
+}
+
+void AAIManager::TellDeployedEnemiesToMove()
+{
+	if (numberOfEnemiesToldToMove < deployedEnemies.Num())
+	{
+		deployedEnemies[numberOfEnemiesToldToMove]->StartEnemyTurn();
+		numberOfEnemiesToldToMove++;
+		FTimerHandle moveDelayHandle;
+		GetWorld()->GetTimerManager().SetTimer(moveDelayHandle, this, &AAIManager::TellDeployedEnemiesToMove, 0.5f, false);
+	}
+	else
+	{
+		numberOfEnemiesToldToMove = 0;
 	}
 }
 
@@ -104,12 +123,17 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 
 void AAIManager::FinishedMoving()
 {
+	//TODO
+	//The numbers should be adjusted when an enemy dies
 
 	//Called by enemies when they finish moving. Used to know when to tell the enemies to attack
 	numberOfEnemiesWhichFinishedMoving++;
 	//UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, nextOp.numberOfTroops - 1);
 	if (numberOfEnemiesWhichFinishedMoving == (nextOp.numberOfTroops - 1))
-		OrderEnemiesToAttackPlayer();
+	{
+		FTimerHandle attackDelayHandle;
+		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AAIManager::OrderEnemiesToAttackPlayer, 0.7f, false);
+	}
 }
 void AAIManager::FinishedAttacking()
 {
@@ -121,12 +145,18 @@ void AAIManager::FinishedAttacking()
 
 void AAIManager::OrderEnemiesToAttackPlayer()
 {
+	//TODO
+	//Potential issue here when an enemy dies
+
 	//Attacking happens one at a time
-	if (deployedEnemies[numberOfEnemiesWhichFinishedMoving])
+	if (numberOfEnemiesWhichFinishedMoving >= 0 && numberOfEnemiesWhichFinishedMoving < deployedEnemies.Num())
 	{
-		deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAttack();
+		if (deployedEnemies[numberOfEnemiesWhichFinishedMoving])
+		{
+			deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAttack();
+		}
 	}
-//	UE_LOG(LogTemp, Warning, TEXT("--------"));
+
 }
 
 

@@ -132,18 +132,22 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 		if (gridManager && pathComp)
 		{
 			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM,0); //4 Reachable by enemy
+			
 			//Checks if we have a player reference first, otherwise, move to target tile
 			if (targetPlayer)
 			{
 				TArray<ATile*> rangeTiles;
 				//Get the tiles that put the enemy within range of the player.
-				rangeTiles = gridManager->GetTilesWithinAttackRange(statsComp->GetStatValue(STAT_WRS), targetPlayer->GetMyTile());
+				gridManager->ClearHighlighted();
+				gridManager->UpdateCurrentTile(targetPlayer->GetMyTile(), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
+				rangeTiles = gridManager->GetHighlightedTiles();
+				gridManager->ClearHighlighted();
+
 				if (!rangeTiles.Contains(myTile_)) //Check if we're not within attacking range
 				{
-					if (myTile_)
+					if (myTile_) //We're gonna move
 						myTile_->SetOccupied(false);
-					targetTile = nullptr;
+					targetTile = nullptr; //We're gonna be changing the target tile to move to withing attack range
 					bGoingToMove = true;
 
 					//Remove the occupied range tiles from the considered set of target tiles
@@ -152,21 +156,16 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 						if (rangeTiles[i]->GetOccupied())
 						{
 							rangeTiles.RemoveAt(i);
-							//UE_LOG(LogTemp, Warning, TEXT("Removed range tile at i %d"), i);
 						}
 					}
-
 					if (rangeTiles.Num() > 0)
 						targetTile = rangeTiles[0];
 
-					//TODO
-					//What if 5 enemies and 1 player remain
-					// What if all the range tiles are occupied
-
+					//If all range tiles are occupied, switch targets
 					if (!targetTile)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from smh"));
-						targetTile = targetPlayer->GetMyTile();
+						//UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from. Gonna get the next closest player"));
+						FindTheNextClosestPlayer(targetPlayer);
 					}
 				}
 				else //We're not going to move so return myTile_ occupied bool to true
@@ -176,21 +175,24 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 					if (aiManager)
 						aiManager->FinishedMoving();
 				}
+
 			}
 			else
 			{
 				//We don't have a player target, find the closest one.
-				FindTheClosestPlayer();
+				FindTheNextClosestPlayer(nullptr);
 				return;
 			}
+
+
+
 			if (bGoingToMove)
 			{
 				MoveToTheTileWithinRangeOfThisTile(myTile_, targetTile);
 			}
-			gridManager->ClearHighlighted(); //Need to clear highlighted here so that different enemies don't get the highlighted tiles of each other
 		}
 
-		bWillMoveAgain = false; //Pickmovment destination is always the last one to be called in terms of movement
+		bWillMoveAgain = false; //Move closer to player is always the last one to be called in terms of movement
 	}
 	else //Only calculate the path if we have our current tile, otherwise, find your tile
 	{
@@ -233,7 +235,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 			gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
 			if (targetPlayer)
 			{
-				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range
+				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
 				{
 					btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
 					AttackUsingWeapon(targetPlayer, btlCtrl->focusRate);
@@ -269,14 +271,24 @@ void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 {
 	if (actionTargets[0])
 		actionTargets[0]->GridCharTakeDamage(1.0f, this);
-	if (aiManager)
-		aiManager->FinishedAttacking();
 
 	if (statsComp->AddTempCRD(CRD_ATK))
 	{
 		if (crdManager)
 			crdManager->UpdateFavor(false);
 	}
+
+	if (gridManager)
+		gridManager->ClearHighlighted(); //Clear the highlighted tiles after completing the attack
+}
+
+void AEnemyBaseGridCharacter::ResetCameraFocus()
+{
+	Super::ResetCameraFocus();
+	FTimerHandle finishedAttackingHandle;
+	//This way we allow the camera to defocus from one enemy before focusing on the next
+	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate + 0.2f, false);
+
 }
 
 void AEnemyBaseGridCharacter::MoveAccordingToPath()
@@ -307,7 +319,7 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 	}
 }
 
-void AEnemyBaseGridCharacter::FindTheClosestPlayer()
+void AEnemyBaseGridCharacter::FindTheNextClosestPlayer(APlayerGridCharacter* currentTarget_)
 {
 	//Not using dijkstra as precision is not important. We're assuming that the displacement is the shortest distance without checking the actual path through the tiles
 	if (btlManager)
@@ -320,11 +332,15 @@ void AEnemyBaseGridCharacter::FindTheClosestPlayer()
 			float min = 10000.0f;
 			for (int i = 0; i < pchars.Num(); i++)
 			{
-				float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
-				if (distance < min)
+				//Get the next closest target. Mainly used when all the range tiles are occupied and the enemy needs a new target
+				if (currentTarget_ != pchars[i] || targetPlayer == nullptr)
 				{
-					targetPlayer = pchars[i];
-					min = distance;
+					float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
+					if (distance < min)
+					{
+						targetPlayer = pchars[i];
+						min = distance;
+					}
 				}
 			}
 		}
@@ -337,6 +353,10 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 {
 	if (targetTile_)
 	{
+		if(!targetItem)
+			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM, 0);
+
+
 		if (movementPath.Num() > 0)
 			movementPath.Empty();
 
@@ -345,43 +365,53 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 
 		pathComp->SetCurrentTile(startingTile_);
 		pathComp->SetTargetTile(targetTile_);
-		movementPath = pathComp->GetPath(); //Get the whole path towards the target
+		pathComp->GetPath(); //Get the whole path towards the target
 		TArray<ATile*> tPath = pathComp->GetMovementPath();
-		//Remove the non-highlighted tiles so you don't go to a tile that's out of reach
-		if (!targetItem) //If we have a target item, that means we've already checked whether there's a path to that item. No need to check again
+
+		TArray<int> tileVecIndexes;
+		//We only care about the tiles within movement range
+		for (int i = 0; i < tPath.Num(); i++)
 		{
-			for (int i = 0; i < tPath.Num(); i++)
+			if (tPath[i]->GetHighlighted() == TILE_ENM)
 			{
-				if (tPath[i]->GetHighlighted() != TILE_ENM)
-				{
-					tPath.RemoveAt(i);
-					movementPath.RemoveAt(i);
-				}
+				tileVecIndexes.Push(i);
 			}
 		}
-		//Make sure the last tile we can reach is not occupied. 
-		//Set it to occupied as well before actually moving to avoid two enemies deciding to go for the same tile
-		if(tPath.Num() > 0 && movementPath.Num()>0 && pathComp)
-			pathComp->AdjustPath(tPath[0], movementPath);
 
-		//Adjust path also sets the occupied flag on the final tile we can reach
-		bMoving = true;
+		for (int j = 0; j < tileVecIndexes.Num(); j++)
+		{
+			movementPath.Push(tPath[tileVecIndexes[j]]->GetActorLocation());
+		}
+
+		//Make sure the last tile we can reach is not occupied. 
+		//Sets it to occupied as well before actually moving to avoid two enemies deciding to go for the same tile
+		if (tPath.Num() > 0 && movementPath.Num() > 0 && tileVecIndexes.Num()>0 && pathComp)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Adjusting path"));
+			pathComp->AdjustPath(tPath[tileVecIndexes[0]], movementPath);
+		}
+
+		if (movementPath.Num() > 0)
+		{
+			bMoving = true;
+			startingTile_->SetOccupied(false);
+		}
+		else
+		{
+			if (aiManager)
+				aiManager->FinishedMoving();
+		}
 
 	}
-
+	
 }
 
 void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 {
 	UpdateOriginTile();
 
-	//Assuming we are going to move
-	if (originTile)
-		originTile->SetOccupied(false);
-
 	if (crdItems.Num() > 0)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("crdItems > 0"));
 		if (gridManager)
 		{
 			gridManager->ClearHighlighted();
@@ -394,18 +424,14 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 					//TODO
 					//Check if we need the item first before marking it
 					
-
 					//If we have detected an item, make sure it's within movement range before marking it
 					ATile* tile_ = crdItems[i]->GetMyTile();
 					if (tile_)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("Got item's tile %d"), tile_->GetHighlighted());
 						if (tile_->GetHighlighted() == TILE_ENM)
 						{
-						//	UE_LOG(LogTemp, Warning, TEXT("Item's tile is reachable"));
 							if (crdItems[i]->MarkItem(this)) //True, means we've marked this items as our target and no other enemy should go for it
 							{
-							//	UE_LOG(LogTemp, Warning, TEXT("Item has been marked"));
 								targetItem = crdItems[i];
 								break;
 							}
@@ -419,12 +445,10 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 
 	if (targetItem) //If we have a target item, then go there
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Move to get item"));
 		MoveToTheTileWithinRangeOfThisTile(nullptr, targetItem->GetMyTile());
 	}
 	else //Otherwise, just go to your target player
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Couldn't find item so now going after player"));
 		MoveCloserToTargetPlayer(nullptr);
 	}
 }
@@ -451,7 +475,6 @@ void AEnemyBaseGridCharacter::DetectItem(UPrimitiveComponent* overlappedComponen
 		ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
 		if (item_)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Found item"));
 			crdItems.Push(item_);
 		}
 

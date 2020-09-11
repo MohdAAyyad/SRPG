@@ -13,6 +13,7 @@
 #include "Player/PlayerGridCharacter.h"
 #include "Intermediary/Intermediate.h"
 #include "BattleController.h"
+#include "Grid/Tile.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -75,6 +76,10 @@ void ABattleManager::NextPhase()
 
 	if (phase == BTL_ENM)	//Enemy phase
 	{
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->GetMyTile()->SetOccupied(true);
+		}
 		if (aiManager)
 			aiManager->BeginEnemyTurn();
 	}

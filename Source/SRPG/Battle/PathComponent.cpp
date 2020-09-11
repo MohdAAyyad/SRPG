@@ -117,11 +117,9 @@ TArray<FVector> UPathComponent::GetPath()
 	}
 
 	UpdateMovementPath(targetTile);
-	//currentTile->HighlightPath();
 
 	for (int i = 0; i < movementPath.Num(); i++)
 	{
-		//movementPath[i]->HighlightPath();
 		path.Push(movementPath[i]->GetActorLocation());
 	}
 	return path;
@@ -225,21 +223,26 @@ TArray<ATile*> UPathComponent::GetMovementPath()
 
 void UPathComponent::ChangeTargetTileIfItsOccupied()
 {
-	if (targetTile->GetOccupied())
+	if (targetTile)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Target ummm yeahhh"));
-		targetTile = targetTile->GetParentTile();
-		ChangeTargetTileIfItsOccupied();
+		if (targetTile->GetOccupied())
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Target ummm yeahhh"));
+			targetTile = targetTile->GetParentTile();
+			ChangeTargetTileIfItsOccupied();
+		}
 	}
 }
 
 void UPathComponent::AdjustPath(ATile* tile_, TArray<FVector>& move_)
 {
+	//Make sure your target tile is not occupied
 	if (tile_)
 	{
 		if (tile_->GetOccupied())
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Tile ummm yeahhh"));
+			tile_->NotHighlighted();
 			tile_ = tile_->GetParentTile();
 			if (move_.Num() > 0)
 			{

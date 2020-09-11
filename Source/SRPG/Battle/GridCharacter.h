@@ -96,6 +96,9 @@ protected:
 
 	FName chosenItem;
 
+	UFUNCTION(BlueprintCallable)
+		virtual void ResetCameraFocus();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -114,9 +117,9 @@ public:
 		virtual void ActivateSkillAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
 	void AttackUsingWeapon(AGridCharacter* target_, float delay_);
-	void CompleteAttackUsingWeapon();
+	void PlayAnimationAttackUsingWeapon();
 	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_);
-	void CompleteAttackUsingSkill();
+	void PlayAnimationAttackUsingSkill();
 
 	void SetBtlAndCrdManagers(ABattleManager* btlManager_,ABattleCrowd* crd_);
 	ATile* GetMyTile(); //Returns the tile the character is standing on

@@ -236,3 +236,9 @@ void ATile::GoBackToPreviousHighlight()
 	else
 		Highlighted(HighlightedIndex);
 }
+
+void ATile::NightBlues()
+{
+	if (skillsMaterial)
+		mesh->SetMaterial(1, skillsMaterial);
+}

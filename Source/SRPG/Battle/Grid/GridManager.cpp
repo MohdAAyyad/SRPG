@@ -436,10 +436,8 @@ ATile* AGridManager::GetTileFromRowAndOffset(int row_, int offset_)
 }
 
 
-TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
+void AGridManager::GetTilesWithinAttackRange(TArray<ATile*>& rangeTiles_,int range_, ATile* tile_)
 {
-	TArray<ATile*> reachableAttackTiles;
-
 	if (tile_)
 	{
 		//Row tiles are inaccessible 
@@ -458,7 +456,7 @@ TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
 				//Make sure the tile is traversable and not occupied before adding it to the reachable tiles
 				if (columnTiles[tileIndexInColumn + range_]->GetTraversable() && !columnTiles[tileIndexInColumn + range_]->GetOccupied())
 				{
-					reachableAttackTiles.Push(columnTiles[tileIndexInColumn + range_]);
+					rangeTiles_.Push(columnTiles[tileIndexInColumn + range_]);
 				}
 			}
 		}
@@ -469,7 +467,7 @@ TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
 			{
 				if (columnTiles[tileIndexInColumn - range_]->GetTraversable() && !columnTiles[tileIndexInColumn - range_]->GetOccupied())
 				{
-					reachableAttackTiles.Push(columnTiles[tileIndexInColumn - range_]);
+					rangeTiles_.Push(columnTiles[tileIndexInColumn - range_]);
 				}
 			}
 		}
@@ -480,7 +478,7 @@ TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
 			{
 				if (columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetOccupied())
 				{
-					reachableAttackTiles.Push(columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]);
+					rangeTiles_.Push(columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]);
 					
 				}
 			}
@@ -492,11 +490,10 @@ TArray<ATile*> AGridManager::GetTilesWithinAttackRange(int range_, ATile* tile_)
 			{
 				if (columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetOccupied())
 				{
-					reachableAttackTiles.Push(columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]);
+					rangeTiles_.Push(columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]);
 					
 				}
 			}
 		}
 	}
-	return reachableAttackTiles;
 }
