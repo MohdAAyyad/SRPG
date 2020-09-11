@@ -34,15 +34,6 @@ void ATournament::BeginPlay()
 	fighterIndex = -1;
 	hasSupportedTeam = false;
 
-	if (idle && meshComp)
-	{
-		meshComp->SetAnimation(idle);
-		meshComp->PlayAnimation(idle, true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Idle Animation is NULL"));
-	}
 }
 
 void ATournament::EndDialogue()

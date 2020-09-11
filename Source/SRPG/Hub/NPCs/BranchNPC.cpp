@@ -17,6 +17,7 @@ void ABranchNPC::EndDialogue()
 
 void ABranchNPC::LoadText()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Load Text on Branch"));
 	if (hasUpdatedCentral == false && central && chanceOfSuccessEffect >= 0)
 	{
 		//line = "I'm sure if you were to talk to the guy over there, things could go your way.";

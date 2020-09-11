@@ -10,11 +10,12 @@
 #include "SRPGCharacter.h"
 #include "Engine/Engine.h"
 #include "Hub/HubWorldManager.h"
+
 // Sets default values
 ANPC::ANPC()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	RootComponent = root;
 
@@ -40,18 +41,8 @@ void ANPC::BeginPlay()
 	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
 	// load a default conversation if nothing is selected
 	npcLineIndex = 0;
-	//UE_LOG(LogTemp, Warning, TEXT("Begin play on NPC"));
-	if (idle && meshComp)
-	{
-		meshComp->SetAnimation(idle);
-		meshComp->PlayAnimation(idle, true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Idle Animation is NULL"));
-	}
 
-
+	animator = Cast<UNPCCharacterAnimInstance>(meshComp->GetAnimClass());
 }
 
 void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 

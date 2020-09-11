@@ -17,6 +17,45 @@ void ACentralNPC::BeginPlay()
 
 	activityEndLine = "";
 	activityAlreadyDone = false;
+	spentUnits = 0;
+}
+
+void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor != nullptr && OtherActor != this && OverlappedComp != nullptr)
+	{
+		// check if we are being interacted with and process the logic 
+		if (interactedWith)
+		{
+			ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
+			if (player)
+			{
+				if (widget && activityAlreadyDone == false)
+				{
+					widget->GetUserWidgetObject()->AddToViewport();
+					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
+				}
+			}
+		}
+	}
+}
+
+void ACentralNPC::PutUnitOnHold(int index_)
+{
+	if (spentUnits <= unitCost)
+	{
+		Intermediate::GetInstance()->PutUnitOnHold(index_);
+		spentUnits += 1;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Too many units spent!"));
+	}
+
 }
 
 void ACentralNPC::UpdateChanceOfSuccess(float value_)
@@ -34,8 +73,9 @@ int ACentralNPC::GetCentralActivityIndex()
 bool ACentralNPC::IsActivityAffordable()
 {
 	// see if we can both afford the money cost and the time cost
-	if (Intermediate::GetInstance()->GetCurrentMoney() > 0 && hubManager->GetCurrentTimeSlotsCount() > timeCost)
+	if (Intermediate::GetInstance()->GetCurrentMoney() - moneyCost > 0 && hubManager->GetCurrentTimeSlotsCount() > timeCost && spentUnits == unitCost)
 	{
+		Intermediate::GetInstance()->SpendMoney(moneyCost);
 		return true;
 	}
 	else
@@ -58,7 +98,7 @@ void ACentralNPC::SpendCost()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Not enough money to activate event"));
+			UE_LOG(LogTemp, Warning, TEXT("Not enough money or units actived to activate event"));
 		}
 	}
 	
@@ -69,6 +109,7 @@ void ACentralNPC::SimulateActivity()
 
 	// spend time regardless of weather or not we succeed
 	SpendTime();
+	spentUnits = 0;
 
 	float result = FMath::FRandRange(0, 100);
 	// if the result is within the chance of success
@@ -82,8 +123,10 @@ void ACentralNPC::SimulateActivity()
 		switch (rewardIndex)
 		{
 			case 0:
-				// augment the money of the player
-				Intermediate::GetInstance()->AddMoney(FMath::RandRange(200, 300));
+				// augment the money of the player, the amount is arbitrary but we can set it later
+				// this case is specifically for Russian Roulette 
+				Intermediate::GetInstance()->AddMoney(Intermediate::GetInstance()->GetCurrentMoney() * 1.25f);
+				UE_LOG(LogTemp, Warning, TEXT("Money Added!"));
 				break;
 			case 1:
 			{
@@ -98,41 +141,42 @@ void ACentralNPC::SimulateActivity()
 					FFighterTableStruct row2 = fileReader->FindFighterTableRow(n, 1);
 					switch (stat)
 					{
-					case 0:
+					case STAT_HP:
 						row2.hp += 1;
 						break;
-					case 1:
+					case STAT_PIP:
 						row2.pip += 1;
 						break;
-					case 2:
+					case STAT_ATK:
 						row2.atk += 1;
 						break;
-					case 3:
+					case STAT_DEF:
 						row2.def += 1;
 						break;
-					case 4:
+					case STAT_INT:
 						row2.intl += 1;
 						break;
-					case 5:
+					case STAT_SPD:
 						row2.spd += 1;
 						break;
-					case 6:
+					case STAT_CRT:
 						row2.crit += 1;
 						break;
-					case 7:
+					case STAT_HIT:
 						row2.agl += 1;
 						break;
-					case 8:
+					case STAT_CRD:
 						row2.crd += 1;
 						break;
-
 					}
 				}
 			}
+			UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
 				break;
 			case 2:
 				//decrement a stat of the enemy
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Enemy Stat went down!"));
 				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
 				Intermediate::GetInstance()->EnemyStatsGoDown(1, stat);
 			}
@@ -140,6 +184,7 @@ void ACentralNPC::SimulateActivity()
 			case 3:
 				// augment the crowd value
 			{
+				UE_LOG(LogTemp, Warning, TEXT("CRD value improved"));
 				Intermediate::GetInstance()->ImprovePlayerCRD(FMath::RandRange(IMP_CRD_LW, IMP_CRD_HG));
 			}
 			break;
@@ -175,6 +220,7 @@ void ACentralNPC::EndDialogue()
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 	}
+	spentUnits = 0;
 	//line = FString("");
 }
 

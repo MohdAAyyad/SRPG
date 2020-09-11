@@ -20,6 +20,16 @@ void AItemShop::BeginPlay()
 	Super::BeginPlay();
 }
 
+TArray<UTexture*> AItemShop::GetItemTextureArray()
+{
+	return itemTextures;
+}
+
+TArray<UTexture*> AItemShop::GetEquipmentTextureArray()
+{
+	return equipmentTextures;
+}
+
 void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
 {
 	// will put a statement for price checking once money is integrated 
@@ -32,6 +42,7 @@ void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
 	{
 		Intermediate::GetInstance()->SpendMoney(row.value);
 		fileReader->AddOwnedValueItemTable(converted, 0, amountToBuy_);
+
 		UE_LOG(LogTemp, Warning, TEXT("Item Purchased!"));
 	}
 	else
@@ -125,3 +136,18 @@ FString AItemShop::GetEquipmentName(int itemIndex_)
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Got Equipment Name!"));
 }
+
+TArray<FItemTableStruct> AItemShop::GetAllAvailbleItems(int worldLevel_)
+{
+
+	TArray<FItemTableStruct> result = fileReader->GetAllItems(fileReader->FindTableIndexInArray(FName("ItemTableStruct")), worldLevel_);
+	return result;
+
+}
+
+TArray<FEquipmentTableStruct> AItemShop::GetAllAvailbleEquipment(int worldLevel_)
+{
+	TArray<FEquipmentTableStruct> result = fileReader->GetAllEquipment(fileReader->FindTableIndexInArray(FName("EquipmentTableStruct")), worldLevel_);
+	return result;
+}
+
