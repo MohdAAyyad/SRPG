@@ -2,6 +2,8 @@
 
 #pragma once
 
+#pragma region Stats
+
 #ifndef STAT_HP
 #define STAT_HP 0
 #endif
@@ -106,6 +108,10 @@
 #define STAT_ARCH 25
 #endif
 
+#pragma endregion
+
+#pragma region Tiles
+
 #ifndef TILE_MOV
 #define TILE_MOV 0
 #endif
@@ -142,6 +148,10 @@
 #define TILE_CRD 8
 #endif
 
+#pragma endregion
+
+#pragma region BattlePhase
+
 #ifndef BTL_DEP
 #define BTL_DEP 0
 #endif
@@ -161,6 +171,10 @@
 #ifndef BTL_END
 #define BTL_END 4
 #endif
+
+#pragma endregion
+
+#pragma region Crowd
 
 #ifndef CRD_DEP
 #define CRD_DEP 10
@@ -182,6 +196,10 @@
 #define CRD_HYP 100
 #endif
 
+#pragma endregion
+
+#pragma region Archetypes
+
 #ifndef ARCH_ATK
 #define ARCH_ATK 0
 #endif
@@ -194,13 +212,21 @@
 #define ARCH_INT 2
 #endif
 
-#ifndef IMP_CRD_LW
+#pragma endregion
+
+#pragma region CentralNPCs
+
+#ifndef IMP_CRD_LW //Improve CRD stats low value
 #define IMP_CRD_LW 2
 #endif
 
 #ifndef IMP_CRD_HG
 #define IMP_CRD_HG 5
 #endif
+
+#pragma endregion
+
+#pragma region AttackResults
 
 #ifndef ATKR_MISS
 #define ATKR_MISS 0
@@ -214,6 +240,9 @@
 #define ATKR_CRIT 3
 #endif
 
+#pragma endregion
+
+#pragma region EquipmentIndexes
 #ifndef EQU_WPN
 #define EQU_WPN 0
 #endif
@@ -226,5 +255,42 @@
 #define EQU_ACC 2
 #endif
 
+#pragma endregion
+
+#pragma region EnemyPatterns
+
+#ifndef PAT_ONE //The level to unlock the second (yes, second, we're counting from 0) enemy pattern. Not related the actual value in the enum
+#define PAT_ONE 4
+#endif
+
+#ifndef PAT_TWO
+#define PAT_TWO 8
+#endif
+
+#ifndef PAT_THR
+#define PAT_THR 12
+#endif
+
+#ifndef RAD_ASS //Radius for assassin
+#define RAD_ASS 200.0f;
+#endif
+
+#ifndef RAD_FOL
+#define RAD_FOL 200.0f;
+#endif
+
+#ifndef RAD_PP //Radius for peopleperson
+#define RAD_PP 150.0f;
+#endif
+
+#ifndef RAD_HEAL
+#define RAD_HEAL 300.0f;
+#endif
+
+#ifndef HP_ASS //HP threshold for assassin
+#define HP_ASS 0.6f;
+#endif
+
+#pragma endregion
 
 #include "CoreMinimal.h"

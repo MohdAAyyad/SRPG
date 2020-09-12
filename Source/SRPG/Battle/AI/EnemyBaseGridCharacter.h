@@ -18,7 +18,7 @@ protected:
 	void BeginPlay() override;
 	class AAIManager* aiManager;
 	class ATile* targetTile;
-	class APlayerGridCharacter* targetPlayer;
+	AGridCharacter* targetCharacter;
 	class ACrowdItem* targetItem;
 	class AGridManager* gridManager;
 	UPROPERTY(EditAnywhere, Category = "Detection")
@@ -50,7 +50,6 @@ protected:
 			bool bFromSweep_,
 			const FHitResult &sweepResult_);
 
-	void FindTheNextClosestPlayer(APlayerGridCharacter* currentTarget_);
 	void MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_,ATile* targetTile_);
 	void CheckIfWeHaveAnyTargetItems();
 	void AddEquipmentStats(int tableIndex_) override;
@@ -59,9 +58,13 @@ protected:
 
 	void ResetCameraFocus() override;
 
+	UPROPERTY(EditAnywhere, Category = "Patterns")
+		bool bHealer;
+	UPROPERTY(EditAnywhere, Category = "Patterns")
+		class UDecisionComp* decisionComp;
+
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);
-	void ScaleLevelBaseOnArchetype(int level_, int archetype_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
 	void StartEnemyTurn();
 	void ExecuteChosenAttack();
@@ -70,4 +73,5 @@ public:
 	virtual void ActivateWeaponAttack() override;
 	void MoveAccordingToPath() override;
 	void ItemIsUnreachable(ATile* startingTile_); //Called by the marked item when it's not obtained within the same turn or is obtained by someone else
+	AGridCharacter* GetCurrentTarget();
 };

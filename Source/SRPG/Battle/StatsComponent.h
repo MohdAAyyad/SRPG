@@ -34,4 +34,5 @@ public:
 	int GetStatValue(int stat_);
 	void InitStatsAtZero(); //Mainly used by enemies. Followed by a call to scalelevelwitharchetype
 	void PushAStat(int statValue_);
+	void UpdateMaxHpAndMaxPip(int hp_, int pip_);
 };

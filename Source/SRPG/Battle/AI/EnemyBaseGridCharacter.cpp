@@ -20,6 +20,7 @@
 #include "../StatsComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Intermediary/Intermediate.h"
+#include "DecisionComp.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -30,13 +31,16 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	detectionRadius->SetCollisionProfileName("EnemyDetectionRadius");
 	detectionRadius->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-	targetPlayer = nullptr;
+	decisionComp = CreateDefaultSubobject<UDecisionComp>(TEXT("Decision Comp"));
+
+	targetCharacter = nullptr;
 	targetTile = nullptr;
 	targetItem = nullptr;
 	bWillMoveAgain = true;
 	bCannotFindTile = false;
 	weaponIndex = 0;
 	armorIndex = 0;
+	bHealer = false; //Changed in the BP editor. Some enemies are just destined to be healers.
 }
 
 void AEnemyBaseGridCharacter::BeginPlay()
@@ -78,6 +82,9 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	statsComp->AddToStat(STAT_ARI, armorIndex);
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 	AddEquipmentStats(2);
+
+	decisionComp->SetRefs(aiManager, btlManager, this);
+	decisionComp->UpdatePattrn(statsComp->GetStatValue(STAT_LVL),bHealer);
 }
 
 void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
@@ -134,12 +141,12 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 			gridManager->ClearHighlighted();
 			
 			//Checks if we have a player reference first, otherwise, move to target tile
-			if (targetPlayer)
+			if (targetCharacter)
 			{
 				TArray<ATile*> rangeTiles;
 				//Get the tiles that put the enemy within range of the player.
 				gridManager->ClearHighlighted();
-				gridManager->UpdateCurrentTile(targetPlayer->GetMyTile(), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
+				gridManager->UpdateCurrentTile(targetCharacter->GetMyTile(), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
 				rangeTiles = gridManager->GetHighlightedTiles();
 				gridManager->ClearHighlighted();
 
@@ -159,13 +166,13 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 						}
 					}
 					if (rangeTiles.Num() > 0)
-						targetTile = rangeTiles[0];
+						targetTile = rangeTiles[rangeTiles.Num() - 1];
 
-					//If all range tiles are occupied, switch targets
+					//If all range tiles are occupied, Find another target
 					if (!targetTile)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("No range tiles to pick from. Gonna get the next closest player"));
-						FindTheNextClosestPlayer(targetPlayer);
+						targetCharacter = decisionComp->FindAnotherTarget(targetCharacter);
+						MoveCloserToTargetPlayer(nullptr);
 					}
 				}
 				else //We're not going to move so return myTile_ occupied bool to true
@@ -180,11 +187,10 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 			else
 			{
 				//We don't have a player target, find the closest one.
-				FindTheNextClosestPlayer(nullptr);
+				targetCharacter = decisionComp->FindTheOptimalTarget();
+				MoveCloserToTargetPlayer(nullptr);
 				return;
 			}
-
-
 
 			if (bGoingToMove)
 			{
@@ -233,12 +239,12 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 		{
 			gridManager->ClearHighlighted();
 			gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
-			if (targetPlayer)
+			if (targetCharacter)
 			{
-				if (targetPlayer->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
+				if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
 				{
 					btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
-					AttackUsingWeapon(targetPlayer, btlCtrl->focusRate);
+					AttackUsingWeapon(targetCharacter, btlCtrl->focusRate);
 				}
 				else
 				{
@@ -318,37 +324,6 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 		}
 	}
 }
-
-void AEnemyBaseGridCharacter::FindTheNextClosestPlayer(APlayerGridCharacter* currentTarget_)
-{
-	//Not using dijkstra as precision is not important. We're assuming that the displacement is the shortest distance without checking the actual path through the tiles
-	if (btlManager)
-	{
-		TArray<APlayerGridCharacter*> pchars = btlManager->GetDeployedPlayers();
-		FVector myLoc = GetActorLocation();
-
-		if (pchars.Num() > 0)
-		{
-			float min = 10000.0f;
-			for (int i = 0; i < pchars.Num(); i++)
-			{
-				//Get the next closest target. Mainly used when all the range tiles are occupied and the enemy needs a new target
-				if (currentTarget_ != pchars[i] || targetPlayer == nullptr)
-				{
-					float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
-					if (distance < min)
-					{
-						targetPlayer = pchars[i];
-						min = distance;
-					}
-				}
-			}
-		}
-
-		MoveCloserToTargetPlayer(nullptr); //Try again
-	}
-}
-
 void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_, ATile* targetTile_)
 {
 	if (targetTile_)
@@ -509,9 +484,9 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 	}
 }
 
-void AEnemyBaseGridCharacter::ScaleLevelBaseOnArchetype(int level_, int archetype_)
+AGridCharacter* AEnemyBaseGridCharacter::GetCurrentTarget()
 {
-	//TODO
+	return targetCharacter;
 }
 
 ///Summary of movement

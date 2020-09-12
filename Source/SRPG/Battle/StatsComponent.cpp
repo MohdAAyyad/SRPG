@@ -100,7 +100,17 @@ void UStatsComponent::LevelUp()
 int UStatsComponent::GetStatValue(int stat_)
 {
 	if (stat_ >= 0 && stat_ < currentStats.Num())
+	{
 		return currentStats[stat_];
+	}
+	else if (stat_ == -1)
+	{
+		return maxHP;
+	}
+	else if (stat_ == -2)
+	{
+		return maxPip;
+	}
 
 	return 0;
 }
@@ -143,8 +153,6 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 
 		currentLevel++;
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("Speed after scaling %d"), currentStats[STAT_SPD]);
 	currentStats[STAT_LVL] = targetLevel_;
 	currentStats[STAT_ARCH] = archetype_;
 }
@@ -158,3 +166,10 @@ void UStatsComponent::InitStatsAtZero()
 	currentStats[STAT_SPD] = 2; //Min speed
 }
 
+
+void UStatsComponent::UpdateMaxHpAndMaxPip(int hp_, int pip_)
+{
+	//Called when adding weapon stats which happens after updating the currentStats array
+	maxHP = currentStats[STAT_HP] + hp_;
+	maxPip = currentStats[STAT_PIP] + pip_;
+}

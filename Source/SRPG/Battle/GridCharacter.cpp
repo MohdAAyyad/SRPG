@@ -437,6 +437,7 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		armor = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ARM), EQU_ARM, statsComp->GetStatValue(STAT_ARI));
 		accessory = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ACC), EQU_ACC, -1);
 		
+		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
 		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_ATK, weapon.atk + armor.atk + accessory.atk);
