@@ -56,7 +56,19 @@ protected:
 										 bool bFromSweep, const FHitResult& SweepResult) override;
 	UFUNCTION(BlueprintCallable)
 	void PutUnitOnHold(int index_);
+	UFUNCTION(BlueprintCallable)
+	TArray<FFighterTableStruct> GetAllAvailbleFighters();
 	int spentUnits;
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetTextureArray();
+
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> fighterTextureArray;
+
+	TArray<int> unitsOnHold;
+
+	UFUNCTION(BlueprintCallable)
+	bool ShouldAddUnitSacrificeUI();
 public:
 
 	void UpdateChanceOfSuccess(float value_);

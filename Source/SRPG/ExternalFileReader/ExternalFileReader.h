@@ -35,6 +35,7 @@ protected:
 	virtual void BeginPlay() override;
 	bool firstTimeItem;
 	bool firstTimeEquipment;
+	bool firstTimeFighter;
 
 public:	
 	// finds a particular row if you know it's name 
@@ -55,6 +56,7 @@ public:
 	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
 	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
+	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
@@ -62,9 +64,10 @@ public:
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+	void ClearRecruitedFightersTable(int tableIndex_);
 	FName ConvertItemNameToNameUsedInTable(FName name_);
 	
-
+	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();
@@ -73,5 +76,6 @@ public:
 
 	// the name must match the class exactly
 	int FindTableIndexInArray(FName structName_);
+	int FindTableIndexByName(FName tableName_);
 		
 };

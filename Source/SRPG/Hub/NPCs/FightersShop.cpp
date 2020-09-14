@@ -174,12 +174,12 @@ void AFightersShop::FinalizePurchase()
 			row.archetype = chosenFighter.archetype;
 			row.id = ++fighterID; //Add 1 to fighter ID then make that equal to row id. Makes sure no two fighters have the same ID
 			row.value = 0;
-
 			// add the new row to the table
 			FName index = FName(*FString::FromInt(purchasedFighters));
 			fileReader->AddRowToRecruitedFighterTable(index, 1, row);
 			purchasedFighters += 1;
-
+			// adds one to the roster size
+			Intermediate::GetInstance()->UpdateCurrentRosterSize(1);
 			//TODO
 			//Play a UI pop up
 			UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));

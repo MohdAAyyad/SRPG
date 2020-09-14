@@ -24,6 +24,7 @@ void UExternalFileReader::BeginPlay()
 	tables.Reserve(10);
 	firstTimeItem = true;
 	firstTimeEquipment = true;
+	firstTimeFighter = true;
 	// ...
 	
 }
@@ -46,6 +47,8 @@ FDialogueTableStruct UExternalFileReader::FindDialogueTableRow(FName name_, int 
 FFighterTableStruct UExternalFileReader::FindFighterTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Fighter Table"));
+	// go clear the recruited fighters table if it's the first time running 
+
 	if (tables[index_])
 	{
 		FFighterTableStruct* result = tables[index_]->FindRow<FFighterTableStruct>(name_, contextString, true);
@@ -118,6 +121,7 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 FFighterTableStruct UExternalFileReader::FindEquippedFighterTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Equipped Fighters Table"));
+
 	if (tables[index_])
 	{
 		FFighterTableStruct* result = tables[index_]->FindRow<FFighterTableStruct>(name_, contextString, true);
@@ -263,7 +267,11 @@ FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activit
 
 void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
-	
+	if (firstTimeFighter)
+	{
+		ClearRecruitedFightersTable(index_);
+	}
+
 	if (tables[index_])
 	{
 		tables[index_]->AddRow(rowName_, row_);
@@ -290,6 +298,31 @@ TArray<FFighterTableStruct*> UExternalFileReader::GetAllRecruitedFighters()
 	}
 
 	return rfighters;
+}
+
+TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tableIndex_)
+{
+
+	// Didn't want to break your old version so I made a new one that actually checks for the table index instead of a hardcoded
+	//value
+	static const FString contextString(TEXT("Trying to get the recruited fighters from the table"));
+	TArray<FName> rowNames;
+	TArray<FFighterTableStruct> rfighters;
+	if (tables[tableIndex_])
+	{
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by TransitionToBattle in the battle. 0 for Rfighters.
+
+		for (auto n : rowNames)
+		{
+			rfighters.Push(*tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true));
+		}
+
+		return rfighters;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+	return TArray<FFighterTableStruct>();
+	
 }
 
 FFighterTableStruct UExternalFileReader::GetRecruitedFighterByID(int id_)
@@ -345,6 +378,23 @@ void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_
 	}
 }
 
+void UExternalFileReader::ClearRecruitedFightersTable(int tableIndex_)
+{
+	// make double sure we aren't clearing the all fighters table
+	if (tables[tableIndex_] && firstTimeFighter)
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+		// run through each row and remove
+		for (auto n : rowNames)
+		{
+			tables[tableIndex_]->RemoveRow(n);
+		}
+		// turn the bool off
+		firstTimeFighter = false;
+	}
+}
+
 UExternalFileReader* UExternalFileReader::GetExternalFileReader()
 {
 	return this;
@@ -376,6 +426,23 @@ int UExternalFileReader::FindTableIndexInArray(FName structName_)
 	return result;
 }
 
+// same story with the name one. Input the name correctly and you have nothing to worry about
+int UExternalFileReader::FindTableIndexByName(FName tableName_)
+{
+	int result = 0;
+	for (auto t : tables)
+	{
+		FName tableQuery = t->GetFName();
+		if (tableQuery == tableName_)
+		{
+			return result;
+		}
+		result++;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Could not find valid table or invalid name input"));
+	return result;
+}
 
 TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
 {
@@ -493,6 +560,32 @@ FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 		return FName(TEXT("1"));
 
 	return FName(TEXT(""));
+}
+
+void UExternalFileReader::RemoveFighterTableRow(FName rowName_, int tableIndex_)
+{
+	// make extra fucking sure you are deleting the correct row, pass in the wrong one and that data is gone.
+	// In the future I will add in a way to check to make sure that you can't delete a main character's data
+	static const FString contextString(TEXT("Removing fighter rows that match id"));
+	if (tables[tableIndex_])
+	{
+		TArray<FName> rowNames;
+		rowNames = tables[tableIndex_]->GetRowNames();
+
+		for (auto n : rowNames)
+		{
+			FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true);
+			FName converted = *FString::FromInt(row->id);
+			if (converted == rowName_)
+			{
+				tables[tableIndex_]->RemoveRow(n);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fighter Table is invalid when trying to remove fighter"));
+	}
 }
 
 FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_, int subIndex_)

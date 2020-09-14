@@ -48,7 +48,7 @@ void ACentralNPC::PutUnitOnHold(int index_)
 {
 	if (spentUnits <= unitCost)
 	{
-		Intermediate::GetInstance()->PutUnitOnHold(index_);
+		unitsOnHold.Push(index_);
 		spentUnits += 1;
 	}
 	else
@@ -56,6 +56,29 @@ void ACentralNPC::PutUnitOnHold(int index_)
 		UE_LOG(LogTemp, Warning, TEXT("Too many units spent!"));
 	}
 
+}
+
+TArray<FFighterTableStruct> ACentralNPC::GetAllAvailbleFighters()
+{
+	return fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+	//return fileReader->GetAllRecruitedFighters(1);
+}
+
+TArray<UTexture*> ACentralNPC::GetTextureArray()
+{
+	return fighterTextureArray;
+}
+
+bool ACentralNPC::ShouldAddUnitSacrificeUI()
+{
+	if(unitCost > 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void ACentralNPC::UpdateChanceOfSuccess(float value_)
@@ -119,6 +142,11 @@ void ACentralNPC::SimulateActivity()
 		FActivityDialogueTableStruct row = fileReader->GetPositiveCentral(activityIndex, 0);
 		line = row.dialogue;
 		activityEndLine = "Activity Success!";
+		// if there are any units on hold and we've succeeded, clear out the array 
+		if (unitsOnHold.Num() > 0)
+		{
+			unitsOnHold.Empty();
+		}
 		// lines would be loaded in via file but for now is just just predetermined
 		switch (rewardIndex)
 		{
@@ -197,6 +225,17 @@ void ACentralNPC::SimulateActivity()
 		line = row.dialogue;
 		//line = "Well that's a fail there";
 		activityEndLine = "Activity Failed";
+		if (unitsOnHold.Num() > 0)
+		{
+			for (int i : unitsOnHold)
+			{
+				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
+				FName converted = *FString::FromInt(i);
+				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+			}
+			// clear out the array
+			unitsOnHold.Empty();
+		}
 	}
 
 	// regardless of the result we have already done the activity

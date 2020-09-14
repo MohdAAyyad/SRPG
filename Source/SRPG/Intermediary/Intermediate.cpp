@@ -47,6 +47,7 @@ void Intermediate::SetProtagonistLevel(int value_)
 }
 void Intermediate::UpdateCurrentRosterSize(int value_) //Value_ can be + or -.  //Called from the fighters shop and from the battle manager
 {
+	currentRosterSize += value_;
 }
 int Intermediate::GetCurrentRosterSize()
 {
@@ -130,7 +131,6 @@ void Intermediate::EnemyStatsGoDown(int value_, int statIndex_)//Passed to battl
 
 void Intermediate::PutUnitOnHold(int index_)//Called from hubplayer or from tournament npc uictrl.
 {
-
 } 
 
 void Intermediate::PlayerUnitsAreRemoved(bool remove_)//Called from central NPC when activity fails. 
