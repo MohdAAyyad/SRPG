@@ -49,7 +49,6 @@ void ACentralNPC::PutUnitOnHold(int index_)
 	if (spentUnits <= unitCost)
 	{
 		unitsOnHold.Push(index_);
-		spentUnits += 1;
 	}
 	else
 	{
@@ -79,6 +78,56 @@ bool ACentralNPC::ShouldAddUnitSacrificeUI()
 	{
 		return false;
 	}
+}
+
+FString ACentralNPC::WarningText(int warningType_)
+{
+	switch (warningType_)
+	{
+		//units too high
+		case 1:
+			return FString("Too Many Units Selected");
+			break;
+		//units too low
+		case 2:
+			return FString("Not Enough Units Selected");
+			break;
+		// not enough money
+		case 3:
+			return FString("Not Enough Money");
+			break;
+		// not enough money and too few units
+		case 4:
+			return FString("Not Enough Units Selected. Not Enough Money");
+			break;
+		// too many units not enough money
+		case 5:
+			return FString("Too Many Units Selected. Not Enough Money");
+			break;
+		// reset the warning string
+		case 6:
+			warning = FString();
+			return warning;
+			break;
+
+	}
+	
+	return FString();
+}
+
+FString ACentralNPC::GetWarningText()
+{
+	return warning;
+}
+
+void ACentralNPC::UpdateSpentUnits(int value_)
+{
+	spentUnits += value_;
+}
+
+void ACentralNPC::SetSpentUnits(int value_)
+{
+	spentUnits = value_;
 }
 
 void ACentralNPC::UpdateChanceOfSuccess(float value_)
@@ -118,10 +167,30 @@ void ACentralNPC::SpendCost()
 		if (IsActivityAffordable())
 		{
 			SimulateActivity();
+			warning = FString();
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Not enough money or units actived to activate event"));
+			if (spentUnits > unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost <= 0)
+			{
+				warning = WarningText(5);
+			}
+			else if (spentUnits < unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost <= 0)
+			{
+				warning = WarningText(4);
+			}
+			else if (spentUnits > unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost > 0)
+			{
+				warning = WarningText(1);
+			}
+			else if (spentUnits < unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost > 0)
+			{
+				warning = WarningText(2);
+			}
+			else if (spentUnits == unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost <= 0)
+			{
+				warning = WarningText(3);
+			}
 		}
 	}
 	
@@ -227,12 +296,12 @@ void ACentralNPC::SimulateActivity()
 		activityEndLine = "Activity Failed";
 		if (unitsOnHold.Num() > 0)
 		{
-			for (int i : unitsOnHold)
+			/*for (int i : unitsOnHold)
 			{
 				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
 				FName converted = *FString::FromInt(i);
 				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
-			}
+			}*/
 			// clear out the array
 			unitsOnHold.Empty();
 		}

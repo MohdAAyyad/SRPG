@@ -33,9 +33,6 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	bool firstTimeItem;
-	bool firstTimeEquipment;
-	bool firstTimeFighter;
 
 public:	
 	// finds a particular row if you know it's name 
@@ -66,8 +63,6 @@ public:
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
 	void ClearRecruitedFightersTable(int tableIndex_);
 	FName ConvertItemNameToNameUsedInTable(FName name_);
-	
-	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();

@@ -29,7 +29,7 @@ protected:
 	float successRewards; // affects a stat based on the reward index
 	FString activityEndLine;// updated after activity succeeds or fails
 	UPROPERTY(BlueprintReadOnly)
-		bool activityAlreadyDone; // if true the percentage UI widget will not be added to the ui
+	bool activityAlreadyDone; // if true the percentage UI widget will not be added to the ui
 
 	UFUNCTION(BlueprintCallable)
 	bool IsActivityAffordable(); /*Checks if the player has enough 
@@ -46,7 +46,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	FString GetChanceOfSuccessString();
 	UFUNCTION(BlueprintCallable)
-		FString GetEndOfActivityLine();
+	FString GetEndOfActivityLine();
 
 	void LoadText() override;
 	void BeginPlay() override;
@@ -69,6 +69,19 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	bool ShouldAddUnitSacrificeUI();
+
+	UFUNCTION(BlueprintCallable)
+	FString WarningText(int warningType_);
+	UFUNCTION(BlueprintCallable)
+	FString GetWarningText();
+
+	UPROPERTY(EditAnywhere)
+	FString warning;
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateSpentUnits(int value_);
+	UFUNCTION(BlueprintCallable)
+	void SetSpentUnits(int value_);
 public:
 
 	void UpdateChanceOfSuccess(float value_);
