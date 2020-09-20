@@ -19,6 +19,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Hub")
 	class AHubWorldManager* hub;
 public:
+	AItemShop();
 	UPROPERTY(EditAnywhere)
 	TArray<UTexture*> itemTextures;
 	UPROPERTY(EditAnywhere)

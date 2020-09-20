@@ -17,6 +17,7 @@ ATournament::ATournament():ACentralNPC()
 	op2SuccessChance = 0;
 	hasBetOnOpponent = false;
 	winner = false;
+	PrimaryActorTick.bCanEverTick = false;
 }
 void ATournament::BeginPlay()
 {

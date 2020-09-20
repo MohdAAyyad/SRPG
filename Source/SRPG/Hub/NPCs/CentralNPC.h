@@ -58,6 +58,7 @@ protected:
 	void PutUnitOnHold(int index_);
 	UFUNCTION(BlueprintCallable)
 	TArray<FFighterTableStruct> GetAllAvailbleFighters();
+	UPROPERTY(BlueprintReadOnly)
 	int spentUnits;
 	UFUNCTION(BlueprintCallable)
 	TArray<UTexture*> GetTextureArray();
