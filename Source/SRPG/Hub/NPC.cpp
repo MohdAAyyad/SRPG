@@ -14,6 +14,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Hub/NPCs/NPCWanderComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Animation/NPCCharacterAnimInstance.h"
 
 // Sets default values
 ANPC::ANPC()
@@ -57,7 +59,9 @@ void ANPC::BeginPlay()
 	// load a default conversation if nothing is selected
 	npcLineIndex = 0;
 
-	animator = Cast<UNPCCharacterAnimInstance>(GetMesh()->GetAnimClass());
+
+	
+	animator = Cast<UNPCCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
 	wander->SetCharacterRef(this);
 }
@@ -111,31 +115,61 @@ void ANPC::LoadText()
 void ANPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//AddMovementInput(FVector(), 1);
+	// handle the wander
 	if (wander->GetShouldMove() && interactedWith == false && shouldWander)
 	{
 		wander->Wander();
 	}
-	if (interactedWith)
+
+	if (wander->GetShouldMove() && animator)
 	{
-		FQuat npcRot = GetActorRotation().Quaternion();
-		FQuat playerRot = playerRef->GetActorRotation().Quaternion();
-
-		SetActorRotation(playerRot.Inverse() * npcRot);
-
-		npcRot = GetActorRotation().Quaternion();
-		playerRot = playerRef->GetActorRotation().Quaternion();
-
-		SetActorRotation(playerRot * npcRot);
-
-		FVector newRotation = GetActorRotation().Euler() + FVector(0, 0, 180);
-		SetActorRotation(FQuat::MakeFromEuler(newRotation));
-
-		FVector interp = FMath::Lerp(playerRef->GetActorRotation().GetInverse().Vector(), GetActorRotation().Vector(), 5);
-		FRotator rot = FRotator(0, 0, interp.Z);
+		animator->SetIsWalking(true);
 	}
+	else if(animator && wander->GetShouldMove() == false)
+	{
+		animator->SetIsWalking(false);
+	}
+
+	//	FQuat npcRot = GetActorRotation().Quaternion();
+	//	FQuat playerRot = playerRef->GetActorRotation().Quaternion();
+	//	FQuat result1 = playerRot.Inverse() * npcRot;
+	//	//SetActorRotation(playerRot.Inverse() * npcRot);
+	//	FQuat result2 = playerRot * npcRot;
+	//*	npcRot = GetActorRotation().Quaternion();
+	//	playerRot = playerRef->GetActorRotation().Quaternion();*/
+
+	//	//SetActorRotation(playerRot * npcRot);
+	//	result1 *= result2;
+	//	FVector newRotation = result1.Vector() + FVector(0, 0, 180);
+	//	//SetActorRotation(FQuat::MakeFromEuler(newRotation));
+
+	//	FVector interp = FMath::Lerp(newRotation, GetActorRotation().Vector(), 1);
+	//	UE_LOG(LogTemp, Warning, TEXT("new target = "));
+	//	FRotator rot = FRotator(0, 0, interp.Z);
+	//	SetActorRotation(rot);
+
 	// rotate the NPC to face the player
-	
+	if (playerRef && interactedWith)
+	{
+		FVector npcRot = GetActorLocation();
+		FVector playerRot = playerRef->GetActorLocation();
+
+		FRotator result = UKismetMathLibrary::FindLookAtRotation(npcRot, playerRot);
+
+		FRotator distance = GetActorRotation() - result;
+		if (GetActorRotation().Yaw > result.Yaw + 2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Rotating Negative!"));
+			FRotator rot = FRotator(0, -400 * DeltaTime, 0);
+			AddActorLocalRotation(rot);
+		}
+		else if (GetActorRotation().Yaw < result.Yaw - 2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Rotating Positive!"));
+			FRotator rot = FRotator(0, 400 * DeltaTime, 0);
+			AddActorLocalRotation(rot);
+		}
+	}	
 }
 
 void ANPC::Interact()

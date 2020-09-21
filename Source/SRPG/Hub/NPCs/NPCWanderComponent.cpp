@@ -45,12 +45,11 @@ void UNPCWanderComponent::Wander()
 		// this function is going to calculate how the npc needs to move
 		direction = target - chara->GetActorLocation();
 		float dist = FVector::Dist(target, chara->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("Scooting"));
+		//UE_LOG(LogTemp, Warning, TEXT("Scooting"));
 		// if we are in the radius go home 
 		if (dist < radius)
 		{
 			shouldMove = false;
-
 			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
 			UE_LOG(LogTemp, Warning, TEXT("Arrived"));
 			return;
@@ -87,7 +86,7 @@ void UNPCWanderComponent::SelectNewTargetLocation()
 			
 			target = tempTarget;
 			shouldMove = true;
-			UE_LOG(LogTemp, Warning, TEXT(" Target X: %f Y: %f Z: %F"), target.X, target.Y, target.Z);
+			//UE_LOG(LogTemp, Warning, TEXT(" Target X: %f Y: %f Z: %F"), target.X, target.Y, target.Z);
 		}
 		else
 		{
