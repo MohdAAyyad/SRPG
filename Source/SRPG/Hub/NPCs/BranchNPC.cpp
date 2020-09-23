@@ -5,6 +5,7 @@
 #include "Hub/NPCs/CentralNPC.h"
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "Hub/NPCs/NPCWanderComponent.h"
 
 void ABranchNPC::EndDialogue()
 {

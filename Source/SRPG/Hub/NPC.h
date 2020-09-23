@@ -9,7 +9,7 @@
 #include "NPC.generated.h"
 
 UCLASS()
-class SRPG_API ANPC : public AActor, public IInteractable
+class SRPG_API ANPC : public ACharacter, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -45,6 +45,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC Widget")
 	class UWidgetComponent* widget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wander")
+	class UNPCWanderComponent* wander;
 
 	UNPCCharacterAnimInstance* animator;
 
@@ -57,7 +59,11 @@ protected:
 		virtual void LoadText();
 	// gives us a ref to the hubmanager for time managment purposes
 	class AHubWorldManager* hubManager;
+
+	class ASRPGCharacter* playerRef;
 	// ref to the player once collided, can be used in blueprints for UI purposes
+	UPROPERTY(EditAnywhere)
+	bool shouldWander;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

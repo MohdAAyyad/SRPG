@@ -16,6 +16,7 @@ AFightersShop::AFightersShop():ANPC()
 	haveChosenFighter = false;
 	currentIndex = -1;
 	fighterID = 0;
+	PrimaryActorTick.bCanEverTick = false;
 }
 void AFightersShop::BeginPlay()
 {

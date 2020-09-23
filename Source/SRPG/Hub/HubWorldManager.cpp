@@ -34,6 +34,8 @@ void AHubWorldManager::BeginPlay()
 
 	SpawnNPCs(1, 0);
 	SpawnNPCs(1, true);
+
+
 	//SpawnNPCs(1, 3);
 	//SpawnNPCs(1, 4);
 	//SpawnNPCs(1, 5);

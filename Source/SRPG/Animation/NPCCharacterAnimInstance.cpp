@@ -3,3 +3,12 @@
 
 #include "NPCCharacterAnimInstance.h"
 
+UNPCCharacterAnimInstance::UNPCCharacterAnimInstance()
+{
+	isWalking = false;
+}
+
+void UNPCCharacterAnimInstance::SetIsWalking(bool walking_)
+{
+	isWalking = walking_;
+}

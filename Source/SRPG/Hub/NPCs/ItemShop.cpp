@@ -18,6 +18,12 @@ void AItemShop::BeginPlay()
 {
 	// begin play
 	Super::BeginPlay();
+
+}
+
+AItemShop::AItemShop()
+{
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 TArray<UTexture*> AItemShop::GetItemTextureArray()

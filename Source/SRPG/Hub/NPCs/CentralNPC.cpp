@@ -8,6 +8,7 @@
 #include "SRPGCharacter.h"
 #include "Intermediary/Intermediate.h"
 #include "Definitions.h"
+#include "Hub/NPCs/NPCWanderComponent.h"
 
 void ACentralNPC::BeginPlay()
 {
