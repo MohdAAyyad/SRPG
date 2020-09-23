@@ -14,6 +14,7 @@
 #include "Intermediary/Intermediate.h"
 #include "BattleController.h"
 #include "Grid/Tile.h"
+#include "TimerManager.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -31,6 +32,8 @@ ABattleManager::ABattleManager()
 	
 	totalNumberOfPhasesElapsed = 1;
 	indexOfSelectedFighterInSelectedFighters = 0;
+
+	bBattleHasEnded = false;
 }
 
 // Called when the game starts or when spawned
@@ -72,41 +75,44 @@ int ABattleManager::GetPhase()
 
 void ABattleManager::NextPhase()
 {
-	phase++;
+	if (!bBattleHasEnded)
+	{
+		phase++;
 
-	if (phase == BTL_ENM)	//Enemy phase
-	{
-		for (int i = 0; i < deployedUnits.Num(); i++)
+		if (phase == BTL_ENM)	//Enemy phase
 		{
-			deployedUnits[i]->GetMyTile()->SetOccupied(true);
-		}
-		if (aiManager)
-			aiManager->BeginEnemyTurn();
-	}
-	else if (phase == BTL_CRD)
-	{
-		if (crdManager)
-		{
-			if (totalNumberOfPhasesElapsed == 1)
+			for (int i = 0; i < deployedUnits.Num(); i++)
 			{
-				crdManager->CalculateFavorForTheFirstTime();
-				crdManager->AddCrowdWidgetToViewPort();
+				deployedUnits[i]->EndPlayerTurn();
 			}
-			crdManager->StartCrowdPhase();
+			if (aiManager)
+				aiManager->BeginEnemyTurn();
 		}
-	}
-	else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
-	{
-		phase = BTL_PLY;
-		totalNumberOfPhasesElapsed++;
-		for (int i = 0; i < deployedUnits.Num(); i++)
+		else if (phase == BTL_CRD)
 		{
-			deployedUnits[i]->UpdateOriginTile();
+			if (crdManager)
+			{
+				if (totalNumberOfPhasesElapsed == 1)
+				{
+					crdManager->CalculateFavorForTheFirstTime();
+					crdManager->AddCrowdWidgetToViewPort();
+				}
+				crdManager->StartCrowdPhase();
+			}
 		}
-	}
+		else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
+		{
+			phase = BTL_PLY;
+			totalNumberOfPhasesElapsed++;
+			for (int i = 0; i < deployedUnits.Num(); i++)
+			{
+				deployedUnits[i]->StartPlayerTurn();
+			}
+		}
 
-	if (btlCtrl)
-		btlCtrl->ResetControlledCharacter();
+		if (btlCtrl)
+			btlCtrl->ResetControlledCharacter();
+	}
 			
 }
 void ABattleManager::DeployThisUnitNext(int index_)
@@ -140,7 +146,9 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			
 			unit->SetBtlAndCrdManagers(this,crdManager);
 			unit->SetFighterIndex(indexOfSelectedFighterInSelectedFighters);
+			unit->SetFighterName(selectedFighters[indexOfSelectedFighterInSelectedFighters].name);
 			deployedUnits.Push(unit);
+			unit->bpID = bpidOfUnitToBeDeployedNext;
 		}
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
@@ -227,4 +235,55 @@ AGridCharacter* ABattleManager::GetPlayerWithLowestStat(int statIndex_)
 TArray<APlayerGridCharacter*> ABattleManager::GetDeployedPlayers()
 {
 	return deployedUnits;
+}
+
+void ABattleManager::HandlePlayerDeath(APlayerGridCharacter* player_)
+{
+	if (deployedUnits.Contains(player_))
+	{
+		deployedUnits.Remove(player_);
+	}
+
+	
+
+	if (deployedUnits.Num() == 0)
+	{
+		EndBattle(false); //Defeat
+	}
+}
+
+void ABattleManager::EndBattle(bool victory_)
+{
+	if (widgetComp->GetUserWidgetObject()->IsInViewport())
+		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+
+	phase = BTL_END;
+	if (victory_)
+	{
+		//TODO
+		//End on a victory
+
+		if(EndWidgets[0])
+			widgetComp->SetWidgetClass(EndWidgets[0]);
+		widgetComp->GetUserWidgetObject()->AddToViewport();
+		FTimerHandle timeToUpdateExpHandle;
+		float timeToUpdateEXP = 0.7f;
+		GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &ABattleManager::UpdatePlayerEXP, timeToUpdateEXP, false);
+	}
+	else
+	{
+		if (EndWidgets[1])
+			widgetComp->SetWidgetClass(EndWidgets[1]);
+		//TODO
+		//End on a defeat
+	}
+}
+
+void ABattleManager::UpdatePlayerEXP()
+{
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if (deployedUnits[i])
+			deployedUnits[i]->UpdateCurrentEXP();
+	}
 }

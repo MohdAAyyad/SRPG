@@ -21,6 +21,8 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Intermediary/Intermediate.h"
 #include "DecisionComp.h"
+#include "Components/WidgetComponent.h"
+#include "Animation/GridCharacterAnimInstance.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -104,7 +106,7 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		accessory = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
 		
 
-
+		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
 		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_ATK, weapon.atk + armor.atk + accessory.atk);
@@ -222,12 +224,24 @@ void AEnemyBaseGridCharacter::Selected()
 		gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENMH,0);
 		gridManager->UpdateCurrentTile(originTile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK, statsComp->GetStatValue(STAT_PURE));
 	}
+
+	if (widgetComp)
+	{
+		if(!widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->AddToViewport();
+	}
 }
 
 void AEnemyBaseGridCharacter::NotSelected()
 {
 	if (gridManager)
 		gridManager->ClearHighlighted();
+
+	if (widgetComp)
+	{
+		if (widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	}
 }
 
 void AEnemyBaseGridCharacter::ExecuteChosenAttack()
@@ -276,7 +290,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAttack()
 void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 {
 	if (actionTargets[0])
-		actionTargets[0]->GridCharTakeDamage(1.0f, this);
+		actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK), this);
 
 	if (statsComp->AddTempCRD(CRD_ATK))
 	{
@@ -487,6 +501,25 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 AGridCharacter* AEnemyBaseGridCharacter::GetCurrentTarget()
 {
 	return targetCharacter;
+}
+
+void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
+{
+	//Rotate to face attacker
+	Super::GridCharTakeDamage(damage_, attacker_);
+	if (overheadWidgetComp)		
+		overheadWidgetComp->SetVisibility(true);
+	//update stats component
+	statsComp->AddToStat(STAT_HP, -damage_);
+	//Check if dead
+	if (statsComp->GetStatValue(STAT_HP) <= 1)
+	{
+		if (aiManager)
+			aiManager->HandleEnemyDeath(this);
+
+		if (animInstance)
+			animInstance->DeathAnim();
+	}
 }
 
 ///Summary of movement

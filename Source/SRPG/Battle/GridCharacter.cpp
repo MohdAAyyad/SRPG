@@ -31,6 +31,8 @@
 #include "Intermediary/Intermediate.h"
 #include "BattleController.h"
 #include "TimerManager.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -77,6 +79,11 @@ AGridCharacter::AGridCharacter()
 	widgetComp->SetupAttachment(RootComponent);
 	widgetComp->SetVisibility(false);
 
+	overheadWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget Component"));
+	overheadWidgetComp->SetupAttachment(RootComponent);
+	overheadWidgetComp->SetVisibility(false);
+	overheadWidgetComp->AddRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+
 	champParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
 	champParticles->SetupAttachment(RootComponent);
 	champParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
@@ -102,6 +109,11 @@ AGridCharacter::AGridCharacter()
 
 
 	fighterIndex = 0;
+
+	bHasMoved = false;
+	bHasDoneAnAction = false;
+
+	bpID = 0;
 
 }
 
@@ -178,15 +190,22 @@ void AGridCharacter::MoveAccordingToPath()
 			movementPath.RemoveAt(movementPath.Num() - 1);
 			if (movementPath.Num() == 0)
 			{
-				ATile* tile_ = GetMyTile();
-				//if (tile_)
-					//tile_->SetOccupied(true);
 				bMoving = false;
+				ATile* tile_ = GetMyTile();
+				if (tile_)
+					tile_->SetOccupied(true);
 				if (btlCtrl)
 					btlCtrl->ResetViewLock();
-				NotSelected();
-				Selected();
-					
+				bHasMoved = true;
+				if (bHasDoneAnAction) //Has moved and has done an action, we're done
+				{
+					FinishState();
+				}
+				else
+				{
+					NotSelected();
+					Selected();
+				}
 			}
 		}
 	}
@@ -226,6 +245,7 @@ void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
 		FTimerHandle attackDelayHandle;
 		//The delay here is needed to allow the camera enough time to focus on the character attacking
 		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingWeapon, delay_, false);
+		bHasDoneAnAction = true;
 	}
 }
 
@@ -234,6 +254,7 @@ void AGridCharacter::PlayAnimationAttackUsingWeapon()
 	if (animInstance)
 	{
 		animInstance->WeaponAttack();
+		//The animation event calls ActivateWeaponAttack
 	}
 }
 
@@ -253,6 +274,7 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float de
 			FTimerHandle attackDelayHandle;
 			//The delay here is needed to allow the camera enough time to focus on the character attacking
 			GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingSkill, delay_, false);
+			bHasDoneAnAction = true;
 		}
 	}
 }
@@ -262,6 +284,7 @@ void AGridCharacter::PlayAnimationAttackUsingSkill()
 	if (animInstance) //Play the animation
 	{
 		animInstance->SkillAttack(chosenSkillAnimIndex);
+		//The animation event calls ActivateSkillAttack
 	}
 }
 
@@ -294,8 +317,6 @@ AGridCharacter::EGridCharState AGridCharacter::GetCurrentState()
 
 void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
 {
-	//TODO
-	//Updated the stats component
 
 	//Rotate the character to face the attacker
 	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
@@ -305,6 +326,8 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 	SetActorRotation(rot);
 	if (animInstance)
 		animInstance->GotHit();
+
+	//Health details are handled inside the children's code
 }
 
 void AGridCharacter::UpdateCharacterSkills()
@@ -392,7 +415,6 @@ void AGridCharacter::HighlightItemUsage(FName itemName_)
 		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM, 0); //Items always cover 1 tile only
 		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
 		currentState = EGridCharState::HEALING;
-		//UE_LOG(LogTemp, Warning, TEXT("Current state is healing"));
 	}
 }
 
@@ -402,13 +424,22 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 	{
 		target_->GridCharReactToItem(fileReader->GetItemStatIndex(3,chosenItem), fileReader->GetItemValue(chosenItem));
 		fileReader->AddOwnedValueItemTable(chosenItem, 3, -1);
+		bHasDoneAnAction = true;
+		if (bHasMoved) //Has moved and has done an action, we're done
+		{
+			FinishState();
+		}
+		else
+		{
+			NotSelected();
+			Selected();
+		}
 	}
 
 }
 
 void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Reacting to item"));
 	if (animInstance)
 		animInstance->SetUseItem();
 }
@@ -496,4 +527,15 @@ void AGridCharacter::ResetCameraFocus()
 	//Called from the UI once an attack finishes
 	if (btlCtrl)
 		btlCtrl->ResetFocus();
+}
+
+
+void AGridCharacter::Die()
+{
+	Destroy();
+}
+
+void AGridCharacter::SetFighterName(FString name_)
+{
+	pName = name_;
 }

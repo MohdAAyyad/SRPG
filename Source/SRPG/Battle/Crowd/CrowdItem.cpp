@@ -67,7 +67,7 @@ void ACrowdItem::SetBtlAndCrdManagers(ABattleManager* btl_, ABattleCrowd* crd_)
 	if (btlManager)
 		turnsElapsedSinceSpawned = btlManager->GetTotalNumberOfPhasesElapsed();
 }
-void ACrowdItem::CheckIfItemShouldBeDestroyed()
+bool ACrowdItem::CheckIfItemShouldBeDestroyed()
 {
 	if (bMarkedByEnemy)
 		bMarkedByEnemy = false;
@@ -83,10 +83,12 @@ void ACrowdItem::CheckIfItemShouldBeDestroyed()
 
 				FTimerHandle endHandle;
 				GetWorld()->GetTimerManager().SetTimer(endHandle,this, &ACrowdItem::DespawnItem,0.15f, false);
+				return true;
 				
 			}
 		}
 	}
+	return false;
 }
 void ACrowdItem::OverlapWithGridCharacter(UPrimitiveComponent* overlappedComponent_,
 	AActor* otherActor_,
@@ -105,7 +107,7 @@ void ACrowdItem::OverlapWithGridCharacter(UPrimitiveComponent* overlappedCompone
 			//Call the needed functions on gchar
 
 			Obtained(gchar->GetActorLocation());
-			
+			Destroy();
 		}
 	}
 }

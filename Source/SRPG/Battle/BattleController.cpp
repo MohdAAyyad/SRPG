@@ -152,8 +152,11 @@ void ABattleController::HandleMousePress()
 					controlledCharacter = Cast<AGridCharacter>(hit.Actor);
 					if (controlledCharacter)
 					{
-						controlledCharacter->Selected();
-						//SetViewTargetWithBlend(controlledCharacter, 0.35f);
+						//Don't store a reference to a character who's finished their turn
+						if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
+							controlledCharacter->Selected();
+						else
+							controlledCharacter = nullptr;
 					}
 
 				}

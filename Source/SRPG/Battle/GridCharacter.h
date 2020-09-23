@@ -19,7 +19,8 @@ public:
 		IDLE,
 		ATTACKING,
 		SKILLING,
-		HEALING
+		HEALING,
+		FINISHED
 	};
 
 	// Sets default values for this character's properties
@@ -29,6 +30,12 @@ public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+	UPROPERTY(BlueprintReadOnly, Category = "Textures")
+		int bpID;
+
+	UPROPERTY(BlueprintReadOnly, Category ="Info Panel")
+		FString pName;
 
 protected:
 	/** Top down camera */
@@ -41,6 +48,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
 		class UWidgetComponent* widgetComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "OverheadWidget")
+		class UWidgetComponent* overheadWidgetComp;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
 		bool bChampion;
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
@@ -54,6 +65,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="File Reader")
 		class UExternalFileReader* fileReader;
+
 
 	bool bMoving;
 	TArray<FVector> movementPath;
@@ -79,6 +91,13 @@ protected:
 	
 	int fighterIndex;
 
+	//Every turn a character can move and do an action. They can move as much as they want until they do an action.
+	//If they do an action before moving, they can still move once.
+	UPROPERTY(BlueprintReadOnly, Category = "Structure")
+		bool bHasMoved;
+	UPROPERTY(BlueprintReadOnly, Category = "Structure")
+		bool bHasDoneAnAction;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -98,6 +117,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void ResetCameraFocus();
+
+	virtual void FinishState() {};
 
 public:	
 	// Called every frame
@@ -126,7 +147,7 @@ public:
 	void SetMoving(bool value_);
 
 	EGridCharState GetCurrentState();
-	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
+	virtual void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
 	void GridCharReactToItem(int statIndex_, int value_);
 	void UseItemOnOtherChar(AGridCharacter* target_);
@@ -135,7 +156,10 @@ public:
 	void SetChampionOrVillain(bool value_);
 	void UnElect(); //Called by battle crowd when 3 crowd turns pass
 
-	//PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS PLACEHOLDERS
+	UFUNCTION(BlueprintCallable)
+		void Die();
+	void SetFighterName(FString name_);
+
 protected:
 	virtual void AddEquipmentStats(int tableIndex_);
 
