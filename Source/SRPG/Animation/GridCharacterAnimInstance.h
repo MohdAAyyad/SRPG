@@ -30,6 +30,8 @@ protected:
 		int skillIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool useItem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bDeath;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -40,6 +42,7 @@ public:
 	void GotHit();
 	void SkillAttack(int index_);
 	void SetUseItem();
+	void DeathAnim();
 
 	
 };

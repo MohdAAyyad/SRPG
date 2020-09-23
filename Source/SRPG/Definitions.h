@@ -88,7 +88,7 @@
 #define STAT_WSN 20
 #endif
 
-#ifndef STAT_ASI
+#ifndef STAT_ASI//Armor skills index
 #define STAT_ASI 21
 #endif
 

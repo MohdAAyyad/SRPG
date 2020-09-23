@@ -34,27 +34,25 @@ void AAIManager::Tick(float DeltaTime)
 
 void AAIManager::BeginEnemyTurn()
 {
-	/*for (int i = 0; i < deployedEnemies.Num(); i++)
-	{
-		deployedEnemies[i]->StartEnemyTurn();
-	}
-	*/
 	numberOfEnemiesWhichFinishedMoving = -1; //Reset
 	TellDeployedEnemiesToMove();
 }
 
 void AAIManager::TellDeployedEnemiesToMove()
 {
-	if (numberOfEnemiesToldToMove < deployedEnemies.Num())
+	if (deployedEnemies.Num() > 0)
 	{
-		deployedEnemies[numberOfEnemiesToldToMove]->StartEnemyTurn();
-		numberOfEnemiesToldToMove++;
-		FTimerHandle moveDelayHandle;
-		GetWorld()->GetTimerManager().SetTimer(moveDelayHandle, this, &AAIManager::TellDeployedEnemiesToMove, 0.5f, false);
-	}
-	else
-	{
-		numberOfEnemiesToldToMove = 0;
+		if (numberOfEnemiesToldToMove < deployedEnemies.Num())
+		{
+			deployedEnemies[numberOfEnemiesToldToMove]->StartEnemyTurn();
+			numberOfEnemiesToldToMove++;
+			FTimerHandle moveDelayHandle;
+			GetWorld()->GetTimerManager().SetTimer(moveDelayHandle, this, &AAIManager::TellDeployedEnemiesToMove, 0.3f, false);
+		}
+		else
+		{
+			numberOfEnemiesToldToMove = 0;
+		}
 	}
 }
 
@@ -107,6 +105,7 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 						deployedEnemies.Push(enemy);
 						enemyDeploymentTiles[tileIndex]->SetOccupied(true);
 						depNodes[nodeIndex].currentNumOfEnemiesForThisNode++;
+						enemy->bpID = enemyIndex;
 					}
 				}
 
@@ -123,13 +122,12 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 
 void AAIManager::FinishedMoving()
 {
-	//TODO
-	//The numbers should be adjusted when an enemy dies
-
 	//Called by enemies when they finish moving. Used to know when to tell the enemies to attack
-	numberOfEnemiesWhichFinishedMoving++;
-	//UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, nextOp.numberOfTroops - 1);
-	if (numberOfEnemiesWhichFinishedMoving == (nextOp.numberOfTroops - 1))
+	if(numberOfEnemiesWhichFinishedMoving+1 <= deployedEnemies.Num() - 1) //Don't go above the total number of deployed enemies
+		numberOfEnemiesWhichFinishedMoving++;
+
+	//UE_LOG(LogTemp, Warning, TEXT("Called AI Manager finished moving %d , %d"), numberOfEnemiesWhichFinishedMoving, deployedEnemies.Num() - 1);
+	if (numberOfEnemiesWhichFinishedMoving == (deployedEnemies.Num() - 1))
 	{
 		FTimerHandle attackDelayHandle;
 		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AAIManager::OrderEnemiesToAttackPlayer, 0.7f, false);
@@ -140,7 +138,14 @@ void AAIManager::FinishedAttacking()
 	//When an enemy finishes attacking, this function is called so we can tell the next one to attack.
 	numberOfEnemiesWhichFinishedMoving--;
 	if (numberOfEnemiesWhichFinishedMoving >= 0 && numberOfEnemiesWhichFinishedMoving < deployedEnemies.Num())
+	{
 		OrderEnemiesToAttackPlayer();
+	}
+	else
+	{ //All the enemies have finished their actions
+		if (btlManager)
+			btlManager->NextPhase();
+	}
 }
 
 void AAIManager::OrderEnemiesToAttackPlayer()
@@ -207,4 +212,17 @@ AGridCharacter* AAIManager::GetEnemyWithLowestStat(int statIndex_)
 	}
 
 	return result;
+}
+
+void AAIManager::HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_)
+{
+	if (deployedEnemies.Contains(enemy_))
+	{
+		deployedEnemies.Remove(enemy_);
+	}
+	if (deployedEnemies.Num() == 0)
+	{
+		if (btlManager)
+			btlManager->EndBattle(true); //Victory
+	}
 }

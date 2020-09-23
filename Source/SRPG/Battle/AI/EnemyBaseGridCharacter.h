@@ -16,7 +16,8 @@ class SRPG_API AEnemyBaseGridCharacter : public AGridCharacter
 protected:
 	AEnemyBaseGridCharacter();
 	void BeginPlay() override;
-	class AAIManager* aiManager;
+	UPROPERTY(BlueprintReadOnly, Category = "AIManager")
+		class AAIManager* aiManager;
 	class ATile* targetTile;
 	AGridCharacter* targetCharacter;
 	class ACrowdItem* targetItem;
@@ -74,4 +75,6 @@ public:
 	void MoveAccordingToPath() override;
 	void ItemIsUnreachable(ATile* startingTile_); //Called by the marked item when it's not obtained within the same turn or is obtained by someone else
 	AGridCharacter* GetCurrentTarget();
+
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_) override;
 };

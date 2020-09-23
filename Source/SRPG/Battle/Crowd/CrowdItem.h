@@ -59,7 +59,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SetBtlAndCrdManagers(ABattleManager* btl_, ABattleCrowd* crd_);
-	void CheckIfItemShouldBeDestroyed();
+	bool CheckIfItemShouldBeDestroyed();
 	bool MarkItem(AEnemyBaseGridCharacter* markingEnemy_); //Called by enemies to make sure no one else takes this item. Return true if operation was a success
 	int GetStat();
 	int GetValue();

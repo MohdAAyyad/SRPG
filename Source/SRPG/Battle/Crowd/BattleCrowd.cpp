@@ -96,14 +96,25 @@ void ABattleCrowd::StartCrowdPhase()
 		turnsSinceChampionAndVillainWereElected = 0;
 	}
 
+	TArray<int> itemsToBeRemoved;
 	//Check if spawned items should be destroyed
 	if (spawnedItems.Num() > 0)
 	{
 		for (int i = 0; i < spawnedItems.Num(); i++)
 		{
 			if (spawnedItems[i])
-				spawnedItems[i]->CheckIfItemShouldBeDestroyed();
+			{
+				if (spawnedItems[i]->CheckIfItemShouldBeDestroyed())
+				{
+					itemsToBeRemoved.Push(i);
+				}
+			}
 		}
+	}
+
+	for (int i = 0; i < itemsToBeRemoved.Num(); i++)
+	{
+		spawnedItems.RemoveAt(itemsToBeRemoved[i]);
 	}
 
 	SpawnItems();
@@ -173,6 +184,9 @@ void ABattleCrowd::SpawnItems()
 			}
 		}
 	}
+
+	if (btlManager)
+		btlManager->NextPhase();
 }
 void ABattleCrowd::ElectChampionAndVillain()
 {

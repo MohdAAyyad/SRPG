@@ -70,6 +70,6 @@ public:
 	void StartCrowdPhase();
 	void UpdateFavor(bool bPlayerOrVillain_); //If true, adds favorIncrement to playerFavor and subtracts it if false
 	void RemoveSpawnedItem(ACrowdItem* item_);
-	void AddCrowdWidgetToViewPort();
+	void AddCrowdWidgetToViewPort();	
 
 };

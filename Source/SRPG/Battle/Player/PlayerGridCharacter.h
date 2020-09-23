@@ -28,6 +28,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void RemoveWidgetFromVP();
+	void FinishState() override;
 
 public:
 	void Selected() override;
@@ -35,6 +36,12 @@ public:
 	virtual void ActivateWeaponAttack() override;
 	virtual void ActivateSkillAttack() override;
 	void SetFighterIndex(int index_);
+	void StartPlayerTurn();
+	void EndPlayerTurn();
+
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_) override;
+	void UpdateCurrentEXP();
+
 
 	
 };

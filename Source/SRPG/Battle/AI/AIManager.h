@@ -54,13 +54,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<TSubclassOf<class AEnemyBaseGridCharacter>> enemiesBPs;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Textures")
+		TArray<UMaterialInterface*> fighterMaterials; //Ordered in the same way as the enemy BPs. Used by UI.
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<FAIDeploymentStruct> depNodes;
 
 	TArray<AEnemyBaseGridCharacter*> deployedEnemies;
 	int numberOfEnemiesWhichFinishedMoving; //When this number reaches the current number of troops, tell them to attack
-	int numberOfEnemiesToldToMove;
+	int numberOfEnemiesToldToMove;	
 	FOpponentStruct nextOp;
+
 
 public:	
 	// Called every frame
@@ -76,6 +79,7 @@ public:
 
 	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_);
 	AGridCharacter* GetEnemyWithLowestStat(int statIndex_);
+	void HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_);
 
 protected:
 

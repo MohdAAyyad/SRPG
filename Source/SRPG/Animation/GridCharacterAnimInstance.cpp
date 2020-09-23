@@ -12,6 +12,7 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	bWeaponAttack = false;
 	bHit = false;
 	skillIndex = -1;
+	bDeath = false;
 }
 void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
@@ -47,4 +48,10 @@ void UGridCharacterAnimInstance::SetUseItem()
 {
 	if(!useItem)
 		useItem = true;
+}
+
+void UGridCharacterAnimInstance::DeathAnim()
+{
+	if (!bDeath)
+		bDeath = true;
 }

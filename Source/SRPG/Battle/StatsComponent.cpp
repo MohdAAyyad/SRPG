@@ -7,11 +7,41 @@
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	currentStats.Reserve(26);
 	tempCRD = 0;
 	maxHP = 0;
 	maxPip = 0;
+	bLevelingUp = false;
+	expOffset = 0.0f;
+	addedEXP = 0;
+}
+
+void UStatsComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bLevelingUp)
+	{
+		if (currentStats[STAT_EXP > 0])
+		{
+			currentStats[STAT_EXP]--;
+			addedEXP++;
+			expPercentage += expOffset;
+			if (addedEXP >= currentStats[STAT_NXP])
+			{
+				addedEXP = 0;
+				expPercentage = 0.0f;
+				bLevelingUp = false; //Assume we won't level up again
+				CheckLevelUp(true); //Levelup
+
+			}
+		}
+		else
+		{
+			bLevelingUp = false;
+		}
+	}
 }
 
 void UStatsComponent::PushAStat(int statValue_)
@@ -92,10 +122,24 @@ bool UStatsComponent::AddTempCRD(int value_) //True if the CRD stat is increased
 	}
 	return false;
 }
-void UStatsComponent::LevelUp()
+void UStatsComponent::CheckLevelUp(bool hasLeveledUp_)
 {
-	//TODO
-	//Level up the stats based on the archetype
+	if (hasLeveledUp_)
+	{
+		//Levelup
+		currentStats[STAT_NXP] *= 2;
+
+		//TODO
+		//Update the stats
+
+		if (currentStats[STAT_EXP] > 0) //We still have exp to earn
+			CheckLevelUp(false); //Call the function again to calculate the expOffset again
+	}
+	else
+	{
+		expOffset = 1.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
+		bLevelingUp = true;		
+	}
 }
 int UStatsComponent::GetStatValue(int stat_)
 {
@@ -172,4 +216,20 @@ void UStatsComponent::UpdateMaxHpAndMaxPip(int hp_, int pip_)
 	//Called when adding weapon stats which happens after updating the currentStats array
 	maxHP = currentStats[STAT_HP] + hp_;
 	maxPip = currentStats[STAT_PIP] + pip_;
+}
+
+
+float UStatsComponent::GetHPPercentage()
+{
+	return (static_cast<float>(currentStats[STAT_HP]) / static_cast<float>(maxHP));
+}
+
+float UStatsComponent::GetPIPPercentage()
+{
+	return (static_cast<float>(currentStats[STAT_PIP]) / static_cast<float>(maxPip));
+}
+
+float UStatsComponent::GetEXPPercentage()
+{
+	return expPercentage;
 }

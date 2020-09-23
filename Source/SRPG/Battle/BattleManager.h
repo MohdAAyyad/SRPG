@@ -49,18 +49,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 		class UWidgetComponent* widgetComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+		TArray<TSubclassOf<UUserWidget>> EndWidgets;
+
+	bool bBattleHasEnded;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Will be read by UI to show the phases
 		int phase; //0 deployment 1 player 2 enemy 3 crowd 4 end
 	
 	//Updated from the intermediate
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") 
+	UPROPERTY(BlueprintReadOnly, Category = "Battle") 
 		TArray<FFighterTableStruct> selectedFighters;
 
 	int indexOfSelectedFighterInSelectedFighters;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
 		TArray<int> deployedFightersIndexes; //Used to make sure the same unit is not spawned more than once
-	TArray<class APlayerGridCharacter*> deployedUnits;
+	UPROPERTY(BlueprintReadOnly, Category = "Deployed units")
+		TArray<class APlayerGridCharacter*> deployedUnits;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 		class AAIManager* aiManager;
@@ -75,6 +81,8 @@ protected:
 		int totalNumberOfPhasesElapsed;
 
 	class ABattleController* btlCtrl;
+
+	void UpdatePlayerEXP();
 
 public:	
 	// Called every frame
@@ -94,5 +102,8 @@ public:
 	AGridCharacter* GetPlayerWithHighestStat(int statIndex_);
 	AGridCharacter* GetPlayerWithLowestStat(int statIndex_);
 	TArray<APlayerGridCharacter*> GetDeployedPlayers();
+
+	void EndBattle(bool victory_);
+	void HandlePlayerDeath(APlayerGridCharacter* player_);
 
 };
