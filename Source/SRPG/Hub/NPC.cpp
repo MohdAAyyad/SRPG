@@ -125,7 +125,7 @@ void ANPC::Tick(float DeltaTime)
 	{
 		animator->SetIsWalking(true);
 	}
-	else if(animator && wander->GetShouldMove() == false)
+	else if(animator && wander->GetShouldMove() == false && interactedWith)
 	{
 		animator->SetIsWalking(false);
 	}

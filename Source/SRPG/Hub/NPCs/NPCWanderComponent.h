@@ -30,7 +30,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float maxSpeed;
 	UPROPERTY(EditAnywhere)
-	float maxRotation;
+	float maxWander;
 	UPROPERTY(EditAnywhere)
 	float waitTime;
 	UPROPERTY(EditAnywhere)
@@ -40,6 +40,7 @@ protected:
 	FTimerHandle newTargetTimerHandle;
 	UPROPERTY(EditAnywhere)
 	float timeToArrive;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -53,5 +54,6 @@ public:
 	bool GetShouldMove();
 
 	void SetCharacterRef(ACharacter* chara_);
+
 		
 };

@@ -55,7 +55,7 @@ void UNPCWanderComponent::Wander()
 			return;
 		}
 
-		direction *= (maxSpeed / 2) / timeToArrive;
+		direction *= maxSpeed / timeToArrive;
 
 		// if we are far enough away just start booking it
 		if (direction.Size() > maxSpeed)
