@@ -501,6 +501,20 @@ int UExternalFileReader::GetItemValue(FName itemName_)
 }
 
 
+void UExternalFileReader::RemoveFighterTableRow(FName rowName_, int tableIndex_)
+{
+	if (tables[tableIndex_])
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Fighter row  removed"));
+		tables[tableIndex_]->RemoveRow(rowName_);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+	}
+
+}
+
 FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
 {
 	FString n = name_.ToString();

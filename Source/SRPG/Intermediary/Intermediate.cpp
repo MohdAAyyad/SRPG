@@ -12,8 +12,9 @@ Intermediate::Intermediate()
 	storyProgress = 0;
 	protagonistLevel = 1;
 	currentMoney = 50000;
-	enemyStatDecreaseValue = 0;
-	enemyStatDecreaseIndex = 0;
+	affectedIndex = -1;
+	statIndex = -1;
+	changeCrowdValue = 0;
 	maxDeploymentSize = 10;
 	currentDeploymentSize = 0;
 	latestFighterID = 3;
@@ -117,17 +118,15 @@ void Intermediate::SetNextOpponent(FOpponentStruct op_)
 FOpponentStruct Intermediate::GetNextOpponent()
 {
 	return nextOpponent;
+} 
+
+
+void Intermediate::ChangeStats(int affectedIndex_, int statIndex_)
+{
+	// set the values on what stat gets affected by which value 
+	affectedIndex = affectedIndex_;
+	statIndex = statIndex_;
 }
-void Intermediate::PlayerStatsGoUp(int value_, int statIndex_) //Called by central NPC when an activity succeeds 
-															 //and increases roster stats
-{
-
-} 
-
-void Intermediate::EnemyStatsGoDown(int value_, int statIndex_)//Passed to battle manager later on
-{
-
-} 
 
 void Intermediate::PutUnitOnHold(int index_)//Called from hubplayer or from tournament npc uictrl.
 {
@@ -142,7 +141,8 @@ void Intermediate::PlayerUnitsAreRemoved(bool remove_)//Called from central NPC 
 
 void Intermediate::ImprovePlayerCRD(float value_)
 {
-
+	// augment the crowd value
+	changeCrowdValue += value_;
 }
 
 int Intermediate::GetLatestFighterID()

@@ -83,6 +83,8 @@ protected:
 	void UpdateSpentUnits(int value_);
 	UFUNCTION(BlueprintCallable)
 	void SetSpentUnits(int value_);
+
+	int initialMoneyValue;
 public:
 
 	void UpdateChanceOfSuccess(float value_);

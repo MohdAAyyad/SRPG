@@ -19,6 +19,11 @@ void ACentralNPC::BeginPlay()
 	activityEndLine = "";
 	activityAlreadyDone = false;
 	spentUnits = 0;
+
+	initialMoneyValue = Intermediate::GetInstance()->GetCurrentMoney();
+
+	// activity index randomization code goes here
+
 }
 
 void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -230,44 +235,8 @@ void ACentralNPC::SimulateActivity()
 			{
 				// choose a stat to give one of to each party member
 				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
-
-				// augment a stat of the player
-				UDataTable* table = fileReader->GetTable(1);
-				TArray<FName> rowNames = table->GetRowNames();
-				for (auto n : rowNames)
-				{
-					FFighterTableStruct row2 = fileReader->FindFighterTableRow(n, 1);
-					switch (stat)
-					{
-					case STAT_HP:
-						row2.hp += 1;
-						break;
-					case STAT_PIP:
-						row2.pip += 1;
-						break;
-					case STAT_ATK:
-						row2.atk += 1;
-						break;
-					case STAT_DEF:
-						row2.def += 1;
-						break;
-					case STAT_INT:
-						row2.intl += 1;
-						break;
-					case STAT_SPD:
-						row2.spd += 1;
-						break;
-					case STAT_CRT:
-						row2.crit += 1;
-						break;
-					case STAT_HIT:
-						row2.agl += 1;
-						break;
-					case STAT_CRD:
-						row2.crd += 1;
-						break;
-					}
-				}
+				Intermediate::GetInstance()->ChangeStats(1, stat);
+				
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
 				break;
@@ -276,7 +245,7 @@ void ACentralNPC::SimulateActivity()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Enemy Stat went down!"));
 				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
-				Intermediate::GetInstance()->EnemyStatsGoDown(1, stat);
+				Intermediate::GetInstance()->ChangeStats(0, stat);
 			}
 				break;
 			case 3:
@@ -297,12 +266,12 @@ void ACentralNPC::SimulateActivity()
 		activityEndLine = "Activity Failed";
 		if (unitsOnHold.Num() > 0)
 		{
-			/*for (int i : unitsOnHold)
+			for (int i : unitsOnHold)
 			{
 				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
 				FName converted = *FString::FromInt(i);
 				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
-			}*/
+			}
 			// clear out the array
 			unitsOnHold.Empty();
 		}
@@ -319,6 +288,10 @@ void ACentralNPC::SpendTime()
 		if (hubManager && hubManager->GetCurrentTimeSlotsCount() - timeCost > 0)
 		{
 			hubManager->UpdateTimeSlots(-timeCost);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Not enough time slots!"));
 		}
 }
 

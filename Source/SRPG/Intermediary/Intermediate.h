@@ -29,8 +29,9 @@ protected:
 	int currentMoney;
 	FOpponentStruct nextOpponent; //Value is passed on to the battle manager which passes it onto the enemy manager 
 							//to spawn the enemies.Used for enemy stat decrease activities 	
-	int enemyStatDecreaseValue;
-	int enemyStatDecreaseIndex;
+	int statIndex;
+	int affectedIndex;// -1 = neither, 0 = enemy is affect, 1 = player
+	float changeCrowdValue; // change to the crowd value
 	int latestFighterID;// Used to make sure that fighters all have a unique ID
 
 	static TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> instance;
@@ -57,14 +58,17 @@ public:
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.
 	FOpponentStruct GetNextOpponent(); //Called by enemy manager to know the details of the next opponent.
-	void PlayerStatsGoUp(int value_, int statIndex_); //Called by central NPC when an activity succeeds 
-													  //and increases roster stats
-	void EnemyStatsGoDown(int value_, int statIndex_); //Passed to battle manager later on
+	//void PlayerStatsGoUp(int value_, int statIndex_); //Called by central NPC when an activity succeeds 
+	//												  //and increases roster stats
+	//void EnemyStatsGoDown(int value_, int statIndex_); //Passed to battle manager later on
+	// -1 = neither, 0 = enemy, 1 = player
+	void ChangeStats(int affectedIndex_, int statIndex_);
 	void PutUnitOnHold(int index_); //Called from hubplayer or from tournament npc uictrl.
 	void PlayerUnitsAreRemoved(bool remove_); //Called from central NPC when activity fails. 
 											  //True: remove the units put on hold. 
 											  //False: return those units to the roster and remove them from the hold array.
 	void ImprovePlayerCRD(float value_);
+
 
 	static Intermediate* GetInstance();
 };
