@@ -23,6 +23,15 @@ void AFightersShop::BeginPlay()
 	Super::BeginPlay();
 	fighterID = Intermediate::GetInstance()->GetLatestFighterID();
 	GetAllFightersForSale();
+
+	if (Intermediate::GetInstance()->GetDeadUnits().Num() > 0)
+	{
+		if (fileReader)
+		{
+			fileReader->RemoveFightersDueToPermaDeath(Intermediate::GetInstance()->GetDeadUnits(), 1); //Remove any dead units from the recruited fighters table
+		}
+	}
+
 }
 
 void AFightersShop::EndDialogue()

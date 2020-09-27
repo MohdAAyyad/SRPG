@@ -22,6 +22,7 @@ protected:
 	int protagonistLevel;
 	TArray<FFighterTableStruct> selectedFighters; //The indexes of the fighters that are going to be used in the next battle
 	TArray<int> unitsOnHold; //When the player engages in activities that use units, these units become on hold. If the activity fails, these units are removed from the currentRoster. The array saves the index of the units in the currentRoster array.
+	TArray<int> deadUnitsIDs; //Stores the ids of dead units. Checked by the fighter shop on begin play.
 	int maxRosterSize;
 	int currentRosterSize;
 	int maxDeploymentSize;
@@ -65,6 +66,9 @@ public:
 											  //True: remove the units put on hold. 
 											  //False: return those units to the roster and remove them from the hold array.
 	void ImprovePlayerCRD(float value_);
+
+	TArray<int>& GetDeadUnits();
+	void PushUnitToDead(int unitId_);
 
 	static Intermediate* GetInstance();
 };

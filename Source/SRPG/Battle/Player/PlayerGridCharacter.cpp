@@ -26,6 +26,7 @@
 #include "../BattleController.h"
 #include "Components/WidgetComponent.h"
 #include "Animation/GridCharacterAnimInstance.h"
+#include "../../ExternalFileReader/ExternalFileReader.h"
 #include "TimerManager.h"
 
 
@@ -33,6 +34,9 @@
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 {
 	overheadWidgetComp->AddRelativeRotation(FRotator(90.0f, -178.0f, 1.25f));
+	fighterID = 0;
+	chosenSkillIndex = 0;
+	chosenSkillAnimIndex = 0;
 }
 
 void APlayerGridCharacter::BeginPlay()
@@ -96,7 +100,7 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 	{
 		currentState = EGridCharState::ATTACKING;
 		tile->GetGridManager()->ClearHighlighted();
-		UE_LOG(LogTemp, Warning, TEXT("Highlighting attack row %d depth %d"), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS));
+		//UE_LOG(LogTemp, Warning, TEXT("Highlighting attack row %d depth %d"), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS));
 		tile->GetGridManager()->UpdateCurrentTile(tile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK, statsComp->GetStatValue(STAT_PURE));
 	}
 }
@@ -134,6 +138,54 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 	actionTargets.Empty();
 }
 
+
+void APlayerGridCharacter::UpdateCharacterSkills()
+{
+	if (skills.Num() == 0) //No need to access the table every time we need to use a skill
+	{
+		if (fileReader)
+		{
+			TArray<FSkillTableStruct*> weaponSkills = fileReader->GetOffesniveSkills(0, statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_WSN), statsComp->GetStatValue(STAT_WSI), statsComp->GetStatValue(STAT_LVL));
+			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
+			for (auto w : weaponSkills)
+			{
+				skills.Push(*w);
+			}
+
+			for (auto a : armorSkills)
+			{
+				skills.Push(*a);
+			}
+
+		}
+	}
+}
+
+void APlayerGridCharacter::UseSkill(int index_)
+{
+	//TODO 
+	//check if we have enough pips first.
+
+	if (index_ >= 0 && index_ < skills.Num())
+	{
+		ATile* tile_ = GetMyTile();
+		if (tile_)
+		{
+			int rowSpeed_ = skills[index_].rge;
+			int depth_ = rowSpeed_ + 1;
+			chosenSkillIndex = index_;
+			chosenSkill = skills[index_];
+			chosenSkillAnimIndex = skills[index_].animationIndex;
+			tile_->GetGridManager()->ClearHighlighted();
+			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL, skills[index_].pure);
+			currentState = EGridCharState::SKILLING;
+			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
+			if (btlctrl)
+				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
+		}
+	}
+}
+
 void APlayerGridCharacter::ActivateSkillAttack()
 {
 	//TODO 
@@ -145,10 +197,10 @@ void APlayerGridCharacter::ActivateSkillAttack()
 	{
 		if (actionTargets[i])
 		{
-			actionTargets[i]->GridCharReactToSkill(skills[chosenSkill].value, skills[chosenSkill].statIndex,
-				skills[chosenSkill].statusEffect, this);
+			actionTargets[i]->GridCharReactToSkill(skills[chosenSkillIndex].value, skills[chosenSkillIndex].statIndex,
+				skills[chosenSkillIndex].statusEffect, this);
 
-			if (statsComp->AddTempCRD(skills[chosenSkill].fls))
+			if (statsComp->AddTempCRD(skills[chosenSkillIndex].fls))
 			{
 				if (crdManager)
 					crdManager->UpdateFavor(true);
@@ -204,7 +256,13 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(0); //24
 		statsComp->PushAStat(selectedFighters[fighterIndex].archetype); //25
 		AddEquipmentStats(2);
+		UpdateCharacterSkills();
 	}
+}
+
+void APlayerGridCharacter::SetFighterID(int fighterID_)
+{
+	fighterID = fighterID_;
 }
 
 void APlayerGridCharacter::RemoveWidgetFromVP()
@@ -235,7 +293,7 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	//Check if dead
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Die player die"));
+		Intermediate::GetInstance()->PushUnitToDead(fighterID);
 		if (btlManager)
 			btlManager->HandlePlayerDeath(this);
 		if (animInstance)

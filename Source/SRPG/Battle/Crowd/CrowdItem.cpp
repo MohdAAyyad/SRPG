@@ -107,6 +107,7 @@ void ACrowdItem::OverlapWithGridCharacter(UPrimitiveComponent* overlappedCompone
 			//Call the needed functions on gchar
 
 			Obtained(gchar->GetActorLocation());
+			ItemWasObtainedByAnEnemyThatDidNotMarkIt(); //In case an item was marked by an enemy, that enemy must be told the item is no longer reachable
 			Destroy();
 		}
 	}

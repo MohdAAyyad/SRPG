@@ -13,7 +13,8 @@ class ASRPGGameMode : public AGameModeBase
 
 public:
 	ASRPGGameMode();
-	void SwitchLevel(FName levelName);
+	UFUNCTION(BlueprintCallable)
+		void SwitchLevel(FName levelName);
 };
 
 

@@ -8,7 +8,7 @@ TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> Intermediate::instance = 
 Intermediate::Intermediate()
 {
 	maxRosterSize = 20; //Arbitrary number
-	currentRosterSize = 4; //Starts with 4 main characters
+	currentRosterSize = 5; //Starts with 5 main characters
 	storyProgress = 0;
 	protagonistLevel = 1;
 	currentMoney = 50000;
@@ -16,7 +16,7 @@ Intermediate::Intermediate()
 	enemyStatDecreaseIndex = 0;
 	maxDeploymentSize = 10;
 	currentDeploymentSize = 0;
-	latestFighterID = 3;
+	latestFighterID = 4;
 }
 
 Intermediate::~Intermediate()
@@ -152,4 +152,17 @@ int Intermediate::GetLatestFighterID()
 void Intermediate::SetLatestFighterID(int id_)
 {
 	latestFighterID = id_;
+}
+
+TArray<int>& Intermediate::GetDeadUnits()
+{
+	return deadUnitsIDs;
+}
+
+void Intermediate::PushUnitToDead(int unitId_)
+{
+	if (unitId_ > 4) //>4 as we have 5 main characters. All of which are immune to permadeath
+	{
+		deadUnitsIDs.Push(unitId_);
+	}
 }

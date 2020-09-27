@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "../../ExternalFileReader/FSkillTableStruct.h"
 #include "DecisionComp.generated.h"
 
 UENUM()
@@ -30,14 +31,31 @@ protected:
 	class AGridCharacter* currentTarget;
 	float targetRadius; //Used by all the patterns besides Default. Targets need to be within this radius to be considered
 
+
+	UPROPERTY(BlueprintReadOnly, Category = "Skills")
+		TArray<FSkillTableStruct> offsenseSkills;
+	UPROPERTY(BlueprintReadOnly, Category = "Skills")
+		TArray<FSkillTableStruct> defenseSkills;
+	
+	int offenseSkillWithTheMaxRangeIndex;
+	int defenseSkillWithTheMaxRangeIndex;
+
+	bool bCanUseSkill; //Affected by remaning pips
+	bool bWillUseSkill; //True if the enemy is gonna be using a skill
+	int skillType; //-1 if enemy will not use a skill, 0 if offense skill, and 1 if defense skill 
+
 public:	
 	UDecisionComp();
-	AGridCharacter* FindTheOptimalTarget();
+	AGridCharacter* FindTheOptimalTargetCharacter();
+	class ATile* FindOptimalTargetTile(ATile* myTile_);
 	void UpdatePattrn(int level_, bool healer_); // Certain patterns are level gated. Hearlers are predetermined
 	void SetRefs(AAIManager* ai_, ABattleManager* btl_, AEnemyBaseGridCharacter* enemy_);
 	bool IsMyTargetHostile(); //Depends on the pattern. Used by enemies to know if they should use offensive or support skills
 	
 	AGridCharacter* FindAnotherTarget(AGridCharacter* target_);
+
+	FSkillTableStruct GetChosenSkill();
+	bool GetWillUseSkill();
 protected:
 	virtual void BeginPlay() override;
 
@@ -47,6 +65,24 @@ protected:
 	AGridCharacter* FindFollowerTarget();
 	AGridCharacter* PeoplePersonEffect();
 	AGridCharacter* FindHealerTarget();
+
+
+	void UpdateEnemySkills();
+	ATile* FindDefaultTile(ATile* myTile_);  //Used by most patterns
+	ATile* ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_); //Checks the ranges of the skills and the regular attack and sees which is more viable to be used
+	ATile* ChooseTileBasedOnPossibleDefenseActions(ATile* myTile_);
+	void PickTheNextUsableSkill(class UStatsComponent* statsComp_, bool offense_);
+
+
+	bool CheckIfPlayerIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
+									   TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
+
+
+	bool CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
+												TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
+
+	void PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
+		TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
 
 
 public:	

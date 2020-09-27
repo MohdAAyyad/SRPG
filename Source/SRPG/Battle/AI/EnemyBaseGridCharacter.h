@@ -24,8 +24,6 @@ protected:
 	class AGridManager* gridManager;
 	UPROPERTY(EditAnywhere, Category = "Detection")
 		class UBoxComponent* detectionRadius;
-
-	class ABattleManager* btlManager;
 	TArray<ACrowdItem*> crdItems;
 
 	bool bWillMoveAgain; //Need to make sure that once we've collided with an item, we don't tell that AI Manager that we've finished moving but rather move towards the player
@@ -68,7 +66,7 @@ public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
 	void StartEnemyTurn();
-	void ExecuteChosenAttack();
+	void ExecuteChosenAction();
 	virtual void Selected() override;
 	virtual void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
@@ -77,4 +75,6 @@ public:
 	AGridCharacter* GetCurrentTarget();
 
 	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_) override;
+
+	void ActivateSkillAttack() override;
 };

@@ -11,6 +11,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "Definitions.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -111,10 +112,10 @@ void ATransitionToBattle::UpdateRecruitedFighters() //Called when the player col
 
 	if (fileReader)
 	{
-		TArray<FFighterTableStruct*> rfighters = fileReader->GetAllRecruitedFighters();
+		TArray<FFighterTableStruct> rfighters = fileReader->GetAllRecruitedFighters(0);
 
 		for (auto r : rfighters)
-			recruitedFighters.Push(*r);
+			recruitedFighters.Push(r);
 	}
 }
 
@@ -154,5 +155,5 @@ void ATransitionToBattle::FinalizeFighterSelection()
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 	if (gameMode)
-		gameMode->SwitchLevel(nextBattleLevel);
+		gameMode->SwitchLevel(MAP_BATTLE);
 }

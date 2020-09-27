@@ -84,12 +84,11 @@ protected:
 	EGridCharState currentState;
 	TArray<AGridCharacter*> actionTargets;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Skills")
-		TArray<FSkillTableStruct> skills;
-	int chosenSkill;
 	int chosenSkillAnimIndex;
-	
 	int fighterIndex;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Skill") //Used by the UI
+		FSkillTableStruct chosenSkill;
 
 	//Every turn a character can move and do an action. They can move as much as they want until they do an action.
 	//If they do an action before moving, they can still move once.
@@ -102,11 +101,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void MoveAccordingToPath();
-
-	void UpdateCharacterSkills();
-	UFUNCTION(BlueprintCallable)
-		void UseSkill(int index_);
-
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FItemTableStruct> GetOwnedItems(); //Called by the UI
@@ -159,6 +153,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void Die();
 	void SetFighterName(FString name_);
+
+	UExternalFileReader* GetFileReader();
+	UStatsComponent* GetStatsComp();
+	UPathComponent* GetPathComponent();
+	ATile* GetOriginTile();
+	class AGridManager* GetGridManager();
 
 protected:
 	virtual void AddEquipmentStats(int tableIndex_);

@@ -44,8 +44,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TArray<UMaterialInterface*> fighterMaterials; //Ordered the same way as the BPs array
-	UPROPERTY(EditAnywhere)
-		FName nextBattleLevel;
 
 	UFUNCTION()
 		void OverlapWithPlayer(UPrimitiveComponent* overlappedComponent_,

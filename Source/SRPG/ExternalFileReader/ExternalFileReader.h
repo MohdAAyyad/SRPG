@@ -52,16 +52,15 @@ public:
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
-	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
+	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
-	void ClearRecruitedFightersTable(int tableIndex_);
 	FName ConvertItemNameToNameUsedInTable(FName name_);
 
 	//gets a ref to this external file reader
