@@ -14,7 +14,7 @@ Intermediate::Intermediate()
 	currentMoney = 50000;
 	affectedIndex = -1;
 	statIndex = -1;
-	changeCrowdValue = 0;
+	changeCrowdValue = 0.0f;
 	maxDeploymentSize = 10;
 	currentDeploymentSize = 0;
 	latestFighterID = 4;

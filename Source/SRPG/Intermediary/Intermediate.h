@@ -36,6 +36,10 @@ protected:
 
 	static TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> instance;
 
+	int affectedIndex = -1;
+	int statIndex = -1;
+	float changeCrowdValue = 0;
+
 public:
 
 	void Victory(); //Adds 1 to the story progress //Called from the battle manager
@@ -58,9 +62,6 @@ public:
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.
 	FOpponentStruct GetNextOpponent(); //Called by enemy manager to know the details of the next opponent.
-	void PlayerStatsGoUp(int value_, int statIndex_); //Called by central NPC when an activity succeeds 
-													  //and increases roster stats
-	void EnemyStatsGoDown(int value_, int statIndex_); //Passed to battle manager later on
 	void PutUnitOnHold(int index_); //Called from hubplayer or from tournament npc uictrl.
 	void PlayerUnitsAreRemoved(bool remove_); //Called from central NPC when activity fails. 
 											  //True: remove the units put on hold. 
@@ -71,4 +72,6 @@ public:
 	void PushUnitToDead(int unitId_);
 
 	static Intermediate* GetInstance();
+
+	void ChangeStats(int affectedIndex_, int statIndex_);
 };

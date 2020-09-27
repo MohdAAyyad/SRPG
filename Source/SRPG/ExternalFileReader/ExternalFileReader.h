@@ -71,5 +71,7 @@ public:
 	// the name must match the class exactly
 	int FindTableIndexInArray(FName structName_);
 	int FindTableIndexByName(FName tableName_);
+
+	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 		
 };
