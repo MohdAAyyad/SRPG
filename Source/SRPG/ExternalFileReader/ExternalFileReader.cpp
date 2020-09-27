@@ -251,23 +251,6 @@ void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int inde
 	}
 }
 
-TArray<FFighterTableStruct*> UExternalFileReader::GetAllRecruitedFighters()
-{
-	//Called by the TransitionToBattle actor
-
-	static const FString contextString(TEXT("Trying to get the recruited fighters from the table"));
-	TArray<FName> rowNames;
-	TArray<FFighterTableStruct*> rfighters;
-	rowNames = tables[0]->GetRowNames(); //Will only be accessed by TransitionToBattle in the battle. 0 for Rfighters.
-
-	for (auto n : rowNames)
-	{
-		rfighters.Push(tables[0]->FindRow<FFighterTableStruct>(n, contextString, true));
-	}
-
-	return rfighters;
-}
-
 TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tableIndex_)
 {
 
@@ -310,6 +293,23 @@ FFighterTableStruct UExternalFileReader::GetRecruitedFighterByID(int id_)
 
 	return FFighterTableStruct();
 
+}
+
+//Called by the fighter shop on being play if the ids_ array is larger than zero in size
+void UExternalFileReader::RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_)
+{
+	static const FString contextString(TEXT("Trying to remove fighters from the recruited fighters table"));
+	TArray<FName> rowNames;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
+
+	for (int i = rowNames.Num()-1; i>-1; i--)
+	{
+		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+		if (ids_.Contains(row->id)) //Is the fighter in the table part of the array of dead units?
+		{
+			tables[tableIndex_]->RemoveRow(rowNames[i]);
+		}
+	}
 }
 
 void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)

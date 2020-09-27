@@ -16,6 +16,11 @@ class SRPG_API APlayerGridCharacter : public AGridCharacter
 	GENERATED_BODY()
 
 protected:
+	int fighterID; //The ID is used to distinguish the fighter inside the recruited table
+
+	UPROPERTY(BlueprintReadOnly, Category = "Skills")
+		TArray<FSkillTableStruct> skills;
+	int chosenSkillIndex;
 
 	APlayerGridCharacter();
 	UFUNCTION(BlueprintCallable)
@@ -30,12 +35,18 @@ protected:
 		void RemoveWidgetFromVP();
 	void FinishState() override;
 
+	UFUNCTION(BlueprintCallable)
+		void UseSkill(int index_);
+
+	void UpdateCharacterSkills();
+
 public:
 	void Selected() override;
 	void NotSelected() override;
 	virtual void ActivateWeaponAttack() override;
 	virtual void ActivateSkillAttack() override;
 	void SetFighterIndex(int index_);
+	void SetFighterID(int fighterID_);
 	void StartPlayerTurn();
 	void EndPlayerTurn();
 

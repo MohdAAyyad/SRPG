@@ -52,9 +52,9 @@ public:
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
-	TArray<FFighterTableStruct*> GetAllRecruitedFighters();
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
+	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);
@@ -73,5 +73,7 @@ public:
 	// the name must match the class exactly
 	int FindTableIndexInArray(FName structName_);
 	int FindTableIndexByName(FName tableName_);
+
+	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 		
 };

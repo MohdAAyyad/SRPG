@@ -158,7 +158,7 @@ void AAIManager::OrderEnemiesToAttackPlayer()
 	{
 		if (deployedEnemies[numberOfEnemiesWhichFinishedMoving])
 		{
-			deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAttack();
+			deployedEnemies[numberOfEnemiesWhichFinishedMoving]->ExecuteChosenAction();
 		}
 	}
 

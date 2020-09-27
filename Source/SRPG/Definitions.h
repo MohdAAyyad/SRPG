@@ -271,8 +271,8 @@
 #define PAT_THR 12
 #endif
 
-#ifndef RAD_ASS //Radius for assassin
-#define RAD_ASS 200.0f;
+#ifndef RAD_ASSA //Radius for assassin
+#define RAD_ASSA 200.0f;
 #endif
 
 #ifndef RAD_FOL
@@ -287,10 +287,18 @@
 #define RAD_HEAL 300.0f;
 #endif
 
-#ifndef HP_ASS //HP threshold for assassin
-#define HP_ASS 0.6f;
+#ifndef HP_ASSA //HP threshold for assassin
+#define HP_ASSA 0.6f;
 #endif
 
 #pragma endregion
+
+#ifndef MAP_HUB //Archetype
+#define MAP_HUB FName(TEXT("HubLevel_S3"))
+#endif
+
+#ifndef MAP_BATTLE //Archetype
+#define MAP_BATTLE FName(TEXT("BTL_00_Test"))
+#endif
 
 #include "CoreMinimal.h"

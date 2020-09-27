@@ -103,8 +103,6 @@ AGridCharacter::AGridCharacter()
 	btlManager = nullptr;
 
 	currentState = EGridCharState::IDLE;
-	chosenSkill = 0;
-	chosenSkillAnimIndex = 0;
 	bChampion = bVillain = false;
 
 
@@ -330,52 +328,6 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 	//Health details are handled inside the children's code
 }
 
-void AGridCharacter::UpdateCharacterSkills()
-{
-	if (skills.Num() == 0) //No need to access the table every time we need to use a skill
-	{
-		if (fileReader)
-		{
-			TArray<FSkillTableStruct*> weaponSkills = fileReader->GetOffesniveSkills(0, statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_WSN), statsComp->GetStatValue(STAT_WSI), statsComp->GetStatValue(STAT_LVL));
-			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
-			for (auto w : weaponSkills)
-			{
-				skills.Push(*w);
-			}
-
-			for (auto a : armorSkills)
-			{
-				skills.Push(*a);
-			}
-			
-		}
-	}
-}
-
-
-void AGridCharacter::UseSkill(int index_)
-{
-	//TODO 
-	//check if we have enough pips first.
-
-	if (index_ >= 0 && index_ < skills.Num())
-	{
-		ATile* tile_ = GetMyTile();
-		if (tile_)
-		{
-			int rowSpeed_ = skills[index_].rge;
-			int depth_ = rowSpeed_ + 1;
-			chosenSkill = index_;
-			chosenSkillAnimIndex = skills[index_].animationIndex;
-			tile_->GetGridManager()->ClearHighlighted();
-			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL, skills[index_].pure);
-			currentState = EGridCharState::SKILLING;
-			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
-			if (btlctrl)
-				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
-		}
-	}
-}
 
 void AGridCharacter::GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_)
 {
@@ -484,12 +436,9 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
 		statsComp->AddToStat(STAT_PURE, weapon.pure);
-
 	}
 		if (pathComp)
 			pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));
-
-		UpdateCharacterSkills();
 }
 void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false villain
 {
@@ -538,4 +487,29 @@ void AGridCharacter::Die()
 void AGridCharacter::SetFighterName(FString name_)
 {
 	pName = name_;
+}
+
+UExternalFileReader*  AGridCharacter::GetFileReader()
+{
+	return fileReader;
+}
+
+UStatsComponent* AGridCharacter::GetStatsComp()
+{
+	return statsComp;
+}
+
+AGridManager* AGridCharacter::GetGridManager()
+{
+	return originTile->GetGridManager();
+}
+
+UPathComponent* AGridCharacter::GetPathComponent()
+{
+	return pathComp;
+}
+
+ATile* AGridCharacter::GetOriginTile()
+{
+	return originTile;
 }

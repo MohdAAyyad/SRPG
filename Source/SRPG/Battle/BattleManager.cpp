@@ -146,6 +146,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			
 			unit->SetBtlAndCrdManagers(this,crdManager);
 			unit->SetFighterIndex(indexOfSelectedFighterInSelectedFighters);
+			unit->SetFighterID(selectedFighters[indexOfSelectedFighterInSelectedFighters].id);
 			unit->SetFighterName(selectedFighters[indexOfSelectedFighterInSelectedFighters].name);
 			deployedUnits.Push(unit);
 			unit->bpID = bpidOfUnitToBeDeployedNext;
@@ -265,7 +266,6 @@ void ABattleManager::EndBattle(bool victory_)
 
 		if(EndWidgets[0])
 			widgetComp->SetWidgetClass(EndWidgets[0]);
-		widgetComp->GetUserWidgetObject()->AddToViewport();
 		FTimerHandle timeToUpdateExpHandle;
 		float timeToUpdateEXP = 0.7f;
 		GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &ABattleManager::UpdatePlayerEXP, timeToUpdateEXP, false);
@@ -277,6 +277,8 @@ void ABattleManager::EndBattle(bool victory_)
 		//TODO
 		//End on a defeat
 	}
+
+	widgetComp->GetUserWidgetObject()->AddToViewport();
 }
 
 void ABattleManager::UpdatePlayerEXP()

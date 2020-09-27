@@ -252,7 +252,7 @@ void UPathComponent::AdjustPath(ATile* tile_, TArray<FVector>& move_)
 			AdjustPath(tile_, move_);
 		}
 		else
-		{
+		{ //The tile we found is not occupied. Mark it as such so no other enemy goes to it.
 			tile_->SetOccupied(true);
 		}
 	}
