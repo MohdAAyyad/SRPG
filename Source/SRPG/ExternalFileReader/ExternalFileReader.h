@@ -61,7 +61,7 @@ public:
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
 	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
-	void ClearRecruitedFightersTable(int tableIndex_);
+	//void ClearRecruitedFightersTable(int tableIndex_);
 	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 	FName ConvertItemNameToNameUsedInTable(FName name_);
 
