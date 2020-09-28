@@ -52,6 +52,7 @@ public:
 
 	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_) override;
 	void UpdateCurrentEXP();
+	void CheckChangeStats();
 
 
 	

@@ -51,7 +51,7 @@ void UNPCWanderComponent::Wander()
 		{
 			shouldMove = false;
 			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
-			UE_LOG(LogTemp, Warning, TEXT("Arrived"));
+			//UE_LOG(LogTemp, Warning, TEXT("Arrived"));
 			return;
 		}
 
@@ -90,7 +90,7 @@ void UNPCWanderComponent::SelectNewTargetLocation()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Target Location is outside of the maximum distance"));
+			//UE_LOG(LogTemp, Error, TEXT("Target Location is outside of the maximum distance"));
 			SelectNewTargetLocation();
 			shouldMove = false;
 		}

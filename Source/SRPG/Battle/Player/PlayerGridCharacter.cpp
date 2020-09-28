@@ -308,3 +308,13 @@ void APlayerGridCharacter::UpdateCurrentEXP()
 		statsComp->CheckLevelUp(false);
 	}
 }
+
+void APlayerGridCharacter::CheckChangeStats()
+{
+	int changedStat = Intermediate::GetInstance()->GetStatsChange(CHG_STAT_PLY);
+	if (changedStat != -1)
+	{
+		statsComp->AddToStat(changedStat, static_cast<float>(statsComp->GetStatValue(changedStat))*PLY_IMP_STAT);
+		animInstance->ChangeStats(true);
+	}
+}

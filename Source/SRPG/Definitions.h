@@ -172,6 +172,14 @@
 #define BTL_END 4
 #endif
 
+#ifndef BTL_ACT_CHG_PLY // Change stats to improve the player activity
+#define BTL_ACT_CHG_PLY 5
+#endif
+
+#ifndef BTL_ACT_CHG_ENM // Change stats affecting enemies
+#define BTL_ACT_CHG_ENM 6
+#endif
+
 #pragma endregion
 
 #pragma region Crowd
@@ -220,8 +228,28 @@
 #define IMP_CRD_LW 2
 #endif
 
-#ifndef IMP_CRD_HG
+#ifndef IMP_CRD_HG //Improve CRD stats high value
 #define IMP_CRD_HG 5
+#endif
+
+#ifndef PLY_IMP_STAT //Improve the player's stats due to changeStats activity
+#define PLY_IMP_STAT 0.2f
+#endif
+
+#ifndef ENM_DEC_STAT //Decrease the enemy's stats due to changestats activity
+#define ENM_DEC_STAT 0.2f
+#endif
+
+#ifndef CHG_STAT_PLY  //Change stat party index
+#define CHG_STAT_PLY 1
+#endif
+
+#ifndef CHG_STAT_ENM 
+#define CHG_STAT_ENM 0
+#endif
+
+#ifndef CHG_STAT_NON 
+#define CHG_STAT_NON -1
 #endif
 
 #pragma endregion
@@ -293,12 +321,14 @@
 
 #pragma endregion
 
-#ifndef MAP_HUB //Archetype
+#pragma region Maps
+#ifndef MAP_HUB 
 #define MAP_HUB FName(TEXT("HubLevel_S3"))
 #endif
 
-#ifndef MAP_BATTLE //Archetype
+#ifndef MAP_BATTLE 
 #define MAP_BATTLE FName(TEXT("BTL_00_Test"))
 #endif
+#pragma endregion
 
 #include "CoreMinimal.h"

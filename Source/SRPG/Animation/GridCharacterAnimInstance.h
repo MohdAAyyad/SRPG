@@ -32,6 +32,8 @@ protected:
 		bool useItem;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bDeath;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bStatDecrease;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -43,6 +45,6 @@ public:
 	void SkillAttack(int index_);
 	void SetUseItem();
 	void DeathAnim();
-
+	void ChangeStats(bool stat_);
 	
 };
