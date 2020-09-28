@@ -226,3 +226,12 @@ void AAIManager::HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_)
 			btlManager->EndBattle(true); //Victory
 	}
 }
+
+void AAIManager::TellEnemiesToCheckChangedStats()
+{
+	//Called by the battlemanager if the affectedParty in the intermeidate is set to 0 meaning enemies are getting a stat change at the beginning of the battle
+	for (auto e : deployedEnemies)
+	{
+		e->CheckChangeStats();
+	}
+}

@@ -2,6 +2,7 @@
 
 
 #include "Intermediate.h"
+#include "Definitions.h"
 
 TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> Intermediate::instance = nullptr;
 
@@ -12,7 +13,7 @@ Intermediate::Intermediate()
 	storyProgress = 0;
 	protagonistLevel = 1;
 	currentMoney = 50000;
-	affectedIndex = -1;
+	affectedParty = CHG_STAT_NON; //Affected by change stats function call. -1 neither 0 enemy 1 player
 	statIndex = -1;
 	changeCrowdValue = 0.0f;
 	maxDeploymentSize = 10;
@@ -77,6 +78,16 @@ void Intermediate::AddFighterToSelected(FFighterTableStruct fighter_)
 		selectedFighters.Push(fighter_);
 	}
 }
+
+void Intermediate::PutUnitOnHold(int index_)
+{
+
+}
+
+void Intermediate::PlayerUnitsAreRemoved(bool remove_)
+{
+
+}
 TArray<FFighterTableStruct> Intermediate::GetSelectedFighters() //Called by the battle manager
 {
 	return selectedFighters;
@@ -121,23 +132,22 @@ FOpponentStruct Intermediate::GetNextOpponent()
 } 
 
 
-void Intermediate::ChangeStats(int affectedIndex_, int statIndex_)
+void Intermediate::ChangeStats(int partyIndex_, int statIndex_)
 {
-	// set the values on what stat gets affected by which value 
-	affectedIndex = affectedIndex_;
+	// Affected party determines whether the player or the enemy was affected
+	// Stat index determines which stat is affected
+	affectedParty = partyIndex_;
 	statIndex = statIndex_;
 }
 
-void Intermediate::PutUnitOnHold(int index_)//Called from hubplayer or from tournament npc uictrl.
+int Intermediate::GetStatsChange(int partyIndex_)
 {
-} 
-
-void Intermediate::PlayerUnitsAreRemoved(bool remove_)//Called from central NPC when activity fails. 
-													  //True: remove the units put on hold. 
-													 //False: return those units to the roster and remove them from the hold array.
-{
-
-} 
+	if (partyIndex_ == affectedParty)
+	{
+		return statIndex;
+	}
+	return -1;
+}
 
 void Intermediate::ImprovePlayerCRD(float value_)
 {
@@ -165,4 +175,15 @@ void Intermediate::PushUnitToDead(int unitId_)
 	{
 		deadUnitsIDs.Push(unitId_);
 	}
+}
+
+int Intermediate::GetAffecteParty()
+{
+	return affectedParty;
+}
+
+void Intermediate::ResetChangeStats()
+{
+	affectedParty = CHG_STAT_NON;
+	statIndex = -1;
 }

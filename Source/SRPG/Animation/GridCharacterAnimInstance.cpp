@@ -13,6 +13,7 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	bHit = false;
 	skillIndex = -1;
 	bDeath = false;
+	bStatDecrease = false;
 }
 void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
@@ -54,4 +55,19 @@ void UGridCharacterAnimInstance::DeathAnim()
 {
 	if (!bDeath)
 		bDeath = true;
+}
+
+void UGridCharacterAnimInstance::ChangeStats(bool stat_)
+{
+	if (stat_) //Increase. Called by the player
+	{
+		if(!useItem)
+			useItem = true;
+	}
+	else //Decrease called by the enemies
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Decreasing stats animation"));
+		if (!bStatDecrease)
+			bStatDecrease = true;
+	}
 }

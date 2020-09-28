@@ -171,12 +171,40 @@ void ABattleManager::EndDeployment()
 
 	Intermediate::GetInstance()->ResetSelectedFighters();
 
+	int changeStatsCheck = Intermediate::GetInstance()->GetAffecteParty();
+
+	if (changeStatsCheck == CHG_STAT_PLY)
+	{
+		phase = BTL_ACT_CHG_PLY; //Used by the UI
+		UE_LOG(LogTemp, Warning, TEXT("PLY"));
+	}
+
 	for (int i = 0; i < deployedUnits.Num(); i++)
 	{
 		deployedUnits[i]->UpdateOriginTile();
+		if (changeStatsCheck == CHG_STAT_PLY) //Check if the players have a change of stats at the beginning of the battle
+			deployedUnits[i]->CheckChangeStats();
 	}
 
-	NextPhase();
+	if (changeStatsCheck == CHG_STAT_ENM) //Check if the enemies have a changeStatCheck
+	{
+		aiManager->TellEnemiesToCheckChangedStats();
+		phase = BTL_ACT_CHG_ENM; //Needed for UI indicators
+		UE_LOG(LogTemp, Warning, TEXT("ENM"));
+	}
+
+	if (changeStatsCheck == CHG_STAT_NON) //No change stats check, continue normally
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NON"));
+		NextPhase();
+	}
+	else //Otherwise, delay the next phase a bit
+	{
+		FTimerHandle nextPhaseHandle;
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 5.0f, false);
+
+		Intermediate::GetInstance()->ResetChangeStats(); //Reset the values
+	}
 }
 
 int ABattleManager::GetTotalNumberOfPhasesElapsed()
@@ -243,9 +271,7 @@ void ABattleManager::HandlePlayerDeath(APlayerGridCharacter* player_)
 	if (deployedUnits.Contains(player_))
 	{
 		deployedUnits.Remove(player_);
-	}
-
-	
+	}	
 
 	if (deployedUnits.Num() == 0)
 	{

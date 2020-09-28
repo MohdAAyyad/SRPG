@@ -167,13 +167,13 @@ void ANPC::Tick(float DeltaTime)
 		FRotator distance = GetActorRotation() - result;
 		if (GetActorRotation().Yaw > result.Yaw + 2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Rotating Negative!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Rotating Negative!"));
 			FRotator rot = FRotator(0, -400 * DeltaTime, 0);
 			AddActorLocalRotation(rot);
 		}
 		else if (GetActorRotation().Yaw < result.Yaw - 2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Rotating Positive!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Rotating Positive!"));
 			FRotator rot = FRotator(0, 400 * DeltaTime, 0);
 			AddActorLocalRotation(rot);
 		}
@@ -183,7 +183,7 @@ void ANPC::Tick(float DeltaTime)
 void ANPC::Interact()
 {
 	interactedWith = true;
-	UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Interacted!"));
 }
 
 void ANPC::UnInteract()
@@ -207,7 +207,7 @@ void ANPC::SetHubManager(AHubWorldManager* manager_)
 
 void ANPC::EndDialogue()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
+	//UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();

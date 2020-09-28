@@ -234,8 +234,8 @@ void ACentralNPC::SimulateActivity()
 			case 1:
 			{
 				// choose a stat to give one of to each party member
-				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
-				Intermediate::GetInstance()->ChangeStats(1, stat);
+				int stat = FMath::RandRange(STAT_ATK, STAT_CRD);
+				Intermediate::GetInstance()->ChangeStats(CHG_STAT_PLY, stat);
 				
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
@@ -244,8 +244,8 @@ void ACentralNPC::SimulateActivity()
 				//decrement a stat of the enemy
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Enemy Stat went down!"));
-				int stat = FMath::RandRange(STAT_HP, STAT_CRD);
-				Intermediate::GetInstance()->ChangeStats(0, stat);
+				int stat = FMath::RandRange(STAT_ATK, STAT_CRD);
+				Intermediate::GetInstance()->ChangeStats(CHG_STAT_ENM, stat);
 			}
 				break;
 			case 3:

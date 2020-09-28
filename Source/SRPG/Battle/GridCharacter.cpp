@@ -428,6 +428,7 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_INT, weapon.intl + armor.intl + accessory.intl);
 		statsComp->AddToStat(STAT_SPD, weapon.spd + armor.spd + accessory.spd);
 		statsComp->AddToStat(STAT_CRT, weapon.crit + armor.crit + accessory.crit);
+		statsComp->AddToStat(STAT_HIT, weapon.hit + armor.hit + accessory.hit);
 		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
 		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
 		statsComp->AddToStat(STAT_WSN, weapon.skillsN);

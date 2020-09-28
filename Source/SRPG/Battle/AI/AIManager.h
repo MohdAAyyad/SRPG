@@ -80,6 +80,7 @@ public:
 	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_);
 	AGridCharacter* GetEnemyWithLowestStat(int statIndex_);
 	void HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_);
+	void TellEnemiesToCheckChangedStats();
 
 protected:
 

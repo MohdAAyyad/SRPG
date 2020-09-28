@@ -36,7 +36,7 @@ protected:
 
 	static TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> instance;
 
-	int affectedIndex = -1;
+	int affectedParty = -1;
 	int statIndex = -1;
 	float changeCrowdValue = 0;
 
@@ -62,16 +62,19 @@ public:
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.
 	FOpponentStruct GetNextOpponent(); //Called by enemy manager to know the details of the next opponent.
-	void PutUnitOnHold(int index_); //Called from hubplayer or from tournament npc uictrl.
-	void PlayerUnitsAreRemoved(bool remove_); //Called from central NPC when activity fails. 
-											  //True: remove the units put on hold. 
-											  //False: return those units to the roster and remove them from the hold array.
 	void ImprovePlayerCRD(float value_);
 
 	TArray<int>& GetDeadUnits();
 	void PushUnitToDead(int unitId_);
+	void PutUnitOnHold(int index_); //Called from hubplayer or from tournament npc uictrl.
 
+	void PlayerUnitsAreRemoved(bool remove_); //Called from central NPC when activity fails. 
+											  //True means remove the units put on hold. 
+											  //False means return those units to the roster and remove them from the hold array.
 	static Intermediate* GetInstance();
 
-	void ChangeStats(int affectedIndex_, int statIndex_);
+	void ChangeStats(int partyIndex_, int statIndex_);
+	int GetStatsChange(int partyIndex_);
+	int GetAffecteParty();
+	void ResetChangeStats(); //Make sure change stats variables are reset
 };
