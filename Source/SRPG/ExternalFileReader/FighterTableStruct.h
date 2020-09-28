@@ -65,7 +65,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int archetype;
 
-	void CalculatePrice();
+	void CalculatePrice(int newLevel_);
 	void ScaleStatsByLevel(int newLevel_);
 	void LevelUpUntilGoal(int goalLevel_);
 };

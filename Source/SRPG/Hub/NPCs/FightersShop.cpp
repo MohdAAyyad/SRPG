@@ -56,13 +56,29 @@ TArray<FFighterTableStruct> AFightersShop::GetAllFightersForSale()
 		{
 			// All fighters will be in index 0
 			// Equipped fighter will be in index 1
-			FFighterTableStruct row = fileReader->FindFighterTableRow(n, 0);
+			FFighterTableStruct row = fileReader->FindFighterTableRow(n, fileReader->FindTableIndexByName("AllFighters__DataTable1S"));
 			//add the fighter to the array
 			fighters.Push(row);
 		}
 		return fighters;
 	}
+	warning = "";
 	return TArray<FFighterTableStruct>();
+}
+
+TArray<UTexture*> AFightersShop::GetTextureArray()
+{
+	return textures;
+}
+
+void AFightersShop::SetWarningText(FString text_)
+{
+	warning = text_;
+}
+
+void AFightersShop::SetHasSelectedFighter(bool hasSelectedFighter_)
+{
+	haveChosenFighter = hasSelectedFighter_;
 }
 
 void AFightersShop::ChooseFighter(int fighterIndex_)
@@ -95,13 +111,23 @@ void AFightersShop::ChooseFighter(int fighterIndex_)
 
 		currentIndex = fighterIndex_;
 		haveChosenFighter = true;
+		warning = "";
 	}
 	
 }
 
 void AFightersShop::UpdateName(FString name_)
 {
-	chosenFighter.name = name_;
+	if (haveChosenFighter)
+	{
+		chosenFighter.name = name_;
+		
+	}
+	else
+	{
+		warning = "No fighter selected";
+	}
+
 }
 
 FString AFightersShop::GetFighterInfo(int fighterIndex_)
@@ -141,6 +167,61 @@ void AFightersShop::LevelUpFighter()
 		chosenFighter.LevelUpUntilGoal(chosenFighter.level + 1);
 }
 
+FFighterTableStruct AFightersShop::LevelUpFighterStruct()
+{
+	FFighterTableStruct result;
+	if (haveChosenFighter)
+	{
+		chosenFighter.LevelUpUntilGoal(chosenFighter.level + 1);
+		
+		result.hp = chosenFighter.hp;
+		result.pip = chosenFighter.pip;
+		result.atk = chosenFighter.atk;
+		result.def = chosenFighter.def;
+		result.intl = chosenFighter.intl;
+		result.spd = chosenFighter.spd;
+		result.crit = chosenFighter.crit;
+		result.agl = chosenFighter.agl;
+		result.crd = chosenFighter.crd;
+		result.value = chosenFighter.value;
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not chosen Fighter"));
+		warning = "No fighter selected";
+	}
+	return result;
+	
+}
+
+FFighterTableStruct AFightersShop::LevelDownFighterStruct()
+{
+	FFighterTableStruct result;
+	if (haveChosenFighter)
+	{
+		chosenFighter.LevelUpUntilGoal(chosenFighter.level - 1);
+
+		result.hp = chosenFighter.hp;
+		result.pip = chosenFighter.pip;
+		result.atk = chosenFighter.atk;
+		result.def = chosenFighter.def;
+		result.intl = chosenFighter.intl;
+		result.spd = chosenFighter.spd;
+		result.crit = chosenFighter.crit;
+		result.agl = chosenFighter.agl;
+		result.crd = chosenFighter.crd;
+		result.value = chosenFighter.value;
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not chosen Fighter"));
+		warning = "No fighter selected";
+	}
+	return result;
+}
+
 void AFightersShop::LevelDownFighter()
 {
 	if (haveChosenFighter)
@@ -152,7 +233,7 @@ void AFightersShop::FinalizePurchase()
 	
 	// load all of the chosen fighters values into the data table;
 
-	FFighterTableStruct price = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
+	//FFighterTableStruct price = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
 	if (haveChosenFighter)
 	{
 		CalculatePrice();
@@ -186,27 +267,42 @@ void AFightersShop::FinalizePurchase()
 			row.value = 0;
 			// add the new row to the table
 			FName index = FName(*FString::FromInt(purchasedFighters));
-			fileReader->AddRowToRecruitedFighterTable(index, 1, row);
+			fileReader->AddRowToRecruitedFighterTable(index, fileReader->FindTableIndexByName("RecruitedFighters_DataTable1_"), row);
 			purchasedFighters += 1;
 			// adds one to the roster size
 			Intermediate::GetInstance()->UpdateCurrentRosterSize(1);
 			//TODO
 			//Play a UI pop up
 			UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
+			haveChosenFighter = false; 
+			warning = "";
 		}
 		else
 		{
 			//TODO
 			//Play UI pop up
 			UE_LOG(LogTemp, Error, TEXT("Not enough money"));
+			warning = "Not enough money to purchase fighter";
 		}
+	}
+	else
+	{
+		warning = "No Fighter Selected";
 	}
 	
 }
 
 void AFightersShop::CalculatePrice()
 {
-	chosenFighter.CalculatePrice();
+	if (haveChosenFighter)
+	{
+		chosenFighter.CalculatePrice(chosenFighter.level);
+	}
+	else
+	{
+		warning = "No Fighter Selected";
+	}
+
 }
 
 void AFightersShop::LoadText()

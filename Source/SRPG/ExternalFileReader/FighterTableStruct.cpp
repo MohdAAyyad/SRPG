@@ -3,10 +3,18 @@
 
 #include "FighterTableStruct.h"
 
-void FFighterTableStruct::CalculatePrice()
+void FFighterTableStruct::CalculatePrice(int newLevel_)
 {
 	//TODO
-	value += 100;
+	if (newLevel_ > level)
+	{
+		value += 100;
+	}
+	else if (newLevel_ < level)
+	{
+		value -= 100;
+	}
+
 }
 
 
@@ -14,12 +22,27 @@ void FFighterTableStruct::ScaleStatsByLevel(int newLevel_)
 {
 	//TODO
 	//Placeholder
-	hp += 20;
-	spd += 2;
-	atk += 3;
-	def += 4;
-	level = newLevel_;
-	CalculatePrice();
+	if (newLevel_ > level)
+	{
+		hp += 20;
+		spd += 2;
+		atk += 3;
+		def += 4;
+		CalculatePrice(newLevel_);
+		level = newLevel_;
+
+	}
+	else if (newLevel_ < level)
+	{
+		hp -= 20;
+		spd -= 2;
+		atk -= 3;
+		def -= 4;
+		CalculatePrice(newLevel_);
+		level = newLevel_;
+
+	}
+
 }
 
 void FFighterTableStruct::LevelUpUntilGoal(int goalLevel_)
@@ -31,25 +54,27 @@ void FFighterTableStruct::LevelUpUntilGoal(int goalLevel_)
 		while (exit == false)
 		{
 			int increment = level + 1;
+			ScaleStatsByLevel(increment);
 			if (level == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
 			}
-			ScaleStatsByLevel(increment);
+
 		}
 	}
-	else if (goalLevel_ < level && level > 0)
+	else if (goalLevel_ < level && level > 1)
 	{
 		while (exit == false)
 		{
 			int decrement = level - 1;
+			ScaleStatsByLevel(decrement);
 			if (level == goalLevel_)
 			{
 				// get out, go home
 				exit = true;
 			}
-			ScaleStatsByLevel(decrement);
+
 		}
 	}
 

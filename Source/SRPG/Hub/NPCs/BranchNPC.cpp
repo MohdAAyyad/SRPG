@@ -13,6 +13,7 @@ void ABranchNPC::EndDialogue()
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
+		hasUpdatedCentral = true;
 	}
 }
 
@@ -26,16 +27,16 @@ void ABranchNPC::LoadText()
 		line = row.dialogue;
 		//line = filedea
 		central->UpdateChanceOfSuccess(chanceOfSuccessEffect);
-		hasUpdatedCentral = true;
+
 	}
 	else if (hasUpdatedCentral == false && central && chanceOfSuccessEffect < 0)
 	{
 		FActivityDialogueTableStruct row = fileReader->GetNegativeBranch(central->GetCentralActivityIndex(), 0);
 		line = row.dialogue;
 		central->UpdateChanceOfSuccess(chanceOfSuccessEffect);
-		hasUpdatedCentral = true;
+		
 	}
-	else
+	else if(hasUpdatedCentral == true)
 	{
 		line = "Listen pal, I've told you all I know";
 	}
@@ -46,6 +47,7 @@ void ABranchNPC::BeginPlay()
 	Super::BeginPlay();
 	chanceOfSuccessEffect = FMath::RandRange(-35, 35);
 	hasUpdatedCentral = false;
+	line = "";
 }
 
 void ABranchNPC::SetCentralNPC(ACentralNPC* ref_)

@@ -36,7 +36,7 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
 			if (player)
 			{
-				if (widget && activityAlreadyDone == false)
+				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
 					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));

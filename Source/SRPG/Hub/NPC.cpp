@@ -80,7 +80,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 			if (player)
 			{
 				playerRef = player;
-				if (widget)
+				if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
 					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));

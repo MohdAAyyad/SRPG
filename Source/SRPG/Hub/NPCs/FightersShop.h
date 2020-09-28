@@ -26,6 +26,7 @@ protected:
 	//
 	void EndDialogue() override;
 	void LoadText() override;
+	UFUNCTION(BlueprintCallable)
 	TArray<FFighterTableStruct> GetAllFightersForSale();
 
 	FString fighterDisplayValue;
@@ -41,6 +42,18 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class AHubWorldManager* hub;
 
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> textures;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetTextureArray();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString warning;
+	UFUNCTION(BlueprintCallable)
+	void SetWarningText(FString text_);
+	UFUNCTION(BlueprintCallable)
+	void SetHasSelectedFighter(bool hasSelectedFighter_);
 public:
 	UFUNCTION(BlueprintCallable)
 	void ChooseFighter(int fighterIndex_);
@@ -50,6 +63,10 @@ public:
 	FString GetFighterInfo(int fighterIndex_);
 	UFUNCTION(BlueprintCallable)
 	void LevelUpFighter();
+	UFUNCTION(BlueprintCallable)
+	FFighterTableStruct LevelUpFighterStruct();
+	UFUNCTION(BlueprintCallable)
+	FFighterTableStruct LevelDownFighterStruct();
 
 	UFUNCTION(BlueprintCallable)
 		FString PrintFighter(int index);
