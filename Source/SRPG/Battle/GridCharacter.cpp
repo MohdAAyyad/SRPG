@@ -224,8 +224,25 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 		{
 			pathComp->SetTargetTile(target_);
 			pathComp->SetCurrentTile(GetMyTile());
-			movementPath = pathComp->GetPath();
-			bMoving = true;
+			pathComp->GetPath();
+			TArray<ATile*> tPath = pathComp->GetMovementPath();
+
+			TArray<int> tileVecIndexes;
+			//We only care about the tiles within movement range
+			for (int i = 0; i < tPath.Num(); i++)
+			{
+				if (tPath[i]->GetHighlighted() == TILE_MOV)
+				{
+					tileVecIndexes.Push(i);
+				}
+			}
+
+			for (int j = 0; j < tileVecIndexes.Num(); j++)
+			{
+				movementPath.Push(tPath[tileVecIndexes[j]]->GetActorLocation());
+			}
+			if(movementPath.Num()>0)
+				bMoving = true;
 		}
 	}
 }
