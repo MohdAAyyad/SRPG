@@ -46,6 +46,7 @@ public:
 	void ClearHighlighted();
 
 	void HighlightTiles(int rowSpeed_, int depth_, int index_);
+	void HighlightAttackTiles(int rowSpeed_, int depth_, int index_);
 	void HighlightTilesPure(int rowSpeed_, int depth_, int index_); //Pure vertical and horizontal highlight
 	void HighlightDeploymentTiles(int rowIndex_, int offset_, int rowSpeed_, int depth_);
 	TArray<ATile*> GetHighlightedTiles();
