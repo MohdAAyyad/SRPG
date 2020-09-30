@@ -54,6 +54,10 @@ protected:
 	void SetWarningText(FString text_);
 	UFUNCTION(BlueprintCallable)
 	void SetHasSelectedFighter(bool hasSelectedFighter_);
+	UFUNCTION(BlueprintCallable)
+	bool IsAffordable();
+	UFUNCTION(BlueprintCallable)
+	FString GetWarning();
 public:
 	UFUNCTION(BlueprintCallable)
 	void ChooseFighter(int fighterIndex_);

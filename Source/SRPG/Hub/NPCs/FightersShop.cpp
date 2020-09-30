@@ -31,6 +31,7 @@ void AFightersShop::BeginPlay()
 			fileReader->RemoveFightersDueToPermaDeath(Intermediate::GetInstance()->GetDeadUnits(), 1); //Remove any dead units from the recruited fighters table
 		}
 	}
+	warning = "";
 
 }
 
@@ -79,6 +80,33 @@ void AFightersShop::SetWarningText(FString text_)
 void AFightersShop::SetHasSelectedFighter(bool hasSelectedFighter_)
 {
 	haveChosenFighter = hasSelectedFighter_;
+}
+
+bool AFightersShop::IsAffordable()
+{
+	if (haveChosenFighter)
+	{
+		if (Intermediate::GetInstance()->GetCurrentMoney() - chosenFighter.value > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+			warning = "Not Enough Money";
+		}
+	}
+	else
+	{
+		warning = "No Fighter Selected";
+		return false;
+	}
+
+}
+
+FString AFightersShop::GetWarning()
+{
+	return warning;
 }
 
 void AFightersShop::ChooseFighter(int fighterIndex_)
