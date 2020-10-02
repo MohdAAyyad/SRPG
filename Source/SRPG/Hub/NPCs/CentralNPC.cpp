@@ -148,6 +148,26 @@ int ACentralNPC::GetCentralActivityIndex()
 	return activityIndex;
 }
 
+void ACentralNPC::SetActivityIndex(int activity_)
+{
+	activityIndex = activity_;
+}
+
+void ACentralNPC::SetMoneyCost(int cost_)
+{
+	moneyCost = cost_;
+}
+
+void ACentralNPC::SetUnitCost(int cost_)
+{
+	unitCost = cost_;
+}
+
+void ACentralNPC::SetChanceOfSuccess(int chance_)
+{
+	chanceOfSuccess = chance_;
+}
+
 bool ACentralNPC::IsActivityAffordable()
 {
 	// see if we can both afford the money cost and the time cost

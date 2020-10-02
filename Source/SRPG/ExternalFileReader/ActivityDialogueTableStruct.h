@@ -27,4 +27,8 @@ public:
 	int branchOrCentral; //Who uses it 0 or 1
 	UPROPERTY(BlueprintReadWrite)
 	int positiveOrNegative; //Whether this dialogue reacts to a positive or a negative result
+	UPROPERTY(BlueprintReadWrite)
+	int unitCost; // how many units does this activity cost
+	UPROPERTY(BlueprintReadWrite)
+	int moneyCost; // how much money does this activity cost
 };

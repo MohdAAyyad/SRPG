@@ -89,4 +89,8 @@ public:
 
 	void UpdateChanceOfSuccess(float value_);
 	int GetCentralActivityIndex();
+	void SetActivityIndex(int activity_);
+	void SetMoneyCost(int cost_);
+	void SetUnitCost(int cost_);
+	void SetChanceOfSuccess(int chance_);
 };

@@ -254,6 +254,33 @@
 
 #pragma endregion
 
+#pragma region HubWorldManager
+
+#ifndef CNTR_SPWN_LOW  // how many central NPCs to spawn, minimum
+#define CNTR_SPWN_LOW 1
+#endif
+
+#ifndef CNTR_SPWN_HIGH
+#define CNTR_SPWN_HIGH 3 // how many central NPCs to spawn, maximum
+#endif
+
+
+#ifndef BRNC_SPWN
+#define BRNC_SPWN 20 // percent chance to spawn a branch NPC 
+#endif
+
+#ifndef ACT_INDX_LOW
+#define ACT_INDX_LOW 1 // lowest activity index possible 
+#endif
+
+#ifndef ACT_INDX_HIGH
+#define ACT_INDX_HIGH 3 // highest activity index possible
+#endif
+
+
+#pragma endregion
+
+
 #pragma region AttackResults
 
 #ifndef ATKR_MISS

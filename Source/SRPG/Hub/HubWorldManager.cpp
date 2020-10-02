@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "SRPGCharacter.h"
 #include "Intermediary/Intermediate.h"
+#include "Definitions.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -33,8 +34,10 @@ void AHubWorldManager::BeginPlay()
 
 
 	SpawnNPCs(1, 0);
-	SpawnNPCs(1, true);
-
+	//SpawnNPCs(1, true);
+	int rand = FMath::RandRange(CNTR_SPWN_LOW, CNTR_SPWN_HIGH);
+	
+	SpawnCentralNPCs(rand);
 
 	//SpawnNPCs(1, 3);
 	//SpawnNPCs(1, 4);
@@ -147,6 +150,104 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 	
 }
 
+ACentralNPC* AHubWorldManager::SpawnCentralNPC()
+{
+	// spawn NPC's based on the actor locations
+	// check to see if world is null
+	int spawned = 0;
+
+	// this is the maximum amount of times the while loop will be allowed to run
+	// takes the possible locations and multiplies it by the number of npcs it should spawn, adds 5 for good mesure
+	int maxLoopCount = npcLocations.Num() + 10;
+	int totalLoopCount = 0;
+	ACentralNPC* centralNPC;
+	while(true)
+	{
+
+		int spawnChance = FMath::RandRange(0, npcLocations.Num());
+		int i = 0;
+
+		if (GetWorld())
+		{
+			// i'll make this more intelligent with selecting certain places to spawn it
+			// make an array to tell what locations we've already spawned
+			for (auto a : npcLocations)
+			{
+				// in the future we would do some RNG to determine what type of NPC is spawned but for now we'll keep it simple
+				if (i == spawnChance && hasSpawned[i] == false)
+				{
+					centralNPC = SpawnCentralNPCs(a);
+					hasSpawned[i] = true;
+					return centralNPC;
+				}
+
+				i++;
+			}
+		}
+
+
+		totalLoopCount++;
+		// if we aren't able to find a valid location in a certain amount of loops 
+		if (totalLoopCount >= maxLoopCount)
+		{
+			// go home 
+			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+			break;
+		}
+	}
+
+	return nullptr;
+}
+
+ABranchNPC* AHubWorldManager::SpawnBranchNPC()
+{
+	int spawned = 0;
+
+	// this is the maximum amount of times the while loop will be allowed to run
+	// takes the possible locations and multiplies it by the number of npcs it should spawn, adds 5 for good mesure
+	int maxLoopCount = npcLocations.Num() + 10;
+	int totalLoopCount = 0;
+	ABranchNPC* branchNPC;
+	
+	while(true)
+	{
+		int i = 0;
+		int spawnChance = FMath::RandRange(0, npcLocations.Num());
+		//int i = 0;
+
+		if (GetWorld())
+		{
+			// i'll make this more intelligent with selecting certain places to spawn it
+			// make an array to tell what locations we've already spawned
+			for (auto a : npcLocations)
+			{
+				// in the future we would do some RNG to determine what type of NPC is spawned but for now we'll keep it simple
+				if (i == spawnChance && hasSpawned[i] == false)
+				{
+					branchNPC = SpawnBranchNPCs(a);
+					hasSpawned[i] = true;
+					spawned++;
+					return branchNPC;
+				}
+
+				i++;
+			}
+		}
+
+
+		totalLoopCount++;
+		// if we aren't able to find a valid location in a certain amount of loops 
+		if (totalLoopCount >= maxLoopCount)
+		{
+			// go home 
+			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+			break;
+		}
+	}
+
+	return nullptr;
+}
+
 void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
 {
 	// spawn NPC's based on the actor locations
@@ -235,6 +336,11 @@ ANPC* AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 		npc->SetNPCLinesIndex(2);
 		npc->SetHubManager(this);
 		npcs.Push(npc);
+		if (meshes.Num() > 0)
+		{
+			npc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+		}
+		
 	}
 	return npc;
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Default NPC"));
@@ -247,6 +353,10 @@ ACentralNPC* AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 	{
 		centralNpc->SetHubManager(this);
 		npcs.Push(centralNpc);
+		if (meshes.Num() > 0)
+		{
+			centralNpc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+		}
 	}
 	return centralNpc;
 	// any information we need to give the NPC will be done here
@@ -260,6 +370,10 @@ ABranchNPC* AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 	{
 		branchNpc->SetHubManager(this);
 		npcs.Push(branchNpc);
+		if (meshes.Num() > 0)
+		{
+			branchNpc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+		}
 	}
 	return branchNpc;
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Branch NPC"));
@@ -320,5 +434,36 @@ void AHubWorldManager::DeleteNPCs()
 	// reset the array
 	hasSpawned.Init(false, npcLocations.Num());
 
+}
+
+void AHubWorldManager::SpawnCentralNPCs(int amount_)
+{
+	for (int i = 0; i < amount_; i++)
+	{
+		if (ACentralNPC* centralNpc = SpawnCentralNPC())
+		{
+			// random activity index
+			int activityIndex = FMath::RandRange(ACT_INDX_LOW, ACT_INDX_HIGH);
+
+			// the specific activity here is russian roulette can be changed at a later date
+			if (activityIndex == 2)
+			{
+				centralNpc->SetChanceOfSuccess(50);
+			}
+
+			int rando = FMath::RandRange(0, 100);
+
+			if (rando < BRNC_SPWN && activityIndex != 2)
+			{
+				if (ABranchNPC* branch = SpawnBranchNPC())
+				{
+					branch->SetCentralNPC(centralNpc);
+				}
+
+
+			}
+		}
+
+	}
 }
 

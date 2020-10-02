@@ -37,6 +37,8 @@ protected:
 	// randomly chosen, 6 at max
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ANPC>> regularNPCs;
+	UPROPERTY(EditAnywhere)
+	TArray<USkeletalMesh*> meshes;
 	//UPROPERTY(EditAnywhere)
 	//TArray<TSubclassOf<ATournament>> tournamentNPCs;
 	//UPROPERTY(EditAnywhere)
@@ -76,6 +78,8 @@ public:
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
 	void SpawnNPCs(int num_, int type_);
+	ACentralNPC* SpawnCentralNPC();
+	ABranchNPC* SpawnBranchNPC();
 	// used specifically for spawning central NPC's with a branch attached
 	void SpawnNPCs(int num_, bool spawnBranch_);
 	ANPC* SpawnDefaultNPCs(AActor* a_);
@@ -86,4 +90,5 @@ public:
 	//void SpawnFighterShop(AActor* a_);
 	// go through and remove the npcs
 	void DeleteNPCs();
+	void SpawnCentralNPCs(int amount_);
 };
