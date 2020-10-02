@@ -281,7 +281,7 @@
 #pragma endregion
 
 
-#pragma region AttackResults
+#pragma region Attacking
 
 #ifndef ATKR_MISS
 #define ATKR_MISS 0
@@ -293,6 +293,18 @@
 
 #ifndef ATKR_CRIT
 #define ATKR_CRIT 3
+#endif
+
+#ifndef HIT_CRIT_BASE
+#define HIT_CRIT_BASE 20 
+#endif
+
+#ifndef ATK_RWRD
+#define ATK_RWRD 20 
+#endif
+
+#ifndef SKL_RWRD
+#define SKL_RWRD 30 
 #endif
 
 #pragma endregion
@@ -327,30 +339,30 @@
 #endif
 
 #ifndef RAD_ASSA //Radius for assassin
-#define RAD_ASSA 200.0f;
+#define RAD_ASSA 200.0f
 #endif
 
 #ifndef RAD_FOL
-#define RAD_FOL 200.0f;
+#define RAD_FOL 200.0f
 #endif
 
 #ifndef RAD_PP //Radius for peopleperson
-#define RAD_PP 150.0f;
+#define RAD_PP 150.0f
 #endif
 
 #ifndef RAD_HEAL
-#define RAD_HEAL 300.0f;
+#define RAD_HEAL 300.0f
 #endif
 
 #ifndef HP_ASSA //HP threshold for assassin
-#define HP_ASSA 0.6f;
+#define HP_ASSA 0.6f
 #endif
 
 #pragma endregion
 
 #pragma region Maps
 #ifndef MAP_HUB 
-#define MAP_HUB FName(TEXT("HubLevel_S3"))
+#define MAP_HUB FName(TEXT("HubLevel_S5"))
 #endif
 
 #ifndef MAP_BATTLE 

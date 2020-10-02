@@ -1,5 +1,0 @@
-,name,description,weaponIndex,value,pip,atk,inti,crit,hit,crd,levelToUnlock,fls,rge,rows,depths,animationIndex,statusEffect,emitterIndex,statIndex,EquipmentSkillsIndex,Pure
-0,KickS0,MMA Style Kick 0,0,10,1,0.5,0,0.2,0.82,0,1,10,1,0,0,0,0,0,0,0,0
-1,Piercing Arrow,Unleash an arrow in a straight line,2,10,1,0.5,0,0.2,0.82,0,1,10,6,3,1,0,0,0,0,0,1
-2,Arrow Rain,Rain arrows on your foes,2,10,1,0.5,0,0.2,0.82,0,1,10,4,3,3,0,0,0,0,0,0
-3,KickS2,MMA Style Kick 2,1,10,1,0.5,0,0.2,0.82,0,1,10,3,1,1,0,0,0,0,0,0

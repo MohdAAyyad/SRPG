@@ -29,4 +29,6 @@ public:
 		int owned; //How many we own.
 	UPROPERTY(BlueprintReadWrite)
 		int level; //Used to determine whether this item can be sold or not. Must be less or equal to world level
+	UPROPERTY(BlueprintReadWrite)
+		int price;
 };

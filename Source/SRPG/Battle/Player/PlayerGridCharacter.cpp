@@ -35,7 +35,6 @@ APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 {
 	overheadWidgetComp->AddRelativeRotation(FRotator(90.0f, -178.0f, 1.25f));
 	fighterID = 0;
-	chosenSkillIndex = 0;
 	chosenSkillAnimIndex = 0;
 }
 
@@ -110,19 +109,41 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 {
 	//TODO
 	//Calculate hit and crit chances before applying damage
-	//Get the damage from the equipment
-	//Affect the crowd
+	int hitModifier = statsComp->GetStatValue(STAT_WHT) / 2; //Every 2 points in hit, gives us one point in HM
+	int critModifier = 1; //Crit starts at 1 (not a critical attack)
+	bool crit_ = false;
 	if (actionTargets[0])
 	{
-		actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) * 10, this);
-		
-		if (statsComp->AddTempCRD(CRD_ATK))
+		if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[0]->GetStat(STAT_HIT)))
 		{
-			if (crdManager)
-				crdManager->UpdateFavor(true);
-		}
+			if (statsComp->GetStatValue(STAT_CRT) >= FMath::RandRange(0, HIT_CRIT_BASE))
+			{
+				critModifier = 2;
+				//Show crit
+				crit_ = true;
+			}
 
-		statsComp->AddToStat(STAT_EXP, 20);
+			//Spawn an emitter based on the weapon index
+			if (btlManager)
+				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(),statsComp->GetStatValue(STAT_WPI));
+
+			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier, this, crit_);
+
+			//Affect the crowd
+			if (statsComp->AddTempCRD(CRD_ATK))
+			{
+				if (crdManager)
+					crdManager->UpdateFavor(true);
+			}
+
+			//Add exp
+			statsComp->AddToStat(STAT_EXP, ATK_RWRD);
+		}
+		else
+		{
+			//Show miss
+			actionTargets[0]->GridCharReactToMiss();
+		}
 	}
 
 	if (bHasMoved && bHasDoneAnAction) //Has moved and has done an action, we're done
@@ -135,7 +156,8 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 		Selected();
 	}
 
-	actionTargets.Empty();
+	if(actionTargets.Num()>0)
+		actionTargets.Empty();
 }
 
 
@@ -168,44 +190,75 @@ void APlayerGridCharacter::UseSkill(int index_)
 
 	if (index_ >= 0 && index_ < skills.Num())
 	{
-		ATile* tile_ = GetMyTile();
-		if (tile_)
+		if (skills[index_].pip <= statsComp->GetStatValue(STAT_PIP)) //Make sure we have enough pips
 		{
-			int rowSpeed_ = skills[index_].rge;
-			int depth_ = rowSpeed_ + 1;
-			chosenSkillIndex = index_;
-			chosenSkill = skills[index_];
-			chosenSkillAnimIndex = skills[index_].animationIndex;
-			tile_->GetGridManager()->ClearHighlighted();
-			tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL, skills[index_].pure);
-			currentState = EGridCharState::SKILLING;
-			ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
-			if (btlctrl)
-				btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+			{
+				int rowSpeed_ = skills[index_].rge;
+				int depth_ = rowSpeed_ + 1;
+				chosenSkill = skills[index_];
+				chosenSkillAnimIndex = skills[index_].animationIndex;
+				tile_->GetGridManager()->ClearHighlighted();
+				tile_->GetGridManager()->UpdateCurrentTile(tile_, rowSpeed_, depth_, TILE_SKL, skills[index_].pure);
+				currentState = EGridCharState::SKILLING;
+				ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
+				if (btlctrl)
+					btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
+			}
 		}
+		//TODO
+		//If no pips are available, play an audio que
 	}
 }
 
 void APlayerGridCharacter::ActivateSkillAttack()
 {
-	//TODO 
 	//Remove used pips
+	statsComp->AddToStat(STAT_PIP,-chosenSkill.pip);
 	//Calculate hit and crit chances
-	//Tell the battlemanager to spawn the emitter on the action target
-	//Affect the crowd
+	int hitModifier = chosenSkill.hit / 2; //Every 2 points in hit, gives us one point in HM
+	int critModifier = 1; //Crit starts at 1 (not a critical attack)
+	//Ready all the variables
+	float atkScaled = chosenSkill.atk * static_cast<float>(statsComp->GetStatValue(STAT_ATK));
+	float intiScaled = chosenSkill.inti *static_cast<float>(statsComp->GetStatValue(STAT_INT));
+	float skillValue = static_cast<float>(chosenSkill.value);
+
 	for (int i = 0; i < actionTargets.Num(); i++)
 	{
 		if (actionTargets[i])
 		{
-			actionTargets[i]->GridCharReactToSkill(skills[chosenSkillIndex].value, skills[chosenSkillIndex].statIndex,
-				skills[chosenSkillIndex].statusEffect, this);
-
-			if (statsComp->AddTempCRD(skills[chosenSkillIndex].fls))
+			//Check if we hit the action target
+			if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[i]->GetStat(STAT_HIT)))
 			{
-				if (crdManager)
-					crdManager->UpdateFavor(true);
-			}
+				bool crit_ = false;
+				if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
+				{
+					critModifier = 2;
+					//Show crit
+					crit_ = true;
+				}
 
+				//Affect the action target
+				actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled) * critModifier, chosenSkill.statIndex,
+					chosenSkill.statusEffect, this, crit_);
+
+				//Tell the battlemanager to spawn the emitter on the action target
+				if (btlManager)
+					btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
+
+				//Affect the crowd
+				if (statsComp->AddTempCRD(chosenSkill.fls))
+				{
+					if (crdManager)
+						crdManager->UpdateFavor(true);
+				}
+			}
+			else
+			{
+				//Show miss
+				actionTargets[i]->GridCharReactToMiss();
+			}
 		}
 	}
 
@@ -218,8 +271,11 @@ void APlayerGridCharacter::ActivateSkillAttack()
 		NotSelected();
 		Selected();
 	}
-
-	actionTargets.Empty();
+	if (actionTargets.Num() > 0)
+	{
+		statsComp->AddToStat(STAT_EXP, SKL_RWRD + chosenSkill.pip); //Pip converted to exp. This way skills that cost a lot reward a lot
+		actionTargets.Empty();
+	}
 }
 
 void APlayerGridCharacter::SetFighterIndex(int index_)
@@ -283,10 +339,29 @@ void APlayerGridCharacter::FinishState()
 		btlCtrl->ResetControlledCharacter(); //Also calls NotSelected()
 }
 
-void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
+void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_)
 {
 	//Rotate to face attacker
-	Super::GridCharTakeDamage(damage_, attacker_);
+	Super::GridCharTakeDamage(damage_, attacker_,crit_);
+	//update stats component
+	statsComp->AddToStat(STAT_HP, -damage_);
+	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
+	//Check if dead
+	if (statsComp->GetStatValue(STAT_HP) <= 1)
+	{
+		Intermediate::GetInstance()->PushUnitToDead(fighterID);
+		if (btlManager)
+			btlManager->HandlePlayerDeath(this);
+		if (animInstance)
+			animInstance->DeathAnim();
+	}
+}
+
+void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_)
+{
+	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
+	if (overheadWidgetComp)
+		overheadWidgetComp->SetVisibility(true);
 	//update stats component
 	statsComp->AddToStat(STAT_HP, -damage_);
 	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));

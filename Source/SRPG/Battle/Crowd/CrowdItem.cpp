@@ -6,7 +6,6 @@
 #include "BattleCrowd.h"
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Particles/ParticleSystem.h"
 #include "../GridCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"

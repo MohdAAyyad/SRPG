@@ -15,6 +15,7 @@
 #include "BattleController.h"
 #include "Grid/Tile.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -313,5 +314,21 @@ void ABattleManager::UpdatePlayerEXP()
 	{
 		if (deployedUnits[i])
 			deployedUnits[i]->UpdateCurrentEXP();
+	}
+}
+
+void ABattleManager::SpawnSkillEmitter(FVector loc_, int emitterIndex_)
+{
+	if (emitterIndex_ >= 0 && emitterIndex_ < skillEmitters.Num())
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), skillEmitters[emitterIndex_], loc_, FRotator::ZeroRotator);
+	}
+}
+
+void ABattleManager::SpawnWeaponEmitter(FVector loc_, int emitterIndex_)
+{
+	if (emitterIndex_ >= 0 && emitterIndex_ < weaponEmitters.Num())
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), weaponEmitters[emitterIndex_], loc_, FRotator::ZeroRotator);
 	}
 }

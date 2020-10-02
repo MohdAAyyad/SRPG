@@ -351,14 +351,6 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 		{
 			if (CheckIfPlayerIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
 			{
-				if (resultTile)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Result is not null"));
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Result NULLLLLL"));
-				}
 				bWillUseSkill = true;
 				skillType = 0;
 				return resultTile;
@@ -553,4 +545,31 @@ FSkillTableStruct UDecisionComp::GetChosenSkill()
 
 	return FSkillTableStruct();
 }
+
+/*
+Begin play: decision component (DC from here on out) gets all the usable skills from the table 
+(same equipment-based rules that apply for the player here) --> DC stores the index of the skill with the 
+highest range (SH from here on out) --> Enemy asks  DC to pick a target --> DC follows the rules of its 
+pattern type enum to pick a target (DEFAULT, ASSASSIN...etc) --> DC then highlights the movement of the 
+enemy-->DC checks if enemy has enough pips to use SH --> Let's assume that the enemy does have enough pips, 
+DC then highlights the tiles around the target based on SH's row and depth speeds --> DC checks whether any of the 
+range tiles are within movement range. If they are, pick one that's not occupied and that becomes our target tile 
+and DC marks a boolean that tells the enemy that we're gonna be using a skill --> If DC does not find a range tile 
+within the movement tiles, then it attempts to find a reachable tile based on the regular attack range --> If it 
+doesn't find a reachable tile this way either, then the picks either the regular attack or the SH based on which 
+has the lower range value (i.e. get as close as possible since you're out of range completely) and based on that 
+choice picks a range tile accordingly as the target.
+
+
+In the case the enemy does not have enough pips, DC looks through the enemy skills and attempts to find the skill 
+with the highest range and with a less pip requirement than the current pip value of the enemy. If it does not  find one,
+then it goes the regular attack route.
+
+Once a tile is picked, everything is normal from here on out, the enemy's path component finds a path to the tile, 
+then the path is adjusted to make sure the end tile is not occupied and the path is completely within movement range. 
+When the enemy reaches the final destination, it checks the aforementioned skill boolean and if a skill to be used, it 
+sees if its within skill range from the player and attacks them or stays still if out of range.
+This is the way most enemies will do it. Enemies with support skills will have a few more decisions to make but I 
+haven't thought about it yet
+*/
 

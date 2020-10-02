@@ -44,9 +44,9 @@ void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
 	// look for item index inside our table and add to the owned column
 	FName converted = FName(*FString::FromInt(itemIndex_));
 	FItemTableStruct row = fileReader->FindItemTableRow(converted, 0);
-	if (Intermediate::GetInstance()->GetCurrentMoney() - row.value > 0)
+	if (Intermediate::GetInstance()->GetCurrentMoney() - row.price > 0)
 	{
-		Intermediate::GetInstance()->SpendMoney(row.value);
+		Intermediate::GetInstance()->SpendMoney(row.price);
 		fileReader->AddOwnedValueItemTable(converted, 0, amountToBuy_);
 
 		UE_LOG(LogTemp, Warning, TEXT("Item Purchased!"));
