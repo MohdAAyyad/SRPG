@@ -84,7 +84,9 @@ void ASRPGCharacter::SetInteracting(IInteractable* ref_)
 void ASRPGCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
+	//ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
+	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	UE_LOG(LogTemp, Warning, TEXT("controllers %d"), GetWorld()->GetNumPlayerControllers());
 	if (controller)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player ref set"));

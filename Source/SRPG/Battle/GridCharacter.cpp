@@ -224,23 +224,7 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 		{
 			pathComp->SetTargetTile(target_);
 			pathComp->SetCurrentTile(GetMyTile());
-			pathComp->GetPath();
-			TArray<ATile*> tPath = pathComp->GetMovementPath();
-
-			TArray<int> tileVecIndexes;
-			//We only care about the tiles within movement range
-			for (int i = 0; i < tPath.Num(); i++)
-			{
-				if (tPath[i]->GetHighlighted() == TILE_MOV)
-				{
-					tileVecIndexes.Push(i);
-				}
-			}
-
-			for (int j = 0; j < tileVecIndexes.Num(); j++)
-			{
-				movementPath.Push(tPath[tileVecIndexes[j]]->GetActorLocation());
-			}
+			movementPath = pathComp->GetPath();
 			if(movementPath.Num()>0)
 				bMoving = true;
 		}
@@ -330,33 +314,39 @@ AGridCharacter::EGridCharState AGridCharacter::GetCurrentState()
 	return currentState;
 }
 
-void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_)
+void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_)
 {
-
 	//Rotate the character to face the attacker
 	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
 	FRotator rot = direction.Rotation();
 	rot.Roll = GetActorRotation().Roll;
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
+	overheadWidgetComp->SetVisibility(true);
 	if (animInstance)
-		animInstance->GotHit();
+	{
+		animInstance->SetDamage(static_cast<int> (damage_));
+		animInstance->GotHit(crit_);
+	}
 
 	//Health details are handled inside the children's code
 }
 
 
-void AGridCharacter::GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_)
+void AGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_)
 {
-	//PLACEHOLDER
 	//Rotate the character to face the attacker
 	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
 	FRotator rot = direction.Rotation();
 	rot.Roll = GetActorRotation().Roll;
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
+	overheadWidgetComp->SetVisibility(true);
 	if (animInstance)
-		animInstance->GotHit();
+	{
+		animInstance->SetDamage(static_cast<int> (damage_));
+		animInstance->GotHit(crit_);
+	}
 
 	//TODO
 	//Affect the correct stat 
@@ -445,7 +435,8 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_INT, weapon.intl + armor.intl + accessory.intl);
 		statsComp->AddToStat(STAT_SPD, weapon.spd + armor.spd + accessory.spd);
 		statsComp->AddToStat(STAT_CRT, weapon.crit + armor.crit + accessory.crit);
-		statsComp->AddToStat(STAT_HIT, weapon.hit + armor.hit + accessory.hit);
+		statsComp->AddToStat(STAT_HIT, armor.hit + accessory.hit); //Agility is not affected by the weapon
+		statsComp->AddToStat(STAT_WHT, weapon.hit); //Weapon hit is affected by the weapon's hit
 		statsComp->AddToStat(STAT_CRD, weapon.crd + armor.crd + accessory.crd);
 		statsComp->AddToStat(STAT_WSI, weapon.skillsIndex);
 		statsComp->AddToStat(STAT_WSN, weapon.skillsN);
@@ -530,4 +521,15 @@ UPathComponent* AGridCharacter::GetPathComponent()
 ATile* AGridCharacter::GetOriginTile()
 {
 	return originTile;
+}
+
+void AGridCharacter::RemoveOverheadWidget()
+{
+	overheadWidgetComp->SetVisibility(false);
+}
+
+void AGridCharacter::GridCharReactToMiss()
+{
+	animInstance->GotMiss();
+	overheadWidgetComp->SetVisibility(true);
 }

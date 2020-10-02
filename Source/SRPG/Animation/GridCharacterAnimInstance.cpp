@@ -14,6 +14,8 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	skillIndex = -1;
 	bDeath = false;
 	bStatDecrease = false;
+	bHitOrCrit = false;
+	bMiss = false;
 }
 void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
@@ -33,10 +35,16 @@ void UGridCharacterAnimInstance::WeaponAttack()
 		bWeaponAttack = true;
 }
 
-void UGridCharacterAnimInstance::GotHit()
+void UGridCharacterAnimInstance::GotHit(bool hitOrCrit_)
 {
+	bHitOrCrit = hitOrCrit_;
 	if (!bHit)
 		bHit = true;
+}
+
+void UGridCharacterAnimInstance::SetDamage(int damage_)
+{
+	damage = damage_;
 }
 
 void UGridCharacterAnimInstance::SkillAttack(int index_)
@@ -70,4 +78,10 @@ void UGridCharacterAnimInstance::ChangeStats(bool stat_)
 		if (!bStatDecrease)
 			bStatDecrease = true;
 	}
+}
+
+void UGridCharacterAnimInstance::GotMiss()
+{
+	if (!bMiss)
+		bMiss = true;
 }

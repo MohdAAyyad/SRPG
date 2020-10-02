@@ -20,7 +20,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Skills")
 		TArray<FSkillTableStruct> skills;
-	int chosenSkillIndex;
 
 	APlayerGridCharacter();
 	UFUNCTION(BlueprintCallable)
@@ -50,7 +49,8 @@ public:
 	void StartPlayerTurn();
 	void EndPlayerTurn();
 
-	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_) override;
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_) override;
+	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_) override;
 	void UpdateCurrentEXP();
 	void CheckChangeStats();
 

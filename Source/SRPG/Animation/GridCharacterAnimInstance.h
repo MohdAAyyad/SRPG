@@ -34,6 +34,12 @@ protected:
 		bool bDeath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bStatDecrease;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bMiss;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bHitOrCrit;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int damage;
 
 	UFUNCTION(BlueprintCallable, Category = "UpdateAnimationProperties")
 		void UpdateAnimationProperties();
@@ -41,7 +47,9 @@ protected:
 public:
 
 	void WeaponAttack();
-	void GotHit();
+	void GotHit(bool hitOrCrit_ );
+	void SetDamage(int damage_);
+	void GotMiss();
 	void SkillAttack(int index_);
 	void SetUseItem();
 	void DeathAnim();

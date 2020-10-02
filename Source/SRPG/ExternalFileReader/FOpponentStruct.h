@@ -28,7 +28,7 @@ struct SRPG_API FOpponentStruct
 		archtype = FMath::RandRange(ARCH_ATK, ARCH_INT);
 		int numChance = FMath::RandRange(0, 4);
 		level = level_ + 2;
-		//numberOfTroops = num_ + numChance;
-		numberOfTroops = 2;
+		numberOfTroops = num_ + numChance;
+		//numberOfTroops = 2;
 	}
 };

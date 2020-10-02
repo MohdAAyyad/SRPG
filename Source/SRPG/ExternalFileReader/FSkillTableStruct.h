@@ -33,9 +33,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		float inti; //Scale with inti percentage
 	UPROPERTY(BlueprintReadOnly)
-		float crit;
+		int crit;
 	UPROPERTY(BlueprintReadOnly)
-		float hit;
+		int hit;
 	UPROPERTY(BlueprintReadOnly)
 		int crd;
 	UPROPERTY(BlueprintReadOnly)

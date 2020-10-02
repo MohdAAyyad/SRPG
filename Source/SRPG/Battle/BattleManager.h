@@ -74,6 +74,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Crowd")
 		class ABattleCrowd* crdManager;
 
+	UPROPERTY(EditAnywhere, Category = "Emitters")
+		TArray<UParticleSystem*> skillEmitters;
+
+	UPROPERTY(EditAnywhere, Category = "Emitters")
+		TArray<UParticleSystem*> weaponEmitters;
+
 	UFUNCTION(BlueprintCallable)
 		void DeployThisUnitNext(int bpid_); //Called from the UI
 
@@ -105,5 +111,8 @@ public:
 
 	void EndBattle(bool victory_);
 	void HandlePlayerDeath(APlayerGridCharacter* player_);
+
+	void SpawnSkillEmitter(FVector loc_, int emitterIndex_);
+	void SpawnWeaponEmitter(FVector loc_, int emitterIndex_);
 
 };

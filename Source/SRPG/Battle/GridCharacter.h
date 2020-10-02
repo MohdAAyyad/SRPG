@@ -114,6 +114,9 @@ protected:
 
 	virtual void FinishState() {};
 
+	UFUNCTION(BlueprintCallable)
+		void RemoveOverheadWidget();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -141,9 +144,10 @@ public:
 	void SetMoving(bool value_);
 
 	EGridCharState GetCurrentState();
-	virtual void GridCharTakeDamage(float damage_, AGridCharacter* attacker_);
-	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_); //TODO add status effects
+	virtual void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_);
+	virtual void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_); //TODO add status effects
 	void GridCharReactToItem(int statIndex_, int value_);
+	void GridCharReactToMiss();
 	void UseItemOnOtherChar(AGridCharacter* target_);
 	float GetStat(int statIndex_);
 
