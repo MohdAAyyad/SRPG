@@ -28,7 +28,9 @@ protected:
 	float expPercentage;
 	int addedEXP;
 	bool bLevelingUp;
+
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+
 
 public:	
 	int CalculateHit(int otherAgi_);
@@ -50,5 +52,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		float GetEXPPercentage();
+
+	void UpdateChampionVillainStats(bool champion_);
+	void RevertChampionVillainStatsUpdate(bool champion_); //When three turns pass and no perma champion is on the field, the stats will need to be reverted
 	
 };

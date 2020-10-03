@@ -30,6 +30,7 @@ UDecisionComp::UDecisionComp()
 	bCanUseSkill = true; //Affected by remaning pips
 	bWillUseSkill = false; //True if the enemy is gonna be using a skill
 	skillType = -1;
+	skillChance = 40;
 }
 
 // Called when the game starts
@@ -46,6 +47,14 @@ void UDecisionComp::SetRefs(AAIManager* ai_, ABattleManager* btl_, AEnemyBaseGri
 	aiManager = ai_;
 	btlManager = btl_;
 	ownerEnemy = enemy_;
+	if (ownerEnemy->GetStatsComp()->GetStatValue(STAT_ARCH) == ARCH_INT)
+	{
+		skillChance += 30;
+	}
+	else if (ownerEnemy->GetStatsComp()->GetStatValue(STAT_ARCH) == ARCH_DEF)
+	{
+		skillChance += 10;
+	}
 	UpdateEnemySkills();
 }
 void UDecisionComp::UpdatePattrn(int level_, bool healer_)
@@ -349,26 +358,34 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 		//Check if we're within range of the skill with the longest range first. Reason: Skills will usually have a higher range than regular attacks
 		if (statsComp->GetStatValue(STAT_PIP) >= offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip) //Do we have enough pips?
 		{
-			if (CheckIfPlayerIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+			//If we have enough pips, roll a dice and see if we get to use a skill
+			if (skillChance >= FMath::RandRange(0, 100))
 			{
-				bWillUseSkill = true;
-				skillType = 0;
-				return resultTile;
-			}
-			else
-			{
-				//If we're not within range of the skill with the longest range, then check if we're in range of a regular attack
-				if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+				if (CheckIfPlayerIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
 				{
+					bWillUseSkill = true;
+					skillType = 0;
 					return resultTile;
 				}
 				else
 				{
-					//If we're in range of neither, then choose a tile based on the one with the least range
-					PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+					//If we're not within range of the skill with the longest range, then check if we're in range of a regular attack
+					if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+					{
+						return resultTile;
+					}
+					else
+					{
+						//If we're in range of neither, then choose a tile based on the one with the least range
+						PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
 
-					//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+						//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+					}
 				}
+			}
+			else
+			{
+				CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
 			}
 		}
 		else //Not enough pips to use the skills with the longest range. So look for the next skill with the longest range

@@ -9,6 +9,7 @@
 #include "Intermediary/Intermediate.h"
 #include "EnemyBaseGridCharacter.h"
 #include "TimerManager.h"
+#include "../Crowd/BattleCrowd.h"
 
 
 // Sets default values
@@ -17,6 +18,9 @@ AAIManager::AAIManager()
 	PrimaryActorTick.bCanEverTick = false;
 	numberOfEnemiesWhichFinishedMoving = -1;
 	numberOfEnemiesToldToMove = 0;
+	btlManager = nullptr;
+	gridManager = nullptr;
+	crdManager = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -56,11 +60,12 @@ void AAIManager::TellDeployedEnemiesToMove()
 	}
 }
 
-void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* grid_)
+void AAIManager::SetBattleGridCrdManagers(ABattleManager* btl_, AGridManager* grid_,ABattleCrowd* cref_)
 {
 	//Called by the battle manager at begin play
 	btlManager = btl_;
 	gridManager = grid_;
+	crdManager = cref_;
 	TArray<ATile*> enemyDeploymentTiles;
 
 	//Get the next opponent
@@ -101,7 +106,7 @@ void AAIManager::SetBattleAndGridManager(ABattleManager* btl_, AGridManager* gri
 
 					if (enemy)
 					{
-						enemy->SetManagers(this, gridManager, btlManager);
+						enemy->SetManagers(this, gridManager, btlManager, crdManager);
 						deployedEnemies.Push(enemy);
 						enemyDeploymentTiles[tileIndex]->SetOccupied(true);
 						depNodes[nodeIndex].currentNumOfEnemiesForThisNode++;
@@ -177,7 +182,7 @@ float AAIManager::GetTotalStatFromDeployedEnemies(int statIndex_)
 	return total;
 }
 
-AGridCharacter* AAIManager::GetEnemyWithHighestStat(int statIndex_)
+AGridCharacter* AAIManager::GetEnemyWithHighestStat(int statIndex_, AGridCharacter* notThisCharacter_)
 {
 	int max = 0;
 	AGridCharacter* result = nullptr;
@@ -185,7 +190,7 @@ AGridCharacter* AAIManager::GetEnemyWithHighestStat(int statIndex_)
 	{
 		if (deployedEnemies[i])
 		{
-			if (deployedEnemies[i]->GetStat(statIndex_) > max)
+			if (deployedEnemies[i]->GetStat(statIndex_) > max && deployedEnemies[i] != notThisCharacter_)
 			{
 				result = deployedEnemies[i];
 				max = deployedEnemies[i]->GetStat(statIndex_);
@@ -195,7 +200,7 @@ AGridCharacter* AAIManager::GetEnemyWithHighestStat(int statIndex_)
 
 	return result;
 }
-AGridCharacter* AAIManager::GetEnemyWithLowestStat(int statIndex_)
+AGridCharacter* AAIManager::GetEnemyWithLowestStat(int statIndex_, AGridCharacter* notThisCharacter_)
 {
 	int min = 10000;
 	AGridCharacter* result = nullptr;
@@ -203,7 +208,7 @@ AGridCharacter* AAIManager::GetEnemyWithLowestStat(int statIndex_)
 	{
 		if (deployedEnemies[i])
 		{
-			if (deployedEnemies[i]->GetStat(statIndex_) < min)
+			if (deployedEnemies[i]->GetStat(statIndex_) < min && deployedEnemies[i] != notThisCharacter_)
 			{
 				result = deployedEnemies[i];
 				min = deployedEnemies[i]->GetStat(statIndex_);

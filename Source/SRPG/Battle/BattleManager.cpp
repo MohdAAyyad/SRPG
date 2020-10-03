@@ -48,7 +48,7 @@ void ABattleManager::BeginPlay()
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->AddToViewport();
 	if (aiManager)
-		aiManager->SetBattleAndGridManager(this, gridManager);
+		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
 	if (gridManager)
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 
@@ -225,15 +225,15 @@ float ABattleManager::GetTotalStatFromDeployedPlayers(int statIndex_)
 	return total;
 }
 
-AGridCharacter* ABattleManager::GetPlayerWithHighestStat(int statIndex_)
+AGridCharacter* ABattleManager::GetPlayerWithHighestStat(int statIndex_, AGridCharacter* notThisCharacter_)
 {
 	int max = 0;
-	AGridCharacter* result = nullptr;
+	AGridCharacter* result = notThisCharacter_; //In case we don't find another character, just return the original one
 	for (int i = 0; i < deployedUnits.Num(); i++)
 	{
 		if (deployedUnits[i])
 		{
-			if (deployedUnits[i]->GetStat(statIndex_) > max)
+			if (deployedUnits[i]->GetStat(statIndex_) > max && deployedUnits[i] != notThisCharacter_)
 			{
 				result = deployedUnits[i];
 				max = deployedUnits[i]->GetStat(statIndex_);
@@ -243,15 +243,15 @@ AGridCharacter* ABattleManager::GetPlayerWithHighestStat(int statIndex_)
 
 	return result;
 }
-AGridCharacter* ABattleManager::GetPlayerWithLowestStat(int statIndex_)
+AGridCharacter* ABattleManager::GetPlayerWithLowestStat(int statIndex_, AGridCharacter* notThisCharacter_)
 {
 	int min = 10000;
-	AGridCharacter* result = nullptr;
+	AGridCharacter* result = notThisCharacter_; //In case we don't find another character, just return the original one
 	for (int i = 0; i < deployedUnits.Num(); i++)
 	{
 		if (deployedUnits[i])
 		{
-			if (deployedUnits[i]->GetStat(statIndex_) < min)
+			if (deployedUnits[i]->GetStat(statIndex_) < min && deployedUnits[i] != notThisCharacter_)
 			{
 				result = deployedUnits[i];
 				min = deployedUnits[i]->GetStat(statIndex_);

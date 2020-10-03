@@ -63,7 +63,7 @@ protected:
 		class UDecisionComp* decisionComp;
 
 public:
-	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_);
+	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
 	void StartEnemyTurn();
 	void ExecuteChosenAction();

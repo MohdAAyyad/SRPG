@@ -218,8 +218,9 @@ void ABattleController::HandleMousePress()
 
 								for (int i = 0; i < targetingTiles.Num(); i++)
 								{
-									if (targetingTiles[i]->GetMyGridCharacter())
-										targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
+									AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
+									if (gchar!=nullptr && !targetedCharacters.Contains(gchar))
+										targetedCharacters.Push(gchar);
 								}
 								FocusOnGridCharacter(controlledCharacter, focusRate);
 								controlledCharacter->AttackUsingSkill(targetedCharacters,focusRate);
@@ -256,8 +257,9 @@ void ABattleController::HandleMousePress()
 
 							for (int i = 0; i < targetingTiles.Num(); i++)
 							{
-								if (targetingTiles[i]->GetMyGridCharacter())
-									targetedCharacters.Push(targetingTiles[i]->GetMyGridCharacter());
+								AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
+								if (gchar != nullptr && !targetedCharacters.Contains(gchar))
+									targetedCharacters.Push(gchar);
 							}
 							if (targetedCharacters.Num() > 0)
 							{

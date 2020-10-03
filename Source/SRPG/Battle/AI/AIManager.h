@@ -51,6 +51,7 @@ protected:
 
 		class ABattleManager* btlManager;
 		class AGridManager* gridManager;
+		class ABattleCrowd* crdManager;
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<TSubclassOf<class AEnemyBaseGridCharacter>> enemiesBPs;
@@ -70,15 +71,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void BeginEnemyTurn(); //Called from Battlemanager
-	void SetBattleAndGridManager(ABattleManager* btl_, AGridManager* grid_);
+	void SetBattleGridCrdManagers(ABattleManager* btl_, AGridManager* grid_, ABattleCrowd* cref_);
 	void FinishedMoving();
 	void FinishedAttacking();
 	void OrderEnemiesToAttackPlayer();
 
 	float GetTotalStatFromDeployedEnemies(int statIndex_);
 
-	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_);
-	AGridCharacter* GetEnemyWithLowestStat(int statIndex_);
+	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_, AGridCharacter* notThisCharacter_);
+	AGridCharacter* GetEnemyWithLowestStat(int statIndex_, AGridCharacter* notThisCharacter_);
 	void HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_);
 	void TellEnemiesToCheckChangedStats();
 
