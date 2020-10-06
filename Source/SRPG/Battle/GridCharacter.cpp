@@ -64,6 +64,7 @@ AGridCharacter::AGridCharacter()
 	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	TopDownCameraComponent->AddRelativeLocation(FVector(-360.0f, 0.0f, 0.0f));
 	TopDownCameraComponent->SetActive(false);
 
 
@@ -93,6 +94,10 @@ AGridCharacter::AGridCharacter()
 	villainParticles->AddRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
 	villainParticles->AddRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
 
+	permaChampParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Perma Champion Particles"));
+	permaChampParticles->SetupAttachment(RootComponent);
+	permaChampParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 
@@ -103,7 +108,7 @@ AGridCharacter::AGridCharacter()
 	btlManager = nullptr;
 
 	currentState = EGridCharState::IDLE;
-	bChampion = bVillain = false;
+	championIndex = -1;
 
 
 	fighterIndex = 0;
@@ -127,6 +132,9 @@ void AGridCharacter::BeginPlay()
 	if(villainParticles)
 		villainParticles->DeactivateSystem();
 
+	if (permaChampParticles)
+		permaChampParticles->DeactivateSystem();
+
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
 }
@@ -137,7 +145,10 @@ void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCr
 	crdManager = crd_;
 	if (statsComp)
 	{
-		statsComp->AddTempCRD(CRD_DEP); //Deployment adds points
+		if (statsComp->AddTempCRD(CRD_DEP))//Deployment adds points
+		{
+			crdManager->UpdateFavor(true);
+		}
 	}
 	ATile* tile = GetMyTile();
 	if(tile)
@@ -322,10 +333,8 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 	rot.Roll = GetActorRotation().Roll;
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
-	overheadWidgetComp->SetVisibility(true);
 	if (animInstance)
 	{
-		animInstance->SetDamage(static_cast<int> (damage_));
 		animInstance->GotHit(crit_);
 	}
 
@@ -344,7 +353,6 @@ void AGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int sta
 	overheadWidgetComp->SetVisibility(true);
 	if (animInstance)
 	{
-		animInstance->SetDamage(static_cast<int> (damage_));
 		animInstance->GotHit(crit_);
 	}
 
@@ -453,19 +461,22 @@ void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false v
 {
 	if (value_)
 	{
-		bChampion = true;
-		villainParticles->DeactivateSystem();
+		championIndex = 0;
+		if (villainParticles)
+			villainParticles->DeactivateSystem();
 		if (champParticles)
 			champParticles->ActivateSystem(true);
+		statsComp->UpdateChampionVillainStats(true);
 
 	}
 	else
 	{
-		bVillain = true;
+		championIndex = 1;
 		if (champParticles)
 			champParticles->DeactivateSystem();
 		if (villainParticles)
 			villainParticles->ActivateSystem(true);
+		statsComp->UpdateChampionVillainStats(false);
 
 	}
 }
@@ -473,11 +484,19 @@ void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false v
 
 void AGridCharacter::UnElect()
 {
-	bChampion = bVillain = false;
-	if (champParticles)
-		champParticles->DeactivateSystem();
-	if (villainParticles)
-		villainParticles->DeactivateSystem();
+	if (championIndex == 0)
+	{
+		statsComp->RevertChampionVillainStatsUpdate(true);
+		if (champParticles)
+			champParticles->DeactivateSystem();
+	}
+	else if (championIndex == 1)
+	{
+		statsComp->RevertChampionVillainStatsUpdate(false);
+		if (villainParticles)
+			villainParticles->DeactivateSystem();
+	}
+	championIndex = -1;
 }
 
 void AGridCharacter::ResetCameraFocus()
@@ -491,6 +510,15 @@ void AGridCharacter::ResetCameraFocus()
 void AGridCharacter::Die()
 {
 	Destroy();
+}
+void AGridCharacter::YouHaveKilledYouTarget(bool killedAnEnemy_)
+{
+	//killedAnEnemy_ represents the dead character. So we update the favor in the opposite direction
+	if (statsComp->AddTempCRD(CRD_KIL))
+	{
+		crdManager->UpdateFavor(!killedAnEnemy_);
+	}
+
 }
 
 void AGridCharacter::SetFighterName(FString name_)
@@ -532,4 +560,117 @@ void AGridCharacter::GridCharReactToMiss()
 {
 	animInstance->GotMiss();
 	overheadWidgetComp->SetVisibility(true);
+}
+
+void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
+{
+	if (championIndex_ == 0 || championIndex_ == 2) //Killed a champion
+	{
+		if (championIndex == 1) //If I am a villain
+		{
+			//If the villain defeats the champion, the hype meter ratio flips (30:70)
+			crdManager->FlipFavorMeter();
+			//the villain becomes the champion until the end of the match (permanent), 
+			championIndex = 2;
+			crdManager->ChampVillainIsDead(false); //No longer a villain
+			crdManager->IAmTheNewChampion(this); //I am the champion now
+			crdManager->SetPermaChampion(true); //and I'm inevitable...I mean permanent
+
+			//Update the stats
+			statsComp->RevertChampionVillainStatsUpdate(false); //Rever the villain nerf
+			statsComp->AddToStat(STAT_PIP, -VILL_PIP); //The revert function does not revert the pips
+			statsComp->UpdateChampionVillainStats(true); //Triple champ buff
+			statsComp->UpdateChampionVillainStats(true);
+			statsComp->UpdateChampionVillainStats(true);
+			statsComp->AddToStat(STAT_DEF, -CHAMP_DEF * 3);  //Def does not get nerfed
+			//Its CRD stat also increases by 3.
+			statsComp->AddToStat(STAT_CRD, 3);
+			crdManager->UpdateFavorForChamp(this,3);
+
+			//Update the played particles
+			if (champParticles)
+				champParticles->ActivateSystem(true);
+			if (villainParticles)
+				villainParticles->DeactivateSystem();
+			if (permaChampParticles)
+				permaChampParticles->ActivateSystem(true);
+
+		}
+		else if (championIndex == -1) //I'm neither a champion nor a villain
+		{
+			//If the champion (perma or otherwise) is defeated by a non-villain character and 
+			//the ratio is 70:30 or higher in favor of the champion’s team, the hype meter flips. 
+			crdManager->FlipFavorMeter(this);
+			//The character that defeated it becomes the permanent champion and 
+			crdManager->ChampVillainIsDead(true); //No longer a champion
+			crdManager->ChampVillainIsDead(false); //No longer a villain)
+			crdManager->IAmTheNewChampion(this);
+
+			championIndex = 2;
+			//and gets a boost to ATK, INT, SPD and a nerf to DEF. 
+			statsComp->UpdateChampionVillainStats(true);
+			statsComp->UpdateChampionVillainStats(true);
+			//Its CRD stat also increases by 2. 
+			statsComp->AddToStat(STAT_CRD, 3);
+			crdManager->UpdateFavorForChamp(this, 3);
+
+			//If there’s a current villain, //they lose their status and return everything to normal.
+			crdManager->UnElect(false);
+
+			//Update the played particles
+			if (champParticles)
+				champParticles->ActivateSystem(true);
+			if (villainParticles)
+				villainParticles->DeactivateSystem();
+			if (permaChampParticles)
+				permaChampParticles->ActivateSystem(true);
+
+
+		}
+	}
+	else if (championIndex_ == 1) //Killed a villain
+	{
+		if (championIndex == 0) //If I am already a champion
+		{
+			//If the champion defeats the villain, the champion remains a champion until the end of the match (permanent)
+			championIndex = 2;
+			//and gets an extra boost to ATK and INT and an extra nerf to DEF. 
+			statsComp->UpdateChampionVillainStats(true);
+			//The champion’s CRD stat also automatically increases by 2.
+			statsComp->AddToStat(STAT_CRD, 2);
+			//Add favor twice as we got 2 crd points
+			crdManager->UpdateFavorForChamp(this,2);
+			crdManager->SetPermaChampion(true);
+
+			//Update the played particles
+			if (champParticles)
+				champParticles->ActivateSystem(true);
+			if (villainParticles)
+				villainParticles->DeactivateSystem();
+			if (permaChampParticles)
+				permaChampParticles->ActivateSystem(true);
+		}
+		else if(championIndex == -1 && !crdManager->GetPermaStatus()) //I'm neither a champion, nor a villain
+		{
+			//If the villain is defeated by a non-champion character, 
+			//the character that defeated it becomes the permanent champion and the original’s champion stats return to normal.
+			crdManager->IAmTheNewChampion(this);
+			crdManager->SetPermaChampion(true);
+			championIndex = 2;
+			//and gets a boost to ATK, INT, SPD and a nerf to DEF. 
+			statsComp->UpdateChampionVillainStats(true);
+			statsComp->UpdateChampionVillainStats(true);
+			//Its CRD stat also increases by 2. 
+			statsComp->AddToStat(STAT_CRD, 2);
+			crdManager->UpdateFavorForChamp(this,2);
+
+			//Update the played particles
+			if (champParticles)
+				champParticles->ActivateSystem(true);
+			if (villainParticles)
+				villainParticles->DeactivateSystem();
+			if (permaChampParticles)
+				permaChampParticles->ActivateSystem(true);
+		}
+	}
 }

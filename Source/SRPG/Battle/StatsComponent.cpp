@@ -95,13 +95,21 @@ void UStatsComponent::AddToStat(int stat_, int value_)
 			if (currentStats[STAT_HP] > maxHP)
 			{
 				currentStats[STAT_HP] = maxHP;
-			}				
+			}	
+			else if (currentStats[STAT_HP] < 0)
+			{
+				currentStats[STAT_HP] = 0;
+			}
 			break;
 		case STAT_PIP: //Regain pips
 			currentStats[STAT_PIP] += value_;
 			if (currentStats[STAT_PIP] > maxPip)
 			{
 				currentStats[STAT_PIP] = maxPip;
+			}
+			else if (currentStats[STAT_PIP] < 0)
+			{
+				currentStats[STAT_PIP] = 0;
 			}
 			break;
 		default: //Handle buffs
@@ -113,9 +121,9 @@ void UStatsComponent::AddToStat(int stat_, int value_)
 bool UStatsComponent::AddTempCRD(int value_) //True if the CRD stat is increased
 {
 	tempCRD += value_;
-	if (tempCRD >= 100)
+	if (tempCRD >= CRD_THRESHOLD)
 	{
-		tempCRD -= 100;
+		tempCRD -= CRD_THRESHOLD;
 		currentStats[STAT_CRD] += 1;
 
 		return true;
@@ -232,4 +240,43 @@ float UStatsComponent::GetPIPPercentage()
 float UStatsComponent::GetEXPPercentage()
 {
 	return expPercentage;
+}
+
+
+void UStatsComponent::UpdateChampionVillainStats(bool champion_)
+{
+	if (champion_)
+	{
+		currentStats[STAT_HP] = maxHP;
+		currentStats[STAT_ATK] += CHAMP_ATK;
+		currentStats[STAT_DEF] += CHAMP_DEF;
+		currentStats[STAT_INT] += CHAMP_INT;
+		currentStats[STAT_SPD] += CHAMP_SDP;
+		AddToStat(STAT_PIP,CHAMP_PIP);
+	}
+	else
+	{
+		currentStats[STAT_ATK] += VILL_ATK;
+		currentStats[STAT_DEF] += VILL_DEF;
+		currentStats[STAT_INT] += VILL_INT;
+		currentStats[STAT_SPD] += VILL_SPD;
+		AddToStat(STAT_PIP, VILL_PIP);
+	}
+}
+void UStatsComponent::RevertChampionVillainStatsUpdate(bool champion_)
+{
+	if (champion_)
+	{
+		currentStats[STAT_ATK] -= CHAMP_ATK;
+		currentStats[STAT_DEF] -= CHAMP_DEF;
+		currentStats[STAT_INT] -= CHAMP_INT;
+		currentStats[STAT_SPD] -= CHAMP_SDP;
+	}
+	else
+	{
+		currentStats[STAT_ATK] -= VILL_ATK;
+		currentStats[STAT_DEF] -= VILL_DEF;
+		currentStats[STAT_INT] -= VILL_INT;
+		currentStats[STAT_SPD] -= VILL_SPD;
+	}
 }

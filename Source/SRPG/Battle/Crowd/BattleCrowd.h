@@ -61,7 +61,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void SpawnItems();
-	void ElectChampionAndVillain();
+	void ElectChampion();
+	void ElectVillain();
 
 public:	
 	// Called every frame
@@ -71,5 +72,13 @@ public:
 	void UpdateFavor(bool bPlayerOrVillain_); //If true, adds favorIncrement to playerFavor and subtracts it if false
 	void RemoveSpawnedItem(ACrowdItem* item_);
 	void AddCrowdWidgetToViewPort();	
+	void SetPermaChampion(bool bvalue_);
+	void ChampVillainIsDead(bool bChamp_);
+	void IAmTheNewChampion(AGridCharacter* gchar_); //Called by a villain who's become the champion
+	void UnElect(bool champ_);
+	void FlipFavorMeter();
+	void FlipFavorMeter(AGridCharacter* gchar_); //Overriden. Flip the meter against the character in the parameters
+	void UpdateFavorForChamp(AGridCharacter* gchar_, int times_); //Update the favor in favor of the champ
+	bool GetPermaStatus();
 
 };

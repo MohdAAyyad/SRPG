@@ -105,8 +105,8 @@ public:
 	int GetTotalNumberOfPhasesElapsed();
 
 	float GetTotalStatFromDeployedPlayers(int statIndex_);
-	AGridCharacter* GetPlayerWithHighestStat(int statIndex_);
-	AGridCharacter* GetPlayerWithLowestStat(int statIndex_);
+	AGridCharacter* GetPlayerWithHighestStat(int statIndex_, AGridCharacter* notThisCharacter_);
+	AGridCharacter* GetPlayerWithLowestStat(int statIndex_, AGridCharacter* notThisCharacter_);
 	TArray<APlayerGridCharacter*> GetDeployedPlayers();
 
 	void EndBattle(bool victory_);

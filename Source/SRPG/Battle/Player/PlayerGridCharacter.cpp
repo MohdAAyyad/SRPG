@@ -185,9 +185,7 @@ void APlayerGridCharacter::UpdateCharacterSkills()
 
 void APlayerGridCharacter::UseSkill(int index_)
 {
-	//TODO 
 	//check if we have enough pips first.
-
 	if (index_ >= 0 && index_ < skills.Num())
 	{
 		if (skills[index_].pip <= statsComp->GetStatValue(STAT_PIP)) //Make sure we have enough pips
@@ -247,12 +245,13 @@ void APlayerGridCharacter::ActivateSkillAttack()
 				if (btlManager)
 					btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
 
-				//Affect the crowd
-				if (statsComp->AddTempCRD(chosenSkill.fls))
+				//Get CRD_SKL per target hit
+				if (statsComp->AddTempCRD(CRD_SKL))
 				{
 					if (crdManager)
 						crdManager->UpdateFavor(true);
 				}
+
 			}
 			else
 			{
@@ -260,6 +259,13 @@ void APlayerGridCharacter::ActivateSkillAttack()
 				actionTargets[i]->GridCharReactToMiss();
 			}
 		}
+	}
+
+	//You've used a skill, so get crd points regardless of the result
+	if (statsComp->AddTempCRD(chosenSkill.fls))
+	{
+		if (crdManager)
+			crdManager->UpdateFavor(true);
 	}
 
 	if (bHasMoved && bHasDoneAnAction) //Has moved and has done an action, we're done
@@ -344,35 +350,87 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	//Rotate to face attacker
 	Super::GridCharTakeDamage(damage_, attacker_,crit_);
 	//update stats component
-	statsComp->AddToStat(STAT_HP, -damage_);
+	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
+	animInstance->SetDamage(static_cast<int> (damage_));
+	overheadWidgetComp->SetVisibility(true);
+	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
 	//Check if dead
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
+		GetMyTile()->SetOccupied(false);
 		Intermediate::GetInstance()->PushUnitToDead(fighterID);
+		attacker_->YouHaveKilledYouTarget(true);
+		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose points
+		{
+			crdManager->UpdateFavor(false);
+		}
 		if (btlManager)
 			btlManager->HandlePlayerDeath(this);
 		if (animInstance)
 			animInstance->DeathAnim();
+
+		//Handle champion/villain death
+		switch (championIndex)
+		{
+		case 0: //Champion dead
+			crdManager->ChampVillainIsDead(true);
+			attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
+			break;
+		case 1: //Villain dead
+			crdManager->ChampVillainIsDead(false);
+			attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
+			break;
+		case 2: //perma champion dead
+			crdManager->SetPermaChampion(false);
+			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
+			break;
+		}
+			
 	}
 }
 
 void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_)
 {
 	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
-	if (overheadWidgetComp)
-		overheadWidgetComp->SetVisibility(true);
+
 	//update stats component
-	statsComp->AddToStat(STAT_HP, -damage_);
-	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
+	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
+	animInstance->SetDamage(static_cast<int> (damage_));
+	overheadWidgetComp->SetVisibility(true);
+	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 	//Check if dead
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
+		GetMyTile()->SetOccupied(false);
 		Intermediate::GetInstance()->PushUnitToDead(fighterID);
+		attacker_->YouHaveKilledYouTarget(true);
+		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
+		{
+			crdManager->UpdateFavor(false);
+		}
 		if (btlManager)
 			btlManager->HandlePlayerDeath(this);
 		if (animInstance)
 			animInstance->DeathAnim();
+
+
+		//Handle champion/villain death
+		switch (championIndex)
+		{
+		case 0: //Champion dead
+			crdManager->ChampVillainIsDead(true);
+			attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
+			break;
+		case 1: //Villain dead
+			crdManager->ChampVillainIsDead(false);
+			attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
+			break;
+		case 2: //perma champion dead
+			crdManager->SetPermaChampion(false);
+			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
+			break;
+		}
 	}
 }
 

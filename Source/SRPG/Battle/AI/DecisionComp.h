@@ -42,7 +42,8 @@ protected:
 
 	bool bCanUseSkill; //Affected by remaning pips
 	bool bWillUseSkill; //True if the enemy is gonna be using a skill
-	int skillType; //-1 if enemy will not use a skill, 0 if offense skill, and 1 if defense skill 
+	int skillType; //-1 if enemy will not use a skill, 0 if offense skill, and 1 if defense skill
+	int skillChance; //Random number affected by archetype
 
 public:	
 	UDecisionComp();

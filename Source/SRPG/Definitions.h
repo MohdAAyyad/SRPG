@@ -108,6 +108,46 @@
 #define STAT_ARCH 25
 #endif
 
+#ifndef CHAMP_ATK //Champion ATK
+#define CHAMP_ATK 2
+#endif
+
+#ifndef CHAMP_DEF //Champion DEF
+#define CHAMP_DEF -1
+#endif
+
+#ifndef CHAMP_INT //Champion INT
+#define CHAMP_INT 2
+#endif
+
+#ifndef CHAMP_SDP //Champion SPD
+#define CHAMP_SDP 1
+#endif
+
+#ifndef CHAMP_PIP //Champion PIP
+#define CHAMP_PIP 1
+#endif
+
+#ifndef VILL_ATK //Villain ATK
+#define VILL_ATK -2
+#endif
+
+#ifndef VILL_DEF //Villain DEF
+#define VILL_DEF 3
+#endif
+
+#ifndef VILL_INT //Villain INT
+#define VILL_INT -2
+#endif
+
+#ifndef VILL_SPD //Villain INT
+#define VILL_SPD 2
+#endif
+
+#ifndef VILL_PIP //Villain INT
+#define VILL_PIP -1
+#endif
+
 #pragma endregion
 
 #pragma region Tiles
@@ -184,16 +224,20 @@
 
 #pragma region Crowd
 
+#ifndef CRD_THRESHOLD //If the temp CRD is higher than this threshold, then increase the CRD
+#define CRD_THRESHOLD 100
+#endif
+
 #ifndef CRD_DEP
-#define CRD_DEP 10
+#define CRD_DEP 20
 #endif
 
 #ifndef CRD_ATK
-#define CRD_ATK 20
+#define CRD_ATK 30
 #endif
 
 #ifndef CRD_KIL
-#define CRD_KIL 40
+#define CRD_KIL 60
 #endif
 
 #ifndef CRD_DED
@@ -202,6 +246,10 @@
 
 #ifndef CRD_HYP
 #define CRD_HYP 100
+#endif
+
+#ifndef CRD_SKL
+#define CRD_SKL 5 //Taken per target hit
 #endif
 
 #pragma endregion

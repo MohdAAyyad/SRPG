@@ -53,11 +53,11 @@ protected:
 		class UWidgetComponent* overheadWidgetComp;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
-		bool bChampion;
-	UPROPERTY(BlueprintReadOnly, Category = "Champion")
-		bool bVillain;
+		int championIndex; //-1 neither 0 champion 1 villain 2 perma
 	UPROPERTY(EditAnywhere, Category = "Champion")
 		class UParticleSystemComponent* champParticles;
+	UPROPERTY(EditAnywhere, Category = "Champion")
+		UParticleSystemComponent* permaChampParticles;
 	UPROPERTY(EditAnywhere, Category = "Champion")
 		UParticleSystemComponent* villainParticles;
 
@@ -163,6 +163,8 @@ public:
 	UPathComponent* GetPathComponent();
 	ATile* GetOriginTile();
 	class AGridManager* GetGridManager();
+	void YouHaveJustKilledAChampion(int championIndex_);
+	void YouHaveKilledYouTarget(bool killedAnEnemy_);
 
 protected:
 	virtual void AddEquipmentStats(int tableIndex_);

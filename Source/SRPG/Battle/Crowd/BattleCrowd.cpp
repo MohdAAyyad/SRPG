@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "Engine/World.h"
 #include "CrowdItem.h"
+#include "../Player/PlayerGridCharacter.h"
 
 // Sets default values
 ABattleCrowd::ABattleCrowd()
@@ -56,9 +57,12 @@ void ABattleCrowd::Tick(float DeltaTime)
 void ABattleCrowd::StartCrowdPhase()
 {
 	//If favor is higher than 70  or less than 30, and we don't have a champion or a villain then elect a champion and/or a villain
-	if ((playerFavor >= 0.7f || playerFavor <= 0.3f) && (!champion || !villain))
+	if (playerFavor >= 0.7f || playerFavor <= 0.3f)
 	{
-		ElectChampionAndVillain();
+		if(!champion)
+			ElectChampion();
+		if (!villain)
+			ElectVillain();
 	}
 	//If favor is higher than 70  or less than 30, and we have a champion or a villain but not a perma champion then start counting the turns since the c and v were first elected
 	else if ((playerFavor >= 0.7f || playerFavor <= 0.3f) && (champion || villain) && !bPermaChampion)
@@ -69,13 +73,14 @@ void ABattleCrowd::StartCrowdPhase()
 			if (champion)
 			{
 				champion->UnElect();
-				champion = nullptr;
 			}
 			if (villain)
 			{
 				villain->UnElect();
-				villain = nullptr;
 			}
+			//Elect a new champion and a new villain
+			ElectChampion(); 
+			ElectVillain();
 			playerFavor = 0.5f;
 			turnsSinceChampionAndVillainWereElected = 0;
 		}
@@ -83,15 +88,14 @@ void ABattleCrowd::StartCrowdPhase()
 	//If favor is less than 70 and higher than 30, and we have a champion or a villain but not a perma champion then unelect both and reset the turns counter
 	else if (((playerFavor < 0.7f && playerFavor > 0.3f) && (champion || villain) && !bPermaChampion))
 	{
+		//Not resetting the c and v ptrs to nullptr so that the next time someone else gets elected
 		if (champion)
 		{
 			champion->UnElect();
-			champion = nullptr;
 		}
 		if (villain)
 		{
 			villain->UnElect();
-			villain = nullptr;
 		}
 		turnsSinceChampionAndVillainWereElected = 0;
 	}
@@ -188,49 +192,42 @@ void ABattleCrowd::SpawnItems()
 	if (btlManager)
 		btlManager->NextPhase();
 }
-void ABattleCrowd::ElectChampionAndVillain()
+void ABattleCrowd::ElectChampion()
 {
-	if (!champion)
+	if (btlManager && aiManager)
 	{
-		if (btlManager && aiManager)
+
+		if (playerFavor >= 0.7f) //Elect a champ from the player camp
 		{
-			AGridCharacter* champ = nullptr;
-
-			if (playerFavor >= 0.7f) //Elect a champ from the player camp
-			{
-				champ = btlManager->GetPlayerWithHighestStat(STAT_CRD);
-			}
-			else //Otherwise, elect an enemy to be the champ
-			{
-				champ = aiManager->GetEnemyWithHighestStat(STAT_CRD);
-			}
-
-			//TODO
-			//Call the needed functions on the champ
-			champ->SetChampionOrVillain(true);
+			champion = btlManager->GetPlayerWithHighestStat(STAT_CRD,champion);
 		}
+		else //Otherwise, elect an enemy to be the champ
+		{
+			champion = aiManager->GetEnemyWithHighestStat(STAT_CRD, champion);
+		}
+
+		//Call the needed functions on the champ
+		champion->SetChampionOrVillain(true);
 	}
-	
-	if (!villain)
+}
+
+void ABattleCrowd::ElectVillain()
+{
+	if (btlManager && aiManager)
 	{
-		if (btlManager && aiManager)
+		if (playerFavor <= 0.3f) //Elect a villain from the player camp
 		{
-			AGridCharacter* villain_ = nullptr;
-
-			if (playerFavor <= 0.3f) //Elect a villain from the player camp
-			{
-				villain_ = btlManager->GetPlayerWithLowestStat(STAT_CRD);
-			}
-			else //Otherwise, elect an enemy to be the villain
-			{
-				villain_ = aiManager->GetEnemyWithLowestStat(STAT_CRD);
-			}
-
-			//TODO
-			//Call the needed functions on the villain
-			villain_->SetChampionOrVillain(false);
+			villain = btlManager->GetPlayerWithLowestStat(STAT_CRD, villain);
 		}
+		else //Otherwise, elect an enemy to be the villain
+		{
+			villain = aiManager->GetEnemyWithLowestStat(STAT_CRD, villain);
+		}
+
+		//Call the needed functions on the villain
+		villain->SetChampionOrVillain(false);
 	}
+
 }
 void ABattleCrowd::CalculateFavorForTheFirstTime()
 {
@@ -271,4 +268,103 @@ void ABattleCrowd::AddCrowdWidgetToViewPort()
 {
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->AddToViewport();
+}
+
+void ABattleCrowd::SetPermaChampion(bool bvalue_)
+{
+	bPermaChampion = bvalue_;
+	if (!bPermaChampion)
+		champion = nullptr;
+}
+
+void ABattleCrowd::ChampVillainIsDead(bool bChamp_)
+{
+	if (bChamp_)
+	{
+		champion = nullptr;
+	}
+	else
+	{
+		villain = nullptr;
+	}
+}
+
+void ABattleCrowd::IAmTheNewChampion(AGridCharacter* gchar_)
+{
+	if (champion)
+		champion->UnElect();
+	champion = gchar_;
+}
+
+void ABattleCrowd::FlipFavorMeter()
+{
+	playerFavor = 1 - playerFavor;
+}
+
+void ABattleCrowd::FlipFavorMeter(AGridCharacter* gchar_)
+{
+	//Check if the favor is 70:30 in favor of gchar_. If it is, we're all good, if not, flip it
+	//Check whether the champ is a player or an enemy
+	APlayerGridCharacter* pChar_ = Cast<APlayerGridCharacter>(gchar_);
+
+	if (pChar_)
+	{
+		if (playerFavor <= 0.3f) //If the meter is not in favor of the player, flip it
+		{
+			FlipFavorMeter();
+		}
+		else //If it's higher than 0.3f, then make the player's favor into 0.7f
+		{
+			playerFavor = 0.7f;
+		}
+	}
+	else
+	{
+		if (playerFavor >= 0.7f) //If the meter is not in favor of the enemy, flip it
+		{
+			FlipFavorMeter();
+		}
+		else //If it's higher than 0.3f, then make the enemy's favor into 0.7f
+		{
+			playerFavor = 0.3f;
+		}
+	}
+}
+
+void ABattleCrowd::UpdateFavorForChamp(AGridCharacter* gchar_, int times_)
+{
+	//Check whether the champ is a player or an enemy
+	APlayerGridCharacter* pChar_ = Cast<APlayerGridCharacter>(gchar_);
+
+	if (pChar_)
+	{
+		playerFavor += favorIncrement * times_;
+		if (playerFavor > 1.0f)
+			playerFavor = 1.0f;
+	}
+	else
+	{
+		playerFavor -= favorIncrement * times_;
+		if (playerFavor < 0.0f)
+			playerFavor = 0.0f;
+	}
+}
+
+void ABattleCrowd::UnElect(bool champ_)
+{
+	if (champ_)
+	{
+		if (champion)
+			champion->UnElect();
+	}
+	else
+	{
+		if (villain)
+			villain->UnElect();
+	}
+}
+
+bool ABattleCrowd::GetPermaStatus()
+{
+	return bPermaChampion;
 }

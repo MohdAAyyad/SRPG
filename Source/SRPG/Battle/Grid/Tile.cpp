@@ -219,7 +219,7 @@ AGridCharacter* ATile::GetMyGridCharacter()
 	FVector start = GetActorLocation();
 	end.Z += 400.0f;
 	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
-	if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), end, ECollisionChannel::ECC_Camera, queryParms))
+	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Camera, queryParms))
 	{
 		AGridCharacter* gchar = Cast<AGridCharacter>(hit.Actor);
 		return gchar;
