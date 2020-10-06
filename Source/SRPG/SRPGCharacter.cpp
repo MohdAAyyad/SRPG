@@ -56,6 +56,8 @@ ASRPGCharacter::ASRPGCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	SetReplicates(true);
 }
 
 void ASRPGCharacter::Tick(float DeltaSeconds)

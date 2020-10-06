@@ -7,11 +7,13 @@
 #include "SRPGCharacter.h"
 #include "Hub/NPC.h"
 #include "Engine/World.h"
+#include "NavigationSystem.h"
 
 ASRPGPlayerController::ASRPGPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+	
 }
 
 void ASRPGPlayerController::SetPlayerReference(ASRPGCharacter* ref_)
@@ -101,19 +103,28 @@ void ASRPGPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIn
 	}
 }
 
-void ASRPGPlayerController::SetNewMoveDestination(const FVector DestLocation)
+
+void ASRPGPlayerController::SetNewMoveDestination_Implementation(const FVector DestLocation)
 {
 	APawn* const MyPawn = GetPawn();
 	if (MyPawn)
 	{
+		UNavigationSystemV1* const nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
 		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
 
 		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if ((Distance >50.0f))
+		if (nav && (Distance >50.0f))
 		{
+			// this function doesn't like MP so we'll have to create a new function for moving characters
 			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
+			//MyPawn->AddMovementInput(DestLocation);
 		}
 	}
+}
+
+bool ASRPGPlayerController::SetNewMoveDestination_Validate(const FVector DestLocation)
+{
+	return true;
 }
 
 void ASRPGPlayerController::OnSetDestinationPressed()

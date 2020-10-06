@@ -7,6 +7,7 @@
 #include "Hub/NPCs/BranchNPC.h"
 #include "Hub/NPCs/CentralNPC.h"
 #include "Hub/NPC.h"
+#include "Networking/SRPGGameState.h"
 #include "HubWorldManager.generated.h"
 
 UCLASS()
@@ -91,4 +92,5 @@ public:
 	// go through and remove the npcs
 	void DeleteNPCs();
 	void SpawnCentralNPCs(int amount_);
+
 };
