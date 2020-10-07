@@ -25,7 +25,7 @@ protected:
 	ATile* targetTile;
 	TArray<ATile*> movementPath;
 
-	ATile* GetTileWithMinFCost(TArray<ATile*> tiles_);
+	ATile* GetTileWithMinFCost(TArray<ATile*>& tiles_);
 	void ChangeTargetTileIfItsOccupied();
 
 public:	
@@ -35,8 +35,7 @@ public:
 	TArray<ATile*> GetMovementPath();
 
 	void UpdateMovementPath(ATile* tile_);
-	bool DoesOpenListHaveALowerFCost(TArray<ATile*>& list_, int fCost_);
-	bool DoesClosedListHaveALowerFCost(TArray<ATile*>& list_, int fCost_);
+	bool DoesListHaveALowerFCost(TArray<ATile*>& list_, int fCost_);
 
 	void UpdateSpeed(int spd_);
 	int GetRowSpeed();

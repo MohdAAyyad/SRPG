@@ -53,7 +53,7 @@ TArray<FVector> UPathComponent::GetPath()
 
 		if (currentNode)
 		{
-			open.Remove(currentNode);
+			open.Remove(currentNode); //Node has been visited
 
 			if (currentNode == targetTile) //We've found the goal, get out
 				break;
@@ -75,11 +75,8 @@ TArray<FVector> UPathComponent::GetPath()
 					currentNode->GetImmediateNeighbors()[i]->fCost = currentNode->GetImmediateNeighbors()[i]->gCost + currentNode->GetImmediateNeighbors()[i]->hCost;
 
 					if (!open.Contains(currentNode->GetImmediateNeighbors()[i])
-						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
-						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost)
+						&& !DoesListHaveALowerFCost(open, currentNode->GetImmediateNeighbors()[i]->fCost) //If we already have a tile in the open list that has a lower FCost, there's no need to bother with this tile
 						&& currentNode->GetImmediateNeighbors()[i]->GetTraversable()
-						//&& (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()== TILE_MOV|| currentNode->GetImmediateNeighbors()[i]->GetHighlighted() == TILE_ENM)
-						//&& !currentNode->GetOccupied()
 						)
 						open.Push(currentNode->GetImmediateNeighbors()[i]);
 				}
@@ -103,11 +100,8 @@ TArray<FVector> UPathComponent::GetPath()
 					currentNode->GetDiagonalNeighbors()[d]->fCost = currentNode->GetDiagonalNeighbors()[d]->gCost + currentNode->GetDiagonalNeighbors()[d]->hCost;
 
 					if (!open.Contains(currentNode->GetDiagonalNeighbors()[d])
-						&& !DoesClosedListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
-						&& !DoesOpenListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
+						&& !DoesListHaveALowerFCost(open, currentNode->GetDiagonalNeighbors()[d]->fCost)
 						&& currentNode->GetDiagonalNeighbors()[d]->GetTraversable()
-						//&& (currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == TILE_MOV || currentNode->GetImmediateNeighbors()[d]->GetHighlighted() == TILE_ENM)
-						//&& !currentNode->GetOccupied()
 						)
 						open.Push(currentNode->GetDiagonalNeighbors()[d]);
 				}
@@ -125,7 +119,7 @@ TArray<FVector> UPathComponent::GetPath()
 	return path;
 }
 
-ATile* UPathComponent::GetTileWithMinFCost(TArray<ATile*> tiles_)
+ATile* UPathComponent::GetTileWithMinFCost(TArray<ATile*>& tiles_)
 {
 	int min = 10000000;
 	ATile* minTile = nullptr;
@@ -170,21 +164,7 @@ void UPathComponent::UpdateMovementPath(ATile* tile_)
 	}
 }
 
-bool UPathComponent::DoesOpenListHaveALowerFCost(TArray<ATile*>& list_, int fCost_)
-{
-	if (list_.Num() > 0)
-	{
-		int min = fCost_;
-
-		for (int i = 0; i < list_.Num(); i++)
-		{
-			if (list_[i]->fCost < min)
-				return true;
-		}
-	}
-	return false;
-}
-bool UPathComponent::DoesClosedListHaveALowerFCost(TArray<ATile*>& list_, int fCost_)
+bool UPathComponent::DoesListHaveALowerFCost(TArray<ATile*>& list_, int fCost_)
 {
 	if (list_.Num() > 0)
 	{
