@@ -28,9 +28,6 @@ protected:
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
 
-	/** Navigate player to the given world location. */
-	float SetNewMoveDestination(const FVector DestLocation);
-
 	/** Input handlers for SetDestination action. */
 	void HandleMousePress();
 

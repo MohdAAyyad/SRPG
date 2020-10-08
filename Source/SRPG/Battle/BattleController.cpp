@@ -66,21 +66,6 @@ void ABattleController::SetupInputComponent()
 	InputComponent->BindAction("Cancel", IE_Pressed, this, &ABattleController::CancelCommand);
 }
 
-
-float ABattleController::SetNewMoveDestination(const FVector DestLocation)
-{
-	APawn* const MyPawn = GetPawn();
-	if (MyPawn)
-	{
-		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
-
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
-
-		return Distance;
-	}
-	return 0.0f;
-}
-
 void ABattleController::HandleMousePress()
 {
 	FHitResult hit;
