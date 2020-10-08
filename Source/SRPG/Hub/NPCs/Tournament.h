@@ -70,5 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EnterFighterIndex(int index_);
 
+	virtual void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+										 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+										 bool bFromSweep, const FHitResult& SweepResult) override;
+
 
 };

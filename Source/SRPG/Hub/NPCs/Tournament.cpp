@@ -154,3 +154,27 @@ void ATournament::EnterFighterIndex(int index_)
 	}
 
 }
+
+void ATournament::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (OtherActor != nullptr && OtherActor != this && OverlappedComp != nullptr)
+	{
+		// check if we are being interacted with and process the logic 
+		if (interactedWith)
+		{
+			ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
+			if (player)
+			{
+				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
+				{
+					widget->GetUserWidgetObject()->AddToViewport();
+					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
+				}
+			}
+		}
+	}
+}

@@ -30,5 +30,15 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int unitCost; // how many units does this activity cost
 	UPROPERTY(BlueprintReadWrite)
-	int moneyCost; // how much money does this activity cost
+	int moneyCostPercentage; // how much money does this activity cost
+	UPROPERTY(BlueprintReadWrite)
+	int timeCost;
+	UPROPERTY(BlueprintReadWrite)
+	int startingDialogue; // 0 if not 1 if true
+	UPROPERTY(BlueprintReadWrite)
+	int endDialogue; // 0 if not, 1 if true. Unlike Negative Central, end dialogue is what appears if the player tries to talk after succeding or failing the task.
+	UPROPERTY(BlueprintReadWrite)
+	int rewardMoneyPercent;
+	UPROPERTY(BlueprintReadWrite)
+	int rewardIndex;
 };

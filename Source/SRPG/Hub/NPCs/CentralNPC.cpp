@@ -24,6 +24,7 @@ void ACentralNPC::BeginPlay()
 
 	// activity index randomization code goes here
 
+
 }
 
 void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -40,6 +41,8 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
 					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+					FActivityDialogueTableStruct startLine = fileReader->GetStartingDialogue(activityIndex, 0);
+					line = startLine.dialogue;
 				}
 				else
 				{
@@ -76,12 +79,17 @@ TArray<UTexture*> ACentralNPC::GetTextureArray()
 
 bool ACentralNPC::ShouldAddUnitSacrificeUI()
 {
+	
 	if(unitCost > 0)
 	{
 		return true;
 	}
 	else
 	{
+		if (fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexInArray(FName("FighterTableStruct"))).Num() < unitCost)
+		{
+			warning = "Not enough Fighters to sacrifice for this activity";
+		}
 		return false;
 	}
 }
@@ -151,6 +159,12 @@ int ACentralNPC::GetCentralActivityIndex()
 void ACentralNPC::SetActivityIndex(int activity_)
 {
 	activityIndex = activity_;
+
+	FActivityDialogueTableStruct start = fileReader->GetStartingDialogue(activityIndex, 0);
+	line = start.dialogue;
+	SetMoneyCost(initialMoneyValue * (start.moneyCostPercentage / 100));
+	SetUnitCost(start.unitCost);
+	rewardIndex = start.rewardIndex;
 }
 
 void ACentralNPC::SetMoneyCost(int cost_)
@@ -186,7 +200,8 @@ void ACentralNPC::SpendCost()
 {
 	if (activityAlreadyDone)
 	{
-		line = "Sorry bud you've already done this before";
+		FActivityDialogueTableStruct end = fileReader->GetActivityEndDialogue(activityIndex, 0);
+		line = end.dialogue;
 	}
 	else
 	{
@@ -246,19 +261,22 @@ void ACentralNPC::SimulateActivity()
 		switch (rewardIndex)
 		{
 			case 0:
+			{
 				// augment the money of the player, the amount is arbitrary but we can set it later
 				// this case is specifically for Russian Roulette 
-				Intermediate::GetInstance()->AddMoney(Intermediate::GetInstance()->GetCurrentMoney() * 1.25f);
+				FActivityDialogueTableStruct endReward = fileReader->GetActivityEndDialogue(activityIndex, 0);
+				Intermediate::GetInstance()->AddMoney(Intermediate::GetInstance()->GetCurrentMoney() * (endReward.rewardMoneyPercent / 100));
 				UE_LOG(LogTemp, Warning, TEXT("Money Added!"));
+			}
 				break;
 			case 1:
 			{
 				// choose a stat to give one of to each party member
 				int stat = FMath::RandRange(STAT_ATK, STAT_CRD);
 				Intermediate::GetInstance()->ChangeStats(CHG_STAT_PLY, stat);
-				
+				UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
+			
 				break;
 			case 2:
 				//decrement a stat of the enemy
@@ -321,6 +339,8 @@ void ACentralNPC::EndDialogue()
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
+		//line = "";
+		//activityEndLine = "";
 	}
 	spentUnits = 0;
 	//line = FString("");

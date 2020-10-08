@@ -46,6 +46,8 @@ public:
 	FActivityDialogueTableStruct GetNegativeBranch(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetPositiveCentral(int activityIndex_, int tableIndex_);
 	FActivityDialogueTableStruct GetNegativeCentral(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetStartingDialogue(int activityIndex_, int tableIndex_);
+	FActivityDialogueTableStruct GetActivityEndDialogue(int activityIndex_, int tableIndex_);
 	TArray<FSkillTableStruct*> GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	TArray<FSkillTableStruct*> GetDefensiveSkills(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_, int subIndex_);

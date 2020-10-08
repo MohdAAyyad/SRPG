@@ -258,12 +258,18 @@ void AFightersShop::LevelDownFighter()
 
 void AFightersShop::FinalizePurchase()
 {
-	
+
 	// load all of the chosen fighters values into the data table;
 
 	//FFighterTableStruct price = fileReader->FindFighterTableRow(rowNames[currentIndex], 0);
-	if (haveChosenFighter)
+	if (haveChosenFighter == false)
 	{
+		warning = "No Fighter Selected";
+
+	}
+	else
+	{
+
 		CalculatePrice();
 		if (Intermediate::GetInstance()->GetCurrentMoney() > chosenFighter.value)
 		{
@@ -280,7 +286,7 @@ void AFightersShop::FinalizePurchase()
 			row.equippedWeapon = chosenFighter.equippedWeapon;
 			row.equippedArmor = chosenFighter.equippedArmor;
 			row.equippedAccessory = chosenFighter.equippedAccessory;
-//			row.emitterIndex = chosenFighter.emitterIndex;
+			//			row.emitterIndex = chosenFighter.emitterIndex;
 			row.hp = chosenFighter.hp;
 			row.pip = chosenFighter.pip;
 			row.atk = chosenFighter.atk;
@@ -302,7 +308,7 @@ void AFightersShop::FinalizePurchase()
 			//TODO
 			//Play a UI pop up
 			UE_LOG(LogTemp, Warning, TEXT("Finalize Purchase"));
-			haveChosenFighter = false; 
+			haveChosenFighter = false;
 			warning = "";
 		}
 		else
@@ -313,12 +319,8 @@ void AFightersShop::FinalizePurchase()
 			warning = "Not enough money to purchase fighter";
 		}
 	}
-	else
-	{
-		warning = "No Fighter Selected";
-	}
-	
 }
+	
 
 void AFightersShop::CalculatePrice()
 {

@@ -338,7 +338,8 @@ ANPC* AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 		npcs.Push(npc);
 		if (meshes.Num() > 0)
 		{
-			npc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+			int rando = FMath::RandRange(0, meshes.Num() - 1);
+			npc->GetMesh()->SetSkeletalMesh(meshes[rando]);
 		}
 		
 	}
@@ -355,7 +356,8 @@ ACentralNPC* AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 		npcs.Push(centralNpc);
 		if (meshes.Num() > 0)
 		{
-			centralNpc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+			int rando = FMath::RandRange(0, meshes.Num() - 1);
+			centralNpc->GetMesh()->SetSkeletalMesh(meshes[rando]);
 		}
 	}
 	return centralNpc;
@@ -372,7 +374,8 @@ ABranchNPC* AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 		npcs.Push(branchNpc);
 		if (meshes.Num() > 0)
 		{
-			branchNpc->GetMesh()->SetSkeletalMesh(meshes[FMath::RandRange(0, meshes.Num())]);
+			int rando = FMath::RandRange(0, meshes.Num() - 1);
+			branchNpc->GetMesh()->SetSkeletalMesh(meshes[rando]);
 		}
 	}
 	return branchNpc;
@@ -444,26 +447,28 @@ void AHubWorldManager::SpawnCentralNPCs(int amount_)
 		{
 			// random activity index
 			int activityIndex = FMath::RandRange(ACT_INDX_LOW, ACT_INDX_HIGH);
-
+			centralNpc->SetActivityIndex(activityIndex);
 			// the specific activity here is russian roulette can be changed at a later date
 			if (activityIndex == 2)
 			{
+				// if we are a russian roulette activity set the chance to 50/50 and don't spawn a branch NPC
 				centralNpc->SetChanceOfSuccess(50);
 			}
 
 			int rando = FMath::RandRange(0, 100);
-
+			if (activityIndex == 2)
+			{
+				// make it impossible for the branch to spawn
+				rando = 1000000;
+			}
 			if (rando < BRNC_SPWN && activityIndex != 2)
 			{
 				if (ABranchNPC* branch = SpawnBranchNPC())
 				{
 					branch->SetCentralNPC(centralNpc);
 				}
-
-
 			}
 		}
-
 	}
 }
 
