@@ -24,12 +24,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		int maxPip;
 
+	class AGridCharacter* ownerChar;
+
 	float expOffset; // 1.0f/nxp //Used to avoid having to divide every tick
 	float expPercentage;
 	int addedEXP;
 	bool bLevelingUp;
+	int newLevel;
 
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+
+	TArray<int> turnsSinceLastStatChange;
+	TArray<int> tempStatChange;
 
 
 public:	
@@ -55,5 +61,14 @@ public:
 
 	void UpdateChampionVillainStats(bool champion_);
 	void RevertChampionVillainStatsUpdate(bool champion_); //When three turns pass and no perma champion is on the field, the stats will need to be reverted
-	
+	void SetOwnerRef(AGridCharacter* ref_);
+
+	int GetMaxHP();
+	int GetMaxPIP();
+	void CheckStatBuffNerfStatus(); //Checks whether buffs and nerfs should be negated
+	void AddTempToStat(int statIndeX_, int value_); //Handle buffs nerfs
+protected:
+	void FinishLevlingUp();
+	int ConvertStatIndexToTempStatIndex(int statIndex_);
+	int ConvertTempStatIndexToStatIndex(int tempStatIndex_);
 };

@@ -16,7 +16,6 @@ class SRPG_API APlayerGridCharacter : public AGridCharacter
 	GENERATED_BODY()
 
 protected:
-	int fighterID; //The ID is used to distinguish the fighter inside the recruited table
 
 	UPROPERTY(BlueprintReadOnly, Category = "Skills")
 		TArray<FSkillTableStruct> skills;

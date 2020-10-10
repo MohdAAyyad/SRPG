@@ -49,6 +49,8 @@ void APlayerGridCharacter::StartPlayerTurn()
 	bHasMoved = false;
 	bHasDoneAnAction = false;
 	currentState = EGridCharState::IDLE;
+
+	statsComp->CheckStatBuffNerfStatus();
 }
 
 void APlayerGridCharacter::EndPlayerTurn()
@@ -214,32 +216,64 @@ void APlayerGridCharacter::ActivateSkillAttack()
 {
 	//Remove used pips
 	statsComp->AddToStat(STAT_PIP,-chosenSkill.pip);
-	//Calculate hit and crit chances
-	int hitModifier = chosenSkill.hit / 2; //Every 2 points in hit, gives us one point in HM
-	int critModifier = 1; //Crit starts at 1 (not a critical attack)
 	//Ready all the variables
 	float atkScaled = chosenSkill.atk * static_cast<float>(statsComp->GetStatValue(STAT_ATK));
 	float intiScaled = chosenSkill.inti *static_cast<float>(statsComp->GetStatValue(STAT_INT));
 	float skillValue = static_cast<float>(chosenSkill.value);
 
+	if (skillValue < 0) //If this is a buff the skill value will be less than zero and the sacling varaibles need to match the sign of the value
+	{
+		atkScaled *= -1.0f;
+		intiScaled *= -1.0f;
+	}
 	for (int i = 0; i < actionTargets.Num(); i++)
 	{
 		if (actionTargets[i])
 		{
-			//Check if we hit the action target
-			if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[i]->GetStat(STAT_HIT)))
+			if (chosenSkill.statIndex == STAT_HP && chosenSkill.value > 0) // If a skill does damage, we should check for hit and crit
 			{
-				bool crit_ = false;
-				if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
-				{
-					critModifier = 2;
-					//Show crit
-					crit_ = true;
-				}
+				//Calculate hit and crit chances
+				int hitModifier = chosenSkill.hit / 2; //Every 2 points in hit, gives us one point in HM
+				int critModifier = 1; //Crit starts at 1 (not a critical attack)
 
+				//Check if we hit the action target
+				if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[i]->GetStat(STAT_HIT)))
+				{
+					bool crit_ = false;
+					if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
+					{
+						critModifier = 2;
+						//Show crit
+						crit_ = true;
+					}
+
+					//Affect the action target
+					actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled) * critModifier, chosenSkill.statIndex,
+						chosenSkill.statusEffect, this, crit_);
+
+					//Tell the battlemanager to spawn the emitter on the action target
+					if (btlManager)
+						btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
+
+					//Get CRD_SKL per target hit
+					if (statsComp->AddTempCRD(CRD_SKL))
+					{
+						if (crdManager)
+							crdManager->UpdateFavor(true);
+					}
+
+				}
+				else
+				{
+					//Show miss
+					actionTargets[i]->GridCharReactToMiss();
+				}
+			}
+			else //If a skill buffs/nerfs/heals, it should always land
+			{
 				//Affect the action target
-				actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled) * critModifier, chosenSkill.statIndex,
-					chosenSkill.statusEffect, this, crit_);
+				actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled), chosenSkill.statIndex,
+					chosenSkill.statusEffect, this, false);
 
 				//Tell the battlemanager to spawn the emitter on the action target
 				if (btlManager)
@@ -251,12 +285,6 @@ void APlayerGridCharacter::ActivateSkillAttack()
 					if (crdManager)
 						crdManager->UpdateFavor(true);
 				}
-
-			}
-			else
-			{
-				//Show miss
-				actionTargets[i]->GridCharReactToMiss();
 			}
 		}
 	}
@@ -279,7 +307,7 @@ void APlayerGridCharacter::ActivateSkillAttack()
 	}
 	if (actionTargets.Num() > 0)
 	{
-		statsComp->AddToStat(STAT_EXP, SKL_RWRD + chosenSkill.pip); //Pip converted to exp. This way skills that cost a lot reward a lot
+		statsComp->AddToStat(STAT_EXP, SKL_RWRD + chosenSkill.pip * 10); //Pip converted to exp. This way skills that cost a lot reward a lot
 		actionTargets.Empty();
 	}
 }
@@ -317,6 +345,7 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(0); //23
 		statsComp->PushAStat(0); //24
 		statsComp->PushAStat(selectedFighters[fighterIndex].archetype); //25
+		statsComp->SetOwnerRef(this);
 		AddEquipmentStats(2);
 		UpdateCharacterSkills();
 	}
@@ -359,7 +388,7 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
 		GetMyTile()->SetOccupied(false);
-		Intermediate::GetInstance()->PushUnitToDead(fighterID);
+		Intermediate::GetInstance()->PushUnitToDead(fighterID); //Store the ID of the fighter
 		attacker_->YouHaveKilledYouTarget(true);
 		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose points
 		{
@@ -369,6 +398,11 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 			btlManager->HandlePlayerDeath(this);
 		if (animInstance)
 			animInstance->DeathAnim();
+
+		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+		{
+			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+		}
 
 		//Handle champion/villain death
 		switch (championIndex)
@@ -394,43 +428,67 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 {
 	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
 
-	//update stats component
-	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-	animInstance->SetDamage(static_cast<int> (damage_));
-	overheadWidgetComp->SetVisibility(true);
-	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
-	//Check if dead
-	if (statsComp->GetStatValue(STAT_HP) <= 1)
+	if (statIndex_ == STAT_HP && damage_ > 0) //If the skill does HP damage
 	{
-		GetMyTile()->SetOccupied(false);
-		Intermediate::GetInstance()->PushUnitToDead(fighterID);
-		attacker_->YouHaveKilledYouTarget(true);
-		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
-		{
-			crdManager->UpdateFavor(false);
-		}
-		if (btlManager)
-			btlManager->HandlePlayerDeath(this);
+		//update stats component
+		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 		if (animInstance)
-			animInstance->DeathAnim();
-
-
-		//Handle champion/villain death
-		switch (championIndex)
 		{
-		case 0: //Champion dead
-			crdManager->ChampVillainIsDead(true);
-			attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
-			break;
-		case 1: //Villain dead
-			crdManager->ChampVillainIsDead(false);
-			attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
-			break;
-		case 2: //perma champion dead
-			crdManager->SetPermaChampion(false);
-			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
-			break;
+			animInstance->GotHit(crit_);
+			animInstance->SetDamage(static_cast<int> (damage_));
 		}
+
+		overheadWidgetComp->SetVisibility(true);
+		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+		//Check if dead
+		if (statsComp->GetStatValue(STAT_HP) <= 1)
+		{
+			GetMyTile()->SetOccupied(false);
+			Intermediate::GetInstance()->PushUnitToDead(fighterID);
+			attacker_->YouHaveKilledYouTarget(true);
+			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
+			{
+				crdManager->UpdateFavor(false);
+			}
+			if (btlManager)
+				btlManager->HandlePlayerDeath(this);
+			if (animInstance)
+				animInstance->DeathAnim();
+
+
+			//Handle champion/villain death
+			switch (championIndex)
+			{
+			case 0: //Champion dead
+				crdManager->ChampVillainIsDead(true);
+				attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
+				break;
+			case 1: //Villain dead
+				crdManager->ChampVillainIsDead(false);
+				attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
+				break;
+			case 2: //perma champion dead
+				crdManager->SetPermaChampion(false);
+				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
+				break;
+			}
+		}
+	}
+	else if((statIndex_ == STAT_HP || statIndex_ == STAT_PIP) && damage_ < 0) //Healing skill
+	{
+		animInstance->ChangeStats(true);
+		statsComp->AddToStat(statIndex_, static_cast<int>(-damage_));
+	}
+	else //Buff or nerf to a stat
+	{
+		UE_LOG(LogTemp, Warning, TEXT("It's a buff or a nerf %f"), damage_);
+
+		if(damage_ < 0) //Buff (I know it's confusing)
+			animInstance->ChangeStats(true);
+		else
+			animInstance->ChangeStats(false);
+
+		statsComp->AddTempToStat(statIndex_, static_cast<int>(-damage_));
 	}
 }
 
@@ -438,6 +496,25 @@ void APlayerGridCharacter::UpdateCurrentEXP()
 {
 	if (statsComp)
 	{
+		//Revert the buffs and nerfs the character received due to being a champion or a villain
+		if (championBuffCount > 0)
+		{
+			if (championIndex == 0 || championIndex == 2) //if I'm a champion
+			{
+				for (int i = 0; i < championBuffCount; i++)
+				{
+					statsComp->RevertChampionVillainStatsUpdate(true);
+				}
+			}
+			else if (championIndex == 1) //if I'm a villain
+			{
+				for (int i = 0; i < championBuffCount; i++)
+				{
+					statsComp->RevertChampionVillainStatsUpdate(false);
+				}
+			}
+		}
+		//Check for level up
 		statsComp->CheckLevelUp(false);
 	}
 }

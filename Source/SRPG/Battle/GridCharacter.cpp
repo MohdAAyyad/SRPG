@@ -33,6 +33,7 @@
 #include "TimerManager.h"
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "ExternalFileReader/FighterTableStruct.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -109,10 +110,11 @@ AGridCharacter::AGridCharacter()
 
 	currentState = EGridCharState::IDLE;
 	championIndex = -1;
+	championBuffCount = 0;
 
 
 	fighterIndex = 0;
-
+	fighterID = 0;
 	bHasMoved = false;
 	bHasDoneAnAction = false;
 
@@ -289,6 +291,26 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float de
 	}
 }
 
+void AGridCharacter::AttackUsingSkill(float delay_)
+{
+	if (actionTargets.Num() > 0)
+	{
+		if (actionTargets[0]) //Rotate towards one of the targets
+		{
+			FVector direction = actionTargets[0]->GetActorLocation() - GetActorLocation();
+			FRotator rot = direction.Rotation();
+			rot.Roll = GetActorRotation().Roll;
+			rot.Pitch = GetActorRotation().Pitch;
+			SetActorRotation(rot);
+
+			FTimerHandle attackDelayHandle;
+			//The delay here is needed to allow the camera enough time to focus on the character attacking
+			GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingSkill, delay_, false);
+			bHasDoneAnAction = true;
+		}
+	}
+}
+
 void AGridCharacter::PlayAnimationAttackUsingSkill()
 {
 	if (animInstance) //Play the animation
@@ -350,11 +372,6 @@ void AGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int sta
 	rot.Roll = GetActorRotation().Roll;
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
-	overheadWidgetComp->SetVisibility(true);
-	if (animInstance)
-	{
-		animInstance->GotHit(crit_);
-	}
 
 	//TODO
 	//Affect the correct stat 
@@ -418,6 +435,26 @@ float AGridCharacter::GetStat(int statIndex_)
 	return static_cast<float>(statsComp->GetStatValue(statIndex_));
 }
 
+void AGridCharacter::PassInYourFinalStatsToTheIntermediate(TArray<int>& stats_)
+{
+	FFighterTableStruct fighter_;
+	fighter_.hp = statsComp->GetMaxHP();
+	fighter_.pip = statsComp->GetMaxPIP();
+	fighter_.atk = stats_[STAT_ATK];
+	fighter_.def = stats_[STAT_DEF];
+	fighter_.intl = stats_[STAT_INT];
+	fighter_.spd = stats_[STAT_SPD];
+	fighter_.agl = stats_[STAT_HIT];
+	fighter_.crit = stats_[STAT_CRT];
+	fighter_.crd = stats_[STAT_CRD];
+	fighter_.currentEXP = stats_[STAT_EXP];
+	fighter_.neededEXPToLevelUp = stats_[STAT_NXP];
+	fighter_.level = stats_[STAT_LVL];
+	fighter_.id = fighterID;
+
+	Intermediate::GetInstance()->AddFighterToSelected(fighter_); //Selected fighters is used again. This time to update the recruited table. The fighter shop will take care of that.
+}
+
 void AGridCharacter::AddEquipmentStats(int tableIndex_)
 {
 
@@ -467,6 +504,7 @@ void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false v
 		if (champParticles)
 			champParticles->ActivateSystem(true);
 		statsComp->UpdateChampionVillainStats(true);
+		championBuffCount = 1;
 
 	}
 	else
@@ -477,6 +515,7 @@ void  AGridCharacter::SetChampionOrVillain(bool value_) //True champion, false v
 		if (villainParticles)
 			villainParticles->ActivateSystem(true);
 		statsComp->UpdateChampionVillainStats(false);
+		championBuffCount = 1;
 
 	}
 }
@@ -562,7 +601,7 @@ void AGridCharacter::GridCharReactToMiss()
 	overheadWidgetComp->SetVisibility(true);
 }
 
-void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
+void AGridCharacter:: YouHaveJustKilledAChampion(int championIndex_)
 {
 	if (championIndex_ == 0 || championIndex_ == 2) //Killed a champion
 	{
@@ -582,7 +621,7 @@ void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
 			statsComp->UpdateChampionVillainStats(true); //Triple champ buff
 			statsComp->UpdateChampionVillainStats(true);
 			statsComp->UpdateChampionVillainStats(true);
-			statsComp->AddToStat(STAT_DEF, -CHAMP_DEF * 3);  //Def does not get nerfed
+			championBuffCount = 3;
 			//Its CRD stat also increases by 3.
 			statsComp->AddToStat(STAT_CRD, 3);
 			crdManager->UpdateFavorForChamp(this,3);
@@ -611,8 +650,10 @@ void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
 			statsComp->UpdateChampionVillainStats(true);
 			statsComp->UpdateChampionVillainStats(true);
 			//Its CRD stat also increases by 2. 
-			statsComp->AddToStat(STAT_CRD, 3);
-			crdManager->UpdateFavorForChamp(this, 3);
+			statsComp->AddToStat(STAT_CRD, 2);
+			crdManager->UpdateFavorForChamp(this, 2);
+
+			championBuffCount = 2;
 
 			//If there’s a current villain, //they lose their status and return everything to normal.
 			crdManager->UnElect(false);
@@ -638,6 +679,7 @@ void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
 			statsComp->UpdateChampionVillainStats(true);
 			//The champion’s CRD stat also automatically increases by 2.
 			statsComp->AddToStat(STAT_CRD, 2);
+			championBuffCount = 2;
 			//Add favor twice as we got 2 crd points
 			crdManager->UpdateFavorForChamp(this,2);
 			crdManager->SetPermaChampion(true);
@@ -663,7 +705,7 @@ void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
 			//Its CRD stat also increases by 2. 
 			statsComp->AddToStat(STAT_CRD, 2);
 			crdManager->UpdateFavorForChamp(this,2);
-
+			championBuffCount = 2;
 			//Update the played particles
 			if (champParticles)
 				champParticles->ActivateSystem(true);
@@ -673,4 +715,24 @@ void AGridCharacter :: YouHaveJustKilledAChampion(int championIndex_)
 				permaChampParticles->ActivateSystem(true);
 		}
 	}
+}
+
+void AGridCharacter::YouAreTargetedByMeNow(AGridCharacter* ref_)
+{
+	if (!TargetedByTheseCharacters.Contains(ref_))
+	{
+		TargetedByTheseCharacters.Push(ref_);
+	}
+}
+void AGridCharacter::YouAreNoLongerTargetedByMe(AGridCharacter* ref_)
+{
+	if (TargetedByTheseCharacters.Contains(ref_))
+	{
+		TargetedByTheseCharacters.Remove(ref_);
+	}
+}
+
+void AGridCharacter::IamDeadStopTargetingMe()
+{
+
 }

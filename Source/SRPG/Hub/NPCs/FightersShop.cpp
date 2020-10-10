@@ -31,6 +31,22 @@ void AFightersShop::BeginPlay()
 			fileReader->RemoveFightersDueToPermaDeath(Intermediate::GetInstance()->GetDeadUnits(), 1); //Remove any dead units from the recruited fighters table
 		}
 	}
+	if (Intermediate::GetInstance()->GetSelectedFighters().Num() > 0)
+	{
+		TArray<FFighterTableStruct> fighters = Intermediate::GetInstance()->GetSelectedFighters();
+		Intermediate::GetInstance()->ResetSelectedFighters();
+
+		for (int i = 0; i < fighters.Num(); i++)
+		{
+			if (fileReader)
+			{
+				fileReader->IncreaseTheStatsOfThisFigheter(fighters[i], 1); //Update the stats of these fighters in the recruited fighters table
+			}
+		}
+
+		fighters.Empty();
+
+	}
 	warning = "";
 
 }

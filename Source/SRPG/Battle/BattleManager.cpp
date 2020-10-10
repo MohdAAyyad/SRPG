@@ -196,7 +196,7 @@ void ABattleManager::EndDeployment()
 
 	if (changeStatsCheck == CHG_STAT_NON) //No change stats check, continue normally
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NON"));
+		//UE_LOG(LogTemp, Warning, TEXT("NON"));
 		NextPhase();
 	}
 	else //Otherwise, delay the next phase a bit
@@ -288,7 +288,6 @@ void ABattleManager::EndBattle(bool victory_)
 	phase = BTL_END;
 	if (victory_)
 	{
-		//TODO
 		//End on a victory
 
 		if(EndWidgets[0])
@@ -299,10 +298,10 @@ void ABattleManager::EndBattle(bool victory_)
 	}
 	else
 	{
+		//End on a defeat
 		if (EndWidgets[1])
 			widgetComp->SetWidgetClass(EndWidgets[1]);
-		//TODO
-		//End on a defeat
+		
 	}
 
 	widgetComp->GetUserWidgetObject()->AddToViewport();

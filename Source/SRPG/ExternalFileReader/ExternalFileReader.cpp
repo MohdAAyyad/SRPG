@@ -293,15 +293,9 @@ FActivityDialogueTableStruct UExternalFileReader::GetActivityEndDialogue(int act
 
 void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
-
 	if (tables[index_])
 	{
 		tables[index_]->AddRow(rowName_, row_);
-		UE_LOG(LogTemp, Error, TEXT("Fighter Table Row Added!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
 	}
 }
 
@@ -367,6 +361,35 @@ void UExternalFileReader::RemoveFightersDueToPermaDeath(TArray<int>& ids_, int t
 			tables[tableIndex_]->RemoveRow(rowNames[i]);
 		}
 	}
+}
+
+//Called by the fighter shop on being play if the selected fighter's array is larger than zero in size
+void UExternalFileReader::IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_)
+{
+	static const FString contextString(TEXT("Trying to increase the stats of the fighters in the recruited fighters table"));
+	TArray<FName> rowNames;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
+
+	for (int i = rowNames.Num() - 1; i > -1; i--)
+	{
+		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+		if (fighter_.id == row->id) //Is the fighter in the table part of the array of dead units?
+		{
+			row->hp = fighter_.hp;
+			row->pip = fighter_.pip;
+			row->atk = fighter_.atk;
+			row->def = fighter_.def;
+			row->intl = fighter_.intl;
+			row->spd = fighter_.spd;
+			row->agl = fighter_.agl;
+			row->crit = fighter_.crit;
+			row->crd = fighter_.crd;
+			row->currentEXP = fighter_.currentEXP;
+			row->neededEXPToLevelUp = fighter_.neededEXPToLevelUp;
+			row->level = fighter_.level;
+		}
+	}
+
 }
 
 void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)
@@ -467,8 +490,11 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableInde
 		{
 			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
 
-			//If we have the right weapon and the correct level, then this is valid information
-			if (row->weaponIndex == weaponIndex_ && row->levelToUnlock <= currentLevel_)
+			UE_LOG(LogTemp, Warning, TEXT("Row WI %d  Incoming WI %d"), row->weaponIndex, weaponIndex_);
+			UE_LOG(LogTemp, Warning, TEXT("Row SI %d  Incoming SI %d"), row->equipmentSkillsIndex, skillsIndex_);
+			UE_LOG(LogTemp, Warning, TEXT("Row LVL %d  Incoming LVL %d"), row->levelToUnlock, currentLevel_);
+			//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
+			if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
 			{
 				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
 				skills.Push(row);
@@ -500,8 +526,8 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int tableInde
 		{
 			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
 
-			//If we have the right weapon and the correct level, then this is valid information
-			if (row->weaponIndex == armorIndex_ && row->levelToUnlock <= currentLevel_)
+			//If we have the right armor type, the correct skill index and the correct level, then this is valid information
+			if ( row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
 			{
 				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
 				skills.Push(row);

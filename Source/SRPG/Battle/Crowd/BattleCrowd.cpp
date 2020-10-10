@@ -207,7 +207,8 @@ void ABattleCrowd::ElectChampion()
 		}
 
 		//Call the needed functions on the champ
-		champion->SetChampionOrVillain(true);
+		if(champion)
+			champion->SetChampionOrVillain(true);
 	}
 }
 
@@ -225,7 +226,8 @@ void ABattleCrowd::ElectVillain()
 		}
 
 		//Call the needed functions on the villain
-		villain->SetChampionOrVillain(false);
+		if(villain)
+			villain->SetChampionOrVillain(false);
 	}
 
 }
