@@ -108,6 +108,34 @@
 #define STAT_ARCH 25
 #endif
 
+
+#ifndef STAT_TEMP_ATK
+#define STAT_TEMP_ATK 0
+#endif
+
+#ifndef STAT_TEMP_DEF
+#define STAT_TEMP_DEF 1
+#endif
+
+#ifndef STAT_TEMP_INT
+#define STAT_TEMP_INT 2
+#endif
+
+#ifndef STAT_TEMP_SPD
+#define STAT_TEMP_SPD 3
+#endif
+
+#ifndef STAT_TEMP_CRT
+#define STAT_TEMP_CRT 4
+#endif
+
+#ifndef STAT_TEMP_HIT
+#define STAT_TEMP_HIT 5
+#endif
+
+#pragma endregion
+
+#pragma region Champion
 #ifndef CHAMP_ATK //Champion ATK
 #define CHAMP_ATK 2
 #endif

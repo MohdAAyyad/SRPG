@@ -43,6 +43,7 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	weaponIndex = 0;
 	armorIndex = 0;
 	bHealer = false; //Changed in the BP editor. Some enemies are just destined to be healers.
+	bLookForANewTargetMidAttack = false;
 }
 
 void AEnemyBaseGridCharacter::BeginPlay()
@@ -106,6 +107,7 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		armor = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ARM, statsComp->GetStatValue(STAT_ARI));
 		accessory = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
 		
+		UE_LOG(LogTemp, Warning, TEXT("Weapon %s skill index is  %d"),*weapon.name, weapon.skillsIndex);
 
 		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
@@ -160,8 +162,9 @@ void AEnemyBaseGridCharacter::StartEnemyTurn()
 {
 	bWillMoveAgain = true; //Ready to obtain a new item
 	targetItem = nullptr;
+	bHasDoneAnAction = false;
+	statsComp->CheckStatBuffNerfStatus();
 	CheckIfWeHaveAnyTargetItems();
-
 }
 
 void AEnemyBaseGridCharacter::Selected()
@@ -212,15 +215,26 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 
 						if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the target within the skill's range?
 						{
+							//Get all the characters on top of the hilighted tiles
+							TArray<ATile*> skillTiles = gridManager->GetHighlightedTiles();
+
+							for (int i = 0; i < skillTiles.Num(); i++)
+							{
+								//Only target player characters
+								APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
+								if (tar)
+								{
+									actionTargets.Push(tar);
+								}
+							}
+
 							btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
-							TArray<AGridCharacter*> targets_;
-							targets_.Reserve(1);
-							targets_.Push(targetCharacter);
 							chosenSkillAnimIndex = chosenSkill.animationIndex;
-							AttackUsingSkill(targets_, btlCtrl->focusRate);
+							AttackUsingSkill(btlCtrl->focusRate);
 						}
 						else
 						{
+							bHasDoneAnAction = true;
 							if (aiManager)
 								aiManager->FinishedAttacking();
 
@@ -242,6 +256,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 							}
 							else
 							{
+								bHasDoneAnAction = true;
 								if (aiManager)
 									aiManager->FinishedAttacking();
 
@@ -255,6 +270,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			}
 			else //Could not find the tile, don't break, finish the turn instead
 			{
+				bHasDoneAnAction = true;
 				if (aiManager)
 					aiManager->FinishedAttacking();
 				if (crdItems.Num() > 0)
@@ -263,6 +279,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 		}
 		else //If you don't have a target yet, finish the attacking phase
 		{
+			bHasDoneAnAction = true;
 			if (aiManager)
 				aiManager->FinishedAttacking();
 			if (crdItems.Num() > 0)
@@ -327,6 +344,12 @@ void AEnemyBaseGridCharacter::ActivateSkillAttack()
 	float atkScaled = chosenSkill.atk * static_cast<float>(statsComp->GetStatValue(STAT_ATK));
 	float intiScaled = chosenSkill.inti *static_cast<float>(statsComp->GetStatValue(STAT_INT));
 	float skillValue = static_cast<float>(chosenSkill.value);
+
+	if (skillValue < 0) //If this is a buff the skill value will be less than zero and the sacling varaibles need to match the sign of the value
+	{
+		atkScaled *= -1.0f;
+		intiScaled *= -1.0f;
+	}
 	//Affect the crowd
 	for (int i = 0; i < actionTargets.Num(); i++)
 	{
@@ -408,6 +431,13 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 					{
 						aiManager->FinishedMoving();
 					}
+				}
+
+				if (bLookForANewTargetMidAttack)
+				{
+					//We've moved to a new target in our attack phase. Now attempt the attack
+					ExecuteChosenAction();
+					bLookForANewTargetMidAttack = false;
 				}
 			}
 		}
@@ -518,6 +548,8 @@ void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
 
 void AEnemyBaseGridCharacter::ItemIsUnreachable(ATile* startingTile_)
 {
+	if (crdItems.Contains(targetItem))
+		crdItems.Remove(targetItem);
 	targetItem = nullptr;
 
 	if (movementPath.Num() > 0)
@@ -561,13 +593,14 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 			//TODO
 			//Get the item's value and update stats
 
+			if (crdItems.Contains(item_))
+				crdItems.Remove(item_);
 			item_->Obtained(GetActorLocation());
 
 			if (item_ != targetItem)//We've obtained an item that we did not mark, we need to let it tell the enemy that marked that it's gone
 				item_->ItemWasObtainedByAnEnemyThatDidNotMarkIt();
 
 			ItemIsUnreachable(item_->GetMyTile()); //You got the item, reset and go to the player starting from the item_ tile
-
 			item_->Destroy();
 		}
 	}
@@ -629,44 +662,64 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 {
 	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
 
-	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-	animInstance->SetDamage(static_cast<int> (damage_));
-	overheadWidgetComp->SetVisibility(true);
-	//update stats component
-	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
-	//Check if dead
-	if (statsComp->GetStatValue(STAT_HP) <= 1)
+	if (statIndex_ == STAT_HP && damage_ > 0) //If the skill does HP damage
 	{
-		GetMyTile()->SetOccupied(false);
-		attacker_->YouHaveKilledYouTarget(false);
-		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
-		{
-			crdManager->UpdateFavor(true);
-		}
-
-		if (aiManager)
-			aiManager->HandleEnemyDeath(this);
-
+		//update stats component
+		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 		if (animInstance)
-			animInstance->DeathAnim();
-
-
-		//Handle champion/villain death
-		switch (championIndex)
 		{
-		case 0: //Champion dead
-			crdManager->ChampVillainIsDead(true);
-			attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
-			break;
-		case 1: //Villain dead
-			crdManager->ChampVillainIsDead(false);
-			attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
-			break;
-		case 2: //perma champion dead
-			crdManager->SetPermaChampion(false);
-			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
-			break;
+			animInstance->GotHit(crit_);
+			animInstance->SetDamage(static_cast<int> (damage_));
 		}
+		overheadWidgetComp->SetVisibility(true);
+		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+		//Check if dead
+		if (statsComp->GetStatValue(STAT_HP) <= 1)
+		{
+			GetMyTile()->SetOccupied(false);
+			Intermediate::GetInstance()->PushUnitToDead(fighterID);
+			attacker_->YouHaveKilledYouTarget(false);
+			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
+			{
+				crdManager->UpdateFavor(true);
+			}
+			if (aiManager)
+				aiManager->HandleEnemyDeath(this);
+			if (animInstance)
+				animInstance->DeathAnim();
+
+
+			//Handle champion/villain death
+			switch (championIndex)
+			{
+			case 0: //Champion dead
+				crdManager->ChampVillainIsDead(true);
+				attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
+				break;
+			case 1: //Villain dead
+				crdManager->ChampVillainIsDead(false);
+				attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
+				break;
+			case 2: //perma champion dead
+				crdManager->SetPermaChampion(false);
+				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
+				break;
+			}
+		}
+	}
+	else if ((statIndex_ == STAT_HP || statIndex_ == STAT_PIP) && damage_ < 0) //Healing skill
+	{
+		animInstance->ChangeStats(true);
+		statsComp->AddToStat(statIndex_, static_cast<int>(-damage_));
+	}
+	else //Buff or nerf to a stat
+	{
+		if (damage_ < 0) //Buff (I know it's confusing)
+			animInstance->ChangeStats(true);
+		else
+			animInstance->ChangeStats(false);
+
+		statsComp->AddTempToStat(statIndex_, static_cast<int>(-damage_));
 	}
 }
 
@@ -678,6 +731,20 @@ void AEnemyBaseGridCharacter::CheckChangeStats()
 	{
 		statsComp->AddToStat(changedStat, -static_cast<float>(statsComp->GetStatValue(changedStat))*PLY_IMP_STAT);
 		animInstance->ChangeStats(false);
+	}
+}
+
+void AEnemyBaseGridCharacter::IamDeadStopTargetingMe()
+{
+	if (decisionComp)
+		decisionComp->ResetCurrentTarget();
+
+	targetCharacter = nullptr;
+
+	if (!bHasDoneAnAction) //We have finished moving so we're in attack phase and we 1. have not attacked yet 2. have not told the ai manager that we're not gonna attack
+	{
+		bLookForANewTargetMidAttack = true;
+		MoveCloserToTargetPlayer(nullptr);
 	}
 }
 

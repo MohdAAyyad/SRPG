@@ -57,6 +57,7 @@ public:
 
 	FSkillTableStruct GetChosenSkill();
 	bool GetWillUseSkill();
+	void ResetCurrentTarget();
 protected:
 	virtual void BeginPlay() override;
 

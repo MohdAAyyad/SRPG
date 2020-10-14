@@ -54,6 +54,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Champion")
 		int championIndex; //-1 neither 0 champion 1 villain 2 perma
+	int championBuffCount; //How many time has the champion/villain been buffed debuffed due to the campion status
 	UPROPERTY(EditAnywhere, Category = "Champion")
 		class UParticleSystemComponent* champParticles;
 	UPROPERTY(EditAnywhere, Category = "Champion")
@@ -86,6 +87,7 @@ protected:
 
 	int chosenSkillAnimIndex;
 	int fighterIndex;
+	int fighterID; //The ID is used to distinguish the fighter inside the recruited table
 
 	UPROPERTY(BlueprintReadOnly, Category = "Skill") //Used by the UI
 		FSkillTableStruct chosenSkill;
@@ -117,6 +119,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void RemoveOverheadWidget();
 
+	TArray<AGridCharacter*> TargetedByTheseCharacters; //An array that stores references to characters that target this character. They need to be notified of this character's death lest they use a pointer to it and crash the engine.
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -137,6 +141,7 @@ public:
 	void AttackUsingWeapon(AGridCharacter* target_, float delay_);
 	void PlayAnimationAttackUsingWeapon();
 	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_);
+	void AttackUsingSkill(float delay_); //overloaded for when we can directly push into action targets
 	void PlayAnimationAttackUsingSkill();
 
 	void SetBtlAndCrdManagers(ABattleManager* btlManager_,ABattleCrowd* crd_);
@@ -165,8 +170,13 @@ public:
 	class AGridManager* GetGridManager();
 	void YouHaveJustKilledAChampion(int championIndex_);
 	void YouHaveKilledYouTarget(bool killedAnEnemy_);
+	void PassInYourFinalStatsToTheIntermediate(TArray<int>& stats_);
+
+	void YouAreTargetedByMeNow(AGridCharacter* ref_);
+	void YouAreNoLongerTargetedByMe(AGridCharacter* ref_);
+	virtual void IamDeadStopTargetingMe();//Used to stop characters from targeting a dead character
 
 protected:
-	virtual void AddEquipmentStats(int tableIndex_);
+	virtual void AddEquipmentStats(int tableIndex_); 
 
 };

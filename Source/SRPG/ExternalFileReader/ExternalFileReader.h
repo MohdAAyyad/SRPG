@@ -57,6 +57,7 @@ public:
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
+	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);

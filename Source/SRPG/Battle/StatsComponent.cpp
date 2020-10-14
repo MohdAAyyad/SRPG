@@ -3,6 +3,7 @@
 
 #include "StatsComponent.h"
 #include "Definitions.h"
+#include "GridCharacter.h"
 
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
@@ -15,6 +16,17 @@ UStatsComponent::UStatsComponent()
 	bLevelingUp = false;
 	expOffset = 0.0f;
 	addedEXP = 0;
+	ownerChar = nullptr;
+	newLevel = 0;
+
+	turnsSinceLastStatChange.Reserve(6);
+	tempStatChange.Reserve(6);
+
+	for (int i = 0; i < 6; i++)
+	{
+		turnsSinceLastStatChange.Push(0);
+		tempStatChange.Push(0);
+	}
 }
 
 void UStatsComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -40,8 +52,15 @@ void UStatsComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, F
 		else
 		{
 			bLevelingUp = false;
+			CheckLevelUp(false); //Calls this again so that finish leveling up is called
 		}
 	}
+}
+
+void UStatsComponent::SetOwnerRef(AGridCharacter* ref_)
+{
+	newLevel = 1; //Starts at minimum level
+	ownerChar = ref_;
 }
 
 void UStatsComponent::PushAStat(int statValue_)
@@ -70,12 +89,6 @@ void UStatsComponent::TakeDamageToStat(int stat_, int value_)
 		{
 		case STAT_HP: //Lose health
 			currentStats[STAT_HP] -= value_;
-			if (currentStats[STAT_HP] <= 0)
-			{
-				//TODO
-				//Handle Death
-			}
-			break;
 		default: //Handle debuffs
 			currentStats[stat_] -= value_;
 			if (currentStats[stat_] < 0)
@@ -112,7 +125,7 @@ void UStatsComponent::AddToStat(int stat_, int value_)
 				currentStats[STAT_PIP] = 0;
 			}
 			break;
-		default: //Handle buffs
+		default: //Handle buffs and nerfs
 			currentStats[stat_] += value_;
 			break;
 		}
@@ -132,21 +145,35 @@ bool UStatsComponent::AddTempCRD(int value_) //True if the CRD stat is increased
 }
 void UStatsComponent::CheckLevelUp(bool hasLeveledUp_)
 {
-	if (hasLeveledUp_)
+	if (currentStats[STAT_EXP] > 0 || hasLeveledUp_) //We might have leveled up but have no exp left, that's why the or is there
 	{
-		//Levelup
-		currentStats[STAT_NXP] *= 2;
-
-		//TODO
-		//Update the stats
-
-		if (currentStats[STAT_EXP] > 0) //We still have exp to earn
-			CheckLevelUp(false); //Call the function again to calculate the expOffset again
+		if (hasLeveledUp_)
+		{
+			//Levelup
+			currentStats[STAT_NXP] *= 2;
+			currentStats[STAT_LVL]++;
+			if (currentStats[STAT_EXP] > 0) //We still have exp to earn
+				CheckLevelUp(false); //Call the function again to calculate the expOffset again
+			else
+				FinishLevlingUp(); //No move EXP, we're done
+		}
+		else
+		{
+			expOffset = 1.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
+			bLevelingUp = true;
+		}
 	}
 	else
 	{
-		expOffset = 1.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
-		bLevelingUp = true;		
+		FinishLevlingUp(); //No move EXP, we're done
+	}
+}
+
+void UStatsComponent::FinishLevlingUp()
+{
+	if (ownerChar)
+	{
+		ownerChar->PassInYourFinalStatsToTheIntermediate(currentStats);
 	}
 }
 int UStatsComponent::GetStatValue(int stat_)
@@ -227,6 +254,15 @@ void UStatsComponent::UpdateMaxHpAndMaxPip(int hp_, int pip_)
 }
 
 
+int UStatsComponent::GetMaxHP()
+{
+	return maxHP;
+}
+int UStatsComponent::GetMaxPIP()
+{
+	return maxPip;
+}
+
 float UStatsComponent::GetHPPercentage()
 {
 	return (static_cast<float>(currentStats[STAT_HP]) / static_cast<float>(maxHP));
@@ -278,5 +314,93 @@ void UStatsComponent::RevertChampionVillainStatsUpdate(bool champion_)
 		currentStats[STAT_DEF] -= VILL_DEF;
 		currentStats[STAT_INT] -= VILL_INT;
 		currentStats[STAT_SPD] -= VILL_SPD;
+	}
+}
+
+
+void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs should be negated
+{
+	for (int i = 0; i< tempStatChange.Num(); i++)
+	{
+		if (tempStatChange[i] != 0)
+		{
+			turnsSinceLastStatChange[i]--;
+			if (turnsSinceLastStatChange[i] <= 0) //Buff/nerf has ended
+			{
+				//Reset the stat to its orignal value and reset the temp arrays
+				int statIndex_ = ConvertTempStatIndexToStatIndex(i);
+				AddToStat(statIndex_, -tempStatChange[i]);
+				tempStatChange[i] = 0;
+				turnsSinceLastStatChange[i] = 0;
+			}
+		}
+	}
+}
+void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs nerfs
+{
+	int tempindex = ConvertStatIndexToTempStatIndex(statIndex_); //Get the temp index
+	if (value_ * tempStatChange[tempindex] < 0) //If this stat has previously been nerfed/buffed and you want to negate it
+	{
+		//Negate the previous effect
+		tempStatChange[tempindex] = 0; 
+		turnsSinceLastStatChange[tempindex] = 0;
+	}
+	else if (value_ * tempStatChange[tempindex] == 0) //No previous nerfs or buffs
+	{
+		//Store the value and turns to buff/nerf the stat
+		tempStatChange[tempindex] = value_; 
+		turnsSinceLastStatChange[tempindex] = 3;
+		if (currentStats[statIndex_] + value_ <= 0)
+		{
+			//A stat cannot go below 1
+			int offsetToOne = 1 - (currentStats[statIndex_] + value_);
+			value_ += offsetToOne;
+			tempStatChange[tempindex] = value_;
+		}
+		AddToStat(statIndex_, value_); //Update the stat
+	}
+
+	//No double buffing or nerfing to the same stat
+
+}
+int UStatsComponent::ConvertStatIndexToTempStatIndex(int statIndex_)
+{
+	switch (statIndex_)
+	{
+	case STAT_ATK:
+		return STAT_TEMP_ATK;
+	case STAT_DEF:
+		return STAT_TEMP_DEF;
+	case STAT_INT:
+		return STAT_TEMP_INT;
+	case STAT_SPD:
+		return STAT_TEMP_SPD;
+	case STAT_CRT:
+		return STAT_TEMP_CRT;
+	case STAT_HIT:
+		return STAT_TEMP_HIT;
+	default:
+		return STAT_TEMP_ATK;
+	}
+}
+
+int UStatsComponent::ConvertTempStatIndexToStatIndex(int tempStatIndex_)
+{
+	switch (tempStatIndex_)
+	{
+	case STAT_TEMP_ATK :
+		return STAT_ATK;
+	case STAT_TEMP_DEF :
+		return STAT_DEF;
+	case STAT_TEMP_INT :
+		return STAT_INT;
+	case STAT_TEMP_SPD :
+		return STAT_SPD;
+	case STAT_TEMP_CRT :
+		return STAT_CRT;
+	case STAT_TEMP_HIT :
+		return STAT_HIT;
+	default:
+		return STAT_ATK;
 	}
 }

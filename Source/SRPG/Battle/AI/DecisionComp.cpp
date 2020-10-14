@@ -25,8 +25,8 @@ UDecisionComp::UDecisionComp()
 	btlManager = nullptr;
 	ownerEnemy = nullptr;
 	targetRadius = 0; //Updated based on the pattern
-	offenseSkillWithTheMaxRangeIndex = 0;
-	defenseSkillWithTheMaxRangeIndex = 0;
+	offenseSkillWithTheMaxRangeIndex = -1;
+	defenseSkillWithTheMaxRangeIndex = -1;
 	bCanUseSkill = true; //Affected by remaning pips
 	bWillUseSkill = false; //True if the enemy is gonna be using a skill
 	skillType = -1;
@@ -132,6 +132,8 @@ bool UDecisionComp::IsMyTargetHostile()
 
 AGridCharacter* UDecisionComp::FindAnotherTarget(AGridCharacter* target_)
 {
+	if (currentTarget)
+		currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
 	currentTarget = target_;
 	return FindTheOptimalTargetCharacter();
 }
@@ -143,6 +145,12 @@ AGridCharacter* UDecisionComp::FindDefaultTarget()
 		TArray<APlayerGridCharacter*> pchars = btlManager->GetDeployedPlayers();
 		FVector myLoc = ownerEnemy->GetActorLocation();
 		APlayerGridCharacter* target = Cast<APlayerGridCharacter>(currentTarget);
+
+		//PLACEHOLDER
+		//In case this function was not called through find another target. PLACEHOLDER until FindAnotherTarget is completed
+		if (currentTarget)
+			currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
+
 		if (pchars.Num() > 0)
 		{
 			float min = 10000.0f;
@@ -158,6 +166,8 @@ AGridCharacter* UDecisionComp::FindDefaultTarget()
 			}
 		}
 		currentTarget = target;
+		if (currentTarget)
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
 		return currentTarget;
 	}
 	return nullptr;
@@ -299,6 +309,7 @@ void UDecisionComp::UpdateEnemySkills()
 			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
 			for (auto w : weaponSkills)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Pushed a skill into offenseSkills"));
 				offsenseSkills.Push(*w);
 			}
 
@@ -353,7 +364,7 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 	gridManager->ClearHighlighted();
 
 
-	if (bCanUseSkill)
+	if (bCanUseSkill && offenseSkillWithTheMaxRangeIndex >= 0)
 	{
 		//Check if we're within range of the skill with the longest range first. Reason: Skills will usually have a higher range than regular attacks
 		if (statsComp->GetStatValue(STAT_PIP) >= offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip) //Do we have enough pips?
@@ -561,6 +572,12 @@ FSkillTableStruct UDecisionComp::GetChosenSkill()
 		return defenseSkills[defenseSkillWithTheMaxRangeIndex];
 
 	return FSkillTableStruct();
+}
+
+void UDecisionComp::ResetCurrentTarget()
+{
+	//Called when our main target is dead
+	currentTarget = nullptr;
 }
 
 /*

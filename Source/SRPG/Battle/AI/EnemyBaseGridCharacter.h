@@ -62,6 +62,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Patterns")
 		class UDecisionComp* decisionComp;
 
+	bool bLookForANewTargetMidAttack; //In case the current target is dead then look for another target in your attack phase
+
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
@@ -80,4 +82,6 @@ public:
 	void ActivateSkillAttack() override;
 
 	void CheckChangeStats();
+
+	void IamDeadStopTargetingMe() override;
 };
