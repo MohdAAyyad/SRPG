@@ -54,6 +54,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class AFightersShop* fighterShop;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UWidgetComponent* widget;
+
 	// initialises at level 2. Used by shops to determine what they can sell.
 	int hubWorldLevel;
 	// checked by NPC's to know which line to say
@@ -67,6 +70,8 @@ protected:
 	TArray<class ANPC*> npcs;
 	// is this the first time the manager is spawning npcs (also called after a reset)
 	bool firstTimeSpawn;
+
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -74,7 +79,11 @@ public:
 	void SetNextIsAStoryMission(bool value_);
 	bool GetNextIsAStoryMission();
 	int GetHubWorldLevel();
+	UFUNCTION(BlueprintCallable)
 	int GetCurrentTimeSlotsCount();
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentMoney();
+	void RemoveUI();
 	void UpdateTimeSlots(int value_);
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
@@ -92,5 +101,6 @@ public:
 	// go through and remove the npcs
 	void DeleteNPCs();
 	void SpawnCentralNPCs(int amount_);
+
 
 };

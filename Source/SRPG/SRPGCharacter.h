@@ -29,6 +29,11 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(Client, Reliable, WithValidation)
+	void SetupController();
+	void SetupController_Implementation();
+	bool SetupController_Validate();
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

@@ -7,6 +7,7 @@
 #include "SRPGCharacter.h"
 #include "Intermediary/Intermediate.h"
 #include "Definitions.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -15,7 +16,11 @@ AHubWorldManager::AHubWorldManager()
 	PrimaryActorTick.bCanEverTick = false;
 
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
 	RootComponent = root;
+
+	widget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -42,6 +47,11 @@ void AHubWorldManager::BeginPlay()
 	//SpawnNPCs(1, 3);
 	//SpawnNPCs(1, 4);
 	//SpawnNPCs(1, 5);
+
+	if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
+	{
+		widget->GetUserWidgetObject()->AddToViewport();
+	}
 }
 
 // Called every frame
@@ -69,6 +79,19 @@ int AHubWorldManager::GetHubWorldLevel()
 int AHubWorldManager::GetCurrentTimeSlotsCount()
 {
 	return timeSlots;
+}
+
+int AHubWorldManager::GetCurrentMoney()
+{
+	return Intermediate::GetInstance()->GetCurrentMoney();
+}
+
+void AHubWorldManager::RemoveUI()
+{
+	if (widget && widget->GetUserWidgetObject()->IsInViewport())
+	{
+		widget->GetUserWidgetObject()->RemoveFromViewport();
+	}
 }
 
 void AHubWorldManager::UpdateTimeSlots(int value_)

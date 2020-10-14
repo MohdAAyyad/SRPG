@@ -45,6 +45,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC Widget")
 	class UWidgetComponent* widget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wander")
 	class UNPCWanderComponent* wander;
 
@@ -58,6 +59,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		virtual void LoadText();
 	// gives us a ref to the hubmanager for time managment purposes
+	UPROPERTY(EditAnywhere, Category = "HubManager")
 	class AHubWorldManager* hubManager;
 
 	class ASRPGCharacter* playerRef;

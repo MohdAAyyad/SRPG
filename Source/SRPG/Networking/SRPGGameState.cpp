@@ -26,8 +26,23 @@ void ASRPGGameState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 
 	DOREPLIFETIME(ASRPGGameState, test);
 	DOREPLIFETIME(ASRPGGameState, test2);
+	DOREPLIFETIME(ASRPGGameState, currentControllerIndex);
 
+}
 
+void ASRPGGameState::SetCurrentControllerIndex_Implementation(int value_)
+{
+	currentControllerIndex = value_;
+}
+
+bool ASRPGGameState::SetCurrentControllerIndex_Validate(int value_)
+{
+	return true;
+}
+
+int ASRPGGameState::GetCurrentControllerIndex()
+{
+	return currentControllerIndex;
 }
 
 void ASRPGGameState::BeginPlay()
@@ -38,5 +53,8 @@ void ASRPGGameState::BeginPlay()
 	{
 		test = 20;
 		OnRep_Test();
+		currentControllerIndex = 1;
 	}
 }
+
+

@@ -85,8 +85,9 @@ protected:
 	void SetSpentUnits(int value_);
 
 	int initialMoneyValue;
-public:
 
+
+public:
 	void UpdateChanceOfSuccess(float value_);
 	int GetCentralActivityIndex();
 	void SetActivityIndex(int activity_);
