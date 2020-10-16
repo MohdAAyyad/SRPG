@@ -388,6 +388,10 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
 		GetMyTile()->SetOccupied(false);
+		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+		{
+			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+		}
 		Intermediate::GetInstance()->PushUnitToDead(fighterID); //Store the ID of the fighter
 		attacker_->YouHaveKilledYouTarget(true);
 		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose points
@@ -398,11 +402,7 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 			btlManager->HandlePlayerDeath(this);
 		if (animInstance)
 			animInstance->DeathAnim();
-
-		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
-		{
-			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
-		}
+		
 
 		//Handle champion/villain death
 		switch (championIndex)
@@ -444,12 +444,18 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
 			GetMyTile()->SetOccupied(false);
+			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+			{
+				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+			}
 			Intermediate::GetInstance()->PushUnitToDead(fighterID);
 			attacker_->YouHaveKilledYouTarget(true);
 			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
 			{
 				crdManager->UpdateFavor(false);
 			}
+
+
 			if (btlManager)
 				btlManager->HandlePlayerDeath(this);
 			if (animInstance)
@@ -481,8 +487,6 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 	}
 	else //Buff or nerf to a stat
 	{
-		UE_LOG(LogTemp, Warning, TEXT("It's a buff or a nerf %f"), damage_);
-
 		if(damage_ < 0) //Buff (I know it's confusing)
 			animInstance->ChangeStats(true);
 		else

@@ -726,9 +726,12 @@ void AGridCharacter::YouAreTargetedByMeNow(AGridCharacter* ref_)
 }
 void AGridCharacter::YouAreNoLongerTargetedByMe(AGridCharacter* ref_)
 {
-	if (TargetedByTheseCharacters.Contains(ref_))
+	if (TargetedByTheseCharacters.Num() > 0)
 	{
-		TargetedByTheseCharacters.Remove(ref_);
+		if (TargetedByTheseCharacters.Contains(ref_))
+		{
+			TargetedByTheseCharacters.Remove(ref_);
+		}
 	}
 }
 

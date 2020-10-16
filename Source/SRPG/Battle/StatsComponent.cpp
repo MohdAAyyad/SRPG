@@ -363,6 +363,16 @@ void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs ne
 	//No double buffing or nerfing to the same stat
 
 }
+
+bool UStatsComponent::HasThisStatBeenBuffed(int statIndex_)
+{
+	//Called by support characters to see if stats have already been buffed
+	int tempIndex = ConvertStatIndexToTempStatIndex(statIndex_);
+	if (tempStatChange[tempIndex] > 0) //BUffed
+		return true;
+	tempStatChange[tempIndex] = 1; //This function is called only when a support enemy is trying to buff another enemy. Changing the value to 1 marks this enemy so this prevents two enemies from buffing the same enemy
+	return false;
+}
 int UStatsComponent::ConvertStatIndexToTempStatIndex(int statIndex_)
 {
 	switch (statIndex_)

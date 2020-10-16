@@ -66,6 +66,7 @@ public:
 	int GetMaxHP();
 	int GetMaxPIP();
 	void CheckStatBuffNerfStatus(); //Checks whether buffs and nerfs should be negated
+	bool HasThisStatBeenBuffed(int statIndex_);
 	void AddTempToStat(int statIndeX_, int value_); //Handle buffs nerfs
 protected:
 	void FinishLevlingUp();

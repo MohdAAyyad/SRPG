@@ -58,11 +58,12 @@ protected:
 	void ResetCameraFocus() override;
 
 	UPROPERTY(EditAnywhere, Category = "Patterns")
-		bool bHealer;
-	UPROPERTY(EditAnywhere, Category = "Patterns")
 		class UDecisionComp* decisionComp;
 
 	bool bLookForANewTargetMidAttack; //In case the current target is dead then look for another target in your attack phase
+
+	UPROPERTY(EditAnywhere, Category = "Patterns")
+		bool bHealer;
 
 public:
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);

@@ -216,6 +216,10 @@
 #define TILE_CRD 8
 #endif
 
+#ifndef TILE_SUPP
+#define TILE_SUPP 9
+#endif
+
 #pragma endregion
 
 #pragma region BattlePhase
@@ -426,12 +430,16 @@
 #define RAD_PP 150.0f
 #endif
 
-#ifndef RAD_HEAL
-#define RAD_HEAL 300.0f
+#ifndef RAD_SUPP
+#define RAD_SUPP 2000.0f
 #endif
 
 #ifndef HP_ASSA //HP threshold for assassin
 #define HP_ASSA 0.6f
+#endif
+
+#ifndef HP_SUPP //HP threshold for supports. If health is less than this, then heal.
+#define HP_SUPP 0.5f
 #endif
 
 #pragma endregion

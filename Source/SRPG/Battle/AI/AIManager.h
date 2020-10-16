@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ExternalFileReader/FOpponentStruct.h"
+#include "Containers/Queue.h"
 #include "AIManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -55,16 +56,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<TSubclassOf<class AEnemyBaseGridCharacter>> enemiesBPs;
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+		TArray<TSubclassOf<class AEnemyBaseGridCharacter>> supportEnemiesBPs;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Textures")
 		TArray<UMaterialInterface*> fighterMaterials; //Ordered in the same way as the enemy BPs. Used by UI.
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 		TArray<FAIDeploymentStruct> depNodes;
 
 	TArray<AEnemyBaseGridCharacter*> deployedEnemies;
+	TQueue<AEnemyBaseGridCharacter*> actionQueue; //keeps track of which enemies finished moving so they get to attack
 	int numberOfEnemiesWhichFinishedMoving; //When this number reaches the current number of troops, tell them to attack
-	int numberOfEnemiesToldToMove;	
+	int numberOfEnemiesToldToMove;
+	int numberOfSupportEnemies;
+	int numberOfRegularEnemies;
 	FOpponentStruct nextOp;
-
 
 public:	
 	// Called every frame
@@ -74,17 +79,22 @@ public:
 	void SetBattleGridCrdManagers(ABattleManager* btl_, AGridManager* grid_, ABattleCrowd* cref_);
 	void FinishedMoving();
 	void FinishedAttacking();
-	void OrderEnemiesToAttackPlayer();
+
 
 	float GetTotalStatFromDeployedEnemies(int statIndex_);
 
 	class AGridCharacter* GetEnemyWithHighestStat(int statIndex_, AGridCharacter* notThisCharacter_);
 	AGridCharacter* GetEnemyWithLowestStat(int statIndex_, AGridCharacter* notThisCharacter_);
-	void HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_);
+	void HandleEnemyDeath(AEnemyBaseGridCharacter* enemy_, bool healer_);
 	void TellEnemiesToCheckChangedStats();
+	TArray<AEnemyBaseGridCharacter*> GetDeployedEnemies();
 
 protected:
 
-	void TellDeployedEnemiesToMove();
+	void TellRegularEnemiesToMove();
+	void TellSupportEnemiesToMove();
+	void DeployEnemies();
+
+	void OrderEnemiesToExecuteAction();
 
 };

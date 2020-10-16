@@ -29,7 +29,7 @@ UDecisionComp::UDecisionComp()
 	defenseSkillWithTheMaxRangeIndex = -1;
 	bCanUseSkill = true; //Affected by remaning pips
 	bWillUseSkill = false; //True if the enemy is gonna be using a skill
-	skillType = -1;
+	skillType = -1; //-1 if enemy will not use a skill, 0 if offense skill, and 1 if defense skill
 	skillChance = 40;
 }
 
@@ -61,7 +61,7 @@ void UDecisionComp::UpdatePattrn(int level_, bool healer_)
 {
 	if (healer_)
 	{
-		currentPattern = EPatterns::HEALER;
+		currentPattern = EPatterns::SUPPORT;
 	}
 	else
 	{
@@ -94,9 +94,10 @@ AGridCharacter* UDecisionComp::FindTheOptimalTargetCharacter()
 	case EPatterns::PEOPLEPERSON:
 		targetRadius = RAD_PP;
 		return PeoplePersonEffect();
-	case EPatterns::HEALER:
-		targetRadius = RAD_HEAL;
-		return FindHealerTarget();
+	case EPatterns::SUPPORT:
+		targetRadius = RAD_SUPP;
+		defenseSkillWithTheMaxRangeIndex = -1; //To make sure the support enemy picks the correct skill later on 
+		return FindHealTarget();
 	}
 	return nullptr;
 }
@@ -118,8 +119,8 @@ ATile* UDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 		return FindDefaultTile(myTile_);
 	case EPatterns::PEOPLEPERSON:
 		return FindDefaultTile(myTile_);
-	case EPatterns::HEALER:
-		return FindDefaultTile(myTile_);
+	case EPatterns::SUPPORT:
+		return FindSupportTile(myTile_);
 	}
 	return nullptr;
 }
@@ -144,7 +145,7 @@ AGridCharacter* UDecisionComp::FindDefaultTarget()
 	{
 		TArray<APlayerGridCharacter*> pchars = btlManager->GetDeployedPlayers();
 		FVector myLoc = ownerEnemy->GetActorLocation();
-		APlayerGridCharacter* target = Cast<APlayerGridCharacter>(currentTarget);
+		APlayerGridCharacter* target = nullptr;
 
 		//PLACEHOLDER
 		//In case this function was not called through find another target. PLACEHOLDER until FindAnotherTarget is completed
@@ -158,7 +159,7 @@ AGridCharacter* UDecisionComp::FindDefaultTarget()
 			{
 				//Get the next closest target. Mainly used when all the range tiles are occupied and the enemy needs a new target
 				float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
-				if (distance < min && target != pchars[i]) //Making sure the target and the new target are not the same thing. Target is eithe nullptr or not in which case, findanothertarget was called
+				if (distance < min && currentTarget != pchars[i]) //Making sure the current target and the new target are not the same thing. Target is eithe nullptr or not in which case, findanothertarget was called
 				{
 					target = pchars[i];
 					min = distance;
@@ -172,13 +173,13 @@ AGridCharacter* UDecisionComp::FindDefaultTarget()
 	}
 	return nullptr;
 }
-
+#pragma region Default
 AGridCharacter* UDecisionComp::FindDefaultTarget(TArray<APlayerGridCharacter*> pchars, FVector myLoc)
 {
 	//Not using dijkstra as precision is not important. We're assuming that the displacement is the shortest distance without checking the actual path through the tiles
 	if (btlManager && ownerEnemy)
 	{
-		APlayerGridCharacter* target = Cast<APlayerGridCharacter>(currentTarget);
+		APlayerGridCharacter* target = nullptr;
 		if (pchars.Num() > 0)
 		{
 			float min = 10000.0f;
@@ -186,7 +187,7 @@ AGridCharacter* UDecisionComp::FindDefaultTarget(TArray<APlayerGridCharacter*> p
 			{
 				//Get the next closest target. Mainly used when all the range tiles are occupied and the enemy needs a new target
 				float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
-				if (distance < min && target != pchars[i])
+				if (distance < min && currentTarget != pchars[i])
 				{
 					target = pchars[i];
 					min = distance;
@@ -194,11 +195,48 @@ AGridCharacter* UDecisionComp::FindDefaultTarget(TArray<APlayerGridCharacter*> p
 			}
 		}
 		currentTarget = target;
-		return Cast<AGridCharacter>(target);
+		if (currentTarget)
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
+		return currentTarget;
 	}
 	return nullptr;
 
 }
+
+ATile* UDecisionComp::FindDefaultTile(ATile* myTile_)
+{
+	if (currentTarget) 	//Checks if we have a player reference first, otherwise, move to target tile
+	{
+		ATile* targetTile = ChooseTileBasedOnPossibleOffenseActions(myTile_); //Attacking is the default pattern
+
+		//If all range tiles are occupied, Find another target
+		if (!targetTile)
+		{
+			FindAnotherTarget(currentTarget);
+			return FindDefaultTile(myTile_); //We've switched to a different target so run the function again and find a tile
+		}
+		else if (targetTile == myTile_) //We're not gonna be moving
+		{
+			return nullptr;
+		}
+		else
+		{
+			return targetTile;
+		}
+	}
+	else
+	{
+		//We don't have a player target, find the optimal one per the enum rules.
+		FindTheOptimalTargetCharacter();
+		return FindDefaultTile(myTile_); //We've got a target now so run the function again
+	}
+
+	return nullptr;
+}
+
+#pragma endregion
+
+#pragma region Assassin
 AGridCharacter* UDecisionComp::FindAssassinTarget()
 {
 	//Assassins look for the player characters with the least HP within their radius
@@ -215,22 +253,25 @@ AGridCharacter* UDecisionComp::FindAssassinTarget()
 
 			for (int i = 0; i < pchars.Num(); i++)
 			{
-				float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
-				if (distance <= targetRadius) //If they're within our target radius, then check their HP
+				if (pchars[i])
 				{
-					hp_ = pchars[i]->GetStat(STAT_HP);
-					maxHp_ = pchars[i]->GetStat(-1);
-					if (hp_ <= (maxHp_ * threshold) && target != pchars[i]) //If they're less than the threshold, then that's our target
+					float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
+					if (distance <= targetRadius) //If they're within our target radius, then check their HP
 					{
-						target = pchars[i];
-						break;
+						hp_ = pchars[i]->GetStat(STAT_HP);
+						maxHp_ = pchars[i]->GetStat(-1);
+						if (hp_ <= (maxHp_ * threshold) && target != pchars[i]) //If they're less than the threshold, then that's our target
+						{
+							target = pchars[i];
+							break;
+						}
 					}
 				}
 			}
 		}
 		if (target)
 		{ //Were we able to find a target within our radius and below the HP threshold?
-			currentTarget = nullptr;
+			currentTarget = target;
 			return Cast<AGridCharacter>(target);
 		}
 		else //Otherwise, just go default
@@ -240,6 +281,8 @@ AGridCharacter* UDecisionComp::FindAssassinTarget()
 	}
 	return nullptr;
 }
+
+#pragma endregion
 AGridCharacter* UDecisionComp::FindFollowerTarget()
 {
 	return nullptr;
@@ -248,53 +291,234 @@ AGridCharacter* UDecisionComp::PeoplePersonEffect()
 {
 	return nullptr;
 }
-AGridCharacter* UDecisionComp::FindHealerTarget()
+
+#pragma region Support pattern
+AGridCharacter* UDecisionComp::FindHealTarget()
 {
+	//Supports look for fellow enemies to either heal or buff
+	if (aiManager && ownerEnemy)
+	{
+		TArray<AEnemyBaseGridCharacter*> echars = aiManager->GetDeployedEnemies();
+		FVector myLoc = ownerEnemy->GetActorLocation();
+		AEnemyBaseGridCharacter* healTarget = nullptr;
+		if (echars.Num() > 0)
+		{
+			float threshold = HP_SUPP;
+			float hp_ = 0.0f;
+			float maxHp_ = 0.0f;
+
+			for (int i = 0; i < echars.Num(); i++)
+			{
+				if (echars[i])
+				{
+					if (echars[i] != currentTarget)
+					{
+						float distance = (myLoc - echars[i]->GetActorLocation()).Size();
+						if (distance <= targetRadius) //If they're within our target radius, then check their HP
+						{
+							//UE_LOG(LogTemp, Warning, TEXT("Checking heal distance and it is lower"));
+							hp_ = echars[i]->GetStat(STAT_HP);
+							maxHp_ = echars[i]->GetStat(-1);
+							if (hp_ <= (maxHp_ * threshold)) //If they're less than the support threshold, then that's our target
+							{
+								//UE_LOG(LogTemp, Warning, TEXT("Checking heal threshold and it is good"));
+								healTarget = echars[i];
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (healTarget)
+		{ //Were we able to find a target within our radius and below the HP threshold?
+			currentTarget = healTarget;
+			return currentTarget;
+		}
+		else //Otherwise, find a character to buff
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Gonna try to find a support target"));
+			return FindSupportTarget(echars, myLoc);
+		}
+	}
 	return nullptr;
 }
-
-
-ATile* UDecisionComp::FindDefaultTile(ATile* myTile_)
+AGridCharacter* UDecisionComp::FindSupportTarget(TArray<AEnemyBaseGridCharacter*> echars, FVector myLoc)
 {
-	ATile* targetTile = ChooseTileBasedOnPossibleOffenseActions(myTile_); //Attacking is the default pattern
-
-	//Checks if we have a player reference first, otherwise, move to target tile
-	if (currentTarget)
+	int targetStat = -1;
+	UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
+	AEnemyBaseGridCharacter* supportTarget = nullptr;
+	//Check if we have any skills that buff stats
+	for (int i = 0; i < defenseSkills.Num(); i++)
 	{
-		//If all range tiles are occupied, Find another target
-		if (!targetTile)
+		//Find the first usable buff stat
+		if (defenseSkills[i].statIndex != STAT_HP && defenseSkills[i].pip <= statsComp->GetStatValue(STAT_PIP))
 		{
-			FindAnotherTarget(currentTarget);
-			return FindDefaultTile(myTile_); //We've switched to a different target so run the function again and find a tile
-		}
-		else if (targetTile == myTile_) //We're not gonna be moving
-		{
-			aiManager->FinishedMoving();
-			return nullptr;
-		}
-		else
-		{
-			return targetTile;
+			//UE_LOG(LogTemp, Warning, TEXT("Found a usable support skill"));
+			targetStat = defenseSkills[i].statIndex;
+			defenseSkillWithTheMaxRangeIndex = i;
+			break;
 		}
 	}
-	else
+
+	//Look for an enemy within range and who has was not already buffed
+	if (targetStat != -1) //Make sure we got a stat first
 	{
-		//We don't have a player target, find the optimal one per the enum rules.
-		FindTheOptimalTargetCharacter();
-		return FindDefaultTile(myTile_); //We've got a target now so run the function again
+		if (echars.Num() > 0)
+		{
+			for (int i = 0; i < echars.Num(); i++)
+			{
+				if (echars[i])
+				{
+					float distance = (myLoc - echars[i]->GetActorLocation()).Size();
+					if (distance <= targetRadius) //If they're within our target radius, then check their HP
+					{
+						if (currentTarget != echars[i] && !echars[i]->GetStatsComp()->HasThisStatBeenBuffed(targetStat)) //Make sure this character did not have this particular stat buffed before
+						{
+							//UE_LOG(LogTemp, Warning, TEXT("Found a support target"));
+							supportTarget = echars[i];
+							break;
+						}
+					}
+				}
+			}
+		}
+		if (supportTarget)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Returning support target"));
+			currentTarget = supportTarget;
+			return currentTarget;
+		}
 	}
-
-
-	/*	else //We're not going to move so return myTile_ occupied bool to true
-{
-	if (myTile_)
-		myTile_->SetOccupied(true);
-	if (aiManager)
-		aiManager->FinishedMoving();
-}*/
+	else //We could not find any usable buffs skills and since we're here, couldn't find  anybody to heal either so
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Gonna go for the closest least health enemy"));
+		//Move closer to the enemy with the least health 
+		FindClosestAllyWithTheLeastHealth(echars, myLoc);
+	}
 	
 	return nullptr;
 }
+
+
+AGridCharacter* UDecisionComp::FindClosestAllyWithTheLeastHealth(TArray<AEnemyBaseGridCharacter*> echars, FVector myLoc)
+{
+	//Move closer to the enemy with the least health 
+	defenseSkillWithTheMaxRangeIndex = -2;
+	int minHealth = 10000;
+	int targetIndex = -1;
+	if (echars.Num() > 0)
+	{
+		for (int i = 0; i < echars.Num(); i++)
+		{
+			if (echars[i])
+			{
+				if (echars[i]->GetStat(STAT_HP) < minHealth)
+				{
+					minHealth = echars[i]->GetStat(STAT_HP);
+					targetIndex = i;
+				}
+			}
+		}
+	}
+	currentTarget = echars[targetIndex];
+	return currentTarget;
+}
+
+ATile* UDecisionComp::FindSupportTile(ATile* myTile_)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Finding support tile..."));
+	if (myTile_)
+	{
+		if (defenseSkillWithTheMaxRangeIndex == -1) //We have not decided on a buff skill yet i.e. we decided to heal
+		{
+		//	UE_LOG(LogTemp, Warning, TEXT("Gonna look for heal tile"));
+			if (currentTarget) 	//Checks if we have a target reference first, otherwise, move to target tile
+			{
+				UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
+				FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(STAT_HP, statsComp->GetStatValue(STAT_PIP));
+				ATile* targetTile = nullptr;
+				if (defenseSkillWithTheMaxRangeIndex != -1)
+					targetTile = ChooseTileBasedOnPossibleSupportActions(myTile_); //If we got a heal skill, then find a possible tile
+
+				//If we could not find a feasable tile, then find a different target
+				if (!targetTile)
+				{
+				//	UE_LOG(LogTemp, Warning, TEXT("Tried to heal but couldn't get a tile. Gonna attempt to find another target to heal"));
+					FindAnotherTarget(currentTarget);
+					return FindSupportTile(myTile_); //We've switched to a different target so run the function again and find a tile
+				}
+				else if (targetTile == myTile_) //We're not gonna be moving
+				{
+					return nullptr; //nullptr is interpreted in the ownerEnemy as finished moving
+				}
+				else
+				{
+				//	UE_LOG(LogTemp, Warning, TEXT("Found a good tile to support from"));
+					return targetTile;
+				}
+			}
+			else
+			{
+			//	UE_LOG(LogTemp, Warning, TEXT("We don't really have a support target"));
+				//We don't have a player target, find the optimal one per the enum rules.
+				FindTheOptimalTargetCharacter();
+				return FindSupportTile(myTile_); //We've got a target now so run the function again
+			}
+
+		}
+		else if (defenseSkillWithTheMaxRangeIndex == -2) //We decided to go to the enemy with the least health
+		{
+		//	UE_LOG(LogTemp, Warning, TEXT("Gonna get closer tile"));
+			if (currentTarget)
+			{
+				bWillUseSkill = false;
+				return currentTarget->GetMyTile();
+			}
+		}
+		else //Buff skill
+		{
+			if (currentTarget)
+			{
+			//	UE_LOG(LogTemp, Warning, TEXT("Trying to find tile for support skill"));
+				ATile* targetTile = ChooseTileBasedOnPossibleSupportActions(myTile_);
+
+				//If we could not find a feasable tile, then find the tile closes to the enemy with the least heal
+				if (!targetTile)
+				{
+				//	UE_LOG(LogTemp, Warning, TEXT("Tried to support but not tile. Let's look for a different target :("));
+					FindAnotherTarget(currentTarget);
+					//HEEEERRREEEE FIIXXXX HEEERRREEEE
+					//return FindSupportTile(myTile_); //We've switched to a different target so run the function again and find a tile
+					return nullptr;
+				}
+				else if (targetTile == myTile_) //We're not gonna be moving
+				{
+				//	UE_LOG(LogTemp, Warning, TEXT("It's my tile"));
+					return nullptr; //nullptr is interpreted in the ownerEnemy as finished moving
+				}
+				else
+				{
+				//	UE_LOG(LogTemp, Warning, TEXT("Found a good tile"));
+					return targetTile;
+				}
+			}
+			else
+			{
+			//	UE_LOG(LogTemp, Warning, TEXT("Gonna find another character"));
+				//We don't have a player target, find the optimal one per the enum rules.
+				FindTheOptimalTargetCharacter();
+				return FindSupportTile(myTile_); //We've got a target now so run the function again
+			}
+
+		}
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Tried to find support tile but I don't really have a tile myself"));
+	return nullptr;
+}
+
+#pragma endregion
+
 
 void UDecisionComp::UpdateEnemySkills()
 {
@@ -309,7 +533,6 @@ void UDecisionComp::UpdateEnemySkills()
 			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
 			for (auto w : weaponSkills)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Pushed a skill into offenseSkills"));
 				offsenseSkills.Push(*w);
 			}
 
@@ -364,71 +587,117 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 	gridManager->ClearHighlighted();
 
 
-	if (bCanUseSkill && offenseSkillWithTheMaxRangeIndex >= 0)
+	if (offsenseSkills.Num() > 0)
 	{
-		//Check if we're within range of the skill with the longest range first. Reason: Skills will usually have a higher range than regular attacks
-		if (statsComp->GetStatValue(STAT_PIP) >= offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip) //Do we have enough pips?
+		if (bCanUseSkill)
 		{
-			//If we have enough pips, roll a dice and see if we get to use a skill
-			if (skillChance >= FMath::RandRange(0, 100))
+			//Check if we're within range of the skill with the longest range first. Reason: Skills will usually have a higher range than regular attacks
+			if (statsComp->GetStatValue(STAT_PIP) >= offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip) //Do we have enough pips?
 			{
-				if (CheckIfPlayerIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+				//If we have enough pips, roll a dice and see if we get to use a skill
+				if (skillChance >= FMath::RandRange(0, 100))
 				{
-					bWillUseSkill = true;
-					skillType = 0;
-					return resultTile;
-				}
-				else
-				{
-					//If we're not within range of the skill with the longest range, then check if we're in range of a regular attack
-					if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+					if (CheckIfTargetIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile,true))
 					{
+						bWillUseSkill = true;
+						skillType = 0;
 						return resultTile;
 					}
 					else
 					{
-						//If we're in range of neither, then choose a tile based on the one with the least range
-						PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+						//If we're not within range of the skill with the longest range, then check if we're in range of a regular attack
+						if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+						{
+							return resultTile;
+						}
+						else
+						{
+							//If we're in range of neither, then choose a tile based on the one with the least range
+							PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
 
-						//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+							//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+						}
 					}
 				}
+				else //Chose to do a regular attack
+				{
+					CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+				}
 			}
-			else
+			else //Not enough pips to use the skills with the longest range. So look for the next skill with the longest range
 			{
-				CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+				bCanUseSkill = false;
+				PickTheNextUsableSkill(statsComp, true);
+				ChooseTileBasedOnPossibleOffenseActions(myTile_); //Try again
 			}
 		}
-		else //Not enough pips to use the skills with the longest range. So look for the next skill with the longest range
+		else
 		{
-			bCanUseSkill = false;
-			PickTheNextUsableSkill(statsComp, true);
-			ChooseTileBasedOnPossibleOffenseActions(myTile_); //Try again
+			//Can't use skills so just use a regular attack
+			CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
 		}
 	}
 	else
 	{
-		//Can't use skills so just use a regular attack
+		//Don't have any offensive skills so just use a regular attack
 		CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+
 	}
 
 	return resultTile;
 }
 
-
-ATile* UDecisionComp::ChooseTileBasedOnPossibleDefenseActions(ATile* myTile_)
+ATile* UDecisionComp::ChooseTileBasedOnPossibleSupportActions(ATile* myTile_)
 {
+	AGridManager* gridManager = ownerEnemy->GetGridManager();
+	UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
+	UPathComponent* pathComp = ownerEnemy->GetPathComponent();
+	TArray<ATile*> rangeTiles;
+	TArray<ATile*> movementTiles;
+	ATile* resultTile = nullptr;
+
+	//Get our movement tiles
+	gridManager->UpdateCurrentTile(ownerEnemy->GetOriginTile(), pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_SUPP, -1);
+	movementTiles = gridManager->GetHighlightedTiles();
+	gridManager->ClearHighlighted();
+
+	if (CheckIfTargetIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile,false))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("The target is within the support skill we've checked!"));
+		bWillUseSkill = true;
+		skillType = 1;
+		return resultTile;
+	}
 	return nullptr;
 }
 
 
-
-bool UDecisionComp::CheckIfPlayerIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
-	TArray<ATile*>& movementTiles_, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_)
+void UDecisionComp::FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(int statIndex_, int currentPips_)
 {
-	//Get the tiles that put the enemy within range of the player.
+	int maxRange = -1;
+	for (int i = 0; i < defenseSkills.Num(); i++)
+	{
+		//Get the skill that matches the stat we're looking for, has the highest range, and usable
+		if (defenseSkills[i].statIndex == statIndex_ && defenseSkills[i].rge > maxRange && defenseSkills[i].pip <= currentPips_)
+		{
+			defenseSkillWithTheMaxRangeIndex = i;
+		}
+	}
+}
+
+bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
+	TArray<ATile*>& movementTiles_, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_, bool offense_)
+{
 	grid_->ClearHighlighted();
-	grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENM, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
+	if (offense_)
+	{
+		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENM, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
+	}
+	else
+	{
+		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), defenseSkills[defenseSkillWithTheMaxRangeIndex].rge, defenseSkills[defenseSkillWithTheMaxRangeIndex].rge + 1, TILE_SUPP, defenseSkills[defenseSkillWithTheMaxRangeIndex].pure);
+	}
+	//Get the tiles that put the enemy within range of the target.
 	rangeTiles_ = grid_->GetHighlightedTiles();
 	grid_->ClearHighlighted();
 
@@ -560,8 +829,9 @@ void UDecisionComp::PickTheNextUsableSkill(UStatsComponent* statsComp_, bool off
 }
 
 
-bool UDecisionComp::GetWillUseSkill()
+bool UDecisionComp::GetWillUseSkill(int& skillType_)
 {
+	skillType_ = skillType;
 	return bWillUseSkill;
 }
 FSkillTableStruct UDecisionComp::GetChosenSkill()

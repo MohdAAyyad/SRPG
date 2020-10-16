@@ -65,7 +65,7 @@ void AEnemyBaseGridCharacter::Tick(float DeltaTime)
 	{
 		ATile* myTile_ = GetMyTile();
 
-		if (myTile_)
+		if (myTile_ && bWillMoveAgain)
 		{
 			bCannotFindTile = false;
 			bMoving = false;
@@ -107,8 +107,6 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		armor = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ARM, statsComp->GetStatValue(STAT_ARI));
 		accessory = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
 		
-		UE_LOG(LogTemp, Warning, TEXT("Weapon %s skill index is  %d"),*weapon.name, weapon.skillsIndex);
-
 		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
 		statsComp->AddToStat(STAT_PIP, weapon.pip + armor.pip + accessory.pip);
@@ -147,7 +145,6 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 		if (targetCharacter)
 		{
 			targetTile = decisionComp->FindOptimalTargetTile(myTile_);
-			
 			MoveToTheTileWithinRangeOfThisTile(myTile_, targetTile);
 		}
 		else //If we couldn't find a character, don't attempt to find a tile. This will only happen whne all potential targets are dead. This check prevents an infinite loop of looking for a target
@@ -163,7 +160,9 @@ void AEnemyBaseGridCharacter::StartEnemyTurn()
 	bWillMoveAgain = true; //Ready to obtain a new item
 	targetItem = nullptr;
 	bHasDoneAnAction = false;
+	bLookForANewTargetMidAttack = false;
 	statsComp->CheckStatBuffNerfStatus();
+	decisionComp->ResetCurrentTarget(); //Reset the current target on the start of the turn to maek sure we always get the optimal target
 	CheckIfWeHaveAnyTargetItems();
 }
 
@@ -198,6 +197,7 @@ void AEnemyBaseGridCharacter::NotSelected()
 
 void AEnemyBaseGridCharacter::ExecuteChosenAction()
 {
+	int skillType = -1;
 	if (gridManager)
 	{
 		if (targetCharacter)
@@ -207,7 +207,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			{
 				if (decisionComp)
 				{
-					if (decisionComp->GetWillUseSkill())
+
+					if (decisionComp->GetWillUseSkill(skillType))
 					{
 						chosenSkill = decisionComp->GetChosenSkill();
 						gridManager->ClearHighlighted();
@@ -215,17 +216,34 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 
 						if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the target within the skill's range?
 						{
+							//Now clear the highlighted tiles and highlight new tiles based on the skill's own row and depth speeds starting from the target's tile
+							gridManager->ClearHighlighted();
+							gridManager->UpdateCurrentTile(targetCharacter->GetMyTile(), chosenSkill.rows, chosenSkill.depths, TILE_ENM, chosenSkill.pure);
 							//Get all the characters on top of the hilighted tiles
 							TArray<ATile*> skillTiles = gridManager->GetHighlightedTiles();
 
 							for (int i = 0; i < skillTiles.Num(); i++)
 							{
-								//Only target player characters
-								APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
-								if (tar)
+							
+								if (skillType == 0)
 								{
-									actionTargets.Push(tar);
+									//Offense skills only target player characters
+									APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
+									if (tar)
+									{
+										actionTargets.Push(tar);
+									}
 								}
+								else
+								{
+									//Defense skills only target enemy characters
+									AEnemyBaseGridCharacter* tar = Cast<AEnemyBaseGridCharacter>(skillTiles[i]->GetMyGridCharacter());
+									if (tar)
+									{
+										actionTargets.Push(tar);
+									}
+								}
+
 							}
 
 							btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
@@ -236,7 +254,10 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 						{
 							bHasDoneAnAction = true;
 							if (aiManager)
+							{
+								UE_LOG(LogTemp, Warning, TEXT("Called finish attacking cause target is not within skill range"));
 								aiManager->FinishedAttacking();
+							}
 
 							if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
 								crdItems.Empty();
@@ -244,25 +265,42 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 					}
 					else
 					{
-						//Regular attack
-						gridManager->ClearHighlighted();
-						gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
-						if (targetCharacter)
+						if (skillType != 1) //If the enemy intended to use a defensive skill, then that enemy was a support enemy and so was looking to support a fellow enemy and should not do regular attacks
 						{
-							if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
+							//Regular attack
+							gridManager->ClearHighlighted();
+							gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
+							if (targetCharacter)
 							{
-								btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
-								AttackUsingWeapon(targetCharacter, btlCtrl->focusRate);
-							}
-							else
-							{
-								bHasDoneAnAction = true;
-								if (aiManager)
-									aiManager->FinishedAttacking();
+								if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
+								{
+									btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
+									AttackUsingWeapon(targetCharacter, btlCtrl->focusRate);
+								}
+								else
+								{
+									bHasDoneAnAction = true;
+									if (aiManager)
+									{
+										UE_LOG(LogTemp, Warning, TEXT("Finished attacking after using a regular attack as I couldn't use a skill"));
+										aiManager->FinishedAttacking();
+									}
 
-								if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
-									crdItems.Empty();
+									if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
+										crdItems.Empty();
+								}
 							}
+						}
+						else
+						{
+							bHasDoneAnAction = true;
+							if (aiManager)
+							{
+								aiManager->FinishedAttacking();
+							}
+
+							if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
+								crdItems.Empty();
 						}
 					}
 				}
@@ -270,18 +308,24 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			}
 			else //Could not find the tile, don't break, finish the turn instead
 			{
+			UE_LOG(LogTemp, Warning, TEXT("Couldn't find a mytile so finish attacking"));
 				bHasDoneAnAction = true;
 				if (aiManager)
+				{
 					aiManager->FinishedAttacking();
+				}
 				if (crdItems.Num() > 0)
 					crdItems.Empty();
 			}
 		}
 		else //If you don't have a target yet, finish the attacking phase
 		{
+		UE_LOG(LogTemp, Warning, TEXT("Couldn't find a target so finish attacking"));
 			bHasDoneAnAction = true;
 			if (aiManager)
+			{
 				aiManager->FinishedAttacking();
+			}
 			if (crdItems.Num() > 0)
 				crdItems.Empty();
 		}
@@ -405,8 +449,7 @@ void AEnemyBaseGridCharacter::ResetCameraFocus()
 	Super::ResetCameraFocus();
 	FTimerHandle finishedAttackingHandle;
 	//This way we allow the camera to defocus from one enemy before focusing on the next
-	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate + 0.2f, false);
-
+	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate, false);
 }
 
 void AEnemyBaseGridCharacter::MoveAccordingToPath()
@@ -495,6 +538,11 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 				aiManager->FinishedMoving();
 		}
 
+	}
+	else //No target tile. We're not moving
+	{
+		if (aiManager)
+			aiManager->FinishedMoving();
 	}
 	
 }
@@ -626,6 +674,11 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
 		GetMyTile()->SetOccupied(false);
+
+		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+		{
+			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+		}
 		attacker_->YouHaveKilledYouTarget(false);
 		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
 		{
@@ -633,7 +686,7 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 		}
 
 		if (aiManager)
-			aiManager->HandleEnemyDeath(this);
+			aiManager->HandleEnemyDeath(this,bHealer);
 
 		if (animInstance)
 			animInstance->DeathAnim();
@@ -677,6 +730,10 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
 			GetMyTile()->SetOccupied(false);
+			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+			{
+				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+			}
 			Intermediate::GetInstance()->PushUnitToDead(fighterID);
 			attacker_->YouHaveKilledYouTarget(false);
 			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
@@ -684,7 +741,7 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 				crdManager->UpdateFavor(true);
 			}
 			if (aiManager)
-				aiManager->HandleEnemyDeath(this);
+				aiManager->HandleEnemyDeath(this, bHealer);
 			if (animInstance)
 				animInstance->DeathAnim();
 

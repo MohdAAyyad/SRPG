@@ -183,12 +183,15 @@ void ATile::CalculateHCost(ATile* tile_)
 {
 	if (tile_)
 	{
-		//hCost = FMath::Sqrt(FMath::Pow((GetActorLocation().X - tile_->GetActorLocation().X),2)
-					 //     + FMath::Pow((GetActorLocation().Y - tile_->GetActorLocation().Y), 2));
-
 		//Manhatten
-		hCost = FMath::Abs(GetActorLocation().X - tile_->GetActorLocation().X)
-			+ FMath::Abs(GetActorLocation().Y - tile_->GetActorLocation().Y);
+
+		int dx = FMath::Abs(GetActorLocation().X - tile_->GetActorLocation().X);
+		int dy = FMath::Abs(GetActorLocation().Y - tile_->GetActorLocation().Y);
+		int aCost = 10; //A step along an axis
+		int dCost = 14; //A step along the diagonal
+		int numOfDiagonalSteps = FMath::Min(dx, dy);
+	
+		hCost = aCost * (dx + dy) + (dCost - (2 * aCost)) * numOfDiagonalSteps;
 	}
 }
 

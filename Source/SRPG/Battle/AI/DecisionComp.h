@@ -14,7 +14,7 @@ enum EPatterns
 	ASSASSIN = 1, //Picks the player with the lowest health within its range
 	FOLLOWER = 2, //Picks an enemy close by and follows them. Targets the same enemy they're targeting. Moves the same as DEFAULT if a target has not been selected yet.
 	PEOPLEPERSON = 3, //Gets a buff when fellow enemies are close by and a nerf when not. Moves the same way as DEFAULT.
-	HEALER = 4 //Uses buff and heal skills on fellow enemies
+	SUPPORT = 4 //Uses buff and heal skills on fellow enemies
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -56,7 +56,7 @@ public:
 	AGridCharacter* FindAnotherTarget(AGridCharacter* target_);
 
 	FSkillTableStruct GetChosenSkill();
-	bool GetWillUseSkill();
+	bool GetWillUseSkill(int& skillType_);
 	void ResetCurrentTarget();
 protected:
 	virtual void BeginPlay() override;
@@ -66,18 +66,23 @@ protected:
 	AGridCharacter* FindAssassinTarget();
 	AGridCharacter* FindFollowerTarget();
 	AGridCharacter* PeoplePersonEffect();
-	AGridCharacter* FindHealerTarget();
+	AGridCharacter* FindHealTarget();
+	AGridCharacter* FindSupportTarget(TArray<AEnemyBaseGridCharacter*> deployedEnemies_,FVector myLoc_);
+	AGridCharacter* FindClosestAllyWithTheLeastHealth(TArray<AEnemyBaseGridCharacter*> echars, FVector myLoc);
 
 
 	void UpdateEnemySkills();
 	ATile* FindDefaultTile(ATile* myTile_);  //Used by most patterns
+	ATile* FindSupportTile(ATile* myTile_);
 	ATile* ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_); //Checks the ranges of the skills and the regular attack and sees which is more viable to be used
-	ATile* ChooseTileBasedOnPossibleDefenseActions(ATile* myTile_);
+	ATile* ChooseTileBasedOnPossibleSupportActions(ATile* myTile_);
+
+	void FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(int statIndex_, int currentPips_);
 	void PickTheNextUsableSkill(class UStatsComponent* statsComp_, bool offense_);
 
 
-	bool CheckIfPlayerIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
-									   TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
+	bool CheckIfTargetIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
+									   TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_, bool offense_);
 
 
 	bool CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,

@@ -57,7 +57,7 @@ void ABattleCrowd::Tick(float DeltaTime)
 void ABattleCrowd::StartCrowdPhase()
 {
 	//If favor is higher than 70  or less than 30, and we don't have a champion or a villain then elect a champion and/or a villain
-	if (playerFavor >= 0.7f || playerFavor <= 0.3f)
+	if (playerFavor >= 0.7f || playerFavor <= 0.3f && !bPermaChampion)
 	{
 		if(!champion)
 			ElectChampion();
@@ -284,6 +284,8 @@ void ABattleCrowd::ChampVillainIsDead(bool bChamp_)
 	if (bChamp_)
 	{
 		champion = nullptr;
+		if (villain)
+			villain->UnElect();
 	}
 	else
 	{

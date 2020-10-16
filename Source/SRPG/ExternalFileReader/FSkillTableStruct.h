@@ -43,7 +43,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		int fls; //How much the skill affects the crowd meter
 	UPROPERTY(BlueprintReadOnly)
-		int rge; //Skill range
+		int rge; //Skill range used for highlighting tiles
 	UPROPERTY(BlueprintReadOnly)
 		int rows; //Row speed -- Used for targeting
 	UPROPERTY(BlueprintReadOnly)

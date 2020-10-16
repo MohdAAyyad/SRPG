@@ -490,9 +490,6 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableInde
 		{
 			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
 
-			UE_LOG(LogTemp, Warning, TEXT("Row WI %d  Incoming WI %d"), row->weaponIndex, weaponIndex_);
-			UE_LOG(LogTemp, Warning, TEXT("Row SI %d  Incoming SI %d"), row->equipmentSkillsIndex, skillsIndex_);
-			UE_LOG(LogTemp, Warning, TEXT("Row LVL %d  Incoming LVL %d"), row->levelToUnlock, currentLevel_);
 			//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
 			if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
 			{
