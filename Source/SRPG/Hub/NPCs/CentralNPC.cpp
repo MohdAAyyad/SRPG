@@ -323,7 +323,7 @@ void ACentralNPC::SpendTime()
 {
 	// empty function because we don't have a hub world manager to handle time
 	// ^ comment aged well
-		if (hubManager && hubManager->GetCurrentTimeSlotsCount() - timeCost > 0)
+		if (hubManager && hubManager->GetCurrentTimeSlotsCount() - timeCost >= 0)
 		{
 			hubManager->UpdateTimeSlots(-timeCost);
 		}

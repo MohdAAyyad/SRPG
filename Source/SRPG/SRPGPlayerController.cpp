@@ -8,6 +8,8 @@
 #include "Hub/NPC.h"
 #include "Engine/World.h"
 #include "NavigationSystem.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 ASRPGPlayerController::ASRPGPlayerController()
 {
@@ -16,9 +18,14 @@ ASRPGPlayerController::ASRPGPlayerController()
 	
 }
 
-void ASRPGPlayerController::SetPlayerReference(ASRPGCharacter* ref_)
+void ASRPGPlayerController::SetPlayerReference_Implementation(ASRPGCharacter* ref_)
 {
 	player = ref_;
+}
+
+bool ASRPGPlayerController::SetPlayerReference_Validate(ASRPGCharacter* ref_)
+{
+	return true;
 }
 
 void ASRPGPlayerController::CheckCollisionUnderMouse()
@@ -55,14 +62,22 @@ void ASRPGPlayerController::CheckCollisionUnderMouse()
 	}
 }
 
+void ASRPGPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	shouldMove = false;
+	radius = 100.0f;
+}
+
 void ASRPGPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
 	// keep updating the destination every tick while desired
-	if (bMoveToMouseCursor)
+	if (bMoveToMouseCursor || shouldMove)
 	{
-		MoveToMouseCursor();
+		SetNewMoveDestination(target.ImpactPoint);
 	}
 }
 
@@ -77,16 +92,21 @@ void ASRPGPlayerController::SetupInputComponent()
 }
 
 
-void ASRPGPlayerController::MoveToMouseCursor()
+void ASRPGPlayerController::MoveToMouseCursor_Implementation()
 {	
 	// Trace to see what is under the mouse cursor
-	FHitResult Hit;
-	GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+	GetHitResultUnderCursor(ECC_Visibility, false, target);
 
-	if (Hit.bBlockingHit)
+	if (shouldMove)
 	{
-		SetNewMoveDestination(Hit.ImpactPoint);
+		//shouldMove = true;
+		
 	}
+}
+
+bool ASRPGPlayerController::MoveToMouseCursor_Validate()
+{
+	return true;
 }
 
 void ASRPGPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIndex, const FVector Location)
@@ -106,20 +126,44 @@ void ASRPGPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIn
 
 void ASRPGPlayerController::SetNewMoveDestination_Implementation(const FVector DestLocation)
 {
-	APawn* const MyPawn = GetPawn();
-	if (MyPawn)
+	
+	if (shouldMove)
 	{
-		UNavigationSystemV1* const nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
-		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
-
-		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if (nav && (Distance >50.0f))
+		APawn* const MyPawn = GetPawn();
+		if (MyPawn)
 		{
-			// this function doesn't like MP so we'll have to create a new function for moving characters
-			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
-			//MyPawn->AddMovementInput(DestLocation);
+			//UNavigationSystemV1* const nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
+			float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
+
+			// We need to issue move command only if far enough in order for walk animation to play correctly
+
+			if (player == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("player Ref is nullptr"));
+			}
+
+			//float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
+			if (player && (Distance > radius))
+			{
+				FVector result = (DestLocation - MyPawn->GetActorLocation());
+				result.Normalize();
+				result *= MyPawn->GetMovementComponent()->GetMaxSpeed();
+				// this function doesn't like MP so we'll have to create a new function for moving characters
+				//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
+				MyPawn->AddMovementInput(result);
+
+				//nav->SimpleMoveToLocation(this, DestLocation);
+				//MyPawn->AddMovementInput(DestLocation);
+			}
+
+			if(Distance < radius)
+			{
+				shouldMove = false;
+			}
 		}
 	}
+	
+	
 }
 
 bool ASRPGPlayerController::SetNewMoveDestination_Validate(const FVector DestLocation)
@@ -127,15 +171,27 @@ bool ASRPGPlayerController::SetNewMoveDestination_Validate(const FVector DestLoc
 	return true;
 }
 
-void ASRPGPlayerController::OnSetDestinationPressed()
+void ASRPGPlayerController::OnSetDestinationPressed_Implementation()
 {
 	// set flag to keep updating destination until released
 	bMoveToMouseCursor = true;
+	shouldMove = true;
+	MoveToMouseCursor();
 }
 
-void ASRPGPlayerController::OnSetDestinationReleased()
+bool ASRPGPlayerController::OnSetDestinationPressed_Validate()
+{
+	return true;
+}
+
+void ASRPGPlayerController::OnSetDestinationReleased_Implementation()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+bool ASRPGPlayerController::OnSetDestinationReleased_Validate()
+{
+	return true;
 }
 

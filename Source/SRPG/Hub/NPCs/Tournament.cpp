@@ -32,16 +32,21 @@ void ATournament::BeginPlay()
 	op2 = FOpponentStruct();
 	op2.InitStruct(Intermediate::GetInstance()->GetProtagonistLevel(), Intermediate::GetInstance()->GetCurrentRosterSize());
 
-	fighterIndex = -1;
 	hasSupportedTeam = false;
-
+	spentTournamentUnits = 0;
+	spentUnits = 0;
+	timeCost = 0;
 }
 
 void ATournament::EndDialogue()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
 	if (widget)
+	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
+		spentTournamentUnits = 0;
+	}
+
 }
 
 void ATournament::SetMoneyCost(int cost_, bool op_)
@@ -52,17 +57,19 @@ void ATournament::SetMoneyCost(int cost_, bool op_)
 	// cost check for money here when functionality is added
 	if (cost_ > 0)
 	{
-		if (currentMoney - cost_ >= 0)
+		if (Intermediate::GetInstance()->GetCurrentMoney() - cost_ >= 0)
 		{
 			moneyCost = cost_;
 
 			if (op_)
 			{
+				betTeam = true;
 				hasBetOnOpponent = true;
 			}
 			else
 			{
-				hasBetOnOpponent = false;
+				betTeam = false;
+				hasBetOnOpponent = true;
 			}
 
 			SpendCost();
@@ -80,23 +87,25 @@ void ATournament::SupportTeam(bool op1_)
 {
 	//TODO
 	//Put units on hold on the intermediate
-	if (fighterIndex > -1 && hasSupportedTeam == false)
+	if (hasSupportedTeam == false && spentTournamentUnits == 2)
 	{
 		if (op1_)
 		{
-			op1SuccessChance += 20;
-			op2SuccessChance -= 20;
+			op1SuccessChance += 5;
+			op2SuccessChance -= 5;
 			// put the unit selected on hold
-			Intermediate::GetInstance()->PutUnitOnHold(fighterIndex);
+			//PutUnitOnHold();
 			hasSupportedTeam = true;
+			hasBetOnOpponent = true;
+			UE_LOG(LogTemp, Warning, TEXT("Supported OP1"));
 		}
 		else
 		{
-			op1SuccessChance -= 20;
-			op2SuccessChance += 20;
-
-			Intermediate::GetInstance()->PutUnitOnHold(fighterIndex);
-			hasSupportedTeam = true;
+			op1SuccessChance -= 5;
+			op2SuccessChance += 5;
+			UE_LOG(LogTemp, Warning, TEXT("Supported OP2"));
+			hasSupportedTeam = true; 
+			hasBetOnOpponent = false;
 		}
 	}
 
@@ -111,18 +120,34 @@ FOpponentStruct ATournament::SimulateMatch()
 		if (winningResult <= op1SuccessChance)
 		{
 			winner = true;
+			UE_LOG(LogTemp, Warning, TEXT("OP1 Won"));
 		}
 		else
 		{
 			winner = false;
+			UE_LOG(LogTemp, Warning, TEXT("OP2 Won"));
 		}
 
 		// If we bet and won
-		if (moneyCost != 0 && hasBetOnOpponent == winner)
+		if (moneyCost != 0 && hasBetOnOpponent && betTeam == winner)
 		{
 			// award the player 1.5 * money cost
-			Intermediate::GetInstance()->SpendMoney(-(moneyCost * 1.5));
+			Intermediate::GetInstance()->AddMoney(moneyCost * 1.5);
+			UE_LOG(LogTemp, Warning, TEXT("Bet Won, money added"));
 			moneyCost = 0;
+		}
+		else if (hasBetOnOpponent != winner && hasSupportedTeam && unitsOnHold.Num() > 0)
+		{
+			// lose the fighters you sacrificed
+
+			for (int i : unitsOnHold)
+			{
+				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
+				FName converted = *FString::FromInt(i);
+				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+			}
+			// clear out the array
+			unitsOnHold.Empty();
 		}
 		activityAlreadyDone = true;
 
@@ -177,4 +202,9 @@ void ATournament::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AAct
 			}
 		}
 	}
+}
+
+bool ATournament::GetHasSupportedTeam()
+{
+	return hasSupportedTeam;
 }
