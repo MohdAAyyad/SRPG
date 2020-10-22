@@ -143,7 +143,7 @@ void ASRPGPlayerController::SetNewMoveDestination_Implementation(const FVector D
 			}
 
 			//float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
-			if (player && (Distance > radius))
+			if ((Distance > radius))
 			{
 				FVector result = (DestLocation - MyPawn->GetActorLocation());
 				result.Normalize();

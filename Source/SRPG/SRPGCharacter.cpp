@@ -95,24 +95,30 @@ void ASRPGCharacter::BeginPlay()
 
 void ASRPGCharacter::SetupController_Implementation()
 {
-	ASRPGPlayerController* controller;
-	if (HasAuthority())
-	{
-		controller = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
-	}
-	else
-	{
-		ASRPGGameState* state = Cast<ASRPGGameState>(GetWorld()->GetGameState());
-		controller = Cast<ASRPGPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), state->GetCurrentControllerIndex()));
-		state->SetCurrentControllerIndex(state->GetCurrentControllerIndex() + 1);
-	}
+	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
+	//if (HasAuthority())
+	//{
+	//	controller = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	//}
+	//else
+	//{
+	//	ASRPGGameState* state = Cast<ASRPGGameState>(GetWorld()->GetGameState());
+	//	controller = Cast<ASRPGPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), state->GetCurrentControllerIndex()));
+	//	state->SetCurrentControllerIndex(state->GetCurrentControllerIndex() + 1);
+	//}
 
-	UE_LOG(LogTemp, Warning, TEXT("controllers %d"), GetWorld()->GetNumPlayerControllers());
+	//UE_LOG(LogTemp, Warning, TEXT("controllers %d"), GetWorld()->GetNumPlayerControllers());
+	//if (controller)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Player ref set"));
+
+	//}
+
 	if (controller)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player ref set"));
 		controller->SetPlayerReference(this);
 	}
+
 }
 
 bool ASRPGCharacter::SetupController_Validate()
