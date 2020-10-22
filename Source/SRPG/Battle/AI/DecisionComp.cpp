@@ -657,7 +657,7 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleSupportActions(ATile* myTile_)
 	ATile* resultTile = nullptr;
 
 	//Get our movement tiles
-	gridManager->UpdateCurrentTile(ownerEnemy->GetOriginTile(), pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_SUPP, -1);
+	gridManager->UpdateCurrentTile(ownerEnemy->GetOriginTile(), pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM, -1);
 	movementTiles = gridManager->GetHighlightedTiles();
 	gridManager->ClearHighlighted();
 
@@ -695,7 +695,7 @@ bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(class AGridManager* grid_, cla
 	}
 	else
 	{
-		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), defenseSkills[defenseSkillWithTheMaxRangeIndex].rge, defenseSkills[defenseSkillWithTheMaxRangeIndex].rge + 1, TILE_SUPP, defenseSkills[defenseSkillWithTheMaxRangeIndex].pure);
+		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), defenseSkills[defenseSkillWithTheMaxRangeIndex].rge, defenseSkills[defenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENM, defenseSkills[defenseSkillWithTheMaxRangeIndex].pure);
 	}
 	//Get the tiles that put the enemy within range of the target.
 	rangeTiles_ = grid_->GetHighlightedTiles();
