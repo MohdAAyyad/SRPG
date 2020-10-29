@@ -33,7 +33,7 @@ void UPathComponent::SetCurrentTile(ATile* tile_)
 	currentTile->SetOccupied(false);
 }
 
-TArray<FVector> UPathComponent::GetPath()
+TArray<FVector> UPathComponent::GetPathToTargetTile(int highlightIndex_)
 {
 	TArray<ATile*> open;
 	TArray<ATile*> closed;
@@ -65,7 +65,8 @@ TArray<FVector> UPathComponent::GetPath()
 			{
 				if (currentNode->GetImmediateNeighbors()[i] != nullptr)
 				{
-					if (closed.Contains(currentNode->GetImmediateNeighbors()[i])) //If the neighbor has already been visited, move on to the next one
+					//UE_LOG(LogTemp, Warning, TEXT("Checking hINdex %d"), currentNode->GetImmediateNeighbors()[i]->GetHighlighted());
+					if (closed.Contains(currentNode->GetImmediateNeighbors()[i]) || (currentNode->GetImmediateNeighbors()[i]->GetHighlighted()!= highlightIndex_ && highlightIndex_ != -1)) //If the neighbor has already been visited or is not highlighted, move on to the next one. If the Hindex is -1 then this function is being called by an enemy and since the target tile can be non-highighlighted we need to negate this check, otherwise, we'll neverfind a path
 						continue;
 
 					currentNode->GetImmediateNeighbors()[i]->SetParentTile(currentNode); // Update the parent of the tile
@@ -90,7 +91,7 @@ TArray<FVector> UPathComponent::GetPath()
 			{
 				if (currentNode->GetDiagonalNeighbors()[d] != nullptr)
 				{
-					if (closed.Contains(currentNode->GetDiagonalNeighbors()[d]))
+					if (closed.Contains(currentNode->GetDiagonalNeighbors()[d]) || (currentNode->GetDiagonalNeighbors()[d]->GetHighlighted() != highlightIndex_ && highlightIndex_ != -1))
 						continue;
 
 					currentNode->GetDiagonalNeighbors()[d]->SetParentTile(currentNode);

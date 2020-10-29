@@ -237,7 +237,7 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 		{
 			pathComp->SetTargetTile(target_);
 			pathComp->SetCurrentTile(GetMyTile());
-			movementPath = pathComp->GetPath();
+			movementPath = pathComp->GetPathToTargetTile(TILE_MOV);
 			if(movementPath.Num()>0)
 				bMoving = true;
 		}

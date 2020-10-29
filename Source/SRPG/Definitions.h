@@ -204,21 +204,23 @@
 #define TILE_ENMH 5
 #endif
 
+#ifndef TILE_ENMA //Enemy attack
+#define TILE_ENMA 6
+#endif
+
 #ifndef TILE_SKL
-#define TILE_SKL 6
+#define TILE_SKL 7
 #endif
 
 #ifndef TILE_SKLT
-#define TILE_SKLT 7
+#define TILE_SKLT 8
 #endif
 
 #ifndef TILE_CRD
-#define TILE_CRD 8
+#define TILE_CRD 9
 #endif
 
-#ifndef TILE_SUPP
-#define TILE_SUPP 9
-#endif
+
 
 #pragma endregion
 
