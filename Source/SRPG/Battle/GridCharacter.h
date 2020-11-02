@@ -99,6 +99,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Structure")
 		bool bHasDoneAnAction;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+		TArray<TSubclassOf<class AWeaponBase>> weaponMeshes;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

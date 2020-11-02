@@ -34,6 +34,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "ExternalFileReader/FighterTableStruct.h"
+#include "Weapons/WeaponBase.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -139,6 +140,27 @@ void AGridCharacter::BeginPlay()
 
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
+	//Spawn and attack the weapons
+	if (weaponMeshes.Num()>0)
+	{
+		if (weaponMeshes[0])
+		{
+			FName weaponSocketName = TEXT("WeaponSocket");
+			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[0]);
+			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocketName);
+		}
+	}
+
+	if (weaponMeshes.Num() > 1)
+	{
+		if (weaponMeshes[1])
+		{
+			FName shieldSocketName = TEXT("ShieldSocket");
+			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[1]);
+			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, shieldSocketName);
+		}
+	}
+
 }
 
 void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCrowd* crd_)
@@ -242,6 +264,7 @@ void AGridCharacter::MoveToThisTile(ATile* target_)
 				bMoving = true;
 		}
 	}
+	
 }
 
 void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
