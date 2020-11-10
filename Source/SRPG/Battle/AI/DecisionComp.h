@@ -45,6 +45,9 @@ protected:
 	int skillType; //-1 if enemy will not use a skill, 0 if offense skill, and 1 if defense skill
 	int skillChance; //Random number affected by archetype
 
+	//Items
+	TArray<class ACrowdItem*> crdItems;
+
 public:	
 	UDecisionComp();
 	AGridCharacter* FindTheOptimalTargetCharacter();
@@ -58,6 +61,13 @@ public:
 	FSkillTableStruct GetChosenSkill();
 	bool GetWillUseSkill(int& skillType_);
 	void ResetCurrentTarget();
+
+	//Items
+
+	ACrowdItem* UpdateTargetItem(class AGridManager* grid_, ATile* originTile_, int rows_, int depths_);
+	void AddCrdItem(ACrowdItem* newItem_);
+	void RemoveCrdItem(ACrowdItem* newItem_);
+	void ClearCrdItems();
 protected:
 	virtual void BeginPlay() override;
 
@@ -81,14 +91,14 @@ protected:
 	void PickTheNextUsableSkill(class UStatsComponent* statsComp_, bool offense_);
 
 
-	bool CheckIfTargetIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
+	bool CheckIfTargetIsInRangeOfSkill(AGridManager* grid_, class UPathComponent*path_,
 									   TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_, bool offense_);
 
 
-	bool CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
+	bool CheckIfPlayerIsInRangeOfRegularAttack(AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 												TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
 
-	void PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
+	void PickAttackOrSkillBasedOnLeastRange(AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 		TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
 
 

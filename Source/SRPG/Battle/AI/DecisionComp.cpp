@@ -12,6 +12,7 @@
 #include "../../ExternalFileReader/ExternalFileReader.h"
 #include "../StatsComponent.h"
 #include "../PathComponent.h"
+#include "../Crowd/CrowdItem.h"
 
 // Sets default values for this component's properties
 UDecisionComp::UDecisionComp()
@@ -621,7 +622,17 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 				}
 				else //Chose to do a regular attack
 				{
-					CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+					if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+					{
+						return resultTile;
+					}
+					else
+					{
+						//If we're in range of neither, then choose a tile based on the one with the least range
+						PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+
+						//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+					}
 				}
 			}
 			else //Not enough pips to use the skills with the longest range. So look for the next skill with the longest range
@@ -634,13 +645,33 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 		else
 		{
 			//Can't use skills so just use a regular attack
-			CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+			if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+			{
+				return resultTile;
+			}
+			else
+			{
+				//If we're in range of neither, then choose a tile based on the one with the least range
+				PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+
+				//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+			}
 		}
 	}
 	else
 	{
 		//Don't have any offensive skills so just use a regular attack
-		CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+		if (CheckIfPlayerIsInRangeOfRegularAttack(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile))
+		{
+			return resultTile;
+		}
+		else
+		{
+			//If we're in range of neither, then choose a tile based on the one with the least range
+			PickAttackOrSkillBasedOnLeastRange(gridManager, statsComp, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile);
+
+			//If we can't find a tile here^ result tile will remain nullptr which will make FindDefaultTile call FindAnotherTarget
+		}
 
 	}
 
@@ -657,7 +688,7 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleSupportActions(ATile* myTile_)
 	ATile* resultTile = nullptr;
 
 	//Get our movement tiles
-	gridManager->UpdateCurrentTile(ownerEnemy->GetOriginTile(), pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_SUPP, -1);
+	gridManager->UpdateCurrentTile(ownerEnemy->GetOriginTile(), pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM, -1);
 	movementTiles = gridManager->GetHighlightedTiles();
 	gridManager->ClearHighlighted();
 
@@ -685,41 +716,44 @@ void UDecisionComp::FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(i
 	}
 }
 
-bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(class AGridManager* grid_, class UPathComponent*path_,
+bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(AGridManager* grid_, class UPathComponent*path_,
 	TArray<ATile*>& movementTiles_, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_, bool offense_)
 {
 	grid_->ClearHighlighted();
-	if (offense_)
+	if (currentTarget)
 	{
-		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENM, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
-	}
-	else
-	{
-		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), defenseSkills[defenseSkillWithTheMaxRangeIndex].rge, defenseSkills[defenseSkillWithTheMaxRangeIndex].rge + 1, TILE_SUPP, defenseSkills[defenseSkillWithTheMaxRangeIndex].pure);
-	}
-	//Get the tiles that put the enemy within range of the target.
-	rangeTiles_ = grid_->GetHighlightedTiles();
-	grid_->ClearHighlighted();
-
-	if (!rangeTiles_.Contains(*myTile_)) //Check if we're not within attacking range
-	{
-		for (int i = 0; i < rangeTiles_.Num(); i++)
+		if (offense_)
 		{
-			if (movementTiles_.Contains(rangeTiles_[i]))
+			grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
+		}
+		else
+		{
+			grid_->UpdateCurrentTile(currentTarget->GetMyTile(), defenseSkills[defenseSkillWithTheMaxRangeIndex].rge, defenseSkills[defenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, defenseSkills[defenseSkillWithTheMaxRangeIndex].pure);
+		}
+		//Get the tiles that put the enemy within range of the target.
+		rangeTiles_ = grid_->GetHighlightedTiles();
+		grid_->ClearHighlighted();
+
+		if (!rangeTiles_.Contains(*myTile_)) //Check if we're not within attacking range
+		{
+			for (int i = 0; i < rangeTiles_.Num(); i++)
 			{
-				if (!rangeTiles_[i]->GetOccupied())
+				if (movementTiles_.Contains(rangeTiles_[i]))
 				{
-					*resultTile_ = rangeTiles_[i]; //That's the tile we're going for
-					return true;
+					if (!rangeTiles_[i]->GetOccupied())
+					{
+						*resultTile_ = rangeTiles_[i]; //That's the tile we're going for
+						return true;
+					}
 				}
 			}
 		}
-	}
-	else
-	{
-		//We're not gonna move so the target tile is the same as the tile we're currently on
-		*resultTile_ = *myTile_;
-		return true;
+		else
+		{
+			//We're not gonna move so the target tile is the same as the tile we're currently on
+			*resultTile_ = *myTile_;
+			return true;
+		}
 	}
 
 	*resultTile_ = nullptr;
@@ -732,7 +766,7 @@ bool UDecisionComp::CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* gr
 {
 	//Check if any of the range tiles is within our movement range
 	rangeTiles_.Empty(); //Clear the range tiles
-	grid_->UpdateCurrentTile(currentTarget->GetMyTile(), statsComp_->GetStatValue(STAT_WRS), statsComp_->GetStatValue(STAT_WDS), TILE_ENM, statsComp_->GetStatValue(STAT_PURE));
+	grid_->UpdateCurrentTile(currentTarget->GetMyTile(), statsComp_->GetStatValue(STAT_WRS), statsComp_->GetStatValue(STAT_WDS), TILE_ENMA, statsComp_->GetStatValue(STAT_PURE));
 	rangeTiles_ = grid_->GetHighlightedTiles();
 	grid_->ClearHighlighted();
 
@@ -762,6 +796,7 @@ bool UDecisionComp::CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* gr
 void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 	TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Picking attack based on least range"));
 	if (statsComp_->GetStatValue(STAT_WRS) <= offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge)
 	{
 		//Find an non-occupied range tile
@@ -781,7 +816,7 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 	else //Do the same for skills. 
 	{
 		grid_->ClearHighlighted();
-		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENM, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
+		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
 		rangeTiles_ = grid_->GetHighlightedTiles();
 		grid_->ClearHighlighted();
 
@@ -800,6 +835,9 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 			skillType = 0;
 		}
 	}
+
+	if(*resultTile_)
+		UE_LOG(LogTemp, Warning, TEXT("Got the tile based on least range"));
 }
 
 
@@ -848,6 +886,69 @@ void UDecisionComp::ResetCurrentTarget()
 {
 	//Called when our main target is dead
 	currentTarget = nullptr;
+}
+
+//Items
+
+ACrowdItem* UDecisionComp::UpdateTargetItem(AGridManager* grid_, ATile* originTile_, int rows_, int depths_)
+{
+	if (ownerEnemy)
+	{
+		if (grid_)
+		{
+			if (originTile_)
+			{
+				grid_->ClearHighlighted();
+				grid_->UpdateCurrentTile(originTile_, rows_, depths_, TILE_ENM, 0);
+
+				for (int i = 0; i < crdItems.Num(); i++)
+				{
+					if (crdItems[i])
+					{
+						//TODO
+						//Check if we need the item first before marking it
+
+						//If we have detected an item, make sure it's within movement range before marking it
+						ATile* tile_ = crdItems[i]->GetMyTile();
+						if (tile_)
+						{
+							if (tile_->GetHighlighted() == TILE_ENM)
+							{
+								if (crdItems[i]->MarkItem(ownerEnemy)) //True, means we've marked this items as our target and no other enemy should go for it
+								{
+									return crdItems[i];
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+void UDecisionComp::AddCrdItem(ACrowdItem* newItem_)
+{
+	crdItems.Push(newItem_);
+}
+void UDecisionComp::RemoveCrdItem(ACrowdItem* newItem_)
+{
+	if (crdItems.Num() > 0)
+	{
+		if (crdItems.Contains(newItem_))
+		{
+			crdItems.Remove(newItem_);
+		}
+	}
+}
+void UDecisionComp::ClearCrdItems()
+{
+	if (crdItems.Num() > 0)
+	{
+		crdItems.Empty();
+	}
 }
 
 /*

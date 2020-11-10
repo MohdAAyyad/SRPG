@@ -128,7 +128,7 @@ void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int
 		}
 		if (pure_ == 0) //False
 		{
-			if (index_ == TILE_ATK || index_ == TILE_SKL) //Non-pure attack tiles get do not highlight the tiles beyond an obstacles
+			if (index_ == TILE_ATK || index_ == TILE_SKL || index_ == TILE_ENMA) //Non-pure attack tiles get do not highlight the tiles beyond an obstacles
 			{
 				HighlightAttackTiles(rowSpeed_, depth_, index_);
 			}

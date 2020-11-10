@@ -31,7 +31,7 @@ protected:
 public:	
 	void SetCurrentTile(ATile* tile_);
 	void SetTargetTile(ATile* tile_);
-	TArray<FVector> GetPath();
+	TArray<FVector> GetPathToTargetTile(int highlightIndex_);
 	TArray<ATile*> GetMovementPath();
 
 	void UpdateMovementPath(ATile* tile_);

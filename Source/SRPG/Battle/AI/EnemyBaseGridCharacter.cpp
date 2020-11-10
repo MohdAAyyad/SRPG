@@ -158,12 +158,21 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 void AEnemyBaseGridCharacter::StartEnemyTurn()
 {
 	bWillMoveAgain = true; //Ready to obtain a new item
-	targetItem = nullptr;
 	bHasDoneAnAction = false;
 	bLookForANewTargetMidAttack = false;
 	statsComp->CheckStatBuffNerfStatus();
 	decisionComp->ResetCurrentTarget(); //Reset the current target on the start of the turn to maek sure we always get the optimal target
-	CheckIfWeHaveAnyTargetItems();
+	UpdateOriginTile();
+	targetItem = decisionComp->UpdateTargetItem(gridManager, originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
+
+	if (targetItem) //If we have a target item, then go there
+	{
+		MoveToTheTileWithinRangeOfThisTile(nullptr, targetItem->GetMyTile());
+	}
+	else //Otherwise, just go to your target player
+	{
+		MoveCloserToTargetPlayer(nullptr);
+	}
 }
 
 void AEnemyBaseGridCharacter::Selected()
@@ -207,18 +216,18 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			{
 				if (decisionComp)
 				{
-
+					//Check if we're using a skill
 					if (decisionComp->GetWillUseSkill(skillType))
 					{
 						chosenSkill = decisionComp->GetChosenSkill();
 						gridManager->ClearHighlighted();
-						gridManager->UpdateCurrentTile(myTile_, chosenSkill.rge, chosenSkill.rge +1, TILE_ENM, chosenSkill.pure);
+						gridManager->UpdateCurrentTile(myTile_, chosenSkill.rge, chosenSkill.rge +1, TILE_ENMA, chosenSkill.pure);
 
-						if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the target within the skill's range?
+						if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENMA) //Is the target within the skill's range?
 						{
 							//Now clear the highlighted tiles and highlight new tiles based on the skill's own row and depth speeds starting from the target's tile
 							gridManager->ClearHighlighted();
-							gridManager->UpdateCurrentTile(targetCharacter->GetMyTile(), chosenSkill.rows, chosenSkill.depths, TILE_ENM, chosenSkill.pure);
+							gridManager->UpdateCurrentTile(targetCharacter->GetMyTile(), chosenSkill.rows, chosenSkill.depths, TILE_ENMA, chosenSkill.pure);
 							//Get all the characters on top of the hilighted tiles
 							TArray<ATile*> skillTiles = gridManager->GetHighlightedTiles();
 
@@ -231,7 +240,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 									APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
 									if (tar)
 									{
-										actionTargets.Push(tar);
+										if(!actionTargets.Contains(tar))
+											actionTargets.Push(tar);
 									}
 								}
 								else
@@ -240,7 +250,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 									AEnemyBaseGridCharacter* tar = Cast<AEnemyBaseGridCharacter>(skillTiles[i]->GetMyGridCharacter());
 									if (tar)
 									{
-										actionTargets.Push(tar);
+										if (!actionTargets.Contains(tar))
+											actionTargets.Push(tar);
 									}
 								}
 
@@ -255,12 +266,11 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 							bHasDoneAnAction = true;
 							if (aiManager)
 							{
-								UE_LOG(LogTemp, Warning, TEXT("Called finish attacking cause target is not within skill range"));
 								aiManager->FinishedAttacking();
 							}
 
-							if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
-								crdItems.Empty();
+							if(decisionComp) //Look for new items on your next turn as someone may take your item on their turn
+								decisionComp->ClearCrdItems();
 						}
 					}
 					else
@@ -269,10 +279,10 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 						{
 							//Regular attack
 							gridManager->ClearHighlighted();
-							gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENM, statsComp->GetStatValue(STAT_PURE));
+							gridManager->UpdateCurrentTile(myTile_, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ENMA, statsComp->GetStatValue(STAT_PURE));
 							if (targetCharacter)
 							{
-								if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENM) //Is the player within attack range?
+								if (targetCharacter->GetMyTile()->GetHighlighted() == TILE_ENMA) //Is the player within attack range?
 								{
 									btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
 									AttackUsingWeapon(targetCharacter, btlCtrl->focusRate);
@@ -282,12 +292,11 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 									bHasDoneAnAction = true;
 									if (aiManager)
 									{
-										UE_LOG(LogTemp, Warning, TEXT("Finished attacking after using a regular attack as I couldn't use a skill"));
 										aiManager->FinishedAttacking();
 									}
 
-									if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
-										crdItems.Empty();
+									if (decisionComp) //Look for new items on your next turn as someone may take your item on their turn
+										decisionComp->ClearCrdItems();
 								}
 							}
 						}
@@ -299,8 +308,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 								aiManager->FinishedAttacking();
 							}
 
-							if (crdItems.Num() > 0) //Look for new items on your next turn as someone may take your item on their turn
-								crdItems.Empty();
+							if (decisionComp) //Look for new items on your next turn as someone may take your item on their turn
+								decisionComp->ClearCrdItems();
 						}
 					}
 				}
@@ -308,26 +317,25 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			}
 			else //Could not find the tile, don't break, finish the turn instead
 			{
-			UE_LOG(LogTemp, Warning, TEXT("Couldn't find a mytile so finish attacking"));
 				bHasDoneAnAction = true;
 				if (aiManager)
 				{
 					aiManager->FinishedAttacking();
 				}
-				if (crdItems.Num() > 0)
-					crdItems.Empty();
+
+				if (decisionComp)
+					decisionComp->ClearCrdItems();
 			}
 		}
 		else //If you don't have a target yet, finish the attacking phase
 		{
-		UE_LOG(LogTemp, Warning, TEXT("Couldn't find a target so finish attacking"));
 			bHasDoneAnAction = true;
 			if (aiManager)
 			{
 				aiManager->FinishedAttacking();
 			}
-			if (crdItems.Num() > 0)
-				crdItems.Empty();
+			if (decisionComp)
+				decisionComp->ClearCrdItems();
 		}
 	}
 }
@@ -449,7 +457,7 @@ void AEnemyBaseGridCharacter::ResetCameraFocus()
 	Super::ResetCameraFocus();
 	FTimerHandle finishedAttackingHandle;
 	//This way we allow the camera to defocus from one enemy before focusing on the next
-	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate, false);
+	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate * 3.5f, false);
 }
 
 void AEnemyBaseGridCharacter::MoveAccordingToPath()
@@ -472,6 +480,7 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 				{
 					if (aiManager)
 					{
+						GetMyTile()->SetOccupied(true);
 						aiManager->FinishedMoving();
 					}
 				}
@@ -502,8 +511,11 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 
 		pathComp->SetCurrentTile(startingTile_);
 		pathComp->SetTargetTile(targetTile_);
-		pathComp->GetPath(); //Get the whole path towards the target
+		pathComp->GetPathToTargetTile(-1); //Get the whole path towards the target
 		TArray<ATile*> tPath = pathComp->GetMovementPath();
+
+		if(tPath.Num()>0)
+			UE_LOG(LogTemp, Warning, TEXT("TPath is larget than zero"));
 
 		TArray<int> tileVecIndexes;
 		//We only care about the tiles within movement range
@@ -511,6 +523,7 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 		{
 			if (tPath[i]->GetHighlighted() == TILE_ENM)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Found TILE_ENM"));
 				tileVecIndexes.Push(i);
 			}
 		}
@@ -524,7 +537,6 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 		//Sets it to occupied as well before actually moving to avoid two enemies deciding to go for the same tile
 		if (tPath.Num() > 0 && movementPath.Num() > 0 && tileVecIndexes.Num()>0 && pathComp)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Adjusting path"));
 			pathComp->AdjustPath(tPath[tileVecIndexes[0]], movementPath);
 		}
 
@@ -535,69 +547,27 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 		else
 		{
 			if (aiManager)
+			{
+				GetMyTile()->SetOccupied(true);
 				aiManager->FinishedMoving();
+			}
 		}
 
 	}
 	else //No target tile. We're not moving
 	{
 		if (aiManager)
+		{
+			GetMyTile()->SetOccupied(true);
 			aiManager->FinishedMoving();
+		}
 	}
 	
 }
-
-void AEnemyBaseGridCharacter::CheckIfWeHaveAnyTargetItems()
-{
-	UpdateOriginTile();
-
-	if (crdItems.Num() > 0)
-	{
-		if (gridManager)
-		{
-			gridManager->ClearHighlighted();
-			gridManager->UpdateCurrentTile(originTile, pathComp->GetRowSpeed(), pathComp->GetDepth(), TILE_ENM,0);
-
-			for (int i = 0; i < crdItems.Num(); i++)
-			{
-				if (crdItems[i])
-				{
-					//TODO
-					//Check if we need the item first before marking it
-					
-					//If we have detected an item, make sure it's within movement range before marking it
-					ATile* tile_ = crdItems[i]->GetMyTile();
-					if (tile_)
-					{
-						if (tile_->GetHighlighted() == TILE_ENM)
-						{
-							if (crdItems[i]->MarkItem(this)) //True, means we've marked this items as our target and no other enemy should go for it
-							{
-								targetItem = crdItems[i];
-								break;
-							}
-						}
-					}
-
-				}
-			}
-		}
-	}		
-
-	if (targetItem) //If we have a target item, then go there
-	{
-		MoveToTheTileWithinRangeOfThisTile(nullptr, targetItem->GetMyTile());
-	}
-	else //Otherwise, just go to your target player
-	{
-		MoveCloserToTargetPlayer(nullptr);
-	}
-}
-
 void AEnemyBaseGridCharacter::ItemIsUnreachable(ATile* startingTile_)
 {
-	if (crdItems.Contains(targetItem))
-		crdItems.Remove(targetItem);
+	if (decisionComp)
+		decisionComp->RemoveCrdItem(targetItem);
 	targetItem = nullptr;
 
 	if (movementPath.Num() > 0)
@@ -619,7 +589,8 @@ void AEnemyBaseGridCharacter::DetectItem(UPrimitiveComponent* overlappedComponen
 		ACrowdItem* item_ = Cast<ACrowdItem>(otherActor_);
 		if (item_)
 		{
-			crdItems.Push(item_);
+			if (decisionComp)
+				decisionComp->AddCrdItem(item_);
 		}
 
 	}
@@ -641,8 +612,8 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 			//TODO
 			//Get the item's value and update stats
 
-			if (crdItems.Contains(item_))
-				crdItems.Remove(item_);
+			if (decisionComp)
+				decisionComp->RemoveCrdItem(item_);
 			item_->Obtained(GetActorLocation());
 
 			if (item_ != targetItem)//We've obtained an item that we did not mark, we need to let it tell the enemy that marked that it's gone
