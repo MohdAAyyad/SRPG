@@ -8,6 +8,8 @@
 #include "Intermediary/Intermediate.h"
 #include "Definitions.h"
 #include "Components/WidgetComponent.h"
+#include "NPCs/Tournament.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -20,6 +22,8 @@ AHubWorldManager::AHubWorldManager()
 	RootComponent = root;
 
 	widget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
 }
 
@@ -52,6 +56,8 @@ void AHubWorldManager::BeginPlay()
 	{
 		widget->GetUserWidgetObject()->AddToViewport();
 	}
+
+	firstTimeInfoSpawn = true;
 }
 
 // Called every frame
@@ -102,6 +108,21 @@ void AHubWorldManager::UpdateTimeSlots(int value_)
 		// tell the intermediate that we're out of timeslots
 
 		timeSlots = 0;
+	}
+
+	// tell the tournament NPC to go simulate the match and spawn brand new NPCs that say dialogue lines that will correspond to the archetype
+
+	if (tournament && firstTimeInfoSpawn)
+	{
+		FOpponentStruct opp = tournament->SimulateMatch();
+
+		ANPC* npc = SpawnNPC(0);
+		// give the npc the line it needs
+		FDialogueTableStruct row = fileReader->FindDialogueTableRow(FName(*FString::FromInt(opp.archtype)), 0);
+		npc->SetLine(row.line);
+		firstTimeInfoSpawn = false;
+
+		UE_LOG(LogTemp, Error, TEXT("Spawned Info NPC"));
 	}
 }
 
@@ -171,6 +192,36 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 		}
 	}
 	
+}
+
+// 0 = npc, 1 = central, 2 = branch, 3 = tournament, 4 = item shop, 5 = fighter shop
+ANPC* AHubWorldManager::SpawnNPC(int type_)
+{
+	// pick a random spawn location
+	int spawnLoc = FMath::RandRange(0, npcLocations.Num());
+
+	int i = 0;
+	for (auto a : npcLocations)
+	{
+		if (spawnLoc == i)
+		{
+			switch (type_)
+			{
+				case 0:
+					return SpawnDefaultNPCs(a);
+					break;
+				case 1:
+					return SpawnCentralNPCs(a);
+					break;
+				case 2:
+					return SpawnBranchNPCs(a);
+				break;
+			}
+			SpawnDefaultNPCs(a);
+		}
+		i++;
+	}
+	return nullptr;
 }
 
 ACentralNPC* AHubWorldManager::SpawnCentralNPC()
@@ -492,6 +543,26 @@ void AHubWorldManager::SpawnCentralNPCs(int amount_)
 				}
 			}
 		}
+	}
+}
+
+void AHubWorldManager::SpawnInfoNPC(int archetype_, FOpponentStruct opp_)
+{
+	switch (opp_.archtype)
+	{
+		case ARCH_ATK:
+			SpawnNPCs(0, 1);
+		break;
+
+		case ARCH_DEF:
+
+		break;
+
+		case ARCH_INT:
+
+		break;
+
+		
 	}
 }
 

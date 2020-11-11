@@ -8,6 +8,7 @@
 #include "Hub/NPCs/CentralNPC.h"
 #include "Hub/NPC.h"
 #include "Networking/SRPGGameState.h"
+#include "ExternalFileReader/FOpponentStruct.h"
 #include "HubWorldManager.generated.h"
 
 UCLASS()
@@ -71,6 +72,8 @@ protected:
 	// is this the first time the manager is spawning npcs (also called after a reset)
 	bool firstTimeSpawn;
 
+	bool firstTimeInfoSpawn;
+
 	
 public:	
 	// Called every frame
@@ -88,6 +91,8 @@ public:
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
 	void SpawnNPCs(int num_, int type_);
+	// spawn a single NPC of a given type and get a reference to it 
+	ANPC* SpawnNPC(int type_);
 	ACentralNPC* SpawnCentralNPC();
 	ABranchNPC* SpawnBranchNPC();
 	// used specifically for spawning central NPC's with a branch attached
@@ -95,12 +100,17 @@ public:
 	ANPC* SpawnDefaultNPCs(AActor* a_);
 	ACentralNPC* SpawnCentralNPCs(AActor* a_);
 	ABranchNPC* SpawnBranchNPCs(AActor* a_);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
+	class UExternalFileReader* fileReader;
 	//void SpawnTournamentNPC(AActor* a_);
 	//void SpawnItemShop(AActor* a_);
 	//void SpawnFighterShop(AActor* a_);
 	// go through and remove the npcs
 	void DeleteNPCs();
 	void SpawnCentralNPCs(int amount_);
+
+
+	void SpawnInfoNPC(int archetype_, FOpponentStruct opp_);
 
 
 };

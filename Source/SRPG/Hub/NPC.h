@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Interactable.h"
 #include "Animation/NPCCharacterAnimInstance.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 #include "NPC.generated.h"
 
 UCLASS()
@@ -74,8 +75,13 @@ public:
 	void Interact() override;
 	void UnInteract() override;
 
+	void SetLine(FString line_);
 	void SetNPCLinesIndex(int index_);
 	void SetHubManager(class AHubWorldManager* manager_);
-	virtual void EndDialogue(); // overriden by children to end the dialogue 
+	virtual void EndDialogue(); // overriden by children to end the dialogue
+
+private:
+	FDialogueTableStruct file;
+	bool hasSetLine;
 
 };

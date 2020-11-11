@@ -5,7 +5,6 @@
 #include "SRPGCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "ExternalFileReader/ExternalFileReader.h"
 #include "Components/WidgetComponent.h"
 #include "SRPGCharacter.h"
 #include "Engine/Engine.h"
@@ -64,6 +63,9 @@ void ANPC::BeginPlay()
 	animator = Cast<UNPCCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
 	wander->SetCharacterRef(this);
+	line = "";
+	hasSetLine = false;
+
 }
 
 void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
@@ -84,13 +86,12 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
 					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+					LoadText();
 				}
 				else
 				{
 					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
 				}
-				LoadText();
-				
 				
 			}
 			else
@@ -104,11 +105,14 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 
 void ANPC::LoadText()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
-	FDialogueTableStruct file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
+	if (hasSetLine == false)
+	{
+		file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
+		line = file.line;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
 
-	line = file.line;
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, line);
+
 }
 
 // Called every frame
@@ -192,9 +196,15 @@ void ANPC::UnInteract()
 	EndDialogue();
 }
 
+void ANPC::SetLine(FString line_)
+{
+	line = line_;
+}
+
 void ANPC::SetNPCLinesIndex(int index_)
 {
 	npcLineIndex = index_;
+	hasSetLine = true;
 }
 
 void ANPC::SetHubManager(AHubWorldManager* manager_)
