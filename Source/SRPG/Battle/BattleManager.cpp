@@ -45,7 +45,7 @@ void ABattleManager::BeginPlay()
 
 	if (ctrl)
 		ctrl->SetBattleManager(this);
-	if (widgetComp)
+	if (widgetComp && HasAuthority())
 		widgetComp->GetUserWidgetObject()->AddToViewport();
 	if (aiManager)
 		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
@@ -152,7 +152,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			deployedUnits.Push(unit);
 			unit->bpID = bpidOfUnitToBeDeployedNext;
 		}
-		if (widgetComp)
+		if (widgetComp && HasAuthority())
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
 		deployedFightersIndexes.Push(indexOfSelectedFighterInSelectedFighters);
@@ -303,7 +303,7 @@ void ABattleManager::EndBattle(bool victory_)
 			widgetComp->SetWidgetClass(EndWidgets[1]);
 		
 	}
-
+	if(HasAuthority())
 	widgetComp->GetUserWidgetObject()->AddToViewport();
 }
 

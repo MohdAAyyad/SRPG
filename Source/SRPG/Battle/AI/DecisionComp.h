@@ -101,6 +101,7 @@ protected:
 	void PickAttackOrSkillBasedOnLeastRange(AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 		TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_);
 
+	bool CheckIfINeedThisItem(UStatsComponent* stats_, int statIndex_, int itemValue_);
 
 public:	
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

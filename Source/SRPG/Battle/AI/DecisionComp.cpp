@@ -901,24 +901,28 @@ ACrowdItem* UDecisionComp::UpdateTargetItem(AGridManager* grid_, ATile* originTi
 				grid_->ClearHighlighted();
 				grid_->UpdateCurrentTile(originTile_, rows_, depths_, TILE_ENM, 0);
 
+				UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
+
 				for (int i = 0; i < crdItems.Num(); i++)
 				{
 					if (crdItems[i])
 					{
 						//TODO
 						//Check if we need the item first before marking it
-
-						//If we have detected an item, make sure it's within movement range before marking it
-						ATile* tile_ = crdItems[i]->GetMyTile();
-						if (tile_)
+						if (CheckIfINeedThisItem(statsComp,crdItems[i]->GetStat(), crdItems[i]->GetValue()))
 						{
-							if (tile_->GetHighlighted() == TILE_ENM)
-							{
-								if (crdItems[i]->MarkItem(ownerEnemy)) //True, means we've marked this items as our target and no other enemy should go for it
+							//If we have detected an item, make sure it's within movement range before marking it
+							ATile* tile_ = crdItems[i]->GetMyTile();
+								if (tile_)
 								{
-									return crdItems[i];
+									if (tile_->GetHighlighted() == TILE_ENM)
+									{
+										if (crdItems[i]->MarkItem(ownerEnemy)) //True, means we've marked this items as our target and no other enemy should go for it
+										{
+											return crdItems[i];
+										}
+									}
 								}
-							}
 						}
 
 					}
@@ -949,6 +953,35 @@ void UDecisionComp::ClearCrdItems()
 	{
 		crdItems.Empty();
 	}
+}
+
+bool UDecisionComp::CheckIfINeedThisItem(UStatsComponent* stats_, int statIndex_, int itemValue_)
+{
+	if (stats_)
+	{
+		//If the item restores HP or PIPs and the enemy's current HP or PIP is less than max then you want to take the item
+		if (statIndex_ == STAT_HP)
+		{
+			if (stats_->GetStatValue(statIndex_) < stats_->GetMaxHP())
+			{
+				return true;
+			}
+		}
+		else if (statIndex_ == STAT_PIP)
+		{
+			if (stats_->GetStatValue(statIndex_) < stats_->GetMaxPIP())
+			{
+				return true;
+			}
+		}
+		//Otherwise, only take the item if you haven't been buffed
+		else
+		{
+			if (!stats_->HasThisStatBeenBuffed(statIndex_))
+				return true;
+		}
+	}
+	return false;
 }
 
 /*

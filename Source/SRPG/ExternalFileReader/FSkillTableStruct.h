@@ -37,8 +37,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		int hit;
 	UPROPERTY(BlueprintReadOnly)
-		int crd;
-	UPROPERTY(BlueprintReadOnly)
 		int levelToUnlock; //The fighter's level must be >= than the skill level to unlock it.
 	UPROPERTY(BlueprintReadOnly)
 		int fls; //How much the skill affects the crowd meter

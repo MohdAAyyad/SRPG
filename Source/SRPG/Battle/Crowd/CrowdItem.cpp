@@ -12,7 +12,9 @@
 #include "../Grid/Tile.h"
 #include "../Player/PlayerGridCharacter.h"
 #include "../AI/EnemyBaseGridCharacter.h"
+#include "../StatsComponent.h"
 #include "CollisionQueryParams.h"
+#include "Definitions.h"
 
 // Sets default values
 ACrowdItem::ACrowdItem()
@@ -102,9 +104,15 @@ void ACrowdItem::OverlapWithGridCharacter(UPrimitiveComponent* overlappedCompone
 		APlayerGridCharacter* gchar = Cast<APlayerGridCharacter>(otherActor_);
 		if (gchar)
 		{
-			//TODO
 			//Call the needed functions on gchar
-
+			if (statIndex == STAT_HP || statIndex == STAT_PIP)
+			{
+				gchar->GetStatsComp()->AddToStat(statIndex, value);
+			}
+			else
+			{
+				gchar->GetStatsComp()->AddTempToStat(statIndex, value);
+			}
 			Obtained(gchar->GetActorLocation());
 			ItemWasObtainedByAnEnemyThatDidNotMarkIt(); //In case an item was marked by an enemy, that enemy must be told the item is no longer reachable
 			Destroy();

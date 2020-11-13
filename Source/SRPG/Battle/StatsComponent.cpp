@@ -342,6 +342,7 @@ void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs ne
 	if (value_ * tempStatChange[tempindex] < 0) //If this stat has previously been nerfed/buffed and you want to negate it
 	{
 		//Negate the previous effect
+		AddToStat(statIndex_, -tempStatChange[tempindex]);
 		tempStatChange[tempindex] = 0; 
 		turnsSinceLastStatChange[tempindex] = 0;
 	}

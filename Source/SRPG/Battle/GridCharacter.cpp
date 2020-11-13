@@ -449,6 +449,9 @@ void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 {
 	if (animInstance)
 		animInstance->SetUseItem();
+
+	if (statsComp)
+		statsComp->AddToStat(statIndex_, value_);
 }
 
 
