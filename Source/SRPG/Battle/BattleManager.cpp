@@ -16,6 +16,7 @@
 #include "Grid/Tile.h"
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "UnrealNetwork.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -35,6 +36,7 @@ ABattleManager::ABattleManager()
 	indexOfSelectedFighterInSelectedFighters = 0;
 
 	bBattleHasEnded = false;
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -68,13 +70,19 @@ void ABattleManager::Tick(float DeltaTime)
 
 }
 
+void ABattleManager::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	DOREPLIFETIME(ABattleManager, phase);
+}
+
+
 
 int ABattleManager::GetPhase()
 {
 	return phase;
 }
 
-void ABattleManager::NextPhase()
+void ABattleManager::NextPhase_Implementation()
 {
 	if (!bBattleHasEnded)
 	{
@@ -134,11 +142,13 @@ void ABattleManager::DeployThisUnitNext(int index_)
 		}
 	}
 }
-void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from battle controller
+void ABattleManager::DeplyUnitAtThisLocation_Implementation(FVector tileLoc_) //Called from battle controller
 {
 	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
 	if (bpidOfUnitToBeDeployedNext != -1)
 	{
+		if (!HasAuthority())
+			UE_LOG(LogTemp, Warning, TEXT("YELLLOOOOWWWW"));
 		numberOfUnitsDeployed++;
 		tileLoc_.Z += 50.0f;
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
@@ -165,7 +175,7 @@ int ABattleManager::GetBpidOfUnitToBeDeployedNext()
 	return bpidOfUnitToBeDeployedNext;
 }
 
-void ABattleManager::EndDeployment()
+void ABattleManager::EndDeployment_Implementation()
 {
 	if (gridManager)
 		gridManager->ClearHighlighted();

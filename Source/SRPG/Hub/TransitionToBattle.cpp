@@ -39,6 +39,7 @@ ATransitionToBattle::ATransitionToBattle()
 	gameMode = nullptr;
 	tourney = nullptr;
 	bHasBeenInteractedWith = false;
+	bOnlinePlay = false;
 }
 
 // Called when the game starts or when spawned
@@ -152,8 +153,23 @@ void ATransitionToBattle::FinalizeFighterSelection()
 			Intermediate::GetInstance()->AddFighterToSelected(recruitedFighters[indexesOfSelectedFighters[i]]);
 	}
 
+	if (bOnlinePlay)
+	{
+		//TODO
+	}
+
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 	if (gameMode)
 		gameMode->SwitchLevel(MAP_BATTLE);
+}
+
+void ATransitionToBattle::LookForOnlineSession()
+{
+
+}
+
+void ATransitionToBattle::JoinAnOnlineSession()
+{
+
 }

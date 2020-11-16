@@ -90,15 +90,18 @@ AGridCharacter::AGridCharacter()
 	champParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
 	champParticles->SetupAttachment(RootComponent);
 	champParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	champParticles->SetAutoActivate(false);
 
 	villainParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Villain Particles"));
 	villainParticles->SetupAttachment(RootComponent);
 	villainParticles->AddRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
 	villainParticles->AddRelativeRotation(FRotator(0.0f, 0.0f, -90.0f));
+	villainParticles->SetAutoActivate(false);
 
 	permaChampParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Perma Champion Particles"));
 	permaChampParticles->SetupAttachment(RootComponent);
 	permaChampParticles->AddRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	permaChampParticles->SetAutoActivate(false);
 
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
@@ -120,6 +123,9 @@ AGridCharacter::AGridCharacter()
 	bHasDoneAnAction = false;
 
 	bpID = 0;
+
+	bReplicates = true;
+	bReplicateMovement = true;
 
 }
 
@@ -284,7 +290,7 @@ void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
 	}
 }
 
-void AGridCharacter::PlayAnimationAttackUsingWeapon()
+void AGridCharacter::PlayAnimationAttackUsingWeapon_Implementation()
 {
 	if (animInstance)
 	{
