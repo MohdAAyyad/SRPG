@@ -609,17 +609,27 @@ void AEnemyBaseGridCharacter::TakeItem(UPrimitiveComponent* overlappedComponent_
 
 		if (item_) //If we've reached the item we planned to reach then obtain it and go to the closest player
 		{
-			//TODO
-			//Get the item's value and update stats
-
-			if (decisionComp)
-				decisionComp->RemoveCrdItem(item_);
+			//Mark the item as obtained
 			item_->Obtained(GetActorLocation());
 
 			if (item_ != targetItem)//We've obtained an item that we did not mark, we need to let it tell the enemy that marked that it's gone
 				item_->ItemWasObtainedByAnEnemyThatDidNotMarkIt();
 
 			ItemIsUnreachable(item_->GetMyTile()); //You got the item, reset and go to the player starting from the item_ tile
+			
+						//Get the item's value and update stats
+			if (statsComp)
+			{
+				int statIndex_ = item_->GetStat();
+				if (statIndex_ == STAT_HP || statIndex_ == STAT_PIP)
+				{
+					statsComp->AddToStat(statIndex_, item_->GetValue());
+				}
+				else
+				{
+					statsComp->AddTempToStat(statIndex_, item_->GetValue());
+				}
+			}
 			item_->Destroy();
 		}
 	}

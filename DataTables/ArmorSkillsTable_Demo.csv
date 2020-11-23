@@ -1,0 +1,21 @@
+,name,description,weaponIndex,value,pip,atk,inti,crit,hit,levelToUnlock,fls,rge,rows,depths,animationIndex,statusEffect,emitterIndex,statIndex,EquipmentSkillsIndex,Pure
+0,Focus,Channel your ki increasing your critical rate,1,1,1,0,0.2,0,1000,1,10,0,0,0,0,0,0,6,0,0
+1,Blitz,Channel your ki to your feet increasing your speed,1,1,1,0.1,0,0,1000,2,10,0,0,0,0,0,0,5,0,0
+2,Turtleheart,Emrace the calmness in your Ki. Increases defense.,1,2,2,0.1,0,0,1000,2,15,0,0,0,0,0,0,3,1,0
+3,Asuraheart,Embrace the anger in your Ki. Increases attack.,1,2,2,0.2,0,0,1000,3,20,0,0,0,0,0,0,2,1,0
+4,Unbreakable,Increase defense.,2,2,1,0.1,0,0,1000,1,10,0,0,0,0,0,0,3,0,0
+5,Knight's honor,Restore a small amount of health.,2,7,1,0,0.1,0,1000,1,5,0,0,0,0,0,0,0,0,0
+6,Inspire,Increase the attack of 3 units.,2,2,2,0.2,0,0,1000,3,20,4,0,1,0,0,0,2,0,0
+7,Shields Up!,Increases the defense of 3 units.,2,2,2,0.2,0,0,1000,3,15,3,0,1,0,0,0,3,0,0
+8,Heal,Restores a small amount of HP to 1 unit,3,7,1,0,0.2,0,1000,1,5,4,0,0,0,0,0,0,0,0
+9,Heal,Restores a small amount of HP to 1 unit,3,7,1,0,0.2,0,1000,1,5,4,0,0,0,0,0,0,1,0
+10,Group Heal,Restores a small amount of HP to 3 unit,3,7,1,0,0.2,0,1000,1,5,4,0,1,0,0,0,0,0,0
+11,Group Heal,Restores a small amount of HP to 3 unit,3,7,1,0,0.2,0,1000,1,5,4,0,1,0,0,0,0,1,0
+12,Concentrate,The user concentrates increasing thier intillegence.,3,2,1,0,0.1,0,1000,1,10,0,0,0,0,0,0,4,0,0
+13,Imbue wind,Enchants a unit with wind increasing thier agility.,3,4,2,0,0.2,0,1000,3,15,4,0,0,0,0,0,7,1,0
+14,Imbue stone,Enchants a unit with stone increasing thier defense.,3,4,2,0,0.2,0,1000,3,15,4,0,0,0,0,0,3,1,0
+15,Imbue fire,Enchants a unit with fire increasing thier defense.,3,4,2,0,0.2,0,1000,3,20,4,0,0,0,0,0,2,0,0
+16,Nimble,Increases speed.,4,2,1,0.1,0,0,1000,1,10,0,0,0,0,0,0,5,0,0
+17,Eagle eye,Increases critical rate.,4,3,2,0,0.2,0,1000,2,15,0,0,0,0,0,0,6,1,0
+18,Red hawk cry,Increases critical rate for 3 units.,4,3,2,0,0.2,0,1000,3,20,3,0,1,0,0,0,6,1,0
+19,New Quiver,Replaces old arrows with new sharper ones. Increases attack.,4,3,2,0.2,0,0,1000,2,20,0,0,0,0,0,0,2,0,0

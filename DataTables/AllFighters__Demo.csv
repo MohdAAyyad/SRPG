@@ -1,9 +1,0 @@
-,BPID,Name,Description,HP,PIP,ATK,DEF,INTL,SPD,CRIT,AGL,CRD,weaponIndex,armorIndex,equippedWeapon,equippedArmor,equippedAccessory,level,currentEXP,neededEXPToLevelUp,id,value,archetype
-0,0,Default fighter,Fists and fighter armor,0,0,2,0,0,1,0,2,0,1,1,0,0,0,1,50,100,0,150,0
-1,1,Default Archer,Bow and archer armor,0,0,2,0,1,0,2,0,0,4,4,0,0,0,1,50,100,1,150,0
-2,2,Default knight,Sword and knight armor,2,0,1,2,0,0,0,0,0,2,2,0,0,0,1,50,100,2,150,1
-3,3,Default mage,Wand and mage armor,0,2,0,0,3,0,0,0,0,3,3,0,0,0,1,50,100,3,150,2
-4,4,Battle mage,Sword and mage armor,1,1,2,0,2,0,0,0,1,2,3,0,0,0,1,50,100,4,300,0
-5,5,Knighted archer,Bow and knight armor,1,0,2,2,0,0,1,0,0,4,2,0,0,0,1,50,100,5,300,1
-6,6,Magic archer,Bow and mage armor,0,1,2,0,2,0,1,0,0,4,3,0,0,0,1,50,100,6,300,2
-7,7,Scardy mage,Wand and knight armor,1,2,0,2,1,0,0,0,0,3,2,0,0,0,1,50,100,7,300,1

@@ -40,7 +40,8 @@ protected:
 
 
 	class AGridManager* gridManager;
-	int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment 4 reachable by enemy
+	UPROPERTY(Replicated)
+		int HighlightedIndex;//0 move, 1 attack, 2 heal 3 deplyment 4 reachable by enemy
 	int previousHighlightIndex;
 
 	//Need different arrays for different neighbors to make cost calculations easier
@@ -50,12 +51,23 @@ protected:
 	bool bTraversable;
 	bool bOccupied; //If the tile is used by an enemy or a player, it becomes occupied
 
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
 public:
 	class AGridManager* GetGridManager();
 	void SetGridManager(class AGridManager* gridManager_);
-	void Highlighted(int index_);
+
+	UFUNCTION(Server, Reliable)
+		void Highlighted(int index_);
+		void Highlighted_Implementation(int index_);
+
 	void GoBackToPreviousHighlight();
-	void NotHighlighted();
+
+	UFUNCTION(Server, Reliable)
+		void NotHighlighted();
+		void NotHighlighted_Implementation();
+
 	int  GetHighlighted();
 	void AddImmediateNeighbor(ATile* tile_);
 	void AddDiagonalNeighbor(ATile* tile_);

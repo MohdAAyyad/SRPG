@@ -10,6 +10,7 @@
 #include "EnemyBaseGridCharacter.h"
 #include "TimerManager.h"
 #include "../Crowd/BattleCrowd.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
@@ -23,6 +24,7 @@ AAIManager::AAIManager()
 	btlManager = nullptr;
 	gridManager = nullptr;
 	crdManager = nullptr;
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +53,7 @@ void AAIManager::SetBattleGridCrdManagers(ABattleManager* btl_, AGridManager* gr
 }
 
 
-void AAIManager::DeployEnemies()
+void AAIManager::DeployEnemies_Implementation()
 {
 
 	TArray<ATile*> enemyDeploymentTiles;

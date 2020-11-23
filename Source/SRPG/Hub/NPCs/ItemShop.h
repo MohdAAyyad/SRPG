@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Hub/NPC.h"
+#include "ExternalFileReader/EquipmentTableStruct.h"
 #include "ItemShop.generated.h"
 
 /**

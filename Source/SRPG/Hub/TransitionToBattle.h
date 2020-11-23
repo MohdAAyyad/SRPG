@@ -24,6 +24,8 @@ protected:
 	class ASRPGGameMode* gameMode;
 
 	bool bHasBeenInteractedWith;
+	UPROPERTY(BlueprintReadWrite)
+	bool bOnlinePlay;
 
 	UPROPERTY(EditAnywhere, Category = "Root")
 		USceneComponent* root;
@@ -66,7 +68,11 @@ protected:
 		void FinalizeFighterSelection(); //Passes in the indexes to the intermediate
 
 	void UpdateRecruitedFighters();
-
+	
+	UFUNCTION(BlueprintCallable)
+		void LookForOnlineSession();
+	UFUNCTION(BlueprintCallable)
+		void JoinAnOnlineSession();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

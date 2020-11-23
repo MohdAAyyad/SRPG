@@ -93,7 +93,9 @@ protected:
 
 	void TellRegularEnemiesToMove();
 	void TellSupportEnemiesToMove();
+	UFUNCTION(Server, Reliable)
 	void DeployEnemies();
+	void DeployEnemies_Implementation();
 
 	void OrderEnemiesToExecuteAction();
 
