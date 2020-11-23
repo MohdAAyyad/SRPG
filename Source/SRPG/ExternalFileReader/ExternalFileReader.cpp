@@ -327,6 +327,28 @@ TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tab
 	
 }
 
+FFighterTableStruct UExternalFileReader::FindFighterRowById(int tableIndex_, int fighterId_)
+{
+	// Mohammad made a version below but the table ID is hardcoded into the function
+	//ew
+	// so I made a new version that doesn't overwrite the old one
+	static const FString contextString(TEXT("Trying to get the items from the table"));
+	TArray<FName> rowNames;
+	rowNames = tables[tableIndex_]->GetRowNames();
+
+	for (auto n : rowNames)
+	{
+		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true);
+
+		if (row->id == fighterId_)
+		{
+			return *row;
+		}
+	}
+
+	return FFighterTableStruct();
+}
+
 FFighterTableStruct UExternalFileReader::GetRecruitedFighterByID(int id_)
 {
 	static const FString contextString(TEXT("Trying to get the items from the table"));
@@ -763,6 +785,33 @@ TArray<FEquipmentTableStruct> UExternalFileReader::GetAllEquipment(int tableInde
 		{
 			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
 			if (row->level <= worldLevel_)
+			{
+				results.Push(*row);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+	}
+
+	return results;
+}
+
+TArray<FEquipmentTableStruct> UExternalFileReader::FindAllOwnedEquipment(int tableIndex_)
+{
+	static const FString contextString(TEXT("Getting all owned equipment"));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tables[tableIndex_])
+	{
+		rowNames = tables[tableIndex_]->GetRowNames();
+
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+			if (row->owned > 0)
 			{
 				results.Push(*row);
 			}

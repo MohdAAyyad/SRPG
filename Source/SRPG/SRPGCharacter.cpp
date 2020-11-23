@@ -14,6 +14,8 @@
 #include "Engine/World.h"
 #include "Networking/SRPGGameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+
 
 ASRPGCharacter::ASRPGCharacter()
 {
@@ -54,6 +56,9 @@ ASRPGCharacter::ASRPGCharacter()
 	}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
+
+	// create the widget component
+	widget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
@@ -96,6 +101,7 @@ void ASRPGCharacter::BeginPlay()
 void ASRPGCharacter::SetupController_Implementation()
 {
 	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
+
 	//if (HasAuthority())
 	//{
 	//	controller = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -125,5 +131,88 @@ bool ASRPGCharacter::SetupController_Validate()
 {
 	return true;
 }
+
+void ASRPGCharacter::TriggerPauseMenu()
+{
+	if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
+	{
+		widget->GetUserWidgetObject()->AddToViewport();
+	}
+	else if (widget && widget->GetUserWidgetObject()->IsInViewport() == true)
+	{
+		widget->GetUserWidgetObject()->RemoveFromViewport();
+	}
+}
+
+TArray<FEquipmentTableStruct> ASRPGCharacter::GetAllOwnedEquipment(FString tableName_)
+{
+	FName convert = FName(*tableName_);
+	return fileReader->FindAllOwnedEquipment(fileReader->FindTableIndexByName(convert));
+}
+
+TArray<FFighterTableStruct> ASRPGCharacter::GetAllFighters(FString tableName_)
+{
+	FName convert = FName(*tableName_);
+	return fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexByName(convert));
+}
+
+TArray<UTexture*> ASRPGCharacter::GetAllItemTextures()
+{
+	return itemTextures;
+}
+
+TArray<UTexture*> ASRPGCharacter::GetAllFighterTextures()
+{
+	return fighterTextures;
+}
+
+bool ASRPGCharacter::CanFighterEquipWeapon(FString tableName_, int id_)
+{
+	FName convert = FName(*FString::FromInt(id_));
+	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
+
+	if (row.equippedWeapon == 0)
+	{
+		// fighter already has something equipped in this slot
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool ASRPGCharacter::CanFighterEquipArmor(FString tableName_, int id_)
+{
+	FName convert = FName(*FString::FromInt(id_));
+	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
+
+	if (row.equippedArmor == 0)
+	{
+		// fighter already has something equipped in this slot
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool ASRPGCharacter::CanFighterEquipAccessory(FString tableName_, int id_)
+{
+	FName convert = FName(*FString::FromInt(id_));
+	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
+
+	if (row.equippedAccessory == 0)
+	{
+		// fighter already has something equipped in this slot
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 
 

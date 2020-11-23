@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Hub/Interactable.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 #include "SRPGCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -34,6 +35,20 @@ public:
 	void SetupController_Implementation();
 	bool SetupController_Validate();
 
+	void TriggerPauseMenu();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget")
+	class UWidgetComponent* widget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
+	UExternalFileReader* fileReader;
+
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> itemTextures;
+
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture*> fighterTextures;
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -46,9 +61,25 @@ private:
 	/** A decal that projects to the cursor location. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
+
 	
 	//what thing are we interacting with
-	IInteractable* interacting; 
+	IInteractable* interacting;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FEquipmentTableStruct> GetAllOwnedEquipment(FString tableName_);
+	UFUNCTION(BlueprintCallable)
+	TArray<FFighterTableStruct> GetAllFighters(FString tableName_);
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetAllItemTextures();
+	UFUNCTION(BlueprintCallable)
+	TArray<UTexture*> GetAllFighterTextures();
+	UFUNCTION(BlueprintCallable)
+	bool CanFighterEquipWeapon(FString tableName_, int id_);
+	UFUNCTION(BlueprintCallable)
+	bool CanFighterEquipArmor(FString tableName_, int id_);
+	UFUNCTION(BlueprintCallable)
+	bool CanFighterEquipAccessory(FString tableName_, int id_);
 
 };
 

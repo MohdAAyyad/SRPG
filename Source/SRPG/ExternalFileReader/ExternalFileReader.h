@@ -40,6 +40,7 @@ public:
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
 	FItemTableStruct FindItemTableRow(FName name_, int index_);
 	FEquipmentTableStruct FindEquipmentTableRow(FName name_, int index_);
+
 	FFighterTableStruct FindEquippedFighterTableRow(FName name_, int index_);
 	FActivityDialogueTableStruct FindActivityDialogueTableRow(FName name_, int index_);
 	FActivityDialogueTableStruct GetPositiveBranch(int activityIndex_, int tableIndex_);
@@ -54,7 +55,9 @@ public:
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
+	TArray<FEquipmentTableStruct> FindAllOwnedEquipment(int tableIndex_);
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
+	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
 	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
