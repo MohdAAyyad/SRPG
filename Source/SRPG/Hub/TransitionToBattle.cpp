@@ -11,6 +11,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "Kismet/GameplayStatics.h"
 #include "Definitions.h"
 
 // Sets default values
@@ -144,7 +145,7 @@ void ATransitionToBattle::AddFighterToSelectedFighters(int index_)
 	}
 }
 
-void ATransitionToBattle::FinalizeFighterSelection()
+void ATransitionToBattle::FinalizeFighterSelection(bool online_)
 {
 	//Pass in the BPIDs to the intermediate
 	for (int i = 0; i < indexesOfSelectedFighters.Num(); i++)
@@ -160,8 +161,19 @@ void ATransitionToBattle::FinalizeFighterSelection()
 
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
-	if (gameMode)
-		gameMode->SwitchLevel(MAP_BATTLE);
+	/*if (gameMode)
+		gameMode->SwitchLevel(MAP_BATTLE);*/
+
+	if (online_)
+	{
+		// add in the "listen" command so it sets up a listen server
+		UGameplayStatics::OpenLevel(GetWorld(), MAP_BATTLE, true, "?listen");
+	}
+	else if(gameMode) 
+	{
+			gameMode->SwitchLevel(MAP_BATTLE);
+	}
+
 }
 
 void ATransitionToBattle::LookForOnlineSession()

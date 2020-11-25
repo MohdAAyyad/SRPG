@@ -65,7 +65,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void AddFighterToSelectedFighters(int index_);
 	UFUNCTION(BlueprintCallable)
-		void FinalizeFighterSelection(); //Passes in the indexes to the intermediate
+		void FinalizeFighterSelection(bool online_); //Passes in the indexes to the intermediate
 
 	void UpdateRecruitedFighters();
 	
