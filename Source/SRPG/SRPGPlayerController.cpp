@@ -15,7 +15,6 @@ ASRPGPlayerController::ASRPGPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
-	
 }
 
 void ASRPGPlayerController::SetPlayerReference_Implementation(ASRPGCharacter* ref_)
@@ -89,6 +88,15 @@ void ASRPGPlayerController::SetupInputComponent()
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ASRPGPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ASRPGPlayerController::OnSetDestinationReleased);
 	InputComponent->BindAction("LeftMouse", IE_Pressed, this, &ASRPGPlayerController::CheckCollisionUnderMouse);
+	InputComponent->BindAction("SpaceBar", IE_Pressed, this, &ASRPGPlayerController::AddPauseMenuToViewport);
+}
+
+void ASRPGPlayerController::AddPauseMenuToViewport()
+{
+	if (player)
+	{
+		player->TriggerPauseMenu();
+	}
 }
 
 
