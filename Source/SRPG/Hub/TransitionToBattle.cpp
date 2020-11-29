@@ -154,9 +154,14 @@ void ATransitionToBattle::FinalizeFighterSelection(bool online_)
 			Intermediate::GetInstance()->AddFighterToSelected(recruitedFighters[indexesOfSelectedFighters[i]]);
 	}
 
-	if (bOnlinePlay)
+	if (widgetComp)
+		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+
+
+	if (!bOnlinePlay)
 	{
-		//TODO
+		if (gameMode)
+			gameMode->SwitchLevel(MAP_BATTLE);
 	}
 
 	if (widgetComp)
