@@ -14,8 +14,6 @@ AGridManager::AGridManager()
 	RootComponent = root;
 	rowsNum = 5;
 	columnsNum = 5;
-	tileSize = 100.0f;
-
 	rowTiles.Reserve(rowsNum);
 	columnTiles.Reserve(columnsNum);
 	tileIndexInColumn = 0;
@@ -38,13 +36,13 @@ void AGridManager::BeginPlay()
 		//The row tiles act as anchors, and will not have any functionality in the game itself
 		for (int r = 0; r < rowsNum; r++)
 		{
-			rowTileLoc = FVector(r*tileSize + GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+			rowTileLoc = FVector(r*TILE_SIZE + GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 			ATile* tiler = GetWorld()->SpawnActor<ATile>(tileRef, rowTileLoc, FRotator::ZeroRotator);
 			tiler->SetGridManager(this);
 			rowTiles.Push(tiler);
 			for (int c = 1; c < columnsNum; c++) //We start at 1 because the row tiles have already created one column
 			{
-				columnTileLoc = FVector(rowTileLoc.X, c*tileSize + rowTileLoc.Y, rowTileLoc.Z);
+				columnTileLoc = FVector(rowTileLoc.X, c*TILE_SIZE + rowTileLoc.Y, rowTileLoc.Z);
 
 				ATile* tilec = GetWorld()->SpawnActor<ATile>(tileRef, columnTileLoc, FRotator::ZeroRotator);
 				tilec->SetGridManager(this);

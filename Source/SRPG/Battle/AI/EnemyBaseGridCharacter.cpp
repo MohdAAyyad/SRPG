@@ -23,6 +23,9 @@
 #include "DecisionComp.h"
 #include "Components/WidgetComponent.h"
 #include "Animation/GridCharacterAnimInstance.h"
+#include "SimpleDecisionComp.h"
+#include "AssasinDecisionComp.h"
+#include "SupportDecisionComp.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -33,8 +36,6 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	detectionRadius->SetCollisionProfileName("EnemyDetectionRadius");
 	detectionRadius->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-	decisionComp = CreateDefaultSubobject<UDecisionComp>(TEXT("Decision Comp"));
-
 	targetCharacter = nullptr;
 	targetTile = nullptr;
 	targetItem = nullptr;
@@ -42,8 +43,10 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	bCannotFindTile = false;
 	weaponIndex = 0;
 	armorIndex = 0;
-	bHealer = false; //Changed in the BP editor. Some enemies are just destined to be healers.
+	bHealer = false; //Changed to true if the decision tree used is that of a support character.
 	bLookForANewTargetMidAttack = false;
+	tree = EDecisionTrees::DISTANCEBASED;
+	bPersistent = false;
 }
 
 void AEnemyBaseGridCharacter::BeginPlay()
@@ -54,6 +57,10 @@ void AEnemyBaseGridCharacter::BeginPlay()
 		detectionRadius->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::DetectItem);
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::TakeItem);
+
+	if (tree == EDecisionTrees::LEVELBASED)
+		ChooseDecisionTreeBasedBasedOnLevel();
+
 
 }
 
@@ -87,8 +94,55 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 	AddEquipmentStats(2);
 
-	decisionComp->SetRefs(aiManager, btlManager, this);
-	decisionComp->UpdatePattrn(statsComp->GetStatValue(STAT_LVL),bHealer);
+	//Create the decision component
+	switch (tree)
+	{
+	case EDecisionTrees::DISTANCEBASED:
+		decisionComp = NewObject<USimpleDecisionComp>(this, TEXT("Simple Decision Comp"));
+		if (decisionComp)
+		{
+			decisionComp->RegisterComponent();
+		}
+		break;
+	case EDecisionTrees::ASSASSIN:
+		decisionComp = NewObject<UAssasinDecisionComp>(this, TEXT("Assassin Decision Comp"));
+		if (decisionComp)
+		{
+			decisionComp->RegisterComponent();
+		}
+		break;
+	case EDecisionTrees::FOLLOWER:
+		break;
+	case EDecisionTrees::PEOPLEPERSON:
+		break;
+	case EDecisionTrees::SUPPORT:
+		decisionComp = NewObject<USupportDecisionComp>(this, TEXT("Support Decision Comp"));
+		if (decisionComp)
+		{
+			decisionComp->RegisterComponent();
+		}
+		bHealer = true;
+		break;
+	}
+	if (decisionComp)
+	{
+		decisionComp->SetRefs(aiManager, btlManager, this);
+		decisionComp->SetPersistence(bPersistent);
+	}
+}
+
+void AEnemyBaseGridCharacter::ChooseDecisionTreeBasedBasedOnLevel()
+{
+	int level_ = statsComp->GetStatValue(STAT_LVL);
+	if (level_ >= 1 && level_ < PAT_ONE)
+		tree = EDecisionTrees::DISTANCEBASED;
+	else if (level_ >= PAT_ONE && level_ < PAT_TWO)
+		tree = EDecisionTrees::ASSASSIN;
+	else if (level_ >= PAT_TWO && level_ < PAT_THR)
+		tree = EDecisionTrees::FOLLOWER;
+	else if (level_ >= PAT_THR)
+		tree = EDecisionTrees::PEOPLEPERSON;
+
 }
 
 void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
@@ -161,7 +215,6 @@ void AEnemyBaseGridCharacter::StartEnemyTurn()
 	bHasDoneAnAction = false;
 	bLookForANewTargetMidAttack = false;
 	statsComp->CheckStatBuffNerfStatus();
-	decisionComp->ResetCurrentTarget(); //Reset the current target on the start of the turn to maek sure we always get the optimal target
 	UpdateOriginTile();
 	targetItem = decisionComp->UpdateTargetItem(gridManager, originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
 
@@ -514,16 +567,12 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 		pathComp->GetPathToTargetTile(-1); //Get the whole path towards the target
 		TArray<ATile*> tPath = pathComp->GetMovementPath();
 
-		if(tPath.Num()>0)
-			UE_LOG(LogTemp, Warning, TEXT("TPath is larget than zero"));
-
 		TArray<int> tileVecIndexes;
 		//We only care about the tiles within movement range
 		for (int i = 0; i < tPath.Num(); i++)
 		{
 			if (tPath[i]->GetHighlighted() == TILE_ENM)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Found TILE_ENM"));
 				tileVecIndexes.Push(i);
 			}
 		}
@@ -645,50 +694,61 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 	//Rotate to face attacker
 	Super::GridCharTakeDamage(damage_, attacker_, crit_);
 
-	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-	animInstance->SetDamage(static_cast<int> (damage_));
-	overheadWidgetComp->SetVisibility(true);
-
-	//update stats component
-	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
-	//Check if dead
-	if (statsComp->GetStatValue(STAT_HP) <= 1)
+	if (attacker_ != this)
 	{
-		GetMyTile()->SetOccupied(false);
+		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
+		animInstance->SetDamage(static_cast<int> (damage_));
+		overheadWidgetComp->SetVisibility(true);
 
-		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+		//update stats component
+		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+		//Check if dead
+		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
-		}
-		attacker_->YouHaveKilledYouTarget(false);
-		if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
-		{
-			crdManager->UpdateFavor(true);
-		}
+			GetMyTile()->SetOccupied(false);
 
+			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+			{
+				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+			}
+			attacker_->YouHaveKilledYouTarget(false);
+			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
+			{
+				crdManager->UpdateFavor(true);
+			}
+
+			if (aiManager)
+				aiManager->HandleEnemyDeath(this, bHealer);
+
+			if (animInstance)
+				animInstance->DeathAnim();
+
+
+			//Handle champion/villain death
+			switch (championIndex)
+			{
+			case 0: //Champion dead
+				crdManager->ChampVillainIsDead(true);
+				attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
+				break;
+			case 1: //Villain dead
+				crdManager->ChampVillainIsDead(false);
+				attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
+				break;
+			case 2: //perma champion dead
+				crdManager->SetPermaChampion(false);
+				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
+				break;
+			}
+		}
+	}
+	else
+	{ //If the character killed itself, then just die and don't affect anytihng else
 		if (aiManager)
-			aiManager->HandleEnemyDeath(this,bHealer);
+			aiManager->HandleEnemyDeath(this, bHealer);
 
 		if (animInstance)
 			animInstance->DeathAnim();
-
-
-		//Handle champion/villain death
-		switch (championIndex)
-		{
-		case 0: //Champion dead
-			crdManager->ChampVillainIsDead(true);
-			attacker_->YouHaveJustKilledAChampion(0); //You've just killed a regular champion
-			break;
-		case 1: //Villain dead
-			crdManager->ChampVillainIsDead(false);
-			attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
-			break;
-		case 2: //perma champion dead
-			crdManager->SetPermaChampion(false);
-			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
-			break;
-		}
 	}
 }
 

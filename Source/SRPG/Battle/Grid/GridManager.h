@@ -26,8 +26,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		int columnsNum;
 	UPROPERTY(EditAnywhere, Category = "Grid")
-		float tileSize;
-	UPROPERTY(EditAnywhere, Category = "Grid")
 		TSubclassOf<class ATile> tileRef;
 
 	TArray<ATile*> rowTiles;

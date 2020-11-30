@@ -180,6 +180,10 @@
 
 #pragma region Tiles
 
+#ifndef TILE_SIZE
+#define TILE_SIZE 100.0f
+#endif
+
 #ifndef TILE_MOV
 #define TILE_MOV 0
 #endif
@@ -421,7 +425,7 @@
 #endif
 
 #ifndef RAD_ASSA //Radius for assassin
-#define RAD_ASSA 200.0f
+#define RAD_ASSA 2000.0f
 #endif
 
 #ifndef RAD_FOL

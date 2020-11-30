@@ -6,9 +6,17 @@
 #include "Battle/GridCharacter.h"
 #include "EnemyBaseGridCharacter.generated.h"
 
-/**
- * 
- */
+UENUM()
+enum class EDecisionTrees : uint8
+{
+	DISTANCEBASED = 0, //Gets close to a player and attacks
+	ASSASSIN = 1, //Picks the player with the lowest health within its range
+	FOLLOWER = 2, //Picks an enemy close by and follows them. Targets the same enemy they're targeting. Moves the same as DEFAULT if a target has not been selected yet.
+	PEOPLEPERSON = 3, //Gets a buff when fellow enemies are close by and a nerf when not. Moves the same way as DEFAULT.
+	SUPPORT = 4, //Uses buff and heal skills on fellow enemies
+	LEVELBASED =5 //Used the level of the protagonist to determine the tree
+};
+
 UCLASS()
 class SRPG_API AEnemyBaseGridCharacter : public AGridCharacter
 {
@@ -32,6 +40,12 @@ protected:
 		int weaponIndex;
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 		int armorIndex;
+	UPROPERTY(EditAnywhere, Category = "Decision Trees")
+		EDecisionTrees tree;
+	UPROPERTY(EditAnywhere, Category = "Decision Trees")
+		bool bPersistent;
+
+public:
 	UFUNCTION()
 		void DetectItem(UPrimitiveComponent* overlappedComponent_,
 			AActor* otherActor_,
@@ -48,23 +62,25 @@ protected:
 			bool bFromSweep_,
 			const FHitResult &sweepResult_);
 
+protected:
 	void MoveToTheTileWithinRangeOfThisTile(ATile* startingTile_,ATile* targetTile_);
-	void AddEquipmentStats(int tableIndex_) override;
+	virtual void AddEquipmentStats(int tableIndex_) override;
 
 	void Tick(float DeltaTime) override;
 
 	void ResetCameraFocus() override;
+
+	void ChooseDecisionTreeBasedBasedOnLevel();
 
 	UPROPERTY(EditAnywhere, Category = "Patterns")
 		class UDecisionComp* decisionComp;
 
 	bool bLookForANewTargetMidAttack; //In case the current target is dead then look for another target in your attack phase
 
-	UPROPERTY(EditAnywhere, Category = "Patterns")
-		bool bHealer;
+	bool bHealer;
 
 public:
-	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);
+	virtual void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
 	void StartEnemyTurn();
 	void ExecuteChosenAction();
