@@ -157,9 +157,9 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 	//Get the stats of the equipment and add them to the character's stats
 	if (fileReader)
 	{
-		weapon = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_WPN, statsComp->GetStatValue(STAT_WPI));
-		armor = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ARM, statsComp->GetStatValue(STAT_ARI));
-		accessory = fileReader->GetEquipmentByLevel(tableIndex_, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
+		weapon = fileReader->GetEquipmentByLevel(2, statsComp->GetStatValue(STAT_LVL),EQU_WPN, statsComp->GetStatValue(STAT_WPI));
+		armor = fileReader->GetEquipmentByLevel(3, statsComp->GetStatValue(STAT_LVL),EQU_ARM, statsComp->GetStatValue(STAT_ARI));
+		accessory = fileReader->GetEquipmentByLevel(4, statsComp->GetStatValue(STAT_LVL),EQU_ACC,-1);
 		
 		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);
@@ -199,7 +199,12 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 		if (targetCharacter)
 		{
 			targetTile = decisionComp->FindOptimalTargetTile(myTile_);
+
+			if(targetTile)
+				UE_LOG(LogTemp, Warning, TEXT("Moving to tile within range"));
+
 			MoveToTheTileWithinRangeOfThisTile(myTile_, targetTile);
+			
 		}
 		else //If we couldn't find a character, don't attempt to find a tile. This will only happen whne all potential targets are dead. This check prevents an infinite loop of looking for a target
 		{
@@ -591,12 +596,14 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 
 		if (movementPath.Num() > 0)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Movement path is larger than zero"));
 			bMoving = true;
 		}
 		else
 		{
 			if (aiManager)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Called finished moving"));
 				GetMyTile()->SetOccupied(true);
 				aiManager->FinishedMoving();
 			}

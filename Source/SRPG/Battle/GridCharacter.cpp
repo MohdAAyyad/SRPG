@@ -435,7 +435,7 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 {
 	if (target_ && fileReader)
 	{
-		target_->GridCharReactToItem(fileReader->GetItemStatIndex(3,chosenItem), fileReader->GetItemValue(chosenItem));
+		target_->GridCharReactToItem(fileReader->GetItemStatIndex(5,chosenItem), fileReader->GetItemValue(chosenItem));
 		fileReader->AddOwnedValueItemTable(chosenItem, 3, -1);
 		bHasDoneAnAction = true;
 		if (bHasMoved) //Has moved and has done an action, we're done
@@ -500,9 +500,9 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 	//Get the stats of the equipment and add them to the character's stats
 	if (fileReader)
 	{
-		weapon = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_WPN), EQU_WPN, statsComp->GetStatValue(STAT_WPI));
-		armor = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ARM), EQU_ARM, statsComp->GetStatValue(STAT_ARI));
-		accessory = fileReader->GetEquipmentById(tableIndex_, statsComp->GetStatValue(STAT_ACC), EQU_ACC, -1);
+		weapon = fileReader->GetEquipmentById(2, statsComp->GetStatValue(STAT_WPN), EQU_WPN, statsComp->GetStatValue(STAT_WPI));
+		armor = fileReader->GetEquipmentById(3, statsComp->GetStatValue(STAT_ARM), EQU_ARM, statsComp->GetStatValue(STAT_ARI));
+		accessory = fileReader->GetEquipmentById(4, statsComp->GetStatValue(STAT_ACC), EQU_ACC, -1);
 		
 		statsComp->UpdateMaxHpAndMaxPip(weapon.hp + armor.hp + accessory.hp, weapon.pip + armor.pip + accessory.pip);
 		statsComp->AddToStat(STAT_HP, weapon.hp + armor.hp + accessory.hp);

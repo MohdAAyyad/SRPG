@@ -567,11 +567,11 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
 	TArray<FItemTableStruct> items;
-	rowNames = tables[3]->GetRowNames(); //Will only be accessed by fighters in the battle. 1 for items.
+	rowNames = tables[5]->GetRowNames(); //Will only be accessed by fighters in the battle. 5 for items.
 
 	for (auto n : rowNames)
 	{
-		FItemTableStruct* row = tables[3]->FindRow<FItemTableStruct>(n, contextString, true);
+		FItemTableStruct* row = tables[5]->FindRow<FItemTableStruct>(n, contextString, true);
 		if (row->owned > 0)
 		{
 			items.Push(*row);

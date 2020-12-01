@@ -20,6 +20,7 @@ USupportDecisionComp::USupportDecisionComp()
 }
 AGridCharacter* USupportDecisionComp::FindTheOptimalTargetCharacter()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Find Optimal Target has been called in support"));
 	bWillUseSkill = false;
 	skillType = -1;
 	defenseSkillWithTheMaxRangeIndex = -1; //To make sure the support enemy picks the correct skill later on 
@@ -63,6 +64,7 @@ AGridCharacter* USupportDecisionComp::FindHealTarget(AEnemyBaseGridCharacter* ig
 		}
 		if (healTarget)
 		{ //Were we able to find a target within our radius and below the HP threshold?
+			UE_LOG(LogTemp, Warning, TEXT("Support: We have a heal target"));
 			currentTarget = healTarget;
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
 			return currentTarget;
@@ -81,6 +83,11 @@ AGridCharacter* USupportDecisionComp::FindBuffTarget(TArray<AEnemyBaseGridCharac
 	UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
 	AEnemyBaseGridCharacter* supportTarget = nullptr;
 	//Check if we have any skills that buff stats
+
+	if (defenseSkills.Num() > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Support: We have buff skills"));
+	}
 	for (int i = 0; i < defenseSkills.Num(); i++)
 	{
 		//Find the first usable buff stat
@@ -135,9 +142,10 @@ AGridCharacter* USupportDecisionComp::FindBuffTarget(TArray<AEnemyBaseGridCharac
 
 AGridCharacter* USupportDecisionComp::FindClosestAllyWithTheLeastHealth(TArray<AEnemyBaseGridCharacter*> echars, FVector myLoc)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Support: Find closest ally with least health"));
 	//Move closer to the enemy with the least health 
 	defenseSkillWithTheMaxRangeIndex = -2;
-	int minHealth = FLT_MIN;
+	float minHealth = FLT_MAX;
 	int targetIndex = -1;
 	if (echars.Num() > 0)
 	{

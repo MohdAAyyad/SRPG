@@ -206,6 +206,7 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_SmallestDistance(AGridChar
 					float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
 					if (distance < offenseTargetRadiusInPx)
 					{
+						UE_LOG(LogTemp, Warning, TEXT("Blank: Found potential target"));
 						if (distance < min && target != pchars[i])
 						{
 							target = pchars[i];

@@ -73,7 +73,7 @@ TArray<FFighterTableStruct> AFightersShop::GetAllFightersForSale()
 		{
 			// All fighters will be in index 0
 			// Equipped fighter will be in index 1
-			FFighterTableStruct row = fileReader->FindFighterTableRow(n, fileReader->FindTableIndexByName("AllFighters_Demo"));
+			FFighterTableStruct row = fileReader->FindFighterTableRow(n, fileReader->FindTableIndexByName("AllFighters_Prot"));
 			//add the fighter to the array
 			fighters.Push(row);
 		}
