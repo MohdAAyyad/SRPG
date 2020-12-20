@@ -17,6 +17,7 @@
 #include "Grid/GridManager.h"
 #include "Definitions.h"
 #include "Kismet/GameplayStatics.h"
+#include "Crowd/BattleCrowd.h"
 
 ABattleController::ABattleController()
 {
@@ -75,128 +76,169 @@ void ABattleController::HandleMousePress()
 	{
 		if (btlManager)
 		{
-			if (btlManager->GetPhase() == BTL_DEP) //Deployment phase
+			if (HasAuthority())
 			{
-				targetTile = Cast<ATile>(hit.Actor);
-				if (targetTile) //Check if we press on a tile first
+				if (btlManager->GetPhase() == BTL_DEP) //Deployment phase
 				{
-					if (!bReDeployingUnit)
+					targetTile = Cast<ATile>(hit.Actor);
+					if (targetTile) //Check if we press on a tile first
 					{
-						if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+						if (!bReDeployingUnit)
 						{
-							btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
-							targetTile->SetOccupied(true);
+							if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+							{
+								btlManager->DeplyUnitAtThisLocation(targetTile->GetActorLocation());
+								targetTile->SetOccupied(true);
+							}
+						}
+						else
+						{
+							if (controlledCharacter) //If I am redeploying, I should have a controlled character
+							{
+								if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+								{
+									//Move the character to the new tile
+									bReDeployingUnit = false;
+									FVector loc = targetTile->GetActorLocation();
+									loc.Z += 50.0f;
+									controlledCharacter->SetActorLocation(loc);
+									targetTile->SetOccupied(true);
+									controlledCharacter = nullptr;
+								}
+							}
 						}
 					}
 					else
 					{
-						if (controlledCharacter) //If I am redeploying, I should have a controlled character
+						if (!bReDeployingUnit)
 						{
-							if (targetTile->GetHighlighted() == TILE_DEP && !targetTile->GetOccupied()) //Deployment highlight index
+							//Clicking on a character in dep phase means the player wishes to move the character
+							controlledCharacter = Cast<AGridCharacter>(hit.Actor);
+							if (controlledCharacter)
 							{
-								//Move the character to the new tile
-								bReDeployingUnit = false;
-								FVector loc = targetTile->GetActorLocation();
-								loc.Z += 50.0f;
-								controlledCharacter->SetActorLocation(loc);
-								targetTile->SetOccupied(true);								
-								controlledCharacter = nullptr;
+								ATile* tile_ = controlledCharacter->GetMyTile();
+								if (tile_)
+								{
+									if (tile_->GetHighlighted() == TILE_DEP) //Make sure the character's tile is a deployment tile which ensures this is a player character not an enemy character
+									{
+										bReDeployingUnit = true;
+										tile_->SetOccupied(false);
+									}
+									else //Player clicked on an enemy. Reset.
+									{
+										controlledCharacter = nullptr;
+									}
+								}
 							}
 						}
 					}
 				}
 				else
 				{
-					if (!bReDeployingUnit)
+					if (!controlledCharacter) //If we don't have a controlled character, control the character you just pressed on
 					{
-						//Clicking on a character in dep phase means the player wishes to move the character
 						controlledCharacter = Cast<AGridCharacter>(hit.Actor);
 						if (controlledCharacter)
 						{
-							ATile* tile_ = controlledCharacter->GetMyTile();
+							//Don't store a reference to a character who's finished their turn
+							if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
+								controlledCharacter->Selected();
+							else
+								controlledCharacter = nullptr;
+						}
+
+					}
+					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
+					{
+						targetTile = Cast<ATile>(hit.Actor);
+						if (targetTile)
+						{
+							if (targetTile->GetHighlighted() == TILE_MOV)
+							{
+								if (!targetTile->GetOccupied())//Move to this tile if there is nobody standing on it already
+								{
+									if (battlePawn)
+										battlePawn->LockOnActor(controlledCharacter);
+
+									controlledCharacter->MoveToThisTile(targetTile);
+								}
+							}
+						}
+						else
+						{
+							controlledCharacter->NotSelected();
+							controlledCharacter = nullptr;
+						}
+					}
+					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::ATTACKING)
+					{
+						//Get the character
+						AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+						if (targetChar)
+						{
+							//Get the tile
+							ATile* tile_ = targetChar->GetMyTile();
 							if (tile_)
 							{
-								if (tile_->GetHighlighted() == TILE_DEP) //Make sure the character's tile is a deployment tile which ensures this is a player character not an enemy character
+								//See if the tile is within attack range
+								if (tile_->GetHighlighted() == TILE_ATK)
 								{
-									bReDeployingUnit = true;
-									tile_->SetOccupied(false);
-								}
-								else //Player clicked on an enemy. Reset.
-								{
-									controlledCharacter = nullptr;
+									FocusOnGridCharacter(controlledCharacter, focusRate);
+									controlledCharacter->AttackUsingWeapon(targetChar, focusRate);
 								}
 							}
 						}
 					}
-				}
-			}
-			else
-			{
-				if (!controlledCharacter) //If we don't have a controlled character, control the character you just pressed on
-				{
-					controlledCharacter = Cast<AGridCharacter>(hit.Actor);
-					if (controlledCharacter)
+					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::SKILLING)
 					{
-						//Don't store a reference to a character who's finished their turn
-						if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
-							controlledCharacter->Selected();
-						else
-							controlledCharacter = nullptr;
-					}
-
-				}
-				else if(controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
-				{
-					targetTile = Cast<ATile>(hit.Actor);
-					if (targetTile)
-					{
-						if (targetTile->GetHighlighted() == TILE_MOV)
+						//Get the character
+						AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+						if (targetChar)
 						{
-							if (!targetTile->GetOccupied())//Move to this tile if there is nobody standing on it already
+							//Get the tile
+							ATile* tile_ = targetChar->GetMyTile();
+							if (tile_)
 							{
-								if(battlePawn)
-									battlePawn->LockOnActor(controlledCharacter);
+								//See if the tile is within attack range and has been targeted
+								if (tile_->GetHighlighted() == TILE_SKLT)
+								{
+									TArray<AGridCharacter*> targetedCharacters;
 
-								controlledCharacter->MoveToThisTile(targetTile);
+									for (int i = 0; i < targetingTiles.Num(); i++)
+									{
+										AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
+										if (gchar != nullptr && !targetedCharacters.Contains(gchar))
+											targetedCharacters.Push(gchar);
+									}
+									FocusOnGridCharacter(controlledCharacter, focusRate);
+									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
+									bTargetingWithASkill = false;
+								}
+							}
+						}
+					}
+					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::HEALING)
+					{
+						AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
+						if (targetChar)
+						{
+							//Get the tile
+							ATile* tile_ = targetChar->GetMyTile();
+							if (tile_)
+							{
+								if (tile_->GetHighlighted() == TILE_ITM)
+								{
+									controlledCharacter->UseItemOnOtherChar(targetChar);
+								}
 							}
 						}
 					}
 					else
 					{
-						controlledCharacter->NotSelected();
-						controlledCharacter = nullptr;
-					}
-				}
-				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::ATTACKING)
-				{
-					//Get the character
-					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
-					if (targetChar)
-					{
-						//Get the tile
-						ATile* tile_ = targetChar->GetMyTile();
+						//If the player presses on a tile, then check which characters are standing on the highlighted group of tiles and attack those
+						ATile* tile_ = Cast<ATile>(hit.Actor);
 						if (tile_)
 						{
-							//See if the tile is within attack range
-							if (tile_->GetHighlighted() == TILE_ATK)
-							{
-								FocusOnGridCharacter(controlledCharacter, focusRate);
-								controlledCharacter->AttackUsingWeapon(targetChar, focusRate);
-							}
-						}
-					}
-				}
-				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::SKILLING)
-				{
-					//Get the character
-					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
-					if (targetChar)
-					{
-						//Get the tile
-						ATile* tile_ = targetChar->GetMyTile();
-						if (tile_)
-						{
-							//See if the tile is within attack range and has been targeted
 							if (tile_->GetHighlighted() == TILE_SKLT)
 							{
 								TArray<AGridCharacter*> targetedCharacters;
@@ -204,63 +246,46 @@ void ABattleController::HandleMousePress()
 								for (int i = 0; i < targetingTiles.Num(); i++)
 								{
 									AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
-									if (gchar!=nullptr && !targetedCharacters.Contains(gchar))
+									if (gchar != nullptr && !targetedCharacters.Contains(gchar))
 										targetedCharacters.Push(gchar);
 								}
-								FocusOnGridCharacter(controlledCharacter, focusRate);
-								controlledCharacter->AttackUsingSkill(targetedCharacters,focusRate);
-								bTargetingWithASkill = false;
+								if (targetedCharacters.Num() > 0)
+								{
+									FocusOnGridCharacter(controlledCharacter, focusRate);
+									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
+									bTargetingWithASkill = false;
+								}
 							}
 						}
-					}
-				}
-				else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::HEALING)
-				{
-					AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
-					if (targetChar)
-					{
-						//Get the tile
-						ATile* tile_ = targetChar->GetMyTile();
-						if (tile_)
+						else
 						{
-							if (tile_->GetHighlighted() == TILE_ITM)
-							{
-								controlledCharacter->UseItemOnOtherChar(targetChar);
-							}
-						}
-					}
-				}
-				else
-				{
-					//If the player presses on a tile, then check which characters are standing on the highlighted group of tiles and attack those
-					ATile* tile_ = Cast<ATile>(hit.Actor);
-					if (tile_)
-					{
-						if (tile_->GetHighlighted() == TILE_SKLT)
-						{
-							TArray<AGridCharacter*> targetedCharacters;
-
-							for (int i = 0; i < targetingTiles.Num(); i++)
-							{
-								AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
-								if (gchar != nullptr && !targetedCharacters.Contains(gchar))
-									targetedCharacters.Push(gchar);
-							}
-							if (targetedCharacters.Num() > 0)
-							{
-								FocusOnGridCharacter(controlledCharacter, focusRate);
-								controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
-								bTargetingWithASkill = false;
-							}
-						}
-					}
-					else
-					{
 							controlledCharacter->NotSelected();
+						}
+					}
+
+				}
+			}
+			else
+			{
+				targetTile = Cast<ATile>(hit.Actor);
+				if (targetTile)
+				{
+					FVector loc = targetTile->GetActorLocation();
+					loc.Z += 50.0f;
+					if (battlePawn)
+					{
+						battlePawn->SpawnItems(btlManager, loc);
 					}
 				}
-
-			}
+				//else
+				//{
+				//	AGridCharacter* gchar = Cast<AGridCharacter>(hit.Actor);
+				//	if (gchar)
+				//	{
+				//		gchar->Selected();
+				//	}
+				//}
+		    }
 		}
 	}
 }

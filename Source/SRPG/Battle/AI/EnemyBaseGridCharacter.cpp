@@ -200,9 +200,6 @@ void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 		{
 			targetTile = decisionComp->FindOptimalTargetTile(myTile_);
 
-			if(targetTile)
-				UE_LOG(LogTemp, Warning, TEXT("Moving to tile within range"));
-
 			MoveToTheTileWithinRangeOfThisTile(myTile_, targetTile);
 			
 		}
@@ -289,6 +286,8 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 							//Get all the characters on top of the hilighted tiles
 							TArray<ATile*> skillTiles = gridManager->GetHighlightedTiles();
 
+							UE_LOG(LogTemp, Warning, TEXT("Skill tiles num: %d"), skillTiles.Num());
+							UE_LOG(LogTemp, Warning, TEXT("Skill type is: %d"), skillType);
 							for (int i = 0; i < skillTiles.Num(); i++)
 							{
 							
@@ -298,6 +297,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 									APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
 									if (tar)
 									{
+										UE_LOG(LogTemp, Warning, TEXT("Found player tar"));
 										if(!actionTargets.Contains(tar))
 											actionTargets.Push(tar);
 									}
@@ -314,7 +314,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 								}
 
 							}
-
+							UE_LOG(LogTemp, Warning, TEXT("Animation index: %d"), chosenSkill.animationIndex);
 							btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
 							chosenSkillAnimIndex = chosenSkill.animationIndex;
 							AttackUsingSkill(btlCtrl->focusRate);
@@ -851,6 +851,11 @@ void AEnemyBaseGridCharacter::IamDeadStopTargetingMe()
 		bLookForANewTargetMidAttack = true;
 		MoveCloserToTargetPlayer(nullptr);
 	}
+}
+
+void AEnemyBaseGridCharacter::UpdateTargetCharacter(AGridCharacter* newTarget_)
+{ //Called from the decision component when changing targets
+	targetCharacter = newTarget_;
 }
 
 ///Summary of movement

@@ -29,7 +29,7 @@ protected:
 	// End PlayerController interface
 
 	/** Input handlers for SetDestination action. */
-	void HandleMousePress();
+		void HandleMousePress();
 
 	class AGridCharacter* controlledCharacter;
 	ABattlePawn* battlePawn;

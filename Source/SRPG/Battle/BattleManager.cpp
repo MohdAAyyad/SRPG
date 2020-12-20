@@ -36,7 +36,6 @@ ABattleManager::ABattleManager()
 	indexOfSelectedFighterInSelectedFighters = 0;
 
 	bBattleHasEnded = false;
-	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +50,7 @@ void ABattleManager::BeginPlay()
 		widgetComp->GetUserWidgetObject()->AddToViewport();
 	if (aiManager)
 		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
-	if (gridManager)
+	if (gridManager && HasAuthority())
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 
 
@@ -70,19 +69,12 @@ void ABattleManager::Tick(float DeltaTime)
 
 }
 
-void ABattleManager::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-{
-	DOREPLIFETIME(ABattleManager, phase);
-}
-
-
-
 int ABattleManager::GetPhase()
 {
 	return phase;
 }
 
-void ABattleManager::NextPhase_Implementation()
+void ABattleManager::NextPhase()
 {
 	if (!bBattleHasEnded)
 	{
@@ -142,7 +134,7 @@ void ABattleManager::DeployThisUnitNext(int index_)
 		}
 	}
 }
-void ABattleManager::DeplyUnitAtThisLocation_Implementation(FVector tileLoc_) //Called from battle controller
+void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from battle controller
 {
 	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
 	if (bpidOfUnitToBeDeployedNext != -1)
@@ -175,7 +167,7 @@ int ABattleManager::GetBpidOfUnitToBeDeployedNext()
 	return bpidOfUnitToBeDeployedNext;
 }
 
-void ABattleManager::EndDeployment_Implementation()
+void ABattleManager::EndDeployment()
 {
 	if (gridManager)
 		gridManager->ClearHighlighted();
@@ -340,4 +332,9 @@ void ABattleManager::SpawnWeaponEmitter(FVector loc_, int emitterIndex_)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), weaponEmitters[emitterIndex_], loc_, FRotator::ZeroRotator);
 	}
+}
+
+ABattleCrowd* ABattleManager::GetCrowdRef()
+{
+	return crdManager;
 }

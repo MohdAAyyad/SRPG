@@ -77,7 +77,7 @@ ATile* USimpleDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 			{
 				currentTarget = nullptr;
 			}
-			FindClosestPlayerTarget(Cast<APlayerGridCharacter>(ignoreThisTarget));
+			ownerEnemy->UpdateTargetCharacter(FindClosestPlayerTarget(Cast<APlayerGridCharacter>(ignoreThisTarget)));
 			return FindOptimalTargetTile(myTile_); //We've switched to a different target so run the function again and find a tile
 		}
 		else if (targetTile == myTile_) //We're not gonna be moving
@@ -92,7 +92,7 @@ ATile* USimpleDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 	else
 	{
 		//We don't have a player target, find the optimal one per the enum rules.
-		FindTheOptimalTargetCharacter();
+		ownerEnemy->UpdateTargetCharacter(FindTheOptimalTargetCharacter());
 		return FindOptimalTargetTile(myTile_); //We've got a target now so run the function again
 	}
 

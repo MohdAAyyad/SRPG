@@ -322,6 +322,12 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float de
 
 void AGridCharacter::AttackUsingSkill(float delay_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("actionTargets.Num() %d"), actionTargets.Num());
+
+	for (int i = 0; i < actionTargets.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CURRENT TARGETTTT %s"), *actionTargets[i]->GetName());
+	}
 	if (actionTargets.Num() > 0)
 	{
 		if (actionTargets[0]) //Rotate towards one of the targets
@@ -769,5 +775,11 @@ void AGridCharacter::YouAreNoLongerTargetedByMe(AGridCharacter* ref_)
 
 void AGridCharacter::IamDeadStopTargetingMe()
 {
+	//Overriden in children
+}
 
+void AGridCharacter::ResetActionTargets()
+{
+	if(actionTargets.Num() > 0)
+		actionTargets.Empty();
 }

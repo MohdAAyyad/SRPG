@@ -34,6 +34,7 @@ ACrowdItem::ACrowdItem()
 	particles->SetupAttachment(root);
 	markedByThisEnemy = nullptr;
 	myTile = nullptr;
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned

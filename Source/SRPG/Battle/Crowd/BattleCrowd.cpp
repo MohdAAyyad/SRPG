@@ -35,6 +35,7 @@ ABattleCrowd::ABattleCrowd()
 
 	champion = nullptr;
 	villain = nullptr;
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -191,6 +192,13 @@ void ABattleCrowd::SpawnItems()
 
 	if (btlManager)
 		btlManager->NextPhase();
+}
+
+void ABattleCrowd::SpawnItemsAtLoc_Implementation(FVector loc_)
+{
+	ACrowdItem* item_ = GetWorld()->SpawnActor<ACrowdItem>(crowdItems[1], loc_, FRotator::ZeroRotator);
+	spawnedItems.Push(item_);
+	item_->SetBtlAndCrdManagers(btlManager, this);
 }
 void ABattleCrowd::ElectChampion()
 {

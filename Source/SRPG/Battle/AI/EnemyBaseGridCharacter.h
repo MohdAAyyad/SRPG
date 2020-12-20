@@ -82,7 +82,7 @@ protected:
 public:
 	virtual void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_);
 	void MoveCloserToTargetPlayer(ATile* startingTile_);
-	void StartEnemyTurn();
+	virtual void StartEnemyTurn();
 	void ExecuteChosenAction();
 	virtual void Selected() override;
 	virtual void NotSelected() override;
@@ -99,4 +99,6 @@ public:
 	void CheckChangeStats();
 
 	void IamDeadStopTargetingMe() override;
+
+	void UpdateTargetCharacter(AGridCharacter* newTarget_); //Called by the decision component upon changing targets
 };

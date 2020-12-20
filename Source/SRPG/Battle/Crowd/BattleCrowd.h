@@ -81,4 +81,8 @@ public:
 	void UpdateFavorForChamp(AGridCharacter* gchar_, int times_); //Update the favor in favor of the champ
 	bool GetPermaStatus();
 
+	UFUNCTION(Server, Reliable)
+	void SpawnItemsAtLoc(FVector loc_);
+	void SpawnItemsAtLoc_Implementation(FVector loc_);
+
 };

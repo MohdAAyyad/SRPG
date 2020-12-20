@@ -9,10 +9,15 @@
 UENUM()
 enum class ETargetConditions : uint8
 {
-	SMALLEST_DISTANCE = 0,
-	LONGEST_DISTANCE = 1,
-	LOWEST_CONDITIONED_STAT = 2,
-	HIGHEST_CONDITIONED_STAT = 3
+	OFFENSE_SMALLEST_DISTANCE = 0,
+	OFFENSE_LONGEST_DISTANCE = 1,
+	OFFENSE_LOWEST_CONDITIONED_STAT = 2,
+	OFFENSE_HIGHEST_CONDITIONED_STAT = 3,
+
+	SUPPORT_SMALLEST_DISTANCE = 4,
+	SUPPORT_LONGEST_DISTANCE = 5,
+	SUPPORT_LOWEST_CONDITIONED_STAT = 6,
+	SUPPORT_HIGHEST_CONDITIONED_STAT = 7
 };
 
 UCLASS()
@@ -26,6 +31,9 @@ public:
 	AGridCharacter* FindTheOptimalTargetCharacter() override;
 	class ATile* FindOptimalTargetTile(ATile* myTile_) override;
 
+	AGridCharacter* FindNextOptimalTargetCharacter(AGridCharacter* ignoreThis_); //Used in case we don't find the first target and we need to change targets
+
+	void ResetFunctionIndex() override;
 	//Function pointers
 	typedef AGridCharacter* (UBlankDecisionComp::*findTargetFuncPtr)(AGridCharacter*); //Takes gridcharacter and returns gridcharacter
 	typedef ATile* (UBlankDecisionComp::*findTileFuncPtr)(ATile*); //Takes tile and returns tile
@@ -37,31 +45,30 @@ protected:
 		uint32 offenseTargetRadiusInTiles;
 	UPROPERTY(EditAnywhere, Category = "Target radius in tiles. Must be larger than zero to take effect.")
 		uint32 supportTargetRadiusInTiles;
-	UPROPERTY(EditAnywhere, Category = "Inclination. Must choose only one. Will only take effect its target radius counterpart is active")
-		bool bInclinedToAttack;
-	UPROPERTY(EditAnywhere, Category = "Inclination. Must choose only one. Will only take effect its target radius counterpart is active")
-		bool bInclinedToSupport;
-	UPROPERTY(EditAnywhere, Category = "Conditions")
-		ETargetConditions offenseCondition;
-	UPROPERTY(EditAnywhere, Category = "Conditions")
-		ETargetConditions supportCondition;
 	UPROPERTY(EditAnywhere, Category = "Condition stat index. Only applicable when using a suitable condition")
 		uint32 offenseConditionStatIndex;
 	UPROPERTY(EditAnywhere, Category = "Condition stat index. Only applicable when using a suitable condition")
-		uint32 supportConditionStatIndex;
+		TArray<uint32> supportPriorityConditionStatIndex;
+
+	UPROPERTY(EditAnywhere, Category = "Conditions")
+		float hpThresholdForSupport;
+	UPROPERTY(EditAnywhere, Category = "Conditions")
+		float pipThresholdForSupport;
+
+	UPROPERTY(EditAnywhere, Category = "Conditions")
+		TArray<ETargetConditions> conditions;
+
+
+
+	TArray<findTargetFuncPtr> targetFunctionPtrs;
+	TArray<findTileFuncPtr> tileFunctionPtrs;
 
 	float offenseTargetRadiusInPx;
 	float supportTargetRadiusInPx;
-	float offenseChance;
-	bool bChosenToAttack;
 
-	findTargetFuncPtr findOffenseTarget;
-	findTargetFuncPtr findSupportTarget;
+	int functionIndex; //Used to call the correct functions in the target and tile function ptrs arrays;
 
-	findTileFuncPtr findOffenseTile;
-	findTileFuncPtr findSupportTile;
 
-	void UpdateInclination();
 	void UpdateFunctionPointers();
 
 	AGridCharacter* FindOffenseTarget_SmallestDistance(AGridCharacter* ignoreThis_);
@@ -75,8 +82,8 @@ protected:
 	AGridCharacter* FindSupportTarget_HighestStat(AGridCharacter* ignoreThis_);
 
 	ATile* FindOptimalOffenseTile(ATile* myTile_);
-	ATile* FindOptimalSupportTile(ATile* myTile_);
-
+	ATile* FindOptimalDistanceBasedSupportTile(ATile* myTile_); //Checks conditioned stat here
+	ATile* FindOptimalStatBasedSupportTile(ATile* myTile_); //Already picked the character based on the stat, now just going to pick a tile
 
 	
 };

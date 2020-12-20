@@ -55,7 +55,7 @@ protected:
 
 	bool bBattleHasEnded;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", Replicated) //Will be read by UI to show the phases
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle") //Will be read by UI to show the phases
 		int phase; //0 deployment 1 player 2 enemy 3 crowd 4 end
 	
 	//Updated from the intermediate
@@ -91,24 +91,18 @@ protected:
 
 	void UpdatePlayerEXP();
 
-	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(Server, Reliable)
 	void DeplyUnitAtThisLocation(FVector tileLoc_); //Called from controller
-	void DeplyUnitAtThisLocation_Implementation(FVector tileLoc_);
 
 	int GetPhase();
-	UFUNCTION(Server, Reliable, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 		void NextPhase();
-		void NextPhase_Implementation();
 
-	UFUNCTION(Server, Reliable, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 		void EndDeployment(); //Called from the UI
-		void EndDeployment_Implementation();
 
 	int GetBpidOfUnitToBeDeployedNext();
 	int GetTotalNumberOfPhasesElapsed();
@@ -123,5 +117,7 @@ public:
 
 	void SpawnSkillEmitter(FVector loc_, int emitterIndex_);
 	void SpawnWeaponEmitter(FVector loc_, int emitterIndex_);
+
+	ABattleCrowd* GetCrowdRef();
 
 };

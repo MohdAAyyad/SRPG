@@ -20,7 +20,7 @@ USupportDecisionComp::USupportDecisionComp()
 }
 AGridCharacter* USupportDecisionComp::FindTheOptimalTargetCharacter()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Find Optimal Target has been called in support"));
+	//UE_LOG(LogTemp, Warning, TEXT("Find Optimal Target has been called in support"));
 	bWillUseSkill = false;
 	skillType = -1;
 	defenseSkillWithTheMaxRangeIndex = -1; //To make sure the support enemy picks the correct skill later on 
@@ -64,7 +64,7 @@ AGridCharacter* USupportDecisionComp::FindHealTarget(AEnemyBaseGridCharacter* ig
 		}
 		if (healTarget)
 		{ //Were we able to find a target within our radius and below the HP threshold?
-			UE_LOG(LogTemp, Warning, TEXT("Support: We have a heal target"));
+			//UE_LOG(LogTemp, Warning, TEXT("Support: We have a heal target"));
 			currentTarget = healTarget;
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
 			return currentTarget;
@@ -86,7 +86,7 @@ AGridCharacter* USupportDecisionComp::FindBuffTarget(TArray<AEnemyBaseGridCharac
 
 	if (defenseSkills.Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Support: We have buff skills"));
+		//UE_LOG(LogTemp, Warning, TEXT("Support: We have buff skills"));
 	}
 	for (int i = 0; i < defenseSkills.Num(); i++)
 	{
@@ -142,7 +142,7 @@ AGridCharacter* USupportDecisionComp::FindBuffTarget(TArray<AEnemyBaseGridCharac
 
 AGridCharacter* USupportDecisionComp::FindClosestAllyWithTheLeastHealth(TArray<AEnemyBaseGridCharacter*> echars, FVector myLoc)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Support: Find closest ally with least health"));
+	//UE_LOG(LogTemp, Warning, TEXT("Support: Find closest ally with least health"));
 	//Move closer to the enemy with the least health 
 	defenseSkillWithTheMaxRangeIndex = -2;
 	float minHealth = FLT_MAX;
@@ -153,7 +153,7 @@ AGridCharacter* USupportDecisionComp::FindClosestAllyWithTheLeastHealth(TArray<A
 		{
 			if (echars[i])
 			{
-				if (echars[i]->GetStat(STAT_HP) < minHealth)
+				if (echars[i]->GetStat(STAT_HP) < minHealth && echars[i] != ownerEnemy)
 				{
 					minHealth = echars[i]->GetStat(STAT_HP);
 					targetIndex = i;
@@ -187,7 +187,7 @@ ATile* USupportDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 				{
 					//	UE_LOG(LogTemp, Warning, TEXT("Tried to heal but couldn't get a tile. Gonna attempt to find another target to heal"));
 					currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
-					FindHealTarget(Cast<AEnemyBaseGridCharacter> (currentTarget));
+				ownerEnemy->UpdateTargetCharacter(FindHealTarget(Cast<AEnemyBaseGridCharacter> (currentTarget)));
 					return FindOptimalTargetTile(myTile_); //We've switched to a different target so run the function again and find a tile
 				}
 				else if (targetTile == myTile_) //We're not gonna be moving
@@ -203,7 +203,7 @@ ATile* USupportDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 			else//We don't have a player target, find the optimal one per the enum rules.
 			{
 				//	UE_LOG(LogTemp, Warning, TEXT("We don't really have a support target"));					
-				FindTheOptimalTargetCharacter();
+				ownerEnemy->UpdateTargetCharacter(FindTheOptimalTargetCharacter());
 				return FindOptimalTargetTile(myTile_); //We've got a target now so run the function again
 			}
 
@@ -228,10 +228,10 @@ ATile* USupportDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 				if (!targetTile)
 				{
 					//	UE_LOG(LogTemp, Warning, TEXT("Tried to support but not tile. Let's look for a different target :("));
-					currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
-					//FindHealTarget(Cast<AEnemyBaseGridCharacter> (currentTarget));
+					//currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
+					//ownerEnemy->UpdateTargetCharacter(FindHealTarget(Cast<AEnemyBaseGridCharacter> (currentTarget)));
 					//HEEEERRREEEE FIIXXXX HEEERRREEEE
-					//return FindSupportTile(myTile_); //We've switched to a different target so run the function again and find a tile
+					//return FindOptimalTargetTile(myTile_); //We've switched to a different target so run the function again and find a tile
 					return nullptr;
 				}
 				else if (targetTile == myTile_) //We're not gonna be moving
@@ -249,7 +249,7 @@ ATile* USupportDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 			{
 				//	UE_LOG(LogTemp, Warning, TEXT("Gonna find another character"));
 					//We don't have a player target, find the optimal one per the enum rules.
-				FindTheOptimalTargetCharacter();
+				ownerEnemy->UpdateTargetCharacter(FindTheOptimalTargetCharacter());
 				return FindOptimalTargetTile(myTile_); //We've got a target now so run the function again
 			}
 

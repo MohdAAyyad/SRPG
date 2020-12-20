@@ -48,4 +48,7 @@ public:
 	void Zoom(float rate_);
 	void LockOnActor(AActor* target_);
 	void ResetLock();
+	UFUNCTION(Server, Reliable)
+	void SpawnItems(class ABattleManager* btl_, FVector loc_);
+	void SpawnItems_Implementation(class ABattleManager* btl_, FVector loc_);
 };

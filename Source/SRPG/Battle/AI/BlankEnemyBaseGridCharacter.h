@@ -16,6 +16,7 @@ class SRPG_API ABlankEnemyBaseGridCharacter : public AEnemyBaseGridCharacter
 public:
 	ABlankEnemyBaseGridCharacter();
 	void SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_) override;
+	void StartEnemyTurn() override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment")

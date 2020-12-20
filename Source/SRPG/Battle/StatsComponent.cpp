@@ -243,6 +243,8 @@ void UStatsComponent::InitStatsAtZero()
 
 	currentStats[STAT_LVL] = 1; //Min level
 	currentStats[STAT_SPD] = 2; //Min speed
+	maxHP = currentStats[STAT_HP] = 10; //Min health
+	maxPip = currentStats[STAT_PIP] = 3; //Min pips
 }
 
 

@@ -46,7 +46,8 @@ void ASRPGPlayerController::CheckCollisionUnderMouse()
 			//set a new one
 			interacting = hitInteractable;
 			hitInteractable->Interact();
-			player->SetInteracting(interacting);
+			if(player)
+				player->SetInteracting(interacting);
 		}
 		else
 		{

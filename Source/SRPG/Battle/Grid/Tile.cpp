@@ -29,8 +29,6 @@ ATile::ATile()
 	gCost = hCost = fCost = 0;
 	bTraversable = true;
 	parentTile = nullptr;
-
-	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -56,11 +54,6 @@ void ATile::BeginPlay()
 	//SetActorHiddenInGame(true);
 }
 
-void ATile::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-{
-	DOREPLIFETIME(ATile, HighlightedIndex);
-}
-
 AGridManager* ATile::GetGridManager()
 {
 	return gridManager;
@@ -70,7 +63,7 @@ void ATile::SetGridManager(AGridManager* gridManager_)
 	gridManager = gridManager_;
 }
 
-void ATile::Highlighted_Implementation(int index_)
+void ATile::Highlighted(int index_)
 {
 	if (bTraversable)
 	{
@@ -117,7 +110,7 @@ void ATile::Highlighted_Implementation(int index_)
 		HighlightedIndex = index_;
 	}
 }
-void ATile::NotHighlighted_Implementation()
+void ATile::NotHighlighted()
 {
 	//SetActorHiddenInGame(true);
 	if (originalMaterial)

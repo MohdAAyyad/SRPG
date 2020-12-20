@@ -115,6 +115,7 @@ void UDecisionComp::UpdateEnemySkills()
 
 ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Choose tile based on possible offesen actions"));
 
 	//Check skills first. If one of our skills can reach the player, we got the tile
 	//If not or if we don't enough pips, then check regular attacks
@@ -134,6 +135,11 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 	movementTiles = gridManager->GetHighlightedTiles();
 	gridManager->ClearHighlighted();
 
+	UE_LOG(LogTemp, Warning, TEXT("offsenseSkills.Num() %d"), offsenseSkills.Num());
+	UE_LOG(LogTemp, Warning, TEXT("statsComp->GetStatValue(STAT_PIP) %d"), statsComp->GetStatValue(STAT_PIP));
+	UE_LOG(LogTemp, Warning, TEXT("offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip %d"), offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip);
+
+	UE_LOG(LogTemp, Warning, TEXT("bCanUseSkill %d"), bCanUseSkill);
 
 	if (offsenseSkills.Num() > 0)
 	{
@@ -145,6 +151,7 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 				//If we have enough pips, roll a dice and see if we get to use a skill
 				if (skillChance >= FMath::RandRange(0, 100))
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Bypassed skill chance check"));
 					if (CheckIfTargetIsInRangeOfSkill(gridManager, pathComp, movementTiles, rangeTiles, &myTile_, &resultTile,true))
 					{
 						bWillUseSkill = true;
@@ -252,12 +259,14 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleSupportActions(ATile* myTile_)
 
 void UDecisionComp::FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(int statIndex_, int currentPips_)
 {
-	int maxRange = -1;
+	int maxRange = FLT_MIN;
+	UE_LOG(LogTemp, Warning, TEXT("statindex_ %d"), statIndex_);
 	for (int i = 0; i < defenseSkills.Num(); i++)
 	{
 		//Get the skill that matches the stat we're looking for, has the highest range, and usable
 		if (defenseSkills[i].statIndex == statIndex_ && defenseSkills[i].rge > maxRange && defenseSkills[i].pip <= currentPips_)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("defenseSkills[i].statIndex %d"), defenseSkills[i].statIndex);
 			defenseSkillWithTheMaxRangeIndex = i;
 		}
 	}
@@ -269,6 +278,7 @@ bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(AGridManager* grid_, class UPa
 	grid_->ClearHighlighted();
 	if (currentTarget)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Got a current target inside CheckIfTargetIsInRangeOfSkill "));
 		if (offense_)
 		{
 			grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
@@ -356,6 +366,8 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 		}
 		if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Yeah went with regular attack"));
+			//Reset skills first
 			*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
 		}
 		
@@ -378,8 +390,6 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 		if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
 		{
 			*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
-			bWillUseSkill = true;
-			skillType = 0;
 		}
 	}
 

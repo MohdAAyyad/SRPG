@@ -11,6 +11,8 @@
 #include "Materials/Material.h"
 #include "BattleController.h"
 #include "Engine/World.h"
+#include "BattleManager.h"
+#include "Crowd/BattleCrowd.h"
 
 // Sets default values
 ABattlePawn::ABattlePawn()
@@ -48,6 +50,7 @@ ABattlePawn::ABattlePawn()
 	bLockedOn = false;
 	lockOnRate = 0.075f;
 	originalFOV = 0.0f;
+	bReplicates = true;
 
 }
 
@@ -138,5 +141,13 @@ void ABattlePawn::ResetLock()
 {
 	bLockedOn = false;
 	lockedOnTarget = nullptr;
+}
+
+void ABattlePawn::SpawnItems_Implementation(ABattleManager* btl_, FVector loc_)
+{
+	if (btl_)
+	{
+		btl_->GetCrowdRef()->SpawnItemsAtLoc(loc_);
+	}
 }
 

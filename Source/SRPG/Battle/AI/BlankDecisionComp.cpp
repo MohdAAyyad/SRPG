@@ -18,119 +18,72 @@ UBlankDecisionComp::UBlankDecisionComp():UDecisionComp()
 {
 	offenseTargetRadiusInPx = 0.0f;
 	supportTargetRadiusInPx = 0.0f;
-	offenseChance = 100.0f;
 	offenseTargetRadiusInTiles = 0;
 	supportTargetRadiusInTiles = 0;
-	bInclinedToAttack = false;
-	bInclinedToAttack = false;
-	findOffenseTarget = nullptr;
-	findOffenseTile = nullptr;
-	findSupportTarget = nullptr;
-	findSupportTile = nullptr;
-	bChosenToAttack = true;
+	functionIndex = 0;
 }
 
 void UBlankDecisionComp::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateInclination();
 	UpdateFunctionPointers();
 
 	offenseTargetRadiusInPx = static_cast<float>(offenseTargetRadiusInTiles) * TILE_SIZE;
 	supportTargetRadiusInPx = static_cast<float>(supportTargetRadiusInTiles) * TILE_SIZE;
 }
 
-void UBlankDecisionComp::UpdateInclination()
+void UBlankDecisionComp::ResetFunctionIndex() //Called at the beginning of the enemy turn
 {
-	//Make sure the inclinations logic makes sense
-	if ((bInclinedToAttack == true && offenseTargetRadiusInTiles <= 0) || (bInclinedToAttack == false && offenseTargetRadiusInTiles > 0))
-	{
-		bInclinedToAttack = false;
-		offenseTargetRadiusInTiles = 0;
-	}
-
-	if ((bInclinedToSupport == true && supportTargetRadiusInTiles <= 0) || (bInclinedToSupport == false && supportTargetRadiusInTiles > 0))
-	{
-		bInclinedToSupport = false;
-		supportTargetRadiusInTiles = 0;
-		if (!bInclinedToAttack)
-		{
-			//if both are false at this point that means I have no target radius for either and the logic is not sound. Die.
-			ownerEnemy->GridCharTakeDamage(FLT_MAX, ownerEnemy, false);
-		}
-	}
-
-	//Both are true and their target raidus is higher than zero. Default to inclined to attack
-	if ((bInclinedToAttack && bInclinedToSupport))
-	{
-		bInclinedToAttack = true;
-		bInclinedToSupport = false;
-	}
-
-	if (bInclinedToAttack && supportTargetRadiusInTiles > 0) //Inclined to attack but can also support
-	{
-		offenseChance = 70.0f;
-	}
-	else if (bInclinedToSupport && offenseTargetRadiusInTiles > 0) //Inclined to support but can also attack
-	{
-		offenseChance = 30.0f;
-	}
-	else if (bInclinedToSupport && offenseTargetRadiusInTiles <= 0) //Will only support
-	{
-		offenseChance = 0.0f;
-	}
+	functionIndex = 0;
 }
-
 void UBlankDecisionComp::UpdateFunctionPointers()
 {
-	if (offenseTargetRadiusInTiles > 0)
+	//Loop through the conditions array and populate the function pointer arrays accordingly
+	for (int i = 0; i < conditions.Num(); i++)
 	{
-		switch (offenseCondition)
+		findTargetFuncPtr  findTarget;
+		findTileFuncPtr findTile;
+		switch (conditions[i])
 		{
-		case ETargetConditions::SMALLEST_DISTANCE:
-			findOffenseTarget = &UBlankDecisionComp::FindOffenseTarget_SmallestDistance;
+		case ETargetConditions::OFFENSE_SMALLEST_DISTANCE:
+			findTarget = &UBlankDecisionComp::FindOffenseTarget_SmallestDistance;
+			findTile = &UBlankDecisionComp::FindOptimalOffenseTile;
 			break;
-		case ETargetConditions::LONGEST_DISTANCE:
-			findOffenseTarget = &UBlankDecisionComp::FindOffenseTarget_LongestDistance;
+		case ETargetConditions::OFFENSE_LONGEST_DISTANCE:
+			findTarget = &UBlankDecisionComp::FindOffenseTarget_LongestDistance;
+			findTile = &UBlankDecisionComp::FindOptimalOffenseTile;
 			break;
-		case ETargetConditions::LOWEST_CONDITIONED_STAT:
-			findOffenseTarget = &UBlankDecisionComp::FindOffenseTarget_LowestStat;
+		case ETargetConditions::OFFENSE_LOWEST_CONDITIONED_STAT:
+			findTarget = &UBlankDecisionComp::FindOffenseTarget_LowestStat;
+			findTile = &UBlankDecisionComp::FindOptimalOffenseTile;
 			break;
-		case ETargetConditions::HIGHEST_CONDITIONED_STAT:
-			findOffenseTarget = &UBlankDecisionComp::FindOffenseTarget_HighestStat;
+		case ETargetConditions::OFFENSE_HIGHEST_CONDITIONED_STAT:
+			findTarget = &UBlankDecisionComp::FindOffenseTarget_HighestStat;
+			findTile = &UBlankDecisionComp::FindOptimalOffenseTile;
+			break;
+
+
+		case ETargetConditions::SUPPORT_SMALLEST_DISTANCE: //Picks a target based on distance THEN decides which skill to choose then picks a tile
+ 			findTarget = &UBlankDecisionComp::FindSupportTarget_SmallestDistance;
+			findTile = &UBlankDecisionComp::FindOptimalDistanceBasedSupportTile;
+			break;
+		case ETargetConditions::SUPPORT_LONGEST_DISTANCE:
+			findTarget = &UBlankDecisionComp::FindSupportTarget_LongestDistance;
+			findTile = &UBlankDecisionComp::FindOptimalDistanceBasedSupportTile;
+			break;
+		case ETargetConditions::SUPPORT_LOWEST_CONDITIONED_STAT: //Chooses a skil to use first then picks a tile.
+			findTarget = &UBlankDecisionComp::FindSupportTarget_LowestStat;
+			findTile = &UBlankDecisionComp::FindOptimalStatBasedSupportTile;
+			break;
+		case ETargetConditions::SUPPORT_HIGHEST_CONDITIONED_STAT:
+			findTarget = &UBlankDecisionComp::FindSupportTarget_HighestStat;
+			findTile = &UBlankDecisionComp::FindOptimalStatBasedSupportTile;
 			break;
 		default:
 			break;
 		}
-
-		//TODO
-		//Add more offenseTileFunctions maybe
-		findOffenseTile = &UBlankDecisionComp::FindOptimalOffenseTile;
-	}
-
-	if (supportTargetRadiusInTiles > 0)
-	{
-		switch (supportCondition)
-		{
-		case ETargetConditions::SMALLEST_DISTANCE:
-			findSupportTarget = &UBlankDecisionComp::FindSupportTarget_SmallestDistance;
-			break;
-		case ETargetConditions::LONGEST_DISTANCE:
-			findSupportTarget = &UBlankDecisionComp::FindSupportTarget_LongestDistance;
-			break;
-		case ETargetConditions::LOWEST_CONDITIONED_STAT:
-			findSupportTarget = &UBlankDecisionComp::FindSupportTarget_LowestStat;
-			break;
-		case ETargetConditions::HIGHEST_CONDITIONED_STAT:
-			findSupportTarget = &UBlankDecisionComp::FindSupportTarget_HighestStat;
-			break;
-		default:
-			break;
-		}
-
-		//TODO
-		//Add more supportTileFunctions maybe
-		findSupportTile = &UBlankDecisionComp::FindOptimalSupportTile;
+		targetFunctionPtrs.Push(findTarget);
+		tileFunctionPtrs.Push(findTile);
 	}
 }
 
@@ -139,44 +92,42 @@ AGridCharacter* UBlankDecisionComp::FindTheOptimalTargetCharacter()
 	bWillUseSkill = false;
 	skillType = -1;
 
-	if (offenseChance < 100.0f  && offenseChance > 0.0f) //Only if we have a mix do we need to calculate the offense chance
+	if (functionIndex >= 0 && functionIndex < targetFunctionPtrs.Num())
 	{
-		float chance = FMath::RandRange(0.0f, 100.0f);
-		if (chance <= offenseChance)
-		{
-			bChosenToAttack = true;
-			return (this->*(findOffenseTarget))(nullptr);
-		}
-		else
-		{
-			bChosenToAttack = false;
-			return (this->*(findSupportTarget))(nullptr);
-		}
+		return (this->*(targetFunctionPtrs[functionIndex]))(nullptr);
 	}
-	else if (offenseChance >= 100.0f) //Will only attack
-	{
-		bChosenToAttack = true;
-		return (this->*(findOffenseTarget))(nullptr);
-	}
-	else if (offenseChance <= 0.0f) //Will only support
-	{
-		bChosenToAttack = false;
-		defenseSkillWithTheMaxRangeIndex = -1;
-		return (this->*(findSupportTarget))(nullptr);
-	}
+
 	return nullptr;
 }
 ATile* UBlankDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 {
+	if (functionIndex >= 0 && functionIndex < tileFunctionPtrs.Num())
+	{
+		return (this->*(tileFunctionPtrs[functionIndex]))(myTile_);
+	}
+	return nullptr;
+}
 
-	if (bChosenToAttack)
+//Used for changing targets after failing to find the optimal one
+AGridCharacter* UBlankDecisionComp::FindNextOptimalTargetCharacter(AGridCharacter* ignoreThis_)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Find next"));
+	bWillUseSkill = false;
+	skillType = -1;
+
+	if (currentTarget)
+		currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
+
+	currentTarget = nullptr; //We're switching targets
+
+	if (ownerEnemy)
+		ownerEnemy->ResetActionTargets(); //Clear the targets array
+
+	if (functionIndex >= 0 && functionIndex < targetFunctionPtrs.Num())
 	{
-		return (this->*(findOffenseTile))(myTile_);
+		return (this->*(targetFunctionPtrs[functionIndex]))(ignoreThis_);
 	}
-	else
-	{
-		return (this->*(findSupportTile))(myTile_);
-	}
+
 	return nullptr;
 }
 
@@ -206,7 +157,7 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_SmallestDistance(AGridChar
 					float distance = (myLoc - pchars[i]->GetActorLocation()).Size();
 					if (distance < offenseTargetRadiusInPx)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("Blank: Found potential target"));
+						//UE_LOG(LogTemp, Warning, TEXT("Blank: Found potential target"));
 						if (distance < min && target != pchars[i])
 						{
 							target = pchars[i];
@@ -219,8 +170,27 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_SmallestDistance(AGridChar
 		}
 
 		if (currentTarget)
+		{
+			
+			UE_LOG(LogTemp, Warning, TEXT("CURRENT TARGETTTT %s"), *currentTarget->GetName());
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-		return currentTarget;
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}	
+			
+		}
 	}
 	return nullptr;
 }
@@ -257,8 +227,25 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_LongestDistance(AGridChara
 		}
 
 		if (currentTarget)
+		{
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-		return currentTarget;
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
+		}
 	}
 	return nullptr;
 }
@@ -291,20 +278,29 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_LowestStat(AGridCharacter*
 						}
 					}
 				}
-
-				if (target)
-				{ //Were we able to find a target within our radius and below the HP threshold?
-					currentTarget = target;
-					currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-					return currentTarget;
-				}
+				currentTarget = target;
 			}
 		}
 
-		//We won't reach this line unless you don't have a target yet
-		if (!currentTarget) //Otherwise, find the closest target
+		if (currentTarget)
 		{
-			return FindOffenseTarget_SmallestDistance(ignoreThis_);
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
 		}
 	}
 	return nullptr;
@@ -339,19 +335,29 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_HighestStat(AGridCharacter
 					}
 				}
 
-				if (target)
-				{ //Were we able to find a target within our radius and below the HP threshold?
-					currentTarget = target;
-					currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-					return currentTarget;
-				}
+				currentTarget = target;
 			}
 		}
 
-		//We won't reach this line unless you don't have a target yet
-		if (!currentTarget) //Otherwise, find the closest target
+		if (currentTarget)
 		{
-			return FindOffenseTarget_SmallestDistance(ignoreThis_);
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
 		}
 	}
 	return nullptr;
@@ -380,13 +386,16 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_SmallestDistance(AGridChar
 				float min = FLT_MAX;
 				for (int i = 0; i < echars.Num(); i++)
 				{
-					float distance = (myLoc - echars[i]->GetActorLocation()).Size();
-					if (distance < supportTargetRadiusInPx)
+					if (echars[i] != ownerEnemy) //Can't choose self
 					{
-						if (distance < min && target != echars[i])
+						float distance = (myLoc - echars[i]->GetActorLocation()).Size();
+						if (distance <= supportTargetRadiusInPx)
 						{
-							target = echars[i];
-							min = distance;
+							if (distance < min && target != echars[i])
+							{
+								target = echars[i];
+								min = distance;
+							}
 						}
 					}
 				}
@@ -395,8 +404,26 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_SmallestDistance(AGridChar
 		}
 
 		if (currentTarget)
+		{
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-		return currentTarget;
+			return currentTarget;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Called next from FindSupportTarget_SmallestDistance"));
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
+		}
 	}
 	return nullptr;
 }
@@ -418,13 +445,16 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_LongestDistance(AGridChara
 				float max = FLT_MIN;
 				for (int i = 0; i < echars.Num(); i++)
 				{
-					float distance = (myLoc - echars[i]->GetActorLocation()).Size();
-					if (distance < supportTargetRadiusInPx)
+					if (echars[i] != ownerEnemy) //Can't choose self
 					{
-						if (distance > max && target != echars[i])
+						float distance = (myLoc - echars[i]->GetActorLocation()).Size();
+						if (distance <= supportTargetRadiusInPx)
 						{
-							target = echars[i];
-							max = distance;
+							if (distance > max && target != echars[i])
+							{
+								target = echars[i];
+								max = distance;
+							}
 						}
 					}
 				}
@@ -433,8 +463,25 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_LongestDistance(AGridChara
 		}
 
 		if (currentTarget)
+		{
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-		return currentTarget;
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
+		}
 	}
 	return nullptr;
 }
@@ -445,42 +492,97 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_LowestStat(AGridCharacter*
 		TArray<AEnemyBaseGridCharacter*> echars = aiManager->GetDeployedEnemies();
 		FVector myLoc = ownerEnemy->GetActorLocation();
 		AEnemyBaseGridCharacter* target = Cast<AEnemyBaseGridCharacter>(ignoreThis_);
+		UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
 		if (echars.Num() > 0)
 		{
 			float stat_ = 0.0f;
+			float distance = 0.0f;
 			float min = FLT_MAX;
 			if (!bPersistant || !currentTarget) //Only look for a new target if you're not persistent or if you don't have a target
 			{
-				for (int i = 0; i < echars.Num(); i++)
+				for (int j = 0; j < supportPriorityConditionStatIndex.Num(); j++)
 				{
-					if (echars[i])
+					defenseSkillWithTheMaxRangeIndex = -1;
+					FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportPriorityConditionStatIndex[j], statsComp->GetStatValue(STAT_PIP));
+					if (defenseSkillWithTheMaxRangeIndex != -1) //Only check for the validty of the target if we have a skill that affects the stat in question
 					{
-						float distance = (myLoc - echars[i]->GetActorLocation()).Size();
-						if (distance <= supportTargetRadiusInPx) //If they're within our target radius, then check their stat
+						for (int i = 0; i < echars.Num(); i++)
 						{
-							stat_ = echars[i]->GetStat(supportConditionStatIndex);
-							if (stat_ < min && target != echars[i]) //If they're less than the threshold, then that's our target
+							if (echars[i])
 							{
-								target = echars[i];
-								min = stat_;
+								distance = (myLoc - echars[i]->GetActorLocation()).Size();
+								stat_ = echars[i]->GetStatsComp()->GetStatValue(supportPriorityConditionStatIndex[j]);
+
+								if (distance <= supportTargetRadiusInPx) //If they're within our target radius, then check their stat
+								{
+									if (supportPriorityConditionStatIndex[j] == STAT_HP) //If the stat we're checking for is HP then make sure the target has less hp than the threshold
+									{
+										if (echars[i]->GetStatsComp()->GetHPPercentage() <= hpThresholdForSupport)
+										{
+											if (stat_ < min && target != echars[i]) //Now check for min
+											{
+												target = echars[i];
+												min = stat_;
+											}
+										}
+									}
+									else if (supportPriorityConditionStatIndex[j] == STAT_PIP) //If the stat we're checking for is PIP then make sure the target has less pip than the threshold
+									{
+										if (echars[i]->GetStatsComp()->GetPIPPercentage() <= pipThresholdForSupport)
+										{
+											if (stat_ < min && target != echars[i]) //Now check for min
+											{
+												target = echars[i];
+												min = stat_;
+											}
+										}
+									}
+									else //It's not hp or pip so just make sure the character was not buffed for that particular stat
+									{
+										if (!echars[i]->GetStatsComp()->HasThisStatBeenBuffed(supportPriorityConditionStatIndex[j]))
+										{
+											if (stat_ < min && target != echars[i]) //Now check for min
+											{
+												target = echars[i];
+												min = stat_;
+											}
+										}
+									}
+
+								}
 							}
+						}
+
+						if (target != nullptr && target != ignoreThis_) //We've found a target for the skill, leave
+						{
+							break;
 						}
 					}
 				}
 
-				if (target)
-				{ //Were we able to find a target within our radius and below the HP threshold?
-					currentTarget = target;
-					currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-					return currentTarget;
-				}
+				currentTarget = target;
 			}
 		}
 
-		//We won't reach this line unless you don't have a target yet
-		if (!currentTarget) //Otherwise, find the closest target
+		if (currentTarget)
 		{
-			return FindSupportTarget_SmallestDistance(ignoreThis_);
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
 		}
 	}
 	return nullptr;
@@ -492,42 +594,97 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_HighestStat(AGridCharacter
 		TArray<AEnemyBaseGridCharacter*> echars = aiManager->GetDeployedEnemies();
 		FVector myLoc = ownerEnemy->GetActorLocation();
 		AEnemyBaseGridCharacter* target = Cast<AEnemyBaseGridCharacter>(ignoreThis_);
+		UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
 		if (echars.Num() > 0)
 		{
+			float distance = 0.0f;
 			float stat_ = 0.0f;
 			float max = FLT_MIN;
 			if (!bPersistant || !currentTarget) //Only look for a new target if you're not persistent or if you don't have a target
 			{
-				for (int i = 0; i < echars.Num(); i++)
+				for (int j = 0; j < supportPriorityConditionStatIndex.Num(); j++)
 				{
-					if (echars[i])
+					defenseSkillWithTheMaxRangeIndex = -1;
+					FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportPriorityConditionStatIndex[j], statsComp->GetStatValue(STAT_PIP));
+					if (defenseSkillWithTheMaxRangeIndex != -1) //Only check for the validty of the target if we have a skill that affects the stat in question
 					{
-						float distance = (myLoc - echars[i]->GetActorLocation()).Size();
-						if (distance <= supportTargetRadiusInPx) //If they're within our target radius, then check their stat
+						for (int i = 0; i < echars.Num(); i++)
 						{
-							stat_ = echars[i]->GetStat(supportConditionStatIndex);
-							if (stat_ > max && target != echars[i]) //If they're less than the threshold, then that's our target
+							if (echars[i])
 							{
-								target = echars[i];
-								max = stat_;
+								distance = (myLoc - echars[i]->GetActorLocation()).Size();
+								stat_ = echars[i]->GetStatsComp()->GetStatValue(supportPriorityConditionStatIndex[j]);
+
+								if (distance <= supportTargetRadiusInPx) //If they're within our target radius, then check their stat
+								{
+									if (supportPriorityConditionStatIndex[j] == STAT_HP) //If the stat we're checking for is HP then make sure the target has less hp than the threshold
+									{
+										if (echars[i]->GetStatsComp()->GetHPPercentage() <= hpThresholdForSupport)
+										{
+											if (stat_ > max && target != echars[i]) //Now check for max
+											{
+												target = echars[i];
+												max = stat_;
+											}
+										}
+									}
+									else if (supportPriorityConditionStatIndex[j] == STAT_PIP) //If the stat we're checking for is PIP then make sure the target has less pip than the threshold
+									{
+										if (echars[i]->GetStatsComp()->GetPIPPercentage() <= pipThresholdForSupport)
+										{
+											if (stat_ > max && target != echars[i]) //Now check for max
+											{
+												target = echars[i];
+												max = stat_;
+											}
+										}
+									}
+									else //It's not hp or pip so just make sure the character was not buffed for that particular stat
+									{
+										if (!echars[i]->GetStatsComp()->HasThisStatBeenBuffed(supportPriorityConditionStatIndex[j]))
+										{
+											if (stat_ > max && target != echars[i]) //Now check for max
+											{
+												target = echars[i];
+												max = stat_;
+											}
+										}
+									}
+
+								}
 							}
+						}
+
+						if (target != nullptr && target != ignoreThis_) //We've found a target for the skill, leave
+						{
+							break;
 						}
 					}
 				}
 
-				if (target)
-				{ //Were we able to find a target within our radius and below the HP threshold?
-					currentTarget = target;
-					currentTarget->YouAreTargetedByMeNow(ownerEnemy);
-					return currentTarget;
-				}
+				currentTarget = target;
 			}
 		}
 
-		//We won't reach this line unless you don't have a target yet
-		if (!currentTarget) //Otherwise, find the closest target
+		if (currentTarget)
 		{
-			return FindSupportTarget_SmallestDistance(ignoreThis_);
+			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
+			return currentTarget;
+		}
+		else
+		{
+			//if you haven't found a suitable target, move on to the next function
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0;
+				return nullptr; //You've exhausted all your options.
+			}
+			else
+			{
+				return FindNextOptimalTargetCharacter(ignoreThis_);
+			}
+
 		}
 	}
 	return nullptr;
@@ -548,14 +705,20 @@ ATile* UBlankDecisionComp::FindOptimalOffenseTile(ATile* myTile_)
 		//If all range tiles are occupied, Find another target
 		if (!targetTile)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Could not find target tile"));
 			currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
 			AGridCharacter* ignoreThisTarget = currentTarget;
 			if (bPersistant) //If this enemy is persistent, we need to tell it to find another target and to do that, the current target needs to be made null but we still need to pass it in to avoid it
 			{
 				currentTarget = nullptr;
 			}
-			(this->*(findOffenseTarget))(ignoreThisTarget);
-			return (this->*(findOffenseTile))(myTile_); //We've switched to a different target so run the function again and find a tile
+			//Increment the function index and check if you're out of bounds
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+				functionIndex = 0;
+
+			ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(ignoreThisTarget));
+			return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
 		}
 		else if (targetTile == myTile_) //We're not gonna be moving
 		{
@@ -568,30 +731,91 @@ ATile* UBlankDecisionComp::FindOptimalOffenseTile(ATile* myTile_)
 	}
 	else
 	{
-		//We don't have a player target, find the optimal one per the enum rules.
-		(this->*(findOffenseTarget))(nullptr);
-		return (this->*(findOffenseTile))(myTile_); //We've got a target now so run the function again
+		//Increment the function index and check if you're out of bounds
+		functionIndex++;
+		if (functionIndex >= targetFunctionPtrs.Num())
+		{
+			functionIndex = 0; //You've exhausted all options
+			return nullptr;
+		}
+		else
+		{
+
+			ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
+			return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+		}
 	}
 
 	return nullptr;
 }
-ATile* UBlankDecisionComp::FindOptimalSupportTile(ATile* myTile_)
+ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 {
+	//We have picked a target based on distance as that's the main condition
+	//Now we need to make sure we can support this character based on the support priority array
+
 	if (currentTarget) 	//Checks if we have a target reference first, otherwise, move to target tile
 	{
 		UStatsComponent* statsComp = ownerEnemy->GetStatsComp();
-		FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportConditionStatIndex, statsComp->GetStatValue(STAT_PIP));
+		UStatsComponent* currentTargetStatComp = currentTarget->GetStatsComp();
+		defenseSkillWithTheMaxRangeIndex = -1;
+		
+		//Loop through the priority stat array to find a usable skill
+		for (int i = 0; i < supportPriorityConditionStatIndex.Num(); i++)
+		{
+			//If the stat in question is HP or PIP, then check the threshold first before committing
+			if (supportPriorityConditionStatIndex[i] == STAT_HP)
+			{
+				if (currentTargetStatComp->GetHPPercentage() <= hpThresholdForSupport)
+				{
+					FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportPriorityConditionStatIndex[i], statsComp->GetStatValue(STAT_PIP));
+					if (defenseSkillWithTheMaxRangeIndex != -1) //Found a skill based on the priority array, break
+						break;
+				}
+			}
+			else if (supportPriorityConditionStatIndex[i] == STAT_PIP)
+			{
+				if (currentTargetStatComp->GetPIPPercentage() <= pipThresholdForSupport)
+				{
+					FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportPriorityConditionStatIndex[i], statsComp->GetStatValue(STAT_PIP));
+					if (defenseSkillWithTheMaxRangeIndex != -1) //Found a skill based on the priority array, break
+						break;
+				}
+			}
+			else //It's not hp or pip so just make sure the character was not buffed for that particular stat
+			{
+				if (!currentTargetStatComp->HasThisStatBeenBuffed(supportPriorityConditionStatIndex[i]))
+				{
+					FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(supportPriorityConditionStatIndex[i], statsComp->GetStatValue(STAT_PIP));
+					if (defenseSkillWithTheMaxRangeIndex != -1) //Found a skill based on the priority array, break
+						break;
+				}
+			}
+		}
+		
 		ATile* targetTile = nullptr;
 		if (defenseSkillWithTheMaxRangeIndex != -1)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("defenseSkillWithTheMaxRangeIndex != -1 %d"), defenseSkillWithTheMaxRangeIndex);
 			targetTile = ChooseTileBasedOnPossibleSupportActions(myTile_); //If we got a skill, then find a possible tile
 		}
 		else
 		{
-			//TODO
+		
+			//Could not find a usable skill so check what the next rule is
 
-			//Could not find a usable skill
-			return nullptr;
+			//Increment the function index and check if you're out of bounds
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0; //You've exhausted all options
+				return nullptr;
+			}
+			else
+			{
+
+				ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
+				return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+			}
 		}
 		//If we could not find a feasable tile, then find a different target
 		if (!targetTile)
@@ -603,8 +827,21 @@ ATile* UBlankDecisionComp::FindOptimalSupportTile(ATile* myTile_)
 			{
 				currentTarget = nullptr;
 			}
-			(this->*(findSupportTarget))(Cast<AEnemyBaseGridCharacter>(ignoreThisTarget));
-			return (this->*(findSupportTile))(myTile_); //We've switched to a different target so run the function again and find a tile
+
+			//UE_LOG(LogTemp, Warning, TEXT("BLANK : Could not find a support target tile"));
+			//Increment the function index and check if you're out of bounds
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0; //You've exhausted all options
+				return nullptr;
+			}
+			else
+			{
+
+				ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(ignoreThisTarget));
+				return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+			}
 		}
 		else if (targetTile == myTile_) //We're not gonna be moving
 		{
@@ -618,10 +855,91 @@ ATile* UBlankDecisionComp::FindOptimalSupportTile(ATile* myTile_)
 	}
 	else//We don't have a player target, run the functions again
 	{
-		//	UE_LOG(LogTemp, Warning, TEXT("We don't really have a support target"));					
-		(this->*(findSupportTarget))(nullptr);
-		return (this->*(findSupportTile))(myTile_); //We've got a target now so run the function again
+		//UE_LOG(LogTemp, Warning, TEXT("BLANK : Don't have a support target"));
+		//Increment the function index and check if you're out of bounds
+		functionIndex++;
+		if (functionIndex >= targetFunctionPtrs.Num())
+		{
+			functionIndex = 0; //You've exhausted all options
+			return nullptr;
+		}
+		else
+		{
+
+			ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
+			return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+		}
 	}
+	return nullptr;
+}
+
+ATile* UBlankDecisionComp::FindOptimalStatBasedSupportTile(ATile* myTile_)
+{
+	//If we're here, that means we've already found a skill to use and found a valid target
+
+	if (currentTarget)
+	{
+		ATile* targetTile = nullptr;
+		if (defenseSkillWithTheMaxRangeIndex != -1) //Extra precaution
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("defenseSkillWithTheMaxRangeIndex != -1 %d"), defenseSkillWithTheMaxRangeIndex);
+			targetTile = ChooseTileBasedOnPossibleSupportActions(myTile_); //If we got a skill, then find a possible tile
+		}
+
+		//If we could not find a feasable tile, then find a different target
+		if (!targetTile)
+		{
+			//	UE_LOG(LogTemp, Warning, TEXT("Tried to heal but couldn't get a tile. Gonna attempt to find another target to heal"));
+			currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
+			AGridCharacter* ignoreThisTarget = currentTarget;
+			if (bPersistant) //If this enemy is persistent, we need to tell it to find another target and to do that, the current target needs to be made null but we still need to pass it in to avoid it
+			{
+				currentTarget = nullptr;
+			}
+
+			//UE_LOG(LogTemp, Warning, TEXT("BLANK : Could not find a support target tile"));
+			//Increment the function index and check if you're out of bounds
+			functionIndex++;
+			if (functionIndex >= targetFunctionPtrs.Num())
+			{
+				functionIndex = 0; //You've exhausted all options
+				return nullptr;
+			}
+			else
+			{
+
+				ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(ignoreThisTarget));
+				return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+			}
+		}
+		else if (targetTile == myTile_) //We're not gonna be moving
+		{
+			return nullptr; //nullptr is interpreted in the ownerEnemy as finished moving
+		}
+		else
+		{
+			//	UE_LOG(LogTemp, Warning, TEXT("Found a good tile to support from"));
+			return targetTile;
+		}
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("BLANK : Don't have a support target"));
+				//Increment the function index and check if you're out of bounds
+		functionIndex++;
+		if (functionIndex >= targetFunctionPtrs.Num())
+		{
+			functionIndex = 0; //You've exhausted all options
+			return nullptr;
+		}
+		else
+		{
+
+			ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
+			return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
+		}
+	}
+
 	return nullptr;
 }
 

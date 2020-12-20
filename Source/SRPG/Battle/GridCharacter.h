@@ -181,6 +181,8 @@ public:
 	void YouAreNoLongerTargetedByMe(AGridCharacter* ref_);
 	virtual void IamDeadStopTargetingMe();//Used to stop characters from targeting a dead character
 
+	void ResetActionTargets(); //Used by blank enemy when switching functions
+
 protected:
 	virtual void AddEquipmentStats(int tableIndex_); 
 

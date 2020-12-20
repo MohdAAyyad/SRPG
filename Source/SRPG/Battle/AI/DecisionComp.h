@@ -59,6 +59,8 @@ public:
 
 	void SetPersistence(bool value_);
 
+	virtual void ResetFunctionIndex() {}; //used by blank enemies only
+
 protected:
 	virtual void BeginPlay() override;
 

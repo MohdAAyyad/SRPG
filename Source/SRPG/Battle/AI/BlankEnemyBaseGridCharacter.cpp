@@ -26,6 +26,13 @@ void ABlankEnemyBaseGridCharacter::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBaseGridCharacter::TakeItem);
 }
 
+void ABlankEnemyBaseGridCharacter::StartEnemyTurn()
+{
+	Super::StartEnemyTurn();
+	if (decisionComp)
+		decisionComp->ResetFunctionIndex();
+}
+
 void ABlankEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_)
 {
 	//Called by AI Manager on Beginplay

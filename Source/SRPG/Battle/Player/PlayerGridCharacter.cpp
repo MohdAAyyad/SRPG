@@ -60,6 +60,13 @@ void APlayerGridCharacter::EndPlayerTurn()
 
 void APlayerGridCharacter::Selected()
 {
+	if (!HasAuthority())
+	{
+		if (widgetComp)
+			widgetComp->GetUserWidgetObject()->AddToViewport();
+		return;
+	}
+
 	if (btlManager->GetPhase() == BTL_PLY) //Player phase
 	{
 		if (currentState != EGridCharState::FINISHED)
