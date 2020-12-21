@@ -22,12 +22,25 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Obstacle")
 		USceneComponent* root;
 
-	UPROPERTY(EditAnywhere, Category = "Obstacle")
-		UStaticMeshComponent* mesh;
+	UPROPERTY(EditAnywhere, Category = "Destructible Mesh")
+		class UDestructibleComponent* mesh;
+
+	UPROPERTY(EditAnywhere, Category = "Destructible Mesh")
+		float hp;
 
 	UPROPERTY(EditAnywhere, Category = "Obstacle")
 		class UBoxComponent* box;
 
+	TArray<class ATile*> obstructedTiles;
+
 public:
+	void ObstacleTakeDamage(float damage_);
+	void AddObstructedTile(ATile* tile_);
+	bool IsAnyOfMyTilesHighlighted(int highlightIndex_);
+
+	TArray<ATile*> GetObstructedTiles();
+
+protected:
+	void DelayedDestroy();
 
 };

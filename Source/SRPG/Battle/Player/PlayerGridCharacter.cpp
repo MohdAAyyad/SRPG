@@ -28,6 +28,7 @@
 #include "Animation/GridCharacterAnimInstance.h"
 #include "../../ExternalFileReader/ExternalFileReader.h"
 #include "TimerManager.h"
+#include "../Grid/Obstacle.h"
 
 
 
@@ -116,12 +117,11 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 
 void APlayerGridCharacter::ActivateWeaponAttack()
 {
-	//TODO
 	//Calculate hit and crit chances before applying damage
 	int hitModifier = statsComp->GetStatValue(STAT_WHT) / 2; //Every 2 points in hit, gives us one point in HM
 	int critModifier = 1; //Crit starts at 1 (not a critical attack)
 	bool crit_ = false;
-	if (actionTargets[0])
+	if (actionTargets.Num() > 0)
 	{
 		if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[0]->GetStat(STAT_HIT)))
 		{
@@ -134,7 +134,7 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 
 			//Spawn an emitter based on the weapon index
 			if (btlManager)
-				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(),statsComp->GetStatValue(STAT_WPI));
+				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
 
 			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier, this, crit_);
 
@@ -153,6 +153,20 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 			//Show miss
 			actionTargets[0]->GridCharReactToMiss();
 		}
+	}
+	else if (targetObstacle) //If we don't have a character target, check if we're attacking an obstacle
+	{
+		//Check for critical
+		if (statsComp->GetStatValue(STAT_CRT) >= FMath::RandRange(0, HIT_CRIT_BASE))
+		{
+			critModifier = 2;
+		}
+
+		//Spawn an emitter based on the weapon index
+		if (btlManager)
+			btlManager->SpawnWeaponEmitter(targetObstacle->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
+
+		targetObstacle->ObstacleTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier);
 	}
 
 	if (bHasMoved && bHasDoneAnAction) //Has moved and has done an action, we're done
@@ -293,6 +307,27 @@ void APlayerGridCharacter::ActivateSkillAttack()
 						crdManager->UpdateFavor(true);
 				}
 			}
+		}
+	}
+
+	if (targetObstacle)
+	{
+		//Obstacles can only be affected by damage skills
+		if (chosenSkill.statIndex == STAT_HP && chosenSkill.value > 0)
+		{
+			int critModifier = 1; //Crit starts at 1 (not a critical attack)
+			//Check for critical
+			if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
+			{
+				critModifier = 2;
+			}
+
+			//Spawn an emitter based on the skill emitter index
+			if (btlManager)
+				btlManager->SpawnWeaponEmitter(targetObstacle->GetActorLocation(), chosenSkill.emitterIndex);
+
+			targetObstacle->ObstacleTakeDamage((skillValue + atkScaled + intiScaled) * critModifier);
+
 		}
 	}
 

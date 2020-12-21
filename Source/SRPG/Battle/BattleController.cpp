@@ -18,6 +18,7 @@
 #include "Definitions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Crowd/BattleCrowd.h"
+#include "Battle/Grid/Obstacle.h"
 
 ABattleController::ABattleController()
 {
@@ -188,15 +189,32 @@ void ABattleController::HandleMousePress()
 								}
 							}
 						}
+						//Check for obstacles
+						else
+						{
+							AObstacle* targetObstacle = Cast<AObstacle>(hit.Actor);
+
+							if (targetObstacle)
+							{
+								if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_ATK)) //Make sure at least one the obstacle's tiles are within attack 
+								{
+									UE_LOG(LogTemp, Warning, TEXT("Attacking obstacle"));
+									FocusOnGridCharacter(controlledCharacter, focusRate);
+									controlledCharacter->AttackUsingWeapon(targetObstacle, focusRate);
+								}
+							}
+						}
 					}
 					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::SKILLING)
 					{
+						//Check if the player presses on a character
 						//Get the character
 						AGridCharacter* targetChar = Cast<AGridCharacter>(hit.Actor);
 						if (targetChar)
 						{
 							//Get the tile
 							ATile* tile_ = targetChar->GetMyTile();
+							AObstacle* targetObstacle = nullptr;
 							if (tile_)
 							{
 								//See if the tile is within attack range and has been targeted
@@ -206,12 +224,36 @@ void ABattleController::HandleMousePress()
 
 									for (int i = 0; i < targetingTiles.Num(); i++)
 									{
+										//Get the character standing on the tile
 										AGridCharacter* gchar = targetingTiles[i]->GetMyGridCharacter();
 										if (gchar != nullptr && !targetedCharacters.Contains(gchar))
+										{
 											targetedCharacters.Push(gchar);
+										}
+										else if(!targetObstacle) //Otherwise check if there's an obstacle on top of the tile if we haven't already got one
+										{
+											targetObstacle = targetingTiles[i]->GetMyObstacle();
+										}
 									}
+									UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle as well"));
 									FocusOnGridCharacter(controlledCharacter, focusRate);
-									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
+									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate, targetObstacle);
+									bTargetingWithASkill = false;
+								}
+							}
+						}
+						//Check for obstacles
+						else
+						{
+							AObstacle* targetObstacle = Cast<AObstacle>(hit.Actor);
+
+							if (targetObstacle)
+							{
+								if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_SKL)) //SKL not SKLT as we only need the obstacle to be targetable
+								{
+									UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle"));
+									FocusOnGridCharacter(controlledCharacter, focusRate);
+									controlledCharacter->AttackUsingSkill(TArray<AGridCharacter*>(), focusRate, targetObstacle);
 									bTargetingWithASkill = false;
 								}
 							}
@@ -252,7 +294,7 @@ void ABattleController::HandleMousePress()
 								if (targetedCharacters.Num() > 0)
 								{
 									FocusOnGridCharacter(controlledCharacter, focusRate);
-									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate);
+									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate, nullptr);
 									bTargetingWithASkill = false;
 								}
 							}

@@ -5,6 +5,7 @@
 #include "Tile.h"
 #include "Engine/World.h"
 #include "Definitions.h"
+#include "Obstacle.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -144,6 +145,7 @@ void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int
 
 void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Highlight Tiles Index %d"), index_);
 	int localDepth = depth_;
 	columnOffset = tileIndexInColumn - ConvertRowTocolumn(tileIndexInRows);
 	//Rows going upwards
@@ -309,6 +311,24 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
 				}
+				else if(index_ != TILE_ENM && index_!=TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+				{ 
+					//Get the obstacle that's blocking this tile
+					AObstacle* obstacle_ = columnTiles[tileIndexInColumn]->GetMyObstacle();
+					if (obstacle_)
+					{
+						//Highlight all its tiles. We need this to be able to target the obstacle
+						TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+						for (int i = 0; i < obstructedTiles.Num(); i++)
+						{
+							obstructedTiles[i]->Highlighted(index_);
+							if (!highlightedTiles.Contains(obstructedTiles[i]))
+								highlightedTiles.Push(obstructedTiles[i]);
+						}
+					}
+					break;
+				}
 				else
 				{
 					break;
@@ -338,9 +358,28 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 								columnTiles[tileIndexInColumn + d]->Highlighted(index_);
 								highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
 								}
-								else
+								else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
 								{
-									break; //Otherwise, don't bother with the tiles on my left
+
+									//Get the obstacle that's blocking this tile
+									AObstacle* obstacle_ = columnTiles[tileIndexInColumn + d - 1]->GetMyObstacle();
+									if (obstacle_)
+									{
+										//Highlight all its tiles. We need this to be able to target the obstacle
+										TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+										for (int i = 0; i < obstructedTiles.Num(); i++)
+										{
+											obstructedTiles[i]->Highlighted(index_);
+											if (!highlightedTiles.Contains(obstructedTiles[i]))
+												highlightedTiles.Push(obstructedTiles[i]);
+										}
+									}
+									break;
+								}
+								else //Enemy tiles
+								{
+									break;
 								}
 							}
 						}
@@ -352,6 +391,24 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 								{
 								columnTiles[tileIndexInColumn - d]->Highlighted(index_);
 								highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
+								}
+								else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+								{
+									//Get the obstacle that's blocking this tile
+									AObstacle* obstacle_ = columnTiles[tileIndexInColumn - d + 1]->GetMyObstacle();
+									if (obstacle_)
+									{
+										//Highlight all its tiles. We need this to be able to target the obstacle
+										TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+										for (int i = 0; i < obstructedTiles.Num(); i++)
+										{
+											obstructedTiles[i]->Highlighted(index_);
+											if (!highlightedTiles.Contains(obstructedTiles[i]))
+												highlightedTiles.Push(obstructedTiles[i]);
+										}
+									}
+									break;
 								}
 								else
 								{
@@ -383,6 +440,24 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
 				}
+				else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+				{
+					//Get the obstacle that's blocking this tile
+					AObstacle* obstacle_ = columnTiles[tileIndexInColumn]->GetMyObstacle();
+					if (obstacle_)
+					{
+						//Highlight all its tiles. We need this to be able to target the obstacle
+						TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+						for (int i = 0; i < obstructedTiles.Num(); i++)
+						{
+							obstructedTiles[i]->Highlighted(index_);
+							if (!highlightedTiles.Contains(obstructedTiles[i]))
+								highlightedTiles.Push(obstructedTiles[i]);
+						}
+					}
+					break;
+				}
 				else
 				{
 					break;
@@ -413,6 +488,24 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 								columnTiles[tileIndexInColumn + d]->Highlighted(index_);
 								highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
 								}
+								else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+								{
+									//Get the obstacle that's blocking this tile
+									AObstacle* obstacle_ = columnTiles[tileIndexInColumn + d - 1]->GetMyObstacle();
+									if (obstacle_)
+									{
+										//Highlight all its tiles. We need this to be able to target the obstacle
+										TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+										for (int i = 0; i < obstructedTiles.Num(); i++)
+										{
+											obstructedTiles[i]->Highlighted(index_);
+											if (!highlightedTiles.Contains(obstructedTiles[i]))
+												highlightedTiles.Push(obstructedTiles[i]);
+										}
+									}
+									break;
+								}
 								else
 								{
 									break;
@@ -427,6 +520,24 @@ void AGridManager::HighlightAttackTiles(int rowSpeed_, int depth_, int index_)
 								{
 								columnTiles[tileIndexInColumn - d]->Highlighted(index_);
 								highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
+								}
+								else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+								{
+									//Get the obstacle that's blocking this tile
+									AObstacle* obstacle_ = columnTiles[tileIndexInColumn - d + 1]->GetMyObstacle();
+									if (obstacle_)
+									{
+										//Highlight all its tiles. We need this to be able to target the obstacle
+										TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+										for (int i = 0; i < obstructedTiles.Num(); i++)
+										{
+											obstructedTiles[i]->Highlighted(index_);
+											if (!highlightedTiles.Contains(obstructedTiles[i]))
+												highlightedTiles.Push(obstructedTiles[i]);
+										}
+									}
+									break;
 								}
 								else
 								{
@@ -459,6 +570,24 @@ void AGridManager::HighlightTilesPure(int rowSpeed_, int depth_, int index_)
 					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
 				}
+				else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+				{
+					//Get the obstacle that's blocking this tile
+					AObstacle* obstacle_ = columnTiles[tileIndexInColumn]->GetMyObstacle();
+					if (obstacle_)
+					{
+						//Highlight all its tiles. We need this to be able to target the obstacle
+						TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+						for (int i = 0; i < obstructedTiles.Num(); i++)
+						{
+							obstructedTiles[i]->Highlighted(index_);
+							if (!highlightedTiles.Contains(obstructedTiles[i]))
+								highlightedTiles.Push(obstructedTiles[i]);
+						}
+					}
+					break;
+				}
 				else
 				{
 					break;
@@ -486,9 +615,27 @@ void AGridManager::HighlightTilesPure(int rowSpeed_, int depth_, int index_)
 									columnTiles[tileIndexInColumn + d]->Highlighted(index_);
 									highlightedTiles.Push(columnTiles[tileIndexInColumn + d]);
 							}
+							else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+							{
+								//Get the obstacle that's blocking this tile
+								AObstacle* obstacle_ = columnTiles[tileIndexInColumn + d - 1]->GetMyObstacle();
+								if (obstacle_)
+								{
+									//Highlight all its tiles. We need this to be able to target the obstacle
+									TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+									for (int i = 0; i < obstructedTiles.Num(); i++)
+									{
+										obstructedTiles[i]->Highlighted(index_);
+										if (!highlightedTiles.Contains(obstructedTiles[i]))
+											highlightedTiles.Push(obstructedTiles[i]);
+									}
+								}
+								break;
+							}
 							else
 							{
-								break; //Otherwise, don't bother with the tiles on my left
+								break;
 							}
 						}
 					}
@@ -500,6 +647,24 @@ void AGridManager::HighlightTilesPure(int rowSpeed_, int depth_, int index_)
 							{
 								columnTiles[tileIndexInColumn - d]->Highlighted(index_);
 								highlightedTiles.Push(columnTiles[tileIndexInColumn - d]);
+							}
+							else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+							{
+								//Get the obstacle that's blocking this tile
+								AObstacle* obstacle_ = columnTiles[tileIndexInColumn - d + 1]->GetMyObstacle();
+								if (obstacle_)
+								{
+									//Highlight all its tiles. We need this to be able to target the obstacle
+									TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+									for (int i = 0; i < obstructedTiles.Num(); i++)
+									{
+										obstructedTiles[i]->Highlighted(index_);
+										if (!highlightedTiles.Contains(obstructedTiles[i]))
+											highlightedTiles.Push(obstructedTiles[i]);
+									}
+								}
+								break;
 							}
 							else
 							{
@@ -527,6 +692,24 @@ void AGridManager::HighlightTilesPure(int rowSpeed_, int depth_, int index_)
 				{
 					columnTiles[tileIndexInColumn]->Highlighted(index_);
 					highlightedTiles.Push(columnTiles[tileIndexInColumn]);
+				}
+				else if (index_ != TILE_ENM && index_ != TILE_ENMA && index_ != TILE_ENMH) //Enemies' awareness of obstacles is that they block the path so the tiles must not be highlighted
+				{
+					//Get the obstacle that's blocking this tile
+					AObstacle* obstacle_ = columnTiles[tileIndexInColumn]->GetMyObstacle();
+					if (obstacle_)
+					{
+						//Highlight all its tiles. We need this to be able to target the obstacle
+						TArray<ATile*> obstructedTiles = obstacle_->GetObstructedTiles();
+
+						for (int i = 0; i < obstructedTiles.Num(); i++)
+						{
+							obstructedTiles[i]->Highlighted(index_);
+							if (!highlightedTiles.Contains(obstructedTiles[i]))
+								highlightedTiles.Push(obstructedTiles[i]);
+						}
+					}
+					break;
 				}
 				else
 				{
@@ -593,67 +776,4 @@ ATile* AGridManager::GetTileFromRowAndOffset(int row_, int offset_)
 		return columnTiles[columnTileIndex];
 	}
 	return nullptr;
-}
-
-
-void AGridManager::GetTilesWithinAttackRange(TArray<ATile*>& rangeTiles_,int range_, ATile* tile_)
-{
-	if (tile_)
-	{
-		//Row tiles are inaccessible 
-		if (columnTiles.Contains(tile_))
-		{
-			//Get the column tile index
-			tileIndexInColumn = columnTiles.IndexOfByKey(tile_);
-			//Get the row tile index
-			tileIndexInRows = ConvertColumnToRow(tileIndexInColumn);
-		}
-
-		if (tileIndexInColumn + range_ < columnTiles.Num()) //Check to the right
-		{
-			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn + range_)) //Make sure we're on the same row
-			{
-				//Make sure the tile is traversable and not occupied before adding it to the reachable tiles
-				if (columnTiles[tileIndexInColumn + range_]->GetTraversable() && !columnTiles[tileIndexInColumn + range_]->GetOccupied())
-				{
-					rangeTiles_.Push(columnTiles[tileIndexInColumn + range_]);
-				}
-			}
-		}
-
-		if (tileIndexInColumn - range_ >= 0) //Left
-		{
-			if (tileIndexInRows == ConvertColumnToRow(tileIndexInColumn - range_))
-			{
-				if (columnTiles[tileIndexInColumn - range_]->GetTraversable() && !columnTiles[tileIndexInColumn - range_]->GetOccupied())
-				{
-					rangeTiles_.Push(columnTiles[tileIndexInColumn - range_]);
-				}
-			}
-		}
-
-		if (tileIndexInColumn + (columnsNum - 1)*range_ < columnTiles.Num() && tileIndexInRows + range_ <= rowsNum) //Up
-		{
-			if (tileIndexInRows + range_ == ConvertColumnToRow(tileIndexInColumn + (columnsNum - 1)*range_))
-			{
-				if (columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]->GetOccupied())
-				{
-					rangeTiles_.Push(columnTiles[tileIndexInColumn + (columnsNum - 1)*range_]);
-					
-				}
-			}
-		}
-
-		if (tileIndexInColumn - (columnsNum - 1)*range_ >= 0 && tileIndexInRows - range_ > 0) //Down
-		{
-			if (tileIndexInRows - range_ == ConvertColumnToRow(tileIndexInColumn - (columnsNum - 1)*range_))
-			{
-				if (columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetTraversable() && !columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]->GetOccupied())
-				{
-					rangeTiles_.Push(columnTiles[tileIndexInColumn - (columnsNum - 1)*range_]);
-					
-				}
-			}
-		}
-	}
 }

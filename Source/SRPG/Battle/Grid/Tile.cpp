@@ -48,6 +48,7 @@ void ATile::BeginPlay()
 		if (obstacle)
 		{
 			bTraversable = false;
+			obstacle->AddObstructedTile(this);
 		}
 	}
 
@@ -65,27 +66,12 @@ void ATile::SetGridManager(AGridManager* gridManager_)
 
 void ATile::Highlighted(int index_)
 {
-	if (bTraversable)
+	if (bTraversable) //Movement tiles cannot be hilighted unless they're traversable
 	{
-		if(index_ != HighlightedIndex)
+		if (index_ != HighlightedIndex)
 			previousHighlightIndex = HighlightedIndex;
 		SetActorHiddenInGame(false);
 		if (index_ == TILE_MOV) //Move
-		{
-			if (pathMaterial)
-				mesh->SetMaterial(1, pathMaterial);
-		}
-		else if (index_ == TILE_ATK) //Attack
-		{
-			if (highlightedMaterial)
-				mesh->SetMaterial(1, highlightedMaterial);
-		}
-		else if (index_ == TILE_ITM)//Items 
-		{
-			if (itemMaterial)
-				mesh->SetMaterial(1, itemMaterial);
-		}
-		else if (index_ == TILE_DEP) //Deployment
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
@@ -95,6 +81,24 @@ void ATile::Highlighted(int index_)
 		{
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
+		}
+		else if (index_ == TILE_DEP) //Deployment
+		{
+			if (pathMaterial)
+				mesh->SetMaterial(1, pathMaterial);
+		}
+	}
+	else //Non-traversable tiles can be highlighted to be able to damage obstacles
+	{
+		if (index_ == TILE_ATK) //Attack
+		{
+			if (highlightedMaterial)
+				mesh->SetMaterial(1, highlightedMaterial);
+		}
+		else if (index_ == TILE_ITM)//Items 
+		{
+			if (itemMaterial)
+				mesh->SetMaterial(1, itemMaterial);
 		}
 		else if(index_ == TILE_SKL) //Skills
 		{
@@ -106,9 +110,8 @@ void ATile::Highlighted(int index_)
 			if (highlightedMaterial)
 				mesh->SetMaterial(1, highlightedMaterial);
 		}
-
-		HighlightedIndex = index_;
 	}
+	HighlightedIndex = index_;
 }
 void ATile::NotHighlighted()
 {
@@ -158,6 +161,11 @@ TArray<ATile*> ATile::GetDiagonalNeighbors()
 bool ATile::GetTraversable()
 {
 	return bTraversable;
+}
+
+void ATile::SetTraversable(bool value_)
+{
+	bTraversable = value_;
 }
 
 bool ATile::GetOccupied()
@@ -245,4 +253,19 @@ void ATile::NightBlues()
 {
 	if (skillsMaterial)
 		mesh->SetMaterial(1, skillsMaterial);
+}
+
+AObstacle* ATile::GetMyObstacle()
+{
+	FHitResult hit;
+	FVector end = GetActorLocation();
+	FVector start = GetActorLocation();
+	end.Z += 400.0f;
+	FCollisionQueryParams queryParms(FName(TEXT("query")), false, this);
+	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Camera, queryParms))
+	{
+		AObstacle* obstacle = Cast<AObstacle>(hit.Actor);
+		return obstacle;
+	}
+	return nullptr;
 }

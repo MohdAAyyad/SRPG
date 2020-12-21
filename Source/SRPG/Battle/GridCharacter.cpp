@@ -35,6 +35,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ExternalFileReader/FighterTableStruct.h"
 #include "Weapons/WeaponBase.h"
+#include "Grid/Obstacle.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -290,6 +291,23 @@ void AGridCharacter::AttackUsingWeapon(AGridCharacter* target_, float delay_)
 	}
 }
 
+void AGridCharacter::AttackUsingWeapon(AObstacle* obstacle_, float delay_)
+{
+	if (obstacle_)
+	{
+		targetObstacle = obstacle_;
+		FVector direction = obstacle_->GetActorLocation() - GetActorLocation();
+		FRotator rot = direction.Rotation();
+		rot.Roll = GetActorRotation().Roll;
+		rot.Pitch = GetActorRotation().Pitch;
+		SetActorRotation(rot);
+		FTimerHandle attackDelayHandle;
+		//The delay here is needed to allow the camera enough time to focus on the character attacking
+		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingWeapon, delay_, false);
+		bHasDoneAnAction = true;
+	}
+}
+
 void AGridCharacter::PlayAnimationAttackUsingWeapon_Implementation()
 {
 	if (animInstance)
@@ -299,8 +317,9 @@ void AGridCharacter::PlayAnimationAttackUsingWeapon_Implementation()
 	}
 }
 
-void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_)
+void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_, AObstacle* obstacle_)
 {
+	targetObstacle = obstacle_;
 	if (targets_.Num()>0)
 	{
 		if (targets_[0]) //Rotate towards one of the targets
@@ -318,16 +337,23 @@ void AGridCharacter::AttackUsingSkill(TArray<AGridCharacter*> targets_, float de
 			bHasDoneAnAction = true;
 		}
 	}
+	else if (targetObstacle)
+	{
+		FVector direction = targetObstacle->GetActorLocation() - GetActorLocation();
+		FRotator rot = direction.Rotation();
+		rot.Roll = GetActorRotation().Roll;
+		rot.Pitch = GetActorRotation().Pitch;
+		SetActorRotation(rot);
+
+		FTimerHandle attackDelayHandle;
+		//The delay here is needed to allow the camera enough time to focus on the character attacking
+		GetWorld()->GetTimerManager().SetTimer(attackDelayHandle, this, &AGridCharacter::PlayAnimationAttackUsingSkill, delay_, false);
+		bHasDoneAnAction = true;
+	}
 }
 
 void AGridCharacter::AttackUsingSkill(float delay_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("actionTargets.Num() %d"), actionTargets.Num());
-
-	for (int i = 0; i < actionTargets.Num(); i++)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CURRENT TARGETTTT %s"), *actionTargets[i]->GetName());
-	}
 	if (actionTargets.Num() > 0)
 	{
 		if (actionTargets[0]) //Rotate towards one of the targets

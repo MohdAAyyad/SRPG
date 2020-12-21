@@ -84,6 +84,7 @@ protected:
 
 	EGridCharState currentState;
 	TArray<AGridCharacter*> actionTargets;
+	class AObstacle* targetObstacle;
 
 	int chosenSkillAnimIndex;
 	int fighterIndex;
@@ -142,10 +143,11 @@ public:
 		virtual void ActivateSkillAttack() {}; //Each fighter will use a different weapon and so each will have a slight different behavior
 
 	void AttackUsingWeapon(AGridCharacter* target_, float delay_);
+	void AttackUsingWeapon(AObstacle* obstacle_, float delay_);
 	UFUNCTION(Server, Reliable)
 	void PlayAnimationAttackUsingWeapon();
 	void PlayAnimationAttackUsingWeapon_Implementation();
-	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_);
+	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_, AObstacle* obstacle_);
 	void AttackUsingSkill(float delay_); //overloaded for when we can directly push into action targets
 	void PlayAnimationAttackUsingSkill();
 

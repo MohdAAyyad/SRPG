@@ -83,6 +83,9 @@ public:
 	void HighlightNeighbor();
 
 	class AGridCharacter* GetMyGridCharacter();
+	class AObstacle* GetMyObstacle();
 
 	void NightBlues();
+
+	void SetTraversable(bool value_);
 };
