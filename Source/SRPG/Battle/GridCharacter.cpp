@@ -308,7 +308,7 @@ void AGridCharacter::AttackUsingWeapon(AObstacle* obstacle_, float delay_)
 	}
 }
 
-void AGridCharacter::PlayAnimationAttackUsingWeapon_Implementation()
+void AGridCharacter::PlayAnimationAttackUsingWeapon()
 {
 	if (animInstance)
 	{
@@ -408,7 +408,7 @@ AGridCharacter::EGridCharState AGridCharacter::GetCurrentState()
 	return currentState;
 }
 
-void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_)
+void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect_)
 {
 	//Rotate the character to face the attacker
 	FVector direction = attacker_->GetActorLocation() - GetActorLocation();
@@ -434,10 +434,14 @@ void AGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int sta
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
 
-	//TODO
-	//Affect the correct stat 
-	//Play the correct reaction animation
-	//Apply the status effects should they exist
+
+	//Stats are affected in children
+}
+
+void AGridCharacter::GridCharReatToElemental(float damage_, int statusEffectIndex_)
+{
+	//Overriden in children
+
 }
 
 
@@ -554,6 +558,9 @@ void AGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
 		statsComp->AddToStat(STAT_PURE, weapon.pure);
+		statsComp->AddToStat(STAT_WPN_EFFECT, weapon.statusEffect);
+		statsComp->AddToStat(STAT_ARM_EFFECT, armor.statusEffect);
+		statsComp->AddToStat(STAT_ACC_EFFECT, accessory.statusEffect);
 	}
 		if (pathComp)
 			pathComp->UpdateSpeed(statsComp->GetStatValue(STAT_SPD));

@@ -31,16 +31,34 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Obstacle")
 		class UBoxComponent* box;
 
+	UPROPERTY(EditAnywhere, Category = "Persistence")
+		bool bCanBeRemoved; //If true, the obstacle manager will have the chance to destroy this obstacle at begin play
+
+	UPROPERTY(EditAnywhere, Category = "ObstacleManager")
+		class AObstaclesManager* obstacleManager;
+
 	TArray<class ATile*> obstructedTiles;
 
+	void AddObstacleToObstacleManager();
+
+	//TODO
+	//Update obstacle take damage to take a status effect
+	//Override the function in elementals
+	//Finish up the elemental code
+	//Update the grid character take damage functions to take into account status effects
+	//Update the stats component to make use of the status effects
+
+
+
 public:
-	void ObstacleTakeDamage(float damage_);
-	void AddObstructedTile(ATile* tile_);
+	virtual void ObstacleTakeDamage(float damage_, int statusEffect_);
+	virtual bool AddObstructedTile(ATile* tile_); //Returns true if the tiles are blocked and false otherwise.
 	bool IsAnyOfMyTilesHighlighted(int highlightIndex_);
 
 	TArray<ATile*> GetObstructedTiles();
+	virtual void DelayedDestroy();
 
-protected:
-	void DelayedDestroy();
+	virtual void ATurnHasPassed(int turnType_) {};//Overriden in elementals
+
 
 };

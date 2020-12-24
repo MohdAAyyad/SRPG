@@ -179,6 +179,9 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_WRS, weapon.range);
 		statsComp->AddToStat(STAT_WDS, weapon.range + 1);
 		statsComp->AddToStat(STAT_PURE, weapon.pure);
+		statsComp->AddToStat(STAT_WPN_EFFECT, weapon.statusEffect);
+		statsComp->AddToStat(STAT_ARM_EFFECT, armor.statusEffect);
+		statsComp->AddToStat(STAT_ACC_EFFECT, accessory.statusEffect);
 	}
 
 	if (pathComp)
@@ -400,7 +403,6 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 
 void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 {
-	//TODO
 	//Calculate hit and crit chances before applying damage
 	int hitModifier = statsComp->GetStatValue(STAT_WHT) / 2; //Every 2 points in hit, gives us one point in HM
 	int critModifier = 1; //Crit starts at 1 (not a critical attack)
@@ -421,7 +423,7 @@ void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
 
 			//Damage the target
-			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) *critModifier, this, crit_);
+			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) *critModifier, this, crit_, statsComp->GetStatValue(STAT_WPN_EFFECT));
 
 			//Affect the crowd
 			if (statsComp->AddTempCRD(CRD_ATK))
@@ -696,16 +698,53 @@ AGridCharacter* AEnemyBaseGridCharacter::GetCurrentTarget()
 	return targetCharacter;
 }
 
-void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_)
+
+void AEnemyBaseGridCharacter::GridCharReatToElemental(float damage_, int statusEffectIndex_)
+{
+	if (damage_ > 0)
+	{
+		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
+		animInstance->SetDamage(static_cast<int> (damage_));
+		overheadWidgetComp->SetVisibility(true);
+		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+
+
+		if (statsComp->GetStatValue(STAT_HP) <= 1)
+		{
+			GetMyTile()->SetOccupied(false);
+			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+			{
+				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+			}
+			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose favor
+			{
+				crdManager->UpdateFavor(true);
+			}
+
+			if (aiManager)
+				aiManager->HandleEnemyDeath(this, bHealer);
+
+			if (animInstance)
+				animInstance->DeathAnim();
+		}
+
+		//TODO
+		//Handle champion and villain situation
+	}
+	statsComp->CheckIfAffectedByStatusEffect(statusEffectIndex_);
+}
+void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect)
 {
 	//Rotate to face attacker
-	Super::GridCharTakeDamage(damage_, attacker_, crit_);
+	Super::GridCharTakeDamage(damage_, attacker_, crit_, statusEffect);
 
 	if (attacker_ != this)
 	{
 		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 		animInstance->SetDamage(static_cast<int> (damage_));
 		overheadWidgetComp->SetVisibility(true);
+
+		statsComp->CheckIfAffectedByStatusEffect(statusEffect);
 
 		//update stats component
 		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
@@ -762,7 +801,7 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_)
 {
 	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
-
+	statsComp->CheckIfAffectedByStatusEffect(statuEffectIndex_);
 	if (statIndex_ == STAT_HP && damage_ > 0) //If the skill does HP damage
 	{
 		//update stats component

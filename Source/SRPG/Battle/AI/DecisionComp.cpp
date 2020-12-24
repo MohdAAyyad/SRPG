@@ -466,7 +466,6 @@ ACrowdItem* UDecisionComp::UpdateTargetItem(AGridManager* grid_, ATile* originTi
 				{
 					if (crdItems[i])
 					{
-						//TODO
 						//Check if we need the item first before marking it
 						if (CheckIfINeedThisItem(statsComp,crdItems[i]->GetStat(), crdItems[i]->GetValue()))
 						{

@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Emitters")
 		TArray<UParticleSystem*> weaponEmitters;
 
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		class AObstaclesManager* obstacleManager;
+
 	UFUNCTION(BlueprintCallable)
 		void DeployThisUnitNext(int bpid_); //Called from the UI
 

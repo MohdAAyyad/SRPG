@@ -47,8 +47,10 @@ void ATile::BeginPlay()
 		AObstacle* obstacle = Cast<AObstacle>(hit.Actor);
 		if (obstacle)
 		{
-			bTraversable = false;
-			obstacle->AddObstructedTile(this);
+			if (obstacle->AddObstructedTile(this)) //Returns true if the tiles are blocked and false otherwise.
+			{
+				bTraversable = false;
+			}
 		}
 	}
 
@@ -66,7 +68,7 @@ void ATile::SetGridManager(AGridManager* gridManager_)
 
 void ATile::Highlighted(int index_)
 {
-	if (bTraversable) //Movement tiles cannot be hilighted unless they're traversable
+	if (bTraversable) //Item and movement tiles cannot be hilighted unless they're traversable. Attack and skill tiles can be highlighted regardless
 	{
 		if (index_ != HighlightedIndex)
 			previousHighlightIndex = HighlightedIndex;
@@ -87,18 +89,33 @@ void ATile::Highlighted(int index_)
 			if (pathMaterial)
 				mesh->SetMaterial(1, pathMaterial);
 		}
-	}
-	else //Non-traversable tiles can be highlighted to be able to damage obstacles
-	{
+		else if (index_ == TILE_ITM)//Items 
+		{
+			if (itemMaterial)
+				mesh->SetMaterial(1, itemMaterial);
+		}
 		if (index_ == TILE_ATK) //Attack
 		{
 			if (highlightedMaterial)
 				mesh->SetMaterial(1, highlightedMaterial);
 		}
-		else if (index_ == TILE_ITM)//Items 
+		else if (index_ == TILE_SKL) //Skills
 		{
-			if (itemMaterial)
-				mesh->SetMaterial(1, itemMaterial);
+			if (skillsMaterial)
+				mesh->SetMaterial(1, skillsMaterial);
+		}
+		else if (index_ == TILE_SKLT) //Skills targeting
+		{
+			if (highlightedMaterial)
+				mesh->SetMaterial(1, highlightedMaterial);
+		}
+	}
+	else //Non-traversable tiles can only be highlighted to be able to damage obstacles
+	{
+		if (index_ == TILE_ATK) //Attack
+		{
+			if (highlightedMaterial)
+				mesh->SetMaterial(1, highlightedMaterial);
 		}
 		else if(index_ == TILE_SKL) //Skills
 		{

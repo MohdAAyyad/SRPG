@@ -17,6 +17,7 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "UnrealNetwork.h"
+#include "Grid/ObstaclesManager.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -78,6 +79,7 @@ void ABattleManager::NextPhase()
 {
 	if (!bBattleHasEnded)
 	{
+
 		phase++;
 
 		if (phase == BTL_ENM)	//Enemy phase
@@ -113,6 +115,10 @@ void ABattleManager::NextPhase()
 
 		if (btlCtrl)
 			btlCtrl->ResetControlledCharacter();
+
+		//We tell the obstacled maanger
+		if (obstacleManager)
+			obstacleManager->TellObstaclesAPhaseHasPassed(phase);
 	}
 			
 }

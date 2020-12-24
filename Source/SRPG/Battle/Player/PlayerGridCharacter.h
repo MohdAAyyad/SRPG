@@ -48,8 +48,9 @@ public:
 	void StartPlayerTurn();
 	void EndPlayerTurn();
 
-	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_) override;
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect_) override;
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_) override;
+	void GridCharReatToElemental(float damage_, int statusEffectIndex_) override;
 	void UpdateCurrentEXP();
 	void CheckChangeStats();
 

@@ -63,4 +63,6 @@ public:
 	int emitterIndex;
 	UPROPERTY(BlueprintReadWrite)
 	int pure; //Pure vertical horizontal
+	UPROPERTY(BlueprintReadWrite)
+	int statusEffect; //Weapons inflict this status effect, armors and accessories increase resistance to it
 };

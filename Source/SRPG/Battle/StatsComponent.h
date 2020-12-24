@@ -36,6 +36,8 @@ protected:
 
 	TArray<int> turnsSinceLastStatChange;
 	TArray<int> tempStatChange;
+	TArray<int> activeStatusEffects;
+	TArray<int> turnsSinceStatusEffect;
 
 
 public:	
@@ -68,6 +70,7 @@ public:
 	void CheckStatBuffNerfStatus(); //Checks whether buffs and nerfs should be negated
 	bool HasThisStatBeenBuffed(int statIndex_);
 	void AddTempToStat(int statIndeX_, int value_); //Handle buffs nerfs
+	void CheckIfAffectedByStatusEffect(int effect_);
 protected:
 	void FinishLevlingUp();
 	int ConvertStatIndexToTempStatIndex(int statIndex_);

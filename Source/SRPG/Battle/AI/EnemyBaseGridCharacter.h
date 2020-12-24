@@ -91,8 +91,9 @@ public:
 	void ItemIsUnreachable(ATile* startingTile_); //Called by the marked item when it's not obtained within the same turn or is obtained by someone else
 	AGridCharacter* GetCurrentTarget();
 
-	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_) override;
+	void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect_) override;
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_) override;
+	void GridCharReatToElemental(float damage_, int statusEffectIndex_) override;
 
 	void ActivateSkillAttack() override;
 

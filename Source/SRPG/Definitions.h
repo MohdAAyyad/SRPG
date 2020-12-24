@@ -108,6 +108,18 @@
 #define STAT_ARCH 25
 #endif
 
+#ifndef STAT_WPN_EFFECT //Weapon status effect
+#define STAT_WPN_EFFECT 26
+#endif
+
+#ifndef STAT_ARM_EFFECT //Armor status effect resistance
+#define STAT_ARM_EFFECT 27
+#endif
+
+#ifndef STAT_ACC_EFFECT //Acessory status effect resistance
+#define STAT_ACC_EFFECT 28
+#endif
+
 
 #ifndef STAT_TEMP_ATK
 #define STAT_TEMP_ATK 0
@@ -452,12 +464,79 @@
 
 #pragma region Maps
 #ifndef MAP_HUB 
-#define MAP_HUB FName(TEXT("HubLevel_S5"))
+#define MAP_HUB FName(TEXT("HubLevel_S11"))
 #endif
 
 #ifndef MAP_BATTLE 
 #define MAP_BATTLE FName(TEXT("BTL_00_Test"))
 #endif
 #pragma endregion
+
+#pragma region Status Effects
+
+
+#ifndef EFFECT_RES_CHANCE_BASE
+#define EFFECT_RES_CHANCE_BASE 15 //Character's resistance are added to this when checking whether the character will get affected or not
+#endif
+
+#ifndef EFFECT_RES_CHANCE_ARM_INC
+#define EFFECT_RES_CHANCE_ARM_INC 25 //How much having an armor that increases resistnace affects the chance of resisting
+#endif
+
+#ifndef EFFECT_RES_CHANCE_ACC_INC
+#define EFFECT_RES_CHANCE_ACC_INC 25 //How much having an accessory that increases resistnace affects the chance of resisting
+#endif
+
+
+#ifndef EFFECT_NONE
+#define EFFECT_NONE 0
+#endif
+
+#ifndef EFFECT_BURN //Fire
+#define EFFECT_BURN 1
+#endif
+
+#ifndef EFFECT_PARALYSIS //Electricity --> Cannot move
+#define EFFECT_PARALYSIS 2
+#endif
+
+#ifndef EFFECT_POISON //Poison
+#define EFFECT_POISON 3
+#endif
+
+#ifndef EFFECT_BLEEDING //Get damaged proportional to the number of tiles moved
+#define EFFECT_BLEEDING 4
+#endif
+
+#ifndef EFFECT_FREEZE //Ice --> Cannot move
+#define EFFECT_FREEZE 5
+#endif
+
+#ifndef EFFECT_SLOW //Slow --> Less speed
+#define EFFECT_SLOW 6
+#endif
+
+#ifndef BURN_DAMAGE //Fire
+#define BURN_DAMAGE 10.0f
+#endif
+
+#ifndef EXPLOSION_DAMAGE //Explosion
+#define EXPLOSION_DAMAGE 20.0f
+#endif
+
+#ifndef POISON_DAMAGE //Poison
+#define POISON_DAMAGE 10.0f
+#endif
+
+#ifndef BLEEDING_DAMAGE //Bleeding
+#define BLEEDING_DAMAGE 2.0f
+#endif
+
+#ifndef SLOW_DAMAGE //Slow
+#define SLOW_DAMAGE 3
+#endif
+
+#pragma endregion
+
 
 #include "CoreMinimal.h"

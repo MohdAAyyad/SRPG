@@ -7,6 +7,7 @@
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
 #include "Tile.h"
+#include "ObstaclesManager.h"
 
 // Sets default values
 AObstacle::AObstacle()
@@ -26,6 +27,8 @@ AObstacle::AObstacle()
 
 	hp = 30.0f;
 
+	bCanBeRemoved = true;
+
 }
 
 // Called when the game starts or when spawned
@@ -33,17 +36,30 @@ void AObstacle::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	//Delay adding to obstacle maanger to ensure the tiles have been added to the obstacle's tile array in case the obstacle manager decides to destroy the obstacle
+	//This is to avoid a race condition where the obstacle is destroyed before the tiles are added to the array potentially causing the tiles to remain non-traversable
+	FTimerHandle timeToAddHandle;
+	GetWorld()->GetTimerManager().SetTimer(timeToAddHandle, this, &AObstacle::AddObstacleToObstacleManager, 1.0f, false);
+
 }
 
-void AObstacle::AddObstructedTile(ATile* tile_) //Called the tiles the obstacle obstructs
+void AObstacle::AddObstacleToObstacleManager()
+{
+	if (obstacleManager)
+		obstacleManager->AddObstacle(this, bCanBeRemoved);
+}
+
+bool AObstacle::AddObstructedTile(ATile* tile_) //Called the tiles the obstacle obstructs
 {
 	if (!obstructedTiles.Contains(tile_))
 	{
 		obstructedTiles.Push(tile_);
 	}
+	return true;
 }
 
-void AObstacle::ObstacleTakeDamage(float damage_)
+void AObstacle::ObstacleTakeDamage(float damage_, int statusEffect_)
 {
 	hp -= damage_;
 	if (hp <= 0.5f)

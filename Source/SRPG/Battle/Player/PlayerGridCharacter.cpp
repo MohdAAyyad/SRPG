@@ -136,7 +136,7 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 			if (btlManager)
 				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
 
-			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier, this, crit_);
+			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier, this, crit_, statsComp->GetStatValue(STAT_WPN_EFFECT));
 
 			//Affect the crowd
 			if (statsComp->AddTempCRD(CRD_ATK))
@@ -166,7 +166,7 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 		if (btlManager)
 			btlManager->SpawnWeaponEmitter(targetObstacle->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
 
-		targetObstacle->ObstacleTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier);
+		targetObstacle->ObstacleTakeDamage(statsComp->GetStatValue(STAT_ATK) * critModifier, statsComp->GetStatValue(STAT_WPN_EFFECT));
 	}
 
 	if (bHasMoved && bHasDoneAnAction) //Has moved and has done an action, we're done
@@ -326,7 +326,7 @@ void APlayerGridCharacter::ActivateSkillAttack()
 			if (btlManager)
 				btlManager->SpawnWeaponEmitter(targetObstacle->GetActorLocation(), chosenSkill.emitterIndex);
 
-			targetObstacle->ObstacleTakeDamage((skillValue + atkScaled + intiScaled) * critModifier);
+			targetObstacle->ObstacleTakeDamage((skillValue + atkScaled + intiScaled) * critModifier,chosenSkill.statusEffect);
 
 		}
 	}
@@ -387,6 +387,9 @@ void APlayerGridCharacter::SetFighterIndex(int index_)
 		statsComp->PushAStat(0); //23
 		statsComp->PushAStat(0); //24
 		statsComp->PushAStat(selectedFighters[fighterIndex].archetype); //25
+		statsComp->PushAStat(0); //26
+		statsComp->PushAStat(0); //27
+		statsComp->PushAStat(0); //28
 		statsComp->SetOwnerRef(this);
 		AddEquipmentStats(2);
 		UpdateCharacterSkills();
@@ -416,15 +419,50 @@ void APlayerGridCharacter::FinishState()
 		btlCtrl->ResetControlledCharacter(); //Also calls NotSelected()
 }
 
-void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_)
+void APlayerGridCharacter::GridCharReatToElemental(float damage_, int statusEffectIndex_)
+{
+	if (damage_ > 0)
+	{
+		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
+		animInstance->SetDamage(static_cast<int> (damage_));
+		overheadWidgetComp->SetVisibility(true);
+		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+
+
+		if (statsComp->GetStatValue(STAT_HP) <= 1)
+		{
+			GetMyTile()->SetOccupied(false);
+			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
+			{
+				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+			}
+			Intermediate::GetInstance()->PushUnitToDead(fighterID); //Store the ID of the fighter
+			if (statsComp->AddTempCRD(CRD_DED)) //You're dead so you also lose points
+			{
+				crdManager->UpdateFavor(false);
+			}
+			if (btlManager)
+				btlManager->HandlePlayerDeath(this);
+			if (animInstance)
+				animInstance->DeathAnim();
+		}
+
+		//TODO
+		//Handle champion and villain situation
+	}
+	statsComp->CheckIfAffectedByStatusEffect(statusEffectIndex_);
+}
+
+void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect_)
 {
 	//Rotate to face attacker
-	Super::GridCharTakeDamage(damage_, attacker_,crit_);
+	Super::GridCharTakeDamage(damage_, attacker_,crit_, statusEffect_);
 	//update stats component
 	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 	animInstance->SetDamage(static_cast<int> (damage_));
 	overheadWidgetComp->SetVisibility(true);
 	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
+	statsComp->CheckIfAffectedByStatusEffect(statusEffect_);
 	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
 	//Check if dead
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
@@ -470,6 +508,7 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 {
 	Super::GridCharReactToSkill(damage_, statIndex_, statuEffectIndex_, attacker_, crit_);
 
+	statsComp->CheckIfAffectedByStatusEffect(statuEffectIndex_);
 	if (statIndex_ == STAT_HP && damage_ > 0) //If the skill does HP damage
 	{
 		//update stats component

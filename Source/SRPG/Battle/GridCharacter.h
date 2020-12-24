@@ -144,9 +144,7 @@ public:
 
 	void AttackUsingWeapon(AGridCharacter* target_, float delay_);
 	void AttackUsingWeapon(AObstacle* obstacle_, float delay_);
-	UFUNCTION(Server, Reliable)
 	void PlayAnimationAttackUsingWeapon();
-	void PlayAnimationAttackUsingWeapon_Implementation();
 	void AttackUsingSkill(TArray<AGridCharacter*> targets_, float delay_, AObstacle* obstacle_);
 	void AttackUsingSkill(float delay_); //overloaded for when we can directly push into action targets
 	void PlayAnimationAttackUsingSkill();
@@ -156,8 +154,9 @@ public:
 	void SetMoving(bool value_);
 
 	EGridCharState GetCurrentState();
-	virtual void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_);
-	virtual void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_); //TODO add status effects
+	virtual void GridCharTakeDamage(float damage_, AGridCharacter* attacker_, bool crit_, int statusEffect_);
+	virtual void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_);
+	virtual void GridCharReatToElemental(float damage_, int statusEffectIndex_);
 	void GridCharReactToItem(int statIndex_, int value_);
 	void GridCharReactToMiss();
 	void UseItemOnOtherChar(AGridCharacter* target_);

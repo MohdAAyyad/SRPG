@@ -9,7 +9,7 @@
 UStatsComponent::UStatsComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	currentStats.Reserve(26);
+	currentStats.Reserve(29);
 	tempCRD = 0;
 	maxHP = 0;
 	maxPip = 0;
@@ -21,12 +21,22 @@ UStatsComponent::UStatsComponent()
 
 	turnsSinceLastStatChange.Reserve(6);
 	tempStatChange.Reserve(6);
+	activeStatusEffects.Reserve(2); //Will only save status effects that do hp damage. And right now only burn and poison do that
+	turnsSinceStatusEffect.Reserve(2);
 
 	for (int i = 0; i < 6; i++)
 	{
 		turnsSinceLastStatChange.Push(0);
 		tempStatChange.Push(0);
 	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		activeStatusEffects.Push(0);
+		turnsSinceStatusEffect.Push(0);
+	}
+
+
 }
 
 void UStatsComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -195,8 +205,6 @@ int UStatsComponent::GetStatValue(int stat_)
 }
 void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 {
-	//TODO
-
 	//Binary increase based on archetype
 	// Non-archetype stats have 1 added every two levels while the archetype stat gets a 1 added for every level
 	int currentLevel = currentStats[STAT_LVL];
@@ -238,7 +246,7 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 
 void UStatsComponent::InitStatsAtZero()
 {
-	for (int i = 0; i < 26; i++)
+	for (int i = 0; i < 29; i++)
 		currentStats.Push(0);
 
 	currentStats[STAT_LVL] = 1; //Min level
@@ -337,6 +345,32 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 			}
 		}
 	}
+
+
+	//Check for status effects
+	for (int i = 0; i < activeStatusEffects.Num(); i++)
+	{
+		if (activeStatusEffects[i] != 0)
+		{
+			turnsSinceStatusEffect[i]--;
+			if (turnsSinceStatusEffect[i] <= 0)
+			{
+				activeStatusEffects[i] = EFFECT_NONE;
+				turnsSinceStatusEffect[i] = 0;
+			}
+			else //Damage the character if the status effect causes damage
+			{
+				if (activeStatusEffects[i] == EFFECT_BURN)
+				{
+					currentStats[STAT_HP] -= BURN_DAMAGE;
+				}
+				else if (activeStatusEffects[i] == EFFECT_POISON)
+				{
+					currentStats[STAT_HP] -= POISON_DAMAGE;
+				}
+			}
+		}
+	}
 }
 void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs nerfs
 {
@@ -415,5 +449,45 @@ int UStatsComponent::ConvertTempStatIndexToStatIndex(int tempStatIndex_)
 		return STAT_HIT;
 	default:
 		return STAT_ATK;
+	}
+}
+
+void UStatsComponent::CheckIfAffectedByStatusEffect(int effect_)
+{
+	int resistanceChance = EFFECT_RES_CHANCE_BASE;
+	int effectChance = FMath::RandRange(0, 101);
+
+	//Check for the character's resistance to the effect
+	if (currentStats[STAT_ARM_EFFECT] == effect_)
+	{
+		resistanceChance += EFFECT_RES_CHANCE_ARM_INC;
+	}
+	if (currentStats[STAT_ACC_EFFECT] == effect_)
+	{
+		resistanceChance += EFFECT_RES_CHANCE_ACC_INC;
+	}
+
+	if (effectChance > resistanceChance)
+	{
+		if (effect_ == EFFECT_BURN || effect_ == EFFECT_POISON) //Damage effects should be added to the array
+		{
+			//Push the stat
+			if (!activeStatusEffects.Contains(effect_))
+			{
+				activeStatusEffects.Push(effect_);
+				turnsSinceStatusEffect.Push(4);
+			}
+		}
+		else //Non-damage act like nerfs
+		{
+			if (effect_ == EFFECT_FREEZE || effect_ == EFFECT_PARALYSIS)
+			{
+				AddTempToStat(STAT_SPD, -currentStats[STAT_SPD]); //Speed reduced to 1
+			}
+			else if (effect_ == EFFECT_SLOW)
+			{
+				AddTempToStat(STAT_SPD, - SLOW_DAMAGE); //Reduce the speed by the slow effect
+			}
+		}
 	}
 }
