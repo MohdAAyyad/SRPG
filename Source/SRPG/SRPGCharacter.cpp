@@ -15,6 +15,8 @@
 #include "Networking/SRPGGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
+#include "SRPGGameMode.h"
+#include "Hub/HubWorldManager.h"
 
 
 ASRPGCharacter::ASRPGCharacter()
@@ -86,39 +88,16 @@ void ASRPGCharacter::Tick(float DeltaSeconds)
 	}
 }
 
-void ASRPGCharacter::SetInteracting(IInteractable* ref_)
-{
-	interacting = ref_;
-}
-
 void ASRPGCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
-	SetupController();
 }
 
-void ASRPGCharacter::SetupController_Implementation()
+
+
+void ASRPGCharacter::SetupController()
 {
 	ASRPGPlayerController* controller = Cast<ASRPGPlayerController>(GetController());
-
-	//if (HasAuthority())
-	//{
-	//	controller = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
-	//}
-	//else
-	//{
-	//	ASRPGGameState* state = Cast<ASRPGGameState>(GetWorld()->GetGameState());
-	//	controller = Cast<ASRPGPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), state->GetCurrentControllerIndex()));
-	//	state->SetCurrentControllerIndex(state->GetCurrentControllerIndex() + 1);
-	//}
-
-	//UE_LOG(LogTemp, Warning, TEXT("controllers %d"), GetWorld()->GetNumPlayerControllers());
-	//if (controller)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Player ref set"));
-
-	//}
 
 	if (controller)
 	{
@@ -127,91 +106,22 @@ void ASRPGCharacter::SetupController_Implementation()
 
 }
 
-bool ASRPGCharacter::SetupController_Validate()
+void ASRPGCharacter::SetInteracting(IInteractable* ref_)
 {
-	return true;
+	interacting = ref_;
 }
 
 void ASRPGCharacter::TriggerPauseMenu()
 {
-	if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
-	{
-		widget->GetUserWidgetObject()->AddToViewport();
-	}
-	else if (widget && widget->GetUserWidgetObject()->IsInViewport() == true)
-	{
-		widget->GetUserWidgetObject()->RemoveFromViewport();
-	}
+	if (hubWorldManager)
+		hubWorldManager->TogglePauseMenu();
 }
 
-TArray<FEquipmentTableStruct> ASRPGCharacter::GetAllOwnedEquipment(FString tableName_)
+void ASRPGCharacter::SetHubWorldManager(AHubWorldManager* ref_)
 {
-	FName convert = FName(*tableName_);
-	return fileReader->FindAllOwnedEquipment(fileReader->FindTableIndexByName(convert));
-}
-
-TArray<FFighterTableStruct> ASRPGCharacter::GetAllFighters(FString tableName_)
-{
-	FName convert = FName(*tableName_);
-	return fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexByName(convert));
-}
-
-TArray<UTexture*> ASRPGCharacter::GetAllItemTextures()
-{
-	return itemTextures;
-}
-
-TArray<UTexture*> ASRPGCharacter::GetAllFighterTextures()
-{
-	return fighterTextures;
-}
-
-bool ASRPGCharacter::CanFighterEquipWeapon(FString tableName_, int id_)
-{
-	FName convert = FName(*FString::FromInt(id_));
-	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
-
-	if (row.equippedWeapon == 0)
-	{
-		// fighter already has something equipped in this slot
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool ASRPGCharacter::CanFighterEquipArmor(FString tableName_, int id_)
-{
-	FName convert = FName(*FString::FromInt(id_));
-	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
-
-	if (row.equippedArmor == 0)
-	{
-		// fighter already has something equipped in this slot
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool ASRPGCharacter::CanFighterEquipAccessory(FString tableName_, int id_)
-{
-	FName convert = FName(*FString::FromInt(id_));
-	FFighterTableStruct row = fileReader->FindFighterRowById(fileReader->FindTableIndexByName(convert), id_);
-
-	if (row.equippedAccessory == 0)
-	{
-		// fighter already has something equipped in this slot
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Set hub world reference"));
+	hubWorldManager = ref_;
+	SetupController();
 }
 
 

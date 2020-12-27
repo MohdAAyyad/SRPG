@@ -10,6 +10,8 @@
 #include "Components/WidgetComponent.h"
 #include "NPCs/Tournament.h"
 #include "ExternalFileReader/ExternalFileReader.h"
+#include "../SRPGCharacter.h"
+#include "TimerManager.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -21,7 +23,7 @@ AHubWorldManager::AHubWorldManager()
 
 	RootComponent = root;
 
-	widget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	pauseMenuWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
@@ -31,11 +33,7 @@ AHubWorldManager::AHubWorldManager()
 void AHubWorldManager::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GetWorld())
-	{
-		// sets the player ref to the first player controller in the world
-		player = Cast<ASRPGCharacter>(GetWorld()->GetFirstPlayerController());
-	}
+
 	// sets the current time slots to our max time slots
 	timeSlots = maxTimeSlots;
 	hasSpawned.Init(false, npcLocations.Num());
@@ -51,13 +49,11 @@ void AHubWorldManager::BeginPlay()
 	//SpawnNPCs(1, 3);
 	//SpawnNPCs(1, 4);
 	//SpawnNPCs(1, 5);
-
-	if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
-	{
-		widget->GetUserWidgetObject()->AddToViewport();
-	}
-
 	firstTimeInfoSpawn = true;
+
+	FTimerHandle timerHandle;
+
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AHubWorldManager::GetPlayerFromController, 1.0f, false);
 }
 
 // Called every frame
@@ -65,6 +61,15 @@ void AHubWorldManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AHubWorldManager::GetPlayerFromController()
+{
+	// sets the player ref to the first player controller in the world
+	ASRPGPlayerController* ctrl = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	player = Cast<ASRPGCharacter>(ctrl->GetPawn());
+	if (player)
+		player->SetHubWorldManager(this);
 }
 
 void AHubWorldManager::SetNextIsAStoryMission(bool value_)
@@ -92,14 +97,6 @@ int AHubWorldManager::GetCurrentMoney()
 	return Intermediate::GetInstance()->GetCurrentMoney();
 }
 
-void AHubWorldManager::RemoveUI()
-{
-	if (widget && widget->GetUserWidgetObject()->IsInViewport())
-	{
-		widget->GetUserWidgetObject()->RemoveFromViewport();
-	}
-}
-
 void AHubWorldManager::UpdateTimeSlots(int value_)
 {
 	timeSlots -= value_;
@@ -122,7 +119,6 @@ void AHubWorldManager::UpdateTimeSlots(int value_)
 		npc->SetLine(row.line);
 		firstTimeInfoSpawn = false;
 
-		UE_LOG(LogTemp, Error, TEXT("Spawned Info NPC"));
 	}
 }
 
@@ -566,3 +562,91 @@ void AHubWorldManager::SpawnInfoNPC(int archetype_, FOpponentStruct opp_)
 	}
 }
 
+#pragma region HubPauseMenu
+
+void AHubWorldManager::TogglePauseMenu()
+{
+	if (pauseMenuWidget)
+	{
+		if (pauseMenuWidget->GetUserWidgetObject()->IsInViewport())
+		{
+			pauseMenuWidget->GetUserWidgetObject()->RemoveFromViewport();
+		}
+		else
+		{
+			pauseMenuWidget->GetUserWidgetObject()->AddToViewport();
+		}
+	}
+}
+
+TArray<FFighterTableStruct> AHubWorldManager::GetAllRecruitedFighters()
+{
+	if (fileReader)
+	{
+		return fileReader->GetAllRecruitedFighters(1);
+	}
+	return TArray<FFighterTableStruct>();
+}
+
+FAllFighterInfoStruct AHubWorldManager::GetFighterInfoByID(int id_)
+{
+	FAllFighterInfoStruct info;
+	if (fileReader)
+	{
+		info.fighter = fileReader->FindFighterRowById(1, id_);
+
+		info.weapon = fileReader->GetEquipmentById(2, info.fighter.equippedWeapon, EQU_WPN, info.fighter.weaponIndex);
+		info.armor = fileReader->GetEquipmentById(3, info.fighter.equippedArmor, EQU_ARM, info.fighter.armorIndex);
+		info.accessory = fileReader->GetEquipmentById(4, info.fighter.equippedAccessory, EQU_ACC, -1);
+
+		info.weaponSkills = fileReader->GetOffesniveSkillsForBP(5, info.fighter.weaponIndex, info.weapon.skillsN, info.weapon.skillsIndex, info.fighter.level);
+		info.armorSkills = fileReader->GetDefensiveSkillsForBP(6, info.fighter.armorIndex, info.armor.skillsN, info.armor.skillsIndex, info.fighter.level);
+
+
+		return info;
+	}
+
+	return  FAllFighterInfoStruct();
+}
+
+TArray<FEquipmentTableStruct> AHubWorldManager::GetEquipmentOfACertainType(int equipIndex_, int subIndex_)
+{
+	int tableIndex = equipIndex_ + 2; //0 weapons 1 armor 2 accessory --> tables 2,3, and 4
+
+	if (fileReader)
+	{
+		return fileReader->GetAllOwnedEquipmentOfACertainType(tableIndex, equipIndex_, subIndex_);
+	}
+
+	return TArray<FEquipmentTableStruct>();
+}
+
+TArray<FSkillTableStruct>AHubWorldManager::FindSkillsByAPieceOfEquipment(int equipIndex_, int subIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
+{
+	int tableIndex = equipIndex_ + 5; //0 weapons 1 armor --> tables 5 and 6
+
+	if (fileReader)
+	{
+		if (equipIndex_ == EQU_WPN)
+		{
+			return fileReader->GetOffesniveSkillsForBP(tableIndex, subIndex_, skillNum_, skillsIndex_, currentLevel_);
+		}
+		else if (equipIndex_ == EQU_ARM)
+		{
+			return fileReader->GetDefensiveSkillsForBP(tableIndex, subIndex_, skillNum_, skillsIndex_, currentLevel_);
+		}
+	}
+
+	return TArray<FSkillTableStruct>();
+}
+
+void AHubWorldManager::Equip(int fighterID, int equipIndex, int equipID, int oldEquipID)
+{
+	int equipTableIndex = equipIndex + 2;
+	if (fileReader)
+	{
+		fileReader->Equip(1, equipTableIndex, fighterID, equipIndex, equipID,oldEquipID);
+	}
+}
+
+#pragma endregion

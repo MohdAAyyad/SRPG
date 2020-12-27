@@ -11,13 +11,16 @@ class ASRPGGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+protected:
+
+	UPROPERTY(EditAnywhere)
+		class AHubWorldManager* hubWorldManager;
+
 public:
 	ASRPGGameMode();
 	UFUNCTION(BlueprintCallable)
 		void SwitchLevel(FName levelName);
 
-	/*UFUNCTION(Client, unreliable)
-	void SetupController();*/
 
 	virtual void BeginPlay() override;
 };

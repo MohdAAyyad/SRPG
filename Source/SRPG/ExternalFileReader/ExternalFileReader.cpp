@@ -307,31 +307,32 @@ TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tab
 	static const FString contextString(TEXT("Trying to get the recruited fighters from the table"));
 	TArray<FName> rowNames;
 	TArray<FFighterTableStruct> rfighters;
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by TransitionToBattle in the battle. 0 for Rfighters.
-
-		for (auto n : rowNames)
+		if (tables[tableIndex_])
 		{
-			rfighters.Push(*tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true));
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				rfighters.Push(*tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true));
+			}
+
+			return rfighters;
 		}
-
-		return rfighters;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
-		return TArray<FFighterTableStruct>();
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
+			return TArray<FFighterTableStruct>();
+		}
 	}
 
+	return  TArray<FFighterTableStruct>();
 	
 }
 
 FFighterTableStruct UExternalFileReader::FindFighterRowById(int tableIndex_, int fighterId_)
 {
-	// Mohammad made a version below but the table ID is hardcoded into the function
-	//ew
-	// so I made a new version that doesn't overwrite the old one
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
 	rowNames = tables[tableIndex_]->GetRowNames();
@@ -347,25 +348,6 @@ FFighterTableStruct UExternalFileReader::FindFighterRowById(int tableIndex_, int
 	}
 
 	return FFighterTableStruct();
-}
-
-FFighterTableStruct UExternalFileReader::GetRecruitedFighterByID(int id_)
-{
-	static const FString contextString(TEXT("Trying to get the items from the table"));
-	TArray<FName> rowNames;
-	rowNames = tables[0]->GetRowNames(); //Called by battle manager to update the stats of the fighters
-
-	for (auto n : rowNames)
-	{
-		FFighterTableStruct* row = tables[0]->FindRow<FFighterTableStruct>(n, contextString, true);
-		if (row->id  == id_)
-		{
-			return *row;
-		}
-	}
-
-	return FFighterTableStruct();
-
 }
 
 //Called by the fighter shop on being play if the ids_ array is larger than zero in size
@@ -529,7 +511,6 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableInde
 	return skills;
 }
 
-//TODO
 //Update the below function and the skills struct so that you can use armor skills
 TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int tableIndex_,int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
 {
@@ -550,6 +531,68 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int tableInde
 			{
 				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
 				skills.Push(row);
+				skillsAddedSoFar++;
+			}
+		}
+		else //We've got enough skills, break
+		{
+			break;
+		}
+	}
+
+	return skills;
+}
+
+//Need to read skills in the pause menu UMG and it doesn't like pointers to structs
+TArray<FSkillTableStruct> UExternalFileReader::GetOffesniveSkillsForBP(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
+{
+	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	TArray<FName> rowNames;
+	TArray<FSkillTableStruct> skills;
+	int skillsAddedSoFar = 0;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+
+	for (auto n : rowNames)
+	{
+		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
+		{
+			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+			//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
+			if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???"
+			{
+				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+				skills.Push(*row);
+				skillsAddedSoFar++;
+			}
+		}
+		else //We've got enough skills, break
+		{
+			break;
+		}
+	}
+
+	return skills;
+}
+TArray<FSkillTableStruct> UExternalFileReader::GetDefensiveSkillsForBP(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
+{
+	static const FString contextString(TEXT("Trying to get the skills from the table"));
+	TArray<FName> rowNames;
+	TArray<FSkillTableStruct> skills;
+	int skillsAddedSoFar = 0;
+	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+
+	for (auto n : rowNames)
+	{
+		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
+		{
+			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+			//If we have the right armor type, the correct skill index and the correct level, then this is valid information
+			if (row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???")
+			{
+				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+				skills.Push(*row);
 				skillsAddedSoFar++;
 			}
 		}
@@ -823,4 +866,110 @@ TArray<FEquipmentTableStruct> UExternalFileReader::FindAllOwnedEquipment(int tab
 	}
 
 	return results;
+}
+
+TArray<FEquipmentTableStruct> UExternalFileReader::GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_)
+{
+	static const FString contextString(TEXT("Getting all owned equipment of a certain type"));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (equipIndex_ != EQU_ACC) //Accesories do not have a subindex
+				{
+					if (row->equipmentIndex == equipIndex_ && (row->weaponIndex == subIndex_ || row->armorIndex == subIndex_) && row->owned > 0)
+					{
+						results.Push(*row);
+					}
+				}
+				else
+				{
+					if (row->equipmentIndex == equipIndex_ && row->owned > 0)
+					{
+						results.Push(*row);
+					}
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		}
+	}
+	return results;
+}
+
+void UExternalFileReader::Equip(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID, int oldEquipID)
+{
+	static const FString contextString(TEXT("Trying to equip"));
+	TArray<FName> rowNames;
+
+
+	//Update the fighter's equipment
+	if (fighterTableIndex_ >= 0 && fighterTableIndex_ < tables.Num())
+	{
+		rowNames = tables[fighterTableIndex_]->GetRowNames(); //Get all the rows
+
+		for (int i = rowNames.Num() - 1; i > -1; i--)
+		{
+			FFighterTableStruct* row = tables[fighterTableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+			if (fighterID == row->id) //Find the fighter 
+			{
+				switch (equipIndex) //Modify the value in the correct column based on the type of equipment being changed
+				{
+				case EQU_WPN:
+					row->equippedWeapon = equipID;
+					break;
+				case EQU_ARM:
+					row->equippedArmor = equipID;
+					break;
+				case EQU_ACC:
+					row->equippedAccessory = equipID;
+					break;
+				}
+
+				break; //Break, we've found what we we're looking for
+			}
+		}
+	}
+
+	//Update the owned of the old and new equipment
+
+	TArray<FName> rowNames2;
+
+	if (equipTableIndex >= 0 && equipTableIndex < tables.Num())
+	{
+		if (tables[equipTableIndex])
+		{
+			rowNames2 = tables[equipTableIndex]->GetRowNames();
+
+			for (auto n : rowNames2)
+			{
+				FEquipmentTableStruct* row2 = tables[equipTableIndex]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (row2->equipmentIndex == equipIndex && row2->id == equipID)
+				{
+					row2->owned--;
+					if (row2->owned < 0)
+						row2->owned = 0;
+				}
+				else if (row2->equipmentIndex == equipIndex && row2->id == oldEquipID)
+				{
+					row2->owned++;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		}
+	}
 }

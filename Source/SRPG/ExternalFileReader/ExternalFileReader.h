@@ -51,14 +51,18 @@ public:
 	FActivityDialogueTableStruct GetActivityEndDialogue(int activityIndex_, int tableIndex_);
 	TArray<FSkillTableStruct*> GetOffesniveSkills(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	TArray<FSkillTableStruct*> GetDefensiveSkills(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
+
+	TArray<FSkillTableStruct> GetOffesniveSkillsForBP(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
+	TArray<FSkillTableStruct> GetDefensiveSkillsForBP(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
+
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_, int subIndex_);
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
 	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> FindAllOwnedEquipment(int tableIndex_);
+	TArray<FEquipmentTableStruct> GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_);
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
-	FFighterTableStruct GetRecruitedFighterByID(int id_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
 	TArray<FItemTableStruct> GetAllOwnedItems();
@@ -79,6 +83,8 @@ public:
 	// the name must match the class exactly
 	int FindTableIndexInArray(FName structName_);
 	int FindTableIndexByName(FName tableName_);
+
+	void Equip(int tableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID,int oldEquipID);
 
 //	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 		

@@ -30,10 +30,7 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(Client, Reliable, WithValidation)
 	void SetupController();
-	void SetupController_Implementation();
-	bool SetupController_Validate();
 
 	void TriggerPauseMenu();
 
@@ -43,13 +40,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
 	UExternalFileReader* fileReader;
 
-	UPROPERTY(EditAnywhere)
-	TArray<UTexture*> itemTextures;
+	class AHubWorldManager* hubWorldManager;
 
-	UPROPERTY(EditAnywhere)
-	TArray<UTexture*> fighterTextures;
 
-private:
+protected:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
@@ -66,20 +60,9 @@ private:
 	//what thing are we interacting with
 	IInteractable* interacting;
 
-	UFUNCTION(BlueprintCallable)
-	TArray<FEquipmentTableStruct> GetAllOwnedEquipment(FString tableName_);
-	UFUNCTION(BlueprintCallable)
-	TArray<FFighterTableStruct> GetAllFighters(FString tableName_);
-	UFUNCTION(BlueprintCallable)
-	TArray<UTexture*> GetAllItemTextures();
-	UFUNCTION(BlueprintCallable)
-	TArray<UTexture*> GetAllFighterTextures();
-	UFUNCTION(BlueprintCallable)
-	bool CanFighterEquipWeapon(FString tableName_, int id_);
-	UFUNCTION(BlueprintCallable)
-	bool CanFighterEquipArmor(FString tableName_, int id_);
-	UFUNCTION(BlueprintCallable)
-	bool CanFighterEquipAccessory(FString tableName_, int id_);
+public:
+
+	void SetHubWorldManager(AHubWorldManager* ref_);
 
 };
 

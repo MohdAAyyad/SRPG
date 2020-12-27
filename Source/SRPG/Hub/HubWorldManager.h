@@ -11,14 +11,62 @@
 #include "ExternalFileReader/FOpponentStruct.h"
 #include "HubWorldManager.generated.h"
 
+USTRUCT(BlueprintType)
+
+struct SRPG_API FAllFighterInfoStruct
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	FAllFighterInfoStruct()
+	{
+
+	}
+	UPROPERTY(BlueprintReadOnly)
+		FFighterTableStruct fighter;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<FSkillTableStruct> weaponSkills;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<FSkillTableStruct> armorSkills;
+	UPROPERTY(BlueprintReadOnly)
+		FEquipmentTableStruct weapon;
+	UPROPERTY(BlueprintReadOnly)
+		FEquipmentTableStruct armor;
+	UPROPERTY(BlueprintReadOnly)
+		FEquipmentTableStruct accessory;
+};
+
 UCLASS()
 class SRPG_API AHubWorldManager : public AActor
 {
 	GENERATED_BODY()
 	
+public:
+
+	//Read by the pause menu
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UTexture*> itemTextures;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UTexture*> weaponTextures;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UTexture*> armorTextures;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		UTexture* accessoryTexture;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UMaterialInterface*> fighterTextures;
+
+
+	UPROPERTY(EditAnywhere, Category = "File Reader")
+		class UExternalFileReader* fileReader;
+
 public:	
 	// Sets default values for this actor's properties
 	AHubWorldManager();
+
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -56,7 +104,7 @@ protected:
 	class AFightersShop* fighterShop;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UWidgetComponent* widget;
+	class UWidgetComponent* pauseMenuWidget;
 
 	// initialises at level 2. Used by shops to determine what they can sell.
 	int hubWorldLevel;
@@ -74,6 +122,8 @@ protected:
 
 	bool firstTimeInfoSpawn;
 
+
+	void GetPlayerFromController();
 	
 public:	
 	// Called every frame
@@ -86,7 +136,6 @@ public:
 	int GetCurrentTimeSlotsCount();
 	UFUNCTION(BlueprintCallable)
 	int GetCurrentMoney();
-	void RemoveUI();
 	void UpdateTimeSlots(int value_);
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type
@@ -100,8 +149,6 @@ public:
 	ANPC* SpawnDefaultNPCs(AActor* a_);
 	ACentralNPC* SpawnCentralNPCs(AActor* a_);
 	ABranchNPC* SpawnBranchNPCs(AActor* a_);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "File Reader")
-	class UExternalFileReader* fileReader;
 	//void SpawnTournamentNPC(AActor* a_);
 	//void SpawnItemShop(AActor* a_);
 	//void SpawnFighterShop(AActor* a_);
@@ -111,6 +158,23 @@ public:
 
 
 	void SpawnInfoNPC(int archetype_, FOpponentStruct opp_);
+
+	void TogglePauseMenu();
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FFighterTableStruct> GetAllRecruitedFighters();
+
+	UFUNCTION(BlueprintCallable)
+		FAllFighterInfoStruct GetFighterInfoByID(int id_);
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FEquipmentTableStruct> GetEquipmentOfACertainType(int equipIndex, int subIndex_);
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FSkillTableStruct>FindSkillsByAPieceOfEquipment(int equipIndex_, int subIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
+
+	UFUNCTION(BlueprintCallable)
+		void Equip(int fighterID, int equipIndex, int equipID, int oldEquipID);
 
 
 };
