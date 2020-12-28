@@ -159,7 +159,8 @@ public:
 
 	void SpawnInfoNPC(int archetype_, FOpponentStruct opp_);
 
-	void TogglePauseMenu();
+	UFUNCTION(BlueprintCallable)
+		void TogglePauseMenu();
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FFighterTableStruct> GetAllRecruitedFighters();
@@ -175,6 +176,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void Equip(int fighterID, int equipIndex, int equipID, int oldEquipID);
+
+
+	UFUNCTION(BlueprintCallable)
+		TArray<FItemTableStruct> GetAllOwnedItems();
 
 
 };

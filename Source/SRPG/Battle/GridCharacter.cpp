@@ -450,7 +450,7 @@ void AGridCharacter::GridCharReatToElemental(float damage_, int statusEffectInde
 TArray<FItemTableStruct> AGridCharacter::GetOwnedItems()
 {
 	if (fileReader)
-		return fileReader->GetAllOwnedItems();
+		return fileReader->GetAllOwnedItems(5);
 
 	return TArray<FItemTableStruct>();
 }

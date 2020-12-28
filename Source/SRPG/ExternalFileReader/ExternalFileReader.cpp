@@ -605,16 +605,16 @@ TArray<FSkillTableStruct> UExternalFileReader::GetDefensiveSkillsForBP(int table
 	return skills;
 }
 
-TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems()
+TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems(int tableIndex_)
 {
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
 	TArray<FItemTableStruct> items;
-	rowNames = tables[5]->GetRowNames(); //Will only be accessed by fighters in the battle. 5 for items.
+	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 5 for items.
 
 	for (auto n : rowNames)
 	{
-		FItemTableStruct* row = tables[5]->FindRow<FItemTableStruct>(n, contextString, true);
+		FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
 		if (row->owned > 0)
 		{
 			items.Push(*row);
@@ -962,6 +962,67 @@ void UExternalFileReader::Equip(int fighterTableIndex_, int equipTableIndex, int
 						row2->owned = 0;
 				}
 				else if (row2->equipmentIndex == equipIndex && row2->id == oldEquipID)
+				{
+					row2->owned++;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		}
+	}
+}
+
+void  UExternalFileReader::RemoveEquipment(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID)
+{
+	static const FString contextString(TEXT("Trying to equip"));
+	TArray<FName> rowNames;
+
+
+	//Remove the equipment from the fighter
+	if (fighterTableIndex_ >= 0 && fighterTableIndex_ < tables.Num())
+	{
+		rowNames = tables[fighterTableIndex_]->GetRowNames(); //Get all the rows
+
+		for (int i = rowNames.Num() - 1; i > -1; i--)
+		{
+			FFighterTableStruct* row = tables[fighterTableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+			if (fighterID == row->id) //Find the fighter 
+			{
+				switch (equipIndex) //Modify the value in the correct column based on the type of equipment being changed
+				{
+				case EQU_WPN:
+					row->equippedWeapon = -1;
+					break;
+				case EQU_ARM:
+					row->equippedArmor = -1;
+					break;
+				case EQU_ACC:
+					row->equippedAccessory = -1;
+					break;
+				}
+
+				break; //Break, we've found what we we're looking for
+			}
+		}
+	}
+
+	//Increased the owned of the piece of equipment
+
+	TArray<FName> rowNames2;
+
+	if (equipTableIndex >= 0 && equipTableIndex < tables.Num())
+	{
+		if (tables[equipTableIndex])
+		{
+			rowNames2 = tables[equipTableIndex]->GetRowNames();
+
+			for (auto n : rowNames2)
+			{
+				FEquipmentTableStruct* row2 = tables[equipTableIndex]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (row2->equipmentIndex == equipIndex && row2->id == equipID)
 				{
 					row2->owned++;
 				}

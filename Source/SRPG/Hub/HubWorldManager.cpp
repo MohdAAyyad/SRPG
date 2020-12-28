@@ -571,10 +571,12 @@ void AHubWorldManager::TogglePauseMenu()
 		if (pauseMenuWidget->GetUserWidgetObject()->IsInViewport())
 		{
 			pauseMenuWidget->GetUserWidgetObject()->RemoveFromViewport();
+			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
 		}
 		else
 		{
 			pauseMenuWidget->GetUserWidgetObject()->AddToViewport();
+			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
 		}
 	}
 }
@@ -647,6 +649,16 @@ void AHubWorldManager::Equip(int fighterID, int equipIndex, int equipID, int old
 	{
 		fileReader->Equip(1, equipTableIndex, fighterID, equipIndex, equipID,oldEquipID);
 	}
+}
+
+TArray<FItemTableStruct> AHubWorldManager::GetAllOwnedItems()
+{
+	if (fileReader)
+	{
+		return fileReader->GetAllOwnedItems(7);
+	}
+
+	return TArray<FItemTableStruct>();
 }
 
 #pragma endregion

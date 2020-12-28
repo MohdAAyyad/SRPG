@@ -65,7 +65,7 @@ public:
 	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
-	TArray<FItemTableStruct> GetAllOwnedItems();
+	TArray<FItemTableStruct> GetAllOwnedItems(int tableIndex_);
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
@@ -84,7 +84,8 @@ public:
 	int FindTableIndexInArray(FName structName_);
 	int FindTableIndexByName(FName tableName_);
 
-	void Equip(int tableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID,int oldEquipID);
+	void Equip(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID,int oldEquipID);
+	void RemoveEquipment(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID);
 
 //	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 		

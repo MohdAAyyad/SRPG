@@ -18,13 +18,15 @@ public:
 
 	}
 	UPROPERTY(BlueprintReadWrite)
-		int id; //EditAnywhere, BluePrintReadOnly
+		int id;
 	UPROPERTY(BlueprintReadWrite)
-		FString name; //EditAnywhere, BluePrintReadOnly
+		FString name;
 	UPROPERTY(BlueprintReadWrite)
-		int value;  //EditAnywhere, BluePrintReadOnly
+		FString description;
 	UPROPERTY(BlueprintReadWrite)
-		int statIndex; //EditAnywhere, BluePrintReadOnly
+		int value; //How much they affect the stat
+	UPROPERTY(BlueprintReadWrite)
+		int statIndex;
 	UPROPERTY(BlueprintReadWrite)
 		int owned; //How many we own.
 	UPROPERTY(BlueprintReadWrite)
