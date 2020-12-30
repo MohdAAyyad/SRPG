@@ -95,26 +95,6 @@ void ASRPGPlayerController::MoveToMouseCursor()
 {	
 	// Trace to see what is under the mouse cursor
 	GetHitResultUnderCursor(ECC_Visibility, false, target);
-
-	if (shouldMove)
-	{
-		//shouldMove = true;
-		
-	}
-}
-
-void ASRPGPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	FVector2D ScreenSpaceLocation(Location);
-
-	// Trace to see what is under the touch location
-	FHitResult HitResult;
-	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit)
-	{
-		// We hit something, move there
-		SetNewMoveDestination(HitResult.ImpactPoint);
-	}
 }
 
 
@@ -160,5 +140,13 @@ void ASRPGPlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+void ASRPGPlayerController::FocusOnThisNPC(AActor* npc_, float rate_)
+{
+	if (npc_)
+	{
+		SetViewTargetWithBlend(npc_, rate_);
+	}
 }
 

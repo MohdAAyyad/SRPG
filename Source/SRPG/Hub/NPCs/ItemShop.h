@@ -15,36 +15,49 @@ class SRPG_API AItemShop : public ANPC
 {
 	GENERATED_BODY()
 protected:
-	void LoadText() override;
 	void BeginPlay() override;
 	UPROPERTY(EditAnywhere, Category = "Hub")
 	class AHubWorldManager* hub;
+
 public:
 	AItemShop();
-	UPROPERTY(EditAnywhere)
-	TArray<UTexture*> itemTextures;
-	UPROPERTY(EditAnywhere)
-	TArray<UTexture*> equipmentTextures;
-	UFUNCTION(BlueprintCallable)
-	TArray<UTexture*> GetItemTextureArray();
-	UFUNCTION(BlueprintCallable)
-	TArray<UTexture*> GetEquipmentTextureArray();
+
+protected:
 	// how much is the player planning to buy. resets after a new item is selected
 	UFUNCTION(BlueprintCallable)
-		void BuyItem(int itemIndex_, int amountToBuy_);
+		void BuyItem(int itemId_, int amountToBuy_, int price_);
 	UFUNCTION(BlueprintCallable)
-		void BuyEquipment(int equipmentIndex_, int amountToBuy_);
+		void BuyEquipment(int equipmentIndex_, int equipId_, int amountToBuy_, int price_);
+	UFUNCTION(BlueprintCallable)
+		void SellEquipment(int equipmentIndex_, int equipId_, int price_, int amountSold_);
+	UFUNCTION(BlueprintCallable)
+		void SellItem(int itemID, int price_, int amountSold_);
 	UFUNCTION(BlueprintCallable)
 		int GetWorldLevel();
 	UFUNCTION(BlueprintCallable)
-		FString GetItemName(int itemIndex_);
+		TArray<FItemTableStruct> GetAllAvailableItems(int worldLevel_);
 	UFUNCTION(BlueprintCallable)
-		int GetItemStatIndex(int index_);
+		TArray<FEquipmentTableStruct> GetAllAvailableEquipmentOfACertainType(int equipmentIndex_, int subIndex_);
+
 	UFUNCTION(BlueprintCallable)
-		FString GetEquipmentName(int itemIndex_);
+		TArray<FEquipmentTableStruct> GetAllOwnedEquipment(); //Used when selling
 	UFUNCTION(BlueprintCallable)
-	TArray<FItemTableStruct> GetAllAvailbleItems(int worldLevel_);
+		TArray<FItemTableStruct> GetAllOwnedItems(); //Used when selling
+
 	UFUNCTION(BlueprintCallable)
-	TArray<FEquipmentTableStruct> GetAllAvailbleEquipment(int worldLevel_);
+		int GetCurrentMoney();
+
+	UFUNCTION(BlueprintCallable)
+		AHubWorldManager* GetHubWolrdManager();
+		void LeaveNPC() override;
+
+
+
+	void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult) override;
+
+	void DelayedAddWidgetToViewPort();
+
 
 };

@@ -57,10 +57,10 @@ public:
 
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_, int subIndex_);
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
-	TArray<FItemTableStruct> GetAllItems(int tableIndex_, int worldLevel_);
-	TArray<FEquipmentTableStruct> GetAllEquipment(int tableIndex_, int worldLevel_);
+	TArray<FItemTableStruct> GetAllItemsConditionedByWorldLevel(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> FindAllOwnedEquipment(int tableIndex_);
 	TArray<FEquipmentTableStruct> GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_);
+	TArray<FEquipmentTableStruct> GetAllEquipmentOfACertainTypeConditionedByWorldLevel(int tableIndex_, int equipIndex_, int subIndex_, int worldLevel_);
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
@@ -69,11 +69,10 @@ public:
 	int GetItemStatIndex(int tableIndex_, FName itemName_);
 	int GetItemValue(FName itemName_);
 	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
-	void AddOwnedValueItemTable(FName rowName_, int index_, int value_);
+	void AddOwnedValueItemTable(int tableIndex_, int itemId_, int amountToAdd_);
 	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
 	//void ClearRecruitedFightersTable(int tableIndex_);
 	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
-	FName ConvertItemNameToNameUsedInTable(FName name_);
 
 	//gets a ref to this external file reader
 	UExternalFileReader* GetExternalFileReader();
@@ -86,6 +85,10 @@ public:
 
 	void Equip(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID,int oldEquipID);
 	void RemoveEquipment(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID);
+
+	void BuyEquipment(int tableIndex_, int equipId_, int amountToBuy_);
+	void SellEquipment(int tableIndex_, int equipId_, int amount_);
+	void SellItem(int tableIndex_, int itemID_, int amount_);
 
 //	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 		

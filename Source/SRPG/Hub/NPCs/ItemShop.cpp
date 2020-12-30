@@ -8,152 +8,202 @@
 #include "Components/WidgetComponent.h"
 #include "Hub/HubWorldManager.h"
 #include "Intermediary/Intermediate.h"
+#include "SRPGCharacter.h"
+#include "SRPGPlayerController.h"
+#include "TimerManager.h"
 
-void AItemShop::LoadText()
-{
-	// leave this empty as we don't want text loading when we interact
-}
 
-void AItemShop::BeginPlay()
-{
-	// begin play
-	Super::BeginPlay();
-
-}
-
-AItemShop::AItemShop()
+AItemShop::AItemShop() :ANPC()
 {
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-TArray<UTexture*> AItemShop::GetItemTextureArray()
+void AItemShop::BeginPlay()
 {
-	return itemTextures;
+	Super::BeginPlay();
 }
 
-TArray<UTexture*> AItemShop::GetEquipmentTextureArray()
+/*
+Money check is always handled in the blueprints because we need to give the player a notification that they cannot buy stuff now
+
+*/
+
+void AItemShop::BuyItem(int itemId_, int amountToBuy_, int price_)
 {
-	return equipmentTextures;
-}
-
-void AItemShop::BuyItem(int itemIndex_, int amountToBuy_)
-{
-	// will put a statement for price checking once money is integrated 
-
-
-	// look for item index inside our table and add to the owned column
-	FName converted = FName(*FString::FromInt(itemIndex_));
-	FItemTableStruct row = fileReader->FindItemTableRow(converted, 0);
-	if (Intermediate::GetInstance()->GetCurrentMoney() - row.price > 0)
+	Intermediate::GetInstance()->SpendMoney(price_ * amountToBuy_);
+	if (fileReader)
 	{
-		Intermediate::GetInstance()->SpendMoney(row.price);
-		fileReader->AddOwnedValueItemTable(converted, 0, amountToBuy_);
-
-		UE_LOG(LogTemp, Warning, TEXT("Item Purchased!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not enough money to purchase this item"));
+		fileReader->AddOwnedValueItemTable(0, itemId_, amountToBuy_);
 	}
 
 }
 
-void AItemShop::BuyEquipment(int equipmentIndex_, int amountToBuy_)
+void AItemShop::BuyEquipment(int equipmentIndex_, int equipId_, int amountToBuy_, int price_)
 {
-	FName converted = FName(*FString::FromInt(equipmentIndex_));
-	FEquipmentTableStruct row = fileReader->FindEquipmentTableRow(converted, 1);
-	// will put a statement for price checking once money is integrated
-	if (Intermediate::GetInstance()->GetCurrentMoney() - row.value > 0)
+	Intermediate::GetInstance()->SpendMoney(price_ * amountToBuy_);
+	int tableIndex = equipmentIndex_ + 1;
+	if (fileReader)
 	{
-		fileReader->AddOwnedValueEquipmentTable(converted, 1, amountToBuy_);
-
-		UE_LOG(LogTemp, Warning, TEXT("Equipment Purchased!"));
+		fileReader->BuyEquipment(tableIndex, equipId_, amountToBuy_);
 	}
-	else
+}
+
+void AItemShop::SellEquipment(int equipmentIndex_, int equipId_, int price_, int amountSold_)
+{
+	Intermediate::GetInstance()->SpendMoney( -price_ * amountSold_);
+	int tableIndex = equipmentIndex_ + 1;
+	if (fileReader)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Not enough money to purchase this"));
+		fileReader->SellEquipment(tableIndex, equipId_, amountSold_);
 	}
-	// need to find a way to do prices before I go about adding in price check
-
-	// if (Intermediate::GetInstance()->GetCurrentMoney());
-	// look for equipment index inside our table and add to the owned column
-
-
 }
 
 int AItemShop::GetWorldLevel()
 {
-	//will fill in functionality later
 	if (hub)
 	{
 		return hub->GetHubWorldLevel();
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Hub Manager NULL"));
-		return 0;
-	}
+	
+	return -1;
 }
 
-FString AItemShop::GetItemName(int itemIndex_)
+int AItemShop::GetCurrentMoney()
 {
-	// return the item name from the values input 
-	FName converted = FName(*FString::FromInt(itemIndex_));
-	FItemTableStruct row = fileReader->FindItemTableRow(converted, 0);
-	//UE_LOG(LogTemp, Warning, TEXT("GotItemName!"))
-	if (row.level <= GetWorldLevel())
+	if (hub)
 	{
-		return row.name;
+		return hub->GetCurrentMoney();
 	}
-	else
-	{
-		return FString("World Level Too high to sell this item");
-	}
+
+	return -1;
 }
 
-int AItemShop::GetItemStatIndex(int index_)
-{
-	// get the row and return the stat index
-	FName converted = FName(*FString::FromInt(index_));
-	FItemTableStruct row = fileReader->FindItemTableRow(converted, 0);
-	if (row.level <= GetWorldLevel())
-	{
-		return row.statIndex;
-	}
-	else
-	{
-		return 0;
-	}
-	//UE_LOG(LogTemp, Warning, TEXT("Got Stat Index!"));
-
-}
-
-FString AItemShop::GetEquipmentName(int itemIndex_)
-{
-	FName converted = FName(*FString::FromInt(itemIndex_));
-	FEquipmentTableStruct row = fileReader->FindEquipmentTableRow(converted, 1);
-	if (row.level <= GetWorldLevel())
-	{
-		return row.name;
-	}
-	else
-	{
-		return FString("World Level Too high to sell this item");
-	}
-	//UE_LOG(LogTemp, Warning, TEXT("Got Equipment Name!"));
-}
-
-TArray<FItemTableStruct> AItemShop::GetAllAvailbleItems(int worldLevel_)
+TArray<FItemTableStruct> AItemShop::GetAllAvailableItems(int worldLevel_)
 {
 
-	TArray<FItemTableStruct> result = fileReader->GetAllItems(fileReader->FindTableIndexInArray(FName("ItemTableStruct")), worldLevel_);
+	TArray<FItemTableStruct> result = fileReader->GetAllItemsConditionedByWorldLevel(0, worldLevel_);
 	return result;
 
 }
 
-TArray<FEquipmentTableStruct> AItemShop::GetAllAvailbleEquipment(int worldLevel_)
+void AItemShop::SellItem(int itemID, int price_, int amountSold_)
 {
-	TArray<FEquipmentTableStruct> result = fileReader->GetAllEquipment(fileReader->FindTableIndexInArray(FName("EquipmentTableStruct")), worldLevel_);
-	return result;
+	Intermediate::GetInstance()->SpendMoney(-price_ * amountSold_);
+	if (fileReader)
+		fileReader->SellItem(0, itemID, amountSold_);
+}
+
+TArray<FEquipmentTableStruct> AItemShop::GetAllAvailableEquipmentOfACertainType(int equipmentIndex_, int subIndex_)
+{
+	int tableIndex_ = equipmentIndex_ + 1; //1 for wpn 2 for armor 3 for acc
+	if (fileReader)
+	{
+		return fileReader->GetAllEquipmentOfACertainTypeConditionedByWorldLevel(tableIndex_, equipmentIndex_, subIndex_, GetWorldLevel());
+	}
+	return TArray<FEquipmentTableStruct>();
+}
+
+void AItemShop::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_,
+	UPrimitiveComponent * otherComp_, int32 otherBodyIndex_,
+	bool bFromSweepO, const FHitResult & sweepResult_)
+{
+	if (otherActor_ != nullptr && otherActor_ != this && overlappedComp_ != nullptr)
+	{
+		// check if we are being interacted with and process the logic 
+		if (interactedWith)
+		{
+			ASRPGCharacter* player = Cast<ASRPGCharacter>(otherActor_);
+			if (player)
+			{
+				playerRef = player;
+				if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
+				{
+					//Focus the camera on the item shop
+					ASRPGPlayerController* ctrl = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+					if (ctrl)
+					{
+						float focusRate = 0.45f;
+						ctrl->FocusOnThisNPC(this, focusRate);
+						FTimerHandle timeToAddWidgetHandle;
+
+						GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &AItemShop::DelayedAddWidgetToViewPort, focusRate + 0.1f, false);
+						ctrl->SetInputMode(FInputModeUIOnly());
+					}
+				}
+
+			}
+		}
+	}
+}
+
+void AItemShop::DelayedAddWidgetToViewPort()
+{
+	//By then the camera will have moved to focus on the item shop
+	if(widget)
+		if(widget->GetUserWidgetObject())
+			widget->GetUserWidgetObject()->AddToViewport();
+}
+
+void AItemShop::LeaveNPC()
+{
+	if (widget)
+		if (widget->GetUserWidgetObject())
+			widget->GetUserWidgetObject()->RemoveFromViewport();
+
+
+	ASRPGPlayerController* ctrl = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (ctrl)
+	{
+		if (playerRef)
+		{
+			ctrl->SetInputMode(FInputModeGameAndUI());
+			ctrl->FocusOnThisNPC(playerRef, 0.45f);
+			playerRef = nullptr;
+		}
+	}
+}
+
+TArray<FEquipmentTableStruct> AItemShop::GetAllOwnedEquipment()
+{
+	TArray<FEquipmentTableStruct> allWpnsAndArmorAndAcc;
+
+	if (fileReader)
+	{
+		allWpnsAndArmorAndAcc = fileReader->FindAllOwnedEquipment(1); //Weapons
+		
+		TArray<FEquipmentTableStruct> armor = fileReader->FindAllOwnedEquipment(2); //Armor
+
+		for (auto a : armor)
+		{
+			allWpnsAndArmorAndAcc.Push(a);
+		}
+
+		armor.Empty();
+
+		armor = fileReader->FindAllOwnedEquipment(3); //Acc
+
+		for (auto a : armor)
+		{
+			allWpnsAndArmorAndAcc.Push(a);
+		}
+
+	}
+
+	return allWpnsAndArmorAndAcc;
+}
+
+TArray<FItemTableStruct> AItemShop::GetAllOwnedItems()
+{
+	if (fileReader)
+	{
+		return fileReader->GetAllOwnedItems(0);
+	}
+
+	return  TArray<FItemTableStruct>();
+}
+
+AHubWorldManager* AItemShop::GetHubWolrdManager()
+{
+	return hub;
 }
 

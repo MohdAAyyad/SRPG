@@ -111,9 +111,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		TArray<FItemTableStruct> GetOwnedItems(); //Called by the UI
 	UFUNCTION(BlueprintCallable)
-		void HighlightItemUsage(FName itemName_); //Called by UI to highlight the tiles
+		void HighlightItemUsage(FItemTableStruct item_); //Called by UI to highlight the tiles
 
-	FName chosenItem;
+	FItemTableStruct chosenItem;
 
 	UFUNCTION(BlueprintCallable)
 		virtual void ResetCameraFocus();

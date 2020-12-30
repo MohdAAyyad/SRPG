@@ -15,6 +15,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/NPCCharacterAnimInstance.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 ANPC::ANPC()
@@ -48,6 +50,22 @@ ANPC::ANPC()
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
 	GetCharacterMovement()->GravityScale = 1.0f;
+
+	// Create a camera boom...
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->bAbsoluteRotation = false;
+	CameraBoom->TargetArmLength = 500.f;
+	CameraBoom->AddRelativeLocation(FVector(-10.f, 0.0f, 20.0f));
+	CameraBoom->RelativeRotation = FRotator::ZeroRotator;
+	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
+
+	// Create a camera...
+	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
+	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	TopDownCameraComponent->AddRelativeLocation(FVector(-360.0f, 0.0f, 0.0f));
+	TopDownCameraComponent->SetActive(false);
 }
 
 // Called when the game starts or when spawned
@@ -85,18 +103,9 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 				if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
-					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
 					LoadText();
 				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
-				}
 				
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Player Could not be Cast"));
 			}
 		}
 	}

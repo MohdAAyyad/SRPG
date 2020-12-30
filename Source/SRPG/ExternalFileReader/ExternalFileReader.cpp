@@ -396,22 +396,22 @@ void UExternalFileReader::IncreaseTheStatsOfThisFigheter(FFighterTableStruct fig
 
 }
 
-void UExternalFileReader::AddOwnedValueItemTable(FName rowName_, int index_, int value_)
+void UExternalFileReader::AddOwnedValueItemTable(int tableIndex_, int itemId_, int amountToAdd_)
 {
-	static const FString contextString(TEXT("Item Table"));
+	static const FString contextString(TEXT("Trying to buy items"));
+	TArray<FName> rowNames;
+	rowNames = tables[tableIndex_]->GetRowNames();
 
-	if (tables[index_])
+	for (auto n : rowNames)
 	{
-		FItemTableStruct* row = tables[index_]->FindRow<FItemTableStruct>(rowName_, contextString, true);
-		if (row)
+		FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+
+		if (row->id == itemId_)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Found Row"));
-			row->owned += value_;
+			row->owned += amountToAdd_;
+			break;
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
+
 	}
 }
 
@@ -660,19 +660,6 @@ void UExternalFileReader::RemoveFighterTableRow(FName rowName_, int tableIndex_)
 
 }
 
-FName UExternalFileReader::ConvertItemNameToNameUsedInTable(FName name_)
-{
-	FString n = name_.ToString();
-
-	if (n == "Healing Potion")
-		return FName(TEXT("0"));
-
-	if (n == "PIP restore")
-		return FName(TEXT("1"));
-
-	return FName(TEXT(""));
-}
-
 FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_, int subIndex_)
 {
 	static const FString contextString(TEXT("Trying to get the Weapons from the table based on ID"));
@@ -790,7 +777,7 @@ FEquipmentTableStruct UExternalFileReader::GetEquipmentByLevel(int tableIndex_, 
 	return equip;
 }
 
-TArray<FItemTableStruct> UExternalFileReader::GetAllItems(int tableIndex_, int worldLevel_)
+TArray<FItemTableStruct> UExternalFileReader::GetAllItemsConditionedByWorldLevel(int tableIndex_, int worldLevel_)
 {
 	static const FString contextString(TEXT("Getting all items"));
 	TArray<FItemTableStruct> results;
@@ -811,31 +798,6 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllItems(int tableIndex_, int w
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
-	}
-
-	return results;
-}
-
-TArray<FEquipmentTableStruct> UExternalFileReader::GetAllEquipment(int tableIndex_, int worldLevel_)
-{
-	static const FString contextString(TEXT("Getting all equipment"));
-	TArray<FEquipmentTableStruct> results;
-	TArray<FName> rowNames;
-	if (tables[tableIndex_])
-	{
-		rowNames = tables[tableIndex_]->GetRowNames();
-		for (auto n : rowNames)
-		{
-			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
-			if (row->level <= worldLevel_)
-			{
-				results.Push(*row);
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
 	}
 
 	return results;
@@ -883,7 +845,7 @@ TArray<FEquipmentTableStruct> UExternalFileReader::GetAllOwnedEquipmentOfACertai
 			{
 				FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
 
-				if (equipIndex_ != EQU_ACC) //Accesories do not have a subindex
+				if (equipIndex_ != EQU_ACC) //Accessories do not have a subindex
 				{
 					if (row->equipmentIndex == equipIndex_ && (row->weaponIndex == subIndex_ || row->armorIndex == subIndex_) && row->owned > 0)
 					{
@@ -893,6 +855,46 @@ TArray<FEquipmentTableStruct> UExternalFileReader::GetAllOwnedEquipmentOfACertai
 				else
 				{
 					if (row->equipmentIndex == equipIndex_ && row->owned > 0)
+					{
+						results.Push(*row);
+					}
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		}
+	}
+	return results;
+}
+
+TArray<FEquipmentTableStruct> UExternalFileReader::GetAllEquipmentOfACertainTypeConditionedByWorldLevel(int tableIndex_, int equipIndex_, int subIndex_, int worldLevel_)
+{
+	//Used by the item shop
+	static const FString contextString(TEXT("Getting all owned equipment of a certain type"));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (equipIndex_ != EQU_ACC) //Accessories do not have a subindex
+				{
+					if (row->equipmentIndex == equipIndex_ && (row->weaponIndex == subIndex_ || row->armorIndex == subIndex_) && row->level <= worldLevel_)
+					{
+						results.Push(*row);
+					}
+				}
+				else
+				{
+					if (row->equipmentIndex == equipIndex_ && row->level <= worldLevel_)
 					{
 						results.Push(*row);
 					}
@@ -1031,6 +1033,80 @@ void  UExternalFileReader::RemoveEquipment(int fighterTableIndex_, int equipTabl
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
+		}
+	}
+}
+
+void UExternalFileReader::BuyEquipment(int tableIndex_, int equipId_, int amountToBuy_)
+{
+	static const FString contextString(TEXT("Buying equipment "));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (row->id == equipId_)
+				{
+					row->owned += amountToBuy_;
+					break;
+				}
+			}
+		}
+	}
+}
+void UExternalFileReader::SellEquipment(int tableIndex_, int equipId_, int amount_)
+{
+	static const FString contextString(TEXT("Selling equipment "));
+	TArray<FEquipmentTableStruct> results;
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+				if (row->id == equipId_)
+				{
+					row->owned -= amount_;
+					break;
+				}
+			}
+		}
+	}
+}
+
+void UExternalFileReader::SellItem(int tableIndex_, int itemID_, int amount_)
+{
+	static const FString contextString(TEXT("Selling items "));
+	TArray<FItemTableStruct> results;
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+
+				if (row->id == itemID_)
+				{
+					row->owned -= amount_;
+					break;
+				}
+			}
 		}
 	}
 }

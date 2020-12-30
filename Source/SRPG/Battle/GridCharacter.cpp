@@ -455,14 +455,15 @@ TArray<FItemTableStruct> AGridCharacter::GetOwnedItems()
 	return TArray<FItemTableStruct>();
 }
 
-void AGridCharacter::HighlightItemUsage(FName itemName_)
+//Called from UI
+void AGridCharacter::HighlightItemUsage(FItemTableStruct item_)
 {
 	ATile* tile_ = GetMyTile();
 	if (tile_)
 	{
 		tile_->GetGridManager()->ClearHighlighted();
 		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM, 0); //Items always cover 1 tile only
-		chosenItem = fileReader->ConvertItemNameToNameUsedInTable(itemName_);
+		chosenItem = item_;
 		currentState = EGridCharState::HEALING;
 	}
 }
@@ -471,8 +472,8 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 {
 	if (target_ && fileReader)
 	{
-		target_->GridCharReactToItem(fileReader->GetItemStatIndex(5,chosenItem), fileReader->GetItemValue(chosenItem));
-		fileReader->AddOwnedValueItemTable(chosenItem, 3, -1);
+		target_->GridCharReactToItem(chosenItem.statIndex, chosenItem.value);
+		fileReader->AddOwnedValueItemTable(3, chosenItem.id, -1);
 		bHasDoneAnAction = true;
 		if (bHasMoved) //Has moved and has done an action, we're done
 		{

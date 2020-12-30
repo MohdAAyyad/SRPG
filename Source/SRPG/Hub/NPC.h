@@ -59,14 +59,28 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void LoadText();
+
+	UFUNCTION(BlueprintCallable)
+		virtual void LeaveNPC() {}; //Overriden in children
 	// gives us a ref to the hubmanager for time managment purposes
 	//UPROPERTY(EditAnywhere, Category = "HubManager")
-	class AHubWorldManager* hubManager;
+	UPROPERTY(BlueprintReadOnly)
+		class AHubWorldManager* hubManager;
 
 	class ASRPGCharacter* playerRef;
 	// ref to the player once collided, can be used in blueprints for UI purposes
 	UPROPERTY(EditAnywhere)
 	bool shouldWander;
+
+
+	/** Top down camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* TopDownCameraComponent;
+
+	/** Camera boom positioning the camera above the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
