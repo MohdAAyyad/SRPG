@@ -60,9 +60,9 @@ void AItemShop::SellEquipment(int equipmentIndex_, int equipId_, int price_, int
 
 int AItemShop::GetWorldLevel()
 {
-	if (hub)
+	if (hubManager)
 	{
-		return hub->GetHubWorldLevel();
+		return hubManager->GetHubWorldLevel();
 	}
 	
 	return -1;
@@ -70,9 +70,9 @@ int AItemShop::GetWorldLevel()
 
 int AItemShop::GetCurrentMoney()
 {
-	if (hub)
+	if (hubManager)
 	{
-		return hub->GetCurrentMoney();
+		return hubManager->GetCurrentMoney();
 	}
 
 	return -1;
@@ -126,7 +126,7 @@ void AItemShop::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActo
 						ctrl->FocusOnThisNPC(this, focusRate);
 						FTimerHandle timeToAddWidgetHandle;
 
-						GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &AItemShop::DelayedAddWidgetToViewPort, focusRate + 0.1f, false);
+						GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, focusRate + 0.1f, false);
 						ctrl->SetInputMode(FInputModeUIOnly());
 					}
 				}
@@ -134,14 +134,6 @@ void AItemShop::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActo
 			}
 		}
 	}
-}
-
-void AItemShop::DelayedAddWidgetToViewPort()
-{
-	//By then the camera will have moved to focus on the item shop
-	if(widget)
-		if(widget->GetUserWidgetObject())
-			widget->GetUserWidgetObject()->AddToViewport();
 }
 
 void AItemShop::LeaveNPC()
@@ -200,10 +192,5 @@ TArray<FItemTableStruct> AItemShop::GetAllOwnedItems()
 	}
 
 	return  TArray<FItemTableStruct>();
-}
-
-AHubWorldManager* AItemShop::GetHubWolrdManager()
-{
-	return hub;
 }
 

@@ -161,7 +161,7 @@ void UStatsComponent::CheckLevelUp(bool hasLeveledUp_)
 		{
 			//Levelup
 			currentStats[STAT_NXP] *= 2;
-			currentStats[STAT_LVL]++;
+			ScaleLevelWithArchetype(currentStats[STAT_LVL]+1,currentStats[STAT_ARCH]);
 			if (currentStats[STAT_EXP] > 0) //We still have exp to earn
 				CheckLevelUp(false); //Call the function again to calculate the expOffset again
 			else
@@ -212,8 +212,10 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 	while (currentLevel < targetLevel_)
 	{
 		increment = currentLevel % 2;
-		currentStats[STAT_HP] += increment;
-		currentStats[STAT_PIP] += increment;
+		maxHP += increment;
+		maxPip += increment;
+		currentStats[STAT_HP] = maxHP;
+		currentStats[STAT_PIP] = maxPip;
 		switch (archetype_)
 		{
 		case ARCH_ATK:

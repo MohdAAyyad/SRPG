@@ -52,23 +52,23 @@
 #define STAT_NXP 11
 #endif
 
-#ifndef STAT_WPI
+#ifndef STAT_WPI //Weapon index
 #define STAT_WPI 12
 #endif
 
-#ifndef STAT_ARI
+#ifndef STAT_ARI //Armor index
 #define STAT_ARI 13
 #endif
 
-#ifndef STAT_WPN
+#ifndef STAT_WPN //Actual equipped weapon
 #define STAT_WPN 14
 #endif
 
-#ifndef STAT_ARM
+#ifndef STAT_ARM //Actual equipped armor
 #define STAT_ARM 15
 #endif
 
-#ifndef STAT_ACC
+#ifndef STAT_ACC //Actual equipped accessory
 #define STAT_ACC 16
 #endif
 
@@ -92,7 +92,7 @@
 #define STAT_ASI 21
 #endif
 
-#ifndef STAT_ASN
+#ifndef STAT_ASN //Armor skills num
 #define STAT_ASN 22
 #endif
 

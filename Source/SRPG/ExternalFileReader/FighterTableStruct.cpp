@@ -2,81 +2,117 @@
 
 
 #include "FighterTableStruct.h"
+#include "Definitions.h"
 
-void FFighterTableStruct::CalculatePrice(int newLevel_)
+
+void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 {
-	//TODO
-	if (newLevel_ > level)
+
+	//Binary increase based on archetype
+	// Non-archetype stats have 1 added every two levels while the archetype stat gets a 1 added for every level
+	int currentLevel = level;
+	int increment = currentLevel % 2;
+	while (currentLevel < targetLevel_)
 	{
-		value += 100;
+		increment = currentLevel % 2;
+		hp += increment;
+		pip += increment;
+		neededEXPToLevelUp *= 2;
+		value += 150;
+		switch (archetype)
+		{
+		case ARCH_ATK:
+			atk++;
+			
+			def += increment;
+			intl += increment;
+			spd += increment;
+			crit += increment;
+			agl += increment;
+			crd += increment;
+
+			break;
+		case ARCH_DEF:
+			def++;
+
+			atk += increment;
+			intl += increment;
+			spd += increment;
+			crit += increment;
+			agl += increment;
+			crd += increment;
+			break;
+		case ARCH_INT:
+			intl++;
+
+			atk += increment;
+			def += increment;
+			spd += increment;
+			crit += increment;
+			agl += increment;
+			crd += increment;
+			break;
+		default:
+			break;
+		}
+
+		currentLevel++;
 	}
-	else if (newLevel_ < level)
-	{
-		value -= 100;
-	}
+	level = targetLevel_;
 
 }
 
-
-void FFighterTableStruct::ScaleStatsByLevel(int newLevel_)
+void FFighterTableStruct::ScaleStatsByLevelDown(int targetLevel_)
 {
-	//TODO
-	//Placeholder
-	if (newLevel_ > level)
+	//Binary increase based on archetype
+// Non-archetype stats have 1 added every two levels while the archetype stat gets a 1 added for every level
+	int currentLevel = level;
+	int increment = currentLevel % 2;
+	while (currentLevel > targetLevel_)
 	{
-		hp += 20;
-		spd += 2;
-		atk += 3;
-		def += 4;
-		CalculatePrice(newLevel_);
-		level = newLevel_;
-
-	}
-	else if (newLevel_ < level)
-	{
-		hp -= 20;
-		spd -= 2;
-		atk -= 3;
-		def -= 4;
-		CalculatePrice(newLevel_);
-		level = newLevel_;
-
-	}
-
-}
-
-void FFighterTableStruct::LevelUpUntilGoal(int goalLevel_)
-{
-	bool exit = false;
-
-	if (goalLevel_ > level)
-	{
-		while (exit == false)
+		increment = currentLevel % 2;
+		hp -= increment;
+		pip -= increment;
+		neededEXPToLevelUp /= 2;
+		value -= 150;
+		switch (archetype)
 		{
-			int increment = level + 1;
-			ScaleStatsByLevel(increment);
-			if (level == goalLevel_)
-			{
-				// get out, go home
-				exit = true;
-			}
+		case ARCH_ATK:
+			atk--;
 
+			def -= increment;
+			intl -= increment;
+			spd -= increment;
+			crit -= increment;
+			agl -= increment;
+			crd -= increment;
+
+			break;
+		case ARCH_DEF:
+			def--;
+
+			atk -= increment;
+			intl -= increment;
+			spd -= increment;
+			crit -= increment;
+			agl -= increment;
+			crd -= increment;
+			break;
+		case ARCH_INT:
+			intl--;
+
+			atk -= increment;
+			def -= increment;
+			spd -= increment;
+			crit -= increment;
+			agl -= increment;
+			crd -= increment;
+			break;
+		default:
+			break;
 		}
-	}
-	else if (goalLevel_ < level && level > 1)
-	{
-		while (exit == false)
-		{
-			int decrement = level - 1;
-			ScaleStatsByLevel(decrement);
-			if (level == goalLevel_)
-			{
-				// get out, go home
-				exit = true;
-			}
 
-		}
+		currentLevel--;
 	}
-
-	level = goalLevel_;
+	level = targetLevel_;
 }

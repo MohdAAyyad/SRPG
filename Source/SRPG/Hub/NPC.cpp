@@ -233,4 +233,19 @@ void ANPC::EndDialogue()
 	}
 }
 
+void ANPC::DelayedAddWidgetToViewPort()
+{
+	//Named "Delayed" for no reason other than the fact this is called by the shops/NPCs when they back the camera out
+
+	//By now the camera will have moved to focus on the item shop
+	if (widget)
+		if (widget->GetUserWidgetObject())
+			widget->GetUserWidgetObject()->AddToViewport();
+}
+
+
+AHubWorldManager* ANPC::GetHubWorldManager()
+{
+	return hubManager;
+}
 

@@ -16,8 +16,6 @@ class SRPG_API AItemShop : public ANPC
 	GENERATED_BODY()
 protected:
 	void BeginPlay() override;
-	UPROPERTY(EditAnywhere, Category = "Hub")
-	class AHubWorldManager* hub;
 
 public:
 	AItemShop();
@@ -47,8 +45,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		int GetCurrentMoney();
 
-	UFUNCTION(BlueprintCallable)
-		AHubWorldManager* GetHubWolrdManager();
 		void LeaveNPC() override;
 
 
@@ -56,8 +52,6 @@ protected:
 	void OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult) override;
-
-	void DelayedAddWidgetToViewPort();
 
 
 };

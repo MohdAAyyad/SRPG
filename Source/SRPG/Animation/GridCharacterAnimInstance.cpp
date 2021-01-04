@@ -18,7 +18,7 @@ UGridCharacterAnimInstance::UGridCharacterAnimInstance()
 	bHitOrCrit = false;
 	bMiss = false;
 }
-void UGridCharacterAnimInstance::UpdateAnimationProperties_Implementation()
+void UGridCharacterAnimInstance::UpdateAnimationProperties()
 {
 	if (!ownerGridCharacter)
 	{
@@ -29,58 +29,43 @@ void UGridCharacterAnimInstance::UpdateAnimationProperties_Implementation()
 		forwardSpeed = ownerGridCharacter->GetVelocity().Size();
 	}
 }
-
-void UGridCharacterAnimInstance::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-{
-	DOREPLIFETIME(UGridCharacterAnimInstance, forwardSpeed);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bWeaponAttack);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bHit);
-	DOREPLIFETIME(UGridCharacterAnimInstance, skillIndex);
-	DOREPLIFETIME(UGridCharacterAnimInstance, useItem);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bDeath);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bStatDecrease);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bMiss);
-	DOREPLIFETIME(UGridCharacterAnimInstance, bHitOrCrit);
-	DOREPLIFETIME(UGridCharacterAnimInstance, damage);
-}
-
-void UGridCharacterAnimInstance::WeaponAttack_Implementation()
+void UGridCharacterAnimInstance::WeaponAttack()
 {
 	if(!bWeaponAttack)
 		bWeaponAttack = true;
 }
 
-void UGridCharacterAnimInstance::GotHit_Implementation(bool hitOrCrit_)
+void UGridCharacterAnimInstance::GotHit(bool hitOrCrit_)
 {
 	bHitOrCrit = hitOrCrit_;
 	if (!bHit)
 		bHit = true;
 }
 
-void UGridCharacterAnimInstance::SetDamage_Implementation(int damage_)
+void UGridCharacterAnimInstance::SetDamage(int damage_)
 {
 	damage = damage_;
 }
 
-void UGridCharacterAnimInstance::SkillAttack_Implementation(int index_)
+void UGridCharacterAnimInstance::SkillAttack(int index_)
 {
 	if(skillIndex == -1)
 		skillIndex = index_;
 }
 
-void UGridCharacterAnimInstance::SetUseItem_Implementation()
+void UGridCharacterAnimInstance::SetUseItem()
 {
 	if(!useItem)
 		useItem = true;
 }
 
-void UGridCharacterAnimInstance::DeathAnim_Implementation()
+void UGridCharacterAnimInstance::DeathAnim()
 {
 	if (!bDeath)
 		bDeath = true;
 }
 
-void UGridCharacterAnimInstance::ChangeStats_Implementation(bool stat_)
+void UGridCharacterAnimInstance::ChangeStats(bool stat_)
 {
 	if (stat_) //Increase. Called by the player
 	{
@@ -95,7 +80,7 @@ void UGridCharacterAnimInstance::ChangeStats_Implementation(bool stat_)
 	}
 }
 
-void UGridCharacterAnimInstance::GotMiss_Implementation()
+void UGridCharacterAnimInstance::GotMiss()
 {
 	if (!bMiss)
 		bMiss = true;

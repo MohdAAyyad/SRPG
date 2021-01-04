@@ -301,9 +301,6 @@ void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int inde
 
 TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tableIndex_)
 {
-
-	// Didn't want to break your old version so I made a new one that actually checks for the table index instead of a hardcoded
-	//value
 	static const FString contextString(TEXT("Trying to get the recruited fighters from the table"));
 	TArray<FName> rowNames;
 	TArray<FFighterTableStruct> rfighters;
@@ -320,15 +317,33 @@ TArray<FFighterTableStruct> UExternalFileReader::GetAllRecruitedFighters(int tab
 
 			return rfighters;
 		}
-		else
+	}
+
+	return TArray<FFighterTableStruct>();
+	
+}
+
+TArray<FFighterTableStruct> UExternalFileReader::GetAllFighters(int tableIndex_)
+{
+	static const FString contextString(TEXT("Trying to get the all fighters from the table"));
+	TArray<FName> rowNames;
+	TArray<FFighterTableStruct> rfighters;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
 		{
-			UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
-			return TArray<FFighterTableStruct>();
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				rfighters.Push(*tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true));
+			}
+
+			return rfighters;
 		}
 	}
 
-	return  TArray<FFighterTableStruct>();
-	
+	return TArray<FFighterTableStruct>();
 }
 
 FFighterTableStruct UExternalFileReader::FindFighterRowById(int tableIndex_, int fighterId_)
@@ -367,7 +382,7 @@ void UExternalFileReader::RemoveFightersDueToPermaDeath(TArray<int>& ids_, int t
 	}
 }
 
-//Called by the fighter shop on being play if the selected fighter's array is larger than zero in size
+//Called by the fighter shop on being play if the selected fighter's array is larger than zero in size. This is to handle leveling up
 void UExternalFileReader::IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_)
 {
 	static const FString contextString(TEXT("Trying to increase the stats of the fighters in the recruited fighters table"));
@@ -377,7 +392,7 @@ void UExternalFileReader::IncreaseTheStatsOfThisFigheter(FFighterTableStruct fig
 	for (int i = rowNames.Num() - 1; i > -1; i--)
 	{
 		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
-		if (fighter_.id == row->id) //Is the fighter in the table part of the array of dead units?
+		if (fighter_.id == row->id)
 		{
 			row->hp = fighter_.hp;
 			row->pip = fighter_.pip;
@@ -1110,3 +1125,4 @@ void UExternalFileReader::SellItem(int tableIndex_, int itemID_, int amount_)
 		}
 	}
 }
+

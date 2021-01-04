@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -64,7 +64,7 @@ protected:
 		virtual void LeaveNPC() {}; //Overriden in children
 	// gives us a ref to the hubmanager for time managment purposes
 	//UPROPERTY(EditAnywhere, Category = "HubManager")
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		class AHubWorldManager* hubManager;
 
 	class ASRPGCharacter* playerRef;
@@ -81,6 +81,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -93,6 +94,11 @@ public:
 	void SetNPCLinesIndex(int index_);
 	void SetHubManager(class AHubWorldManager* manager_);
 	virtual void EndDialogue(); // overriden by children to end the dialogue
+
+	void DelayedAddWidgetToViewPort();
+
+	UFUNCTION(BlueprintCallable)
+		AHubWorldManager* GetHubWorldManager();
 
 private:
 	FDialogueTableStruct file;

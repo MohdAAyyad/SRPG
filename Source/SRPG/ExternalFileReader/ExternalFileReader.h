@@ -62,6 +62,7 @@ public:
 	TArray<FEquipmentTableStruct> GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_);
 	TArray<FEquipmentTableStruct> GetAllEquipmentOfACertainTypeConditionedByWorldLevel(int tableIndex_, int equipIndex_, int subIndex_, int worldLevel_);
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
+	TArray<FFighterTableStruct> GetAllFighters(int tableIndex_);
 	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
