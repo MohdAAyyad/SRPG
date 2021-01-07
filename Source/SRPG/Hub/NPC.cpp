@@ -17,6 +17,7 @@
 #include "Animation/NPCCharacterAnimInstance.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "SRPGPlayerController.h"
 
 // Sets default values
 ANPC::ANPC()
@@ -103,7 +104,13 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 				if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
-					LoadText();
+					//LoadText();
+					ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+					if (control)
+					{
+						control->SetInputMode(FInputModeUIOnly());
+					}
+					
 				}
 				
 			}
@@ -114,13 +121,13 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * o
 
 void ANPC::LoadText()
 {
-	if (hasSetLine == false)
-	{
-		file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
-		line = file.line;
-	}
-	//UE_LOG(LogTemp, Warning, TEXT("Everything worked according to plan!"));
+	file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
+	line = file.line;
+	skippable = file.skippable;
+	name = file.name;
+	textSpeed = file.textSpeed;
 
+	UE_LOG(LogTemp, Warning, TEXT("Line Loaded"));
 
 }
 
@@ -230,6 +237,12 @@ void ANPC::EndDialogue()
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
+
+		ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (control)
+		{
+			control->SetInputMode(FInputModeGameAndUI());
+		}
 	}
 }
 

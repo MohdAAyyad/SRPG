@@ -22,8 +22,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// used for dialogue
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Line")
-	FString line;
+
 	// box component used to start dialogue with the player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* startDialogueBox;
@@ -93,15 +92,30 @@ public:
 	void SetLine(FString line_);
 	void SetNPCLinesIndex(int index_);
 	void SetHubManager(class AHubWorldManager* manager_);
+
+	UFUNCTION(BlueprintCallable)
 	virtual void EndDialogue(); // overriden by children to end the dialogue
 
 	void DelayedAddWidgetToViewPort();
 
 	UFUNCTION(BlueprintCallable)
-		AHubWorldManager* GetHubWorldManager();
+	AHubWorldManager* GetHubWorldManager();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString line;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool skippable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float textSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString name;
 
 private:
 	FDialogueTableStruct file;
+
+
+
 	bool hasSetLine;
 
 };

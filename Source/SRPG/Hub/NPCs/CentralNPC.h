@@ -41,6 +41,7 @@ protected:
 	virtual void SimulateActivity(); // overriden by children, rewards the player based on the reward index and success index. Calls spend time
 	
 	void SpendTime(); //calls update time slot in hub manager and passes in the time cost. Must be called at the end of simulate activity unless otherwise specified
+
 	void EndDialogue() override;
 
 	UFUNCTION(BlueprintCallable)

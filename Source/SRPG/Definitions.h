@@ -352,6 +352,18 @@
 
 #pragma endregion
 
+#pragma region Dialogue
+
+#ifndef THROWAWAYLINES_MIN
+#define THROWAWAYLINES_MIN 0 
+#endif
+
+#ifndef THROWAWAYLINES_MAX
+#define THROWAWAYLINES_MAX 8 
+#endif
+
+#pragma endregion
+
 #pragma region HubWorldManager
 
 #ifndef CNTR_SPWN_LOW  // how many central NPCs to spawn, minimum

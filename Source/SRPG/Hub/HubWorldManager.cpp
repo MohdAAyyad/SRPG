@@ -403,7 +403,8 @@ ANPC* AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 	ANPC* npc = GetWorld()->SpawnActor<ANPC>(regularNPCs[0], a_->GetActorTransform());
 	if (npc)
 	{
-		npc->SetNPCLinesIndex(2);
+		int randoLine = FMath::RandRange(THROWAWAYLINES_MIN, THROWAWAYLINES_MAX);
+		npc->SetNPCLinesIndex(randoLine);
 		npc->SetHubManager(this);
 		npcs.Push(npc);
 		if (meshes.Num() > 0)

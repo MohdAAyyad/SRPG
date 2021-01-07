@@ -9,6 +9,8 @@
 #include "Intermediary/Intermediate.h"
 #include "Definitions.h"
 #include "Hub/NPCs/NPCWanderComponent.h"
+#include "SRPGPlayerController.h"
+#include "Engine/World.h"
 
 void ACentralNPC::BeginPlay()
 {
@@ -19,7 +21,8 @@ void ACentralNPC::BeginPlay()
 	activityEndLine = "";
 	activityAlreadyDone = false;
 	spentUnits = 0;
-
+	moneyCost = 0;
+	unitCost = 0;
 	initialMoneyValue = Intermediate::GetInstance()->GetCurrentMoney();
 
 	// activity index randomization code goes here
@@ -39,10 +42,28 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 			{
 				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
-					widget->GetUserWidgetObject()->AddToViewport();
+					//widget->GetUserWidgetObject()->AddToViewport();
 					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
 					FActivityDialogueTableStruct startLine = fileReader->GetStartingDialogue(activityIndex, 0);
 					line = startLine.dialogue;
+
+					// focus in on the npc
+
+					ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+					if (control)
+					{
+						control->SetInputMode(FInputModeUIOnly());
+
+						// don't know what the rate supposed to be but here it is
+						float rate = 0.45f;
+
+						control->FocusOnThisNPC(this, rate);
+
+						FTimerHandle timeToAddWidgetHandle;
+
+						GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, rate + 0.1f, false);
+					}
+
 				}
 				else
 				{
@@ -162,13 +183,24 @@ void ACentralNPC::SetActivityIndex(int activity_)
 
 	FActivityDialogueTableStruct start = fileReader->GetStartingDialogue(activityIndex, 0);
 	line = start.dialogue;
-	SetMoneyCost(initialMoneyValue * (start.moneyCostPercentage / 100));
-	SetUnitCost(start.unitCost);
+	if (start.moneyCostPercentage > 0)
+	{
+		float percent = static_cast<float>(start.moneyCostPercentage) / 100.0f;
+		int percentCost = percent * initialMoneyValue;
+		SetMoneyCost(percentCost);
+	}
+	
+	if (start.unitCost > 0)
+	{
+		SetUnitCost(start.unitCost);
+	}
+
 	rewardIndex = start.rewardIndex;
 }
 
 void ACentralNPC::SetMoneyCost(int cost_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SET MONEY COST"));
 	moneyCost = cost_;
 }
 
@@ -325,7 +357,7 @@ void ACentralNPC::SpendTime()
 	// ^ comment aged well
 		if (hubManager && hubManager->GetCurrentTimeSlotsCount() - timeCost >= 0)
 		{
-			hubManager->UpdateTimeSlots(-timeCost);
+			hubManager->UpdateTimeSlots(timeCost);
 		}
 		else
 		{
@@ -335,12 +367,19 @@ void ACentralNPC::SpendTime()
 
 void ACentralNPC::EndDialogue()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
+	//UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
-		//line = "";
-		//activityEndLine = "";
+
+		ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (control)
+		{
+			control->SetInputMode(FInputModeGameAndUI());
+			control->FocusOnThisNPC(playerRef, 0.45f);
+			playerRef = nullptr;
+		}
+		
 	}
 	spentUnits = 0;
 	//line = FString("");

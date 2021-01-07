@@ -21,7 +21,14 @@ public:
 	}
 
 	UPROPERTY(BlueprintReadWrite)
-		FString line;
+	FString line;
+	UPROPERTY(BlueprintReadWrite)
+	FString name;
+	UPROPERTY(BlueprintReadWrite)
+	float textSpeed;
+	UPROPERTY(BlueprintReadWrite)
+	bool skippable;
+
 
 
 };
