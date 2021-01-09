@@ -40,6 +40,7 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
 			if (player)
 			{
+				playerRef = player;
 				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					//widget->GetUserWidgetObject()->AddToViewport();
@@ -371,16 +372,16 @@ void ACentralNPC::EndDialogue()
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
-
-		ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
-		if (control)
-		{
-			control->SetInputMode(FInputModeGameAndUI());
-			control->FocusOnThisNPC(playerRef, 0.45f);
-			playerRef = nullptr;
-		}
-		
 	}
+
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (control)
+	{
+		control->SetInputMode(FInputModeGameAndUI());
+		control->FocusOnThisNPC(playerRef, 0.45f);
+		//playerRef = nullptr;
+	}
+
 	spentUnits = 0;
 	//line = FString("");
 }

@@ -8,6 +8,8 @@
 #include "SRPGCharacter.h"
 #include "Hub/HubWorldManager.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "SRPGPlayerController.h"
+#include "Engine/World.h"
 
 
 ATournament::ATournament():ACentralNPC()
@@ -36,6 +38,7 @@ void ATournament::BeginPlay()
 	spentTournamentUnits = 0;
 	spentUnits = 0;
 	timeCost = 0;
+	gainedMoney = 0;
 }
 
 void ATournament::EndDialogue()
@@ -44,9 +47,17 @@ void ATournament::EndDialogue()
 	if (widget)
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
-		spentTournamentUnits = 0;
 	}
 
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (control)
+	{
+		control->SetInputMode(FInputModeGameAndUI());
+		control->FocusOnThisNPC(playerRef, 0.45f);
+		//playerRef = nullptr;
+	}
+
+	spentTournamentUnits = 0;
 }
 
 void ATournament::SetMoneyCost(int cost_, bool op_)
@@ -113,6 +124,7 @@ void ATournament::SupportTeam(bool op1_)
 
 FOpponentStruct ATournament::SimulateMatch()
 {
+	gainedMoney = 0;
 	if (!activityAlreadyDone)
 	{
 		int winningResult = FMath::RandRange(0, 100);
@@ -132,7 +144,8 @@ FOpponentStruct ATournament::SimulateMatch()
 		if (moneyCost != 0 && hasBetOnOpponent && betTeam == winner)
 		{
 			// award the player 1.5 * money cost
-			Intermediate::GetInstance()->AddMoney(moneyCost * 1.5);
+			gainedMoney = moneyCost * 1.5;
+			Intermediate::GetInstance()->AddMoney(gainedMoney);
 			UE_LOG(LogTemp, Warning, TEXT("Bet Won, money added"));
 			moneyCost = 0;
 		}
@@ -190,6 +203,20 @@ void ATournament::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AAct
 			ASRPGCharacter* player = Cast<ASRPGCharacter>(OtherActor);
 			if (player)
 			{
+				playerRef = player;
+
+				ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+				if (control)
+				{
+					control->SetInputMode(FInputModeUIOnly());
+					float rate = 0.45f;
+
+					control->FocusOnThisNPC(this, rate);
+
+					FTimerHandle timeToAddWidgetHandle;
+
+					GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, rate + 0.1f, false);
+				}
 				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
@@ -207,4 +234,9 @@ void ATournament::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AAct
 bool ATournament::GetHasSupportedTeam()
 {
 	return hasSupportedTeam;
+}
+
+int ATournament::GetCurrentMoney()
+{
+	return Intermediate::GetInstance()->GetCurrentMoney();
 }

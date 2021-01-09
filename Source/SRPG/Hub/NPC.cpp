@@ -209,7 +209,7 @@ void ANPC::Interact()
 void ANPC::UnInteract()
 {
 	interactedWith = false;
-	EndDialogue();
+	//EndDialogue();
 }
 
 void ANPC::SetLine(FString line_)

@@ -23,22 +23,25 @@ protected:
 
 	// this is test value to test if betting works correctly
 	UPROPERTY(BlueprintReadOnly) //Represents current money obtained from the intermediate. Used by UI
-		int currentMoney;
+	int currentMoney;
+
+	UPROPERTY(BlueprintReadOnly) // How much money was won from bets
+	int gainedMoney;
 
 	UPROPERTY(BlueprintReadOnly)
-		int op1SuccessChance;
+	int op1SuccessChance;
 	// 100 - op1 
 	UPROPERTY(BlueprintReadOnly)
-		int op2SuccessChance;
+	int op2SuccessChance;
 	// true op 1, false op 2
 	bool hasBetOnOpponent;
 	UPROPERTY(BlueprintReadOnly) //Used to know which opponent to display after the simulation is done
-		bool winner;
+	bool winner;
 
 	UPROPERTY(BlueprintReadOnly)
-		FOpponentStruct op1;
+	FOpponentStruct op1;
 	UPROPERTY(BlueprintReadOnly)
-		FOpponentStruct op2;
+	FOpponentStruct op2;
 
 	void BeginPlay() override;
 	void EndDialogue() override;
@@ -65,9 +68,9 @@ public:
 	is not a story mission or when the player manually simulates the result by interacting with the tourney npc.
 	After it finishes, calls intermdiate's SetNextOpponent. Turns bActivityHasAlreadyBeenDone to true*/
 	UFUNCTION(BlueprintCallable)
-		int GetOp1Chance();
+	int GetOp1Chance();
 	UFUNCTION(BlueprintCallable)
-		int GetOp2Chance();
+	int GetOp2Chance();
 
 	UFUNCTION(BlueprintCallable)
 	void EnterFighterIndex(int index_);
@@ -80,6 +83,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	int spentTournamentUnits;
+
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentMoney();
 
 	//void PutUnitOnHold(int index_) override;
 
