@@ -95,7 +95,10 @@ protected:
 	void UpdatePlayerEXP();
 
 public:	
-	// Called every frame
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UTexture*> itemTextures;
+
 	virtual void Tick(float DeltaTime) override;
 
 	void DeplyUnitAtThisLocation(FVector tileLoc_); //Called from controller
@@ -122,5 +125,6 @@ public:
 	void SpawnWeaponEmitter(FVector loc_, int emitterIndex_);
 
 	ABattleCrowd* GetCrowdRef();
+
 
 };

@@ -13,6 +13,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Kismet/GameplayStatics.h"
 #include "Definitions.h"
+#include "SRPGPlayerController.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -105,6 +106,12 @@ void ATransitionToBattle::EndDay()
 
 	if (tourney)
 		Intermediate::GetInstance()->SetNextOpponent(tourney->SimulateMatch());
+
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (control)
+	{
+		control->SetInputMode(FInputModeUIOnly());
+	}
 }
 
 void ATransitionToBattle::UpdateRecruitedFighters() //Called when the player collides with the actor

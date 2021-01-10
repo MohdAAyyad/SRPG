@@ -97,3 +97,15 @@ void AObstaclesManager::TellObstaclesAPhaseHasPassed(int phase_)
 
 }
 
+void AObstaclesManager::RemoveObstacle(AObstacle* obstacle_)
+{
+	for (int i = 0; i < obstacles.Num(); i++)
+	{
+		if (obstacles[i] == obstacle_)
+		{
+			obstacles.Remove(obstacle_);
+			obstacle_->Destroy();
+		}
+	}
+}
+

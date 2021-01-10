@@ -65,10 +65,10 @@ void AObstacle::ObstacleTakeDamage(float damage_, int statusEffect_)
 	if (hp <= 0.5f)
 	{
 		FTimerHandle timeToDestroyHandle;
-		mesh->ApplyDamage(2.0f, GetActorLocation(), FVector::ZeroVector, 1.0f);
+		mesh->ApplyDamage(5.0f, GetActorLocation(), FVector::ZeroVector, 1.0f);
 		mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 2.0f, false);
 	}
 }
 
@@ -79,7 +79,11 @@ void AObstacle::DelayedDestroy()
 	{
 		obstructedTiles[i]->SetTraversable(true);
 	}
-	Destroy();
+	//Tell the obstacle manager that you're done
+	if (obstacleManager)
+		obstacleManager->RemoveObstacle(this);
+	else
+		Destroy();
 }
 
 bool AObstacle::IsAnyOfMyTilesHighlighted(int highlightIndex_)

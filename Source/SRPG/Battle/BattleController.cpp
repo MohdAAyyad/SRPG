@@ -142,14 +142,14 @@ void ABattleController::HandleMousePress()
 						if (controlledCharacter)
 						{
 							//Don't store a reference to a character who's finished their turn
-							if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
+						//	if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
 								controlledCharacter->Selected();
-							else
-								controlledCharacter = nullptr;
-						}
+							//else
+								//controlledCharacter = nullptr;
+						}//
 
 					}
-					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::IDLE)
+					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::MOVING)
 					{
 						targetTile = Cast<ATile>(hit.Actor);
 						if (targetTile)
@@ -302,6 +302,7 @@ void ABattleController::HandleMousePress()
 						else
 						{
 							controlledCharacter->NotSelected();
+							controlledCharacter = nullptr;
 						}
 					}
 
@@ -463,7 +464,10 @@ void ABattleController::CancelCommand()
 	if (controlledCharacter)
 	{
 		controlledCharacter->NotSelected();
-		controlledCharacter->Selected();
+		if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::IDLE && controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED) //If the character is not idle, that means tiles are being highlighted so pressing cancel here means the user wants to go back to the UI
+			controlledCharacter->Selected();
+		else
+			controlledCharacter = nullptr; //Reset
 	}
 }
 

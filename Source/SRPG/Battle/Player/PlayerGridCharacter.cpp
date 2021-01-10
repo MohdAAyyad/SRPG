@@ -61,26 +61,18 @@ void APlayerGridCharacter::EndPlayerTurn()
 
 void APlayerGridCharacter::Selected()
 {
-	if (!HasAuthority())
-	{
-		if (widgetComp)
-			widgetComp->GetUserWidgetObject()->AddToViewport();
-		return;
-	}
-
 	if (btlManager->GetPhase() == BTL_PLY) //Player phase
 	{
-		if (currentState != EGridCharState::FINISHED)
-		{
-			if (widgetComp)
+		if (widgetComp)
+			if(!widgetComp->GetUserWidgetObject()->IsInViewport())
 				widgetComp->GetUserWidgetObject()->AddToViewport();
-		}
 	}
 }
 void APlayerGridCharacter::NotSelected()
 {
-	if(widgetComp->GetUserWidgetObject()->IsInViewport())
-		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	if(widgetComp)
+		if(widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 
 	if (originTile)
 		originTile->GetGridManager()->ClearHighlighted();
@@ -92,7 +84,7 @@ void APlayerGridCharacter::HighlightMovementPath()
 {
 	if (originTile)
 	{
-		currentState = EGridCharState::IDLE;
+		currentState = EGridCharState::MOVING;
 
 		originTile->GetGridManager()->ClearHighlighted();
 
@@ -612,4 +604,9 @@ void APlayerGridCharacter::CheckChangeStats()
 		statsComp->AddToStat(changedStat, static_cast<float>(statsComp->GetStatValue(changedStat))*PLY_IMP_STAT);
 		animInstance->ChangeStats(true);
 	}
+}
+
+ABattleManager* APlayerGridCharacter::GetBattleManager()
+{
+	return btlManager;
 }

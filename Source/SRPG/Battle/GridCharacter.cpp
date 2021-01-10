@@ -473,7 +473,7 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 	if (target_ && fileReader)
 	{
 		target_->GridCharReactToItem(chosenItem.statIndex, chosenItem.value);
-		fileReader->AddOwnedValueItemTable(3, chosenItem.id, -1);
+		fileReader->AddOwnedValueItemTable(5, chosenItem.id, -1);
 		bHasDoneAnAction = true;
 		if (bHasMoved) //Has moved and has done an action, we're done
 		{

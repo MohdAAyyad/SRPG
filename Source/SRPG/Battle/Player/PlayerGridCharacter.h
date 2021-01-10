@@ -36,6 +36,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void UseSkill(int index_);
 
+
+
 	void UpdateCharacterSkills();
 
 public:
@@ -53,6 +55,9 @@ public:
 	void GridCharReatToElemental(float damage_, int statusEffectIndex_) override;
 	void UpdateCurrentEXP();
 	void CheckChangeStats();
+
+	UFUNCTION(BlueprintCallable)
+		ABattleManager* GetBattleManager();
 
 
 	

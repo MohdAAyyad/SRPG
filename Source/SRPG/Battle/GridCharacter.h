@@ -17,6 +17,7 @@ public:
 	enum class EGridCharState : unsigned short
 	{
 		IDLE,
+		MOVING,
 		ATTACKING,
 		SKILLING,
 		HEALING,

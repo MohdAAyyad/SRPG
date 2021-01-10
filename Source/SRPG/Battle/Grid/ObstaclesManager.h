@@ -36,5 +36,6 @@ public:
 	UParticleSystemComponent* SpawnElemntalEmitterAtLocation(FVector loc_, CurrentElemntalStat elementStat_);
 	int GetBattlePhase();
 	void TellObstaclesAPhaseHasPassed(int phase_);
+	void RemoveObstacle(AObstacle* obstacle_);
 
 };
