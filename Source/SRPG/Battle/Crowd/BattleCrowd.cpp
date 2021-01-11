@@ -351,6 +351,8 @@ void ABattleCrowd::CalculateFavorForTheFirstTime()
 	}
 
 	playerFavor = playerCRD / totalCRD;
+
+	playerFavor = int(playerFavor * 100) * 0.01;
 }
 void ABattleCrowd::UpdateFavor(bool bPlayerOrEnemy_) //Called when the player or the enemy gain a CRD point
 {
@@ -362,6 +364,8 @@ void ABattleCrowd::UpdateFavor(bool bPlayerOrEnemy_) //Called when the player or
 	{
 		playerFavor -= favorIncrement;
 	}
+
+	//playerFavor = int(playerFavor * 100) * 0.01;
 }
 
 void ABattleCrowd::RemoveSpawnedItem(ACrowdItem* item_)

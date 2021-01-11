@@ -90,6 +90,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		int totalNumberOfPhasesElapsed;
 
+	UPROPERTY(BlueprintReadWrite) //Checked by the UI to play phase animation
+		bool bHasUpdatedPhase;
+
 	class ABattleController* btlCtrl;
 
 	void UpdatePlayerEXP();
@@ -106,6 +109,8 @@ public:
 	int GetPhase();
 	UFUNCTION(BlueprintCallable)
 		void NextPhase();
+
+	void PhaseAction();
 
 	UFUNCTION(BlueprintCallable)
 		void EndDeployment(); //Called from the UI

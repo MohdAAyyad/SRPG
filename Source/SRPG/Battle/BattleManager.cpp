@@ -81,46 +81,54 @@ void ABattleManager::NextPhase()
 	{
 
 		phase++;
+		bHasUpdatedPhase = true; //The UI checks this to paly the phase text animation
 
-		if (phase == BTL_ENM)	//Enemy phase
-		{
-			for (int i = 0; i < deployedUnits.Num(); i++)
-			{
-				deployedUnits[i]->EndPlayerTurn();
-			}
-			if (aiManager)
-				aiManager->BeginEnemyTurn();
-		}
-		else if (phase == BTL_CRD)
-		{
-			if (crdManager)
-			{
-				if (totalNumberOfPhasesElapsed == 1)
-				{
-					crdManager->CalculateFavorForTheFirstTime();
-					crdManager->AddCrowdWidgetToViewPort();
-				}
-				crdManager->StartCrowdPhase();
-			}
-		}
-		else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
-		{
-			phase = BTL_PLY;
-			totalNumberOfPhasesElapsed++;
-			for (int i = 0; i < deployedUnits.Num(); i++)
-			{
-				deployedUnits[i]->StartPlayerTurn();
-			}
-		}
-
-		if (btlCtrl)
-			btlCtrl->ResetControlledCharacter();
-
-		//We tell the obstacled maanger
-		if (obstacleManager)
-			obstacleManager->TellObstaclesAPhaseHasPassed(phase);
+		//Adding delay before activating the phase to allow for the UI to do its thing
+		FTimerHandle nextPhaseHandle;
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::PhaseAction, 2.0f, false);
 	}
 			
+}
+
+void ABattleManager::PhaseAction()
+{
+	if (phase == BTL_ENM)	//Enemy phase
+	{
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->EndPlayerTurn();
+		}
+		if (aiManager)
+			aiManager->BeginEnemyTurn();
+	}
+	else if (phase == BTL_CRD)
+	{
+		if (crdManager)
+		{
+			if (totalNumberOfPhasesElapsed == 1)
+			{
+				crdManager->CalculateFavorForTheFirstTime();
+				crdManager->AddCrowdWidgetToViewPort();
+			}
+			crdManager->StartCrowdPhase();
+		}
+	}
+	else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
+	{
+		phase = BTL_PLY;
+		totalNumberOfPhasesElapsed++;
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->StartPlayerTurn();
+		}
+	}
+
+	if (btlCtrl)
+		btlCtrl->ResetControlledCharacter();
+
+	//We tell the obstacled maanger
+	if (obstacleManager)
+		obstacleManager->TellObstaclesAPhaseHasPassed(phase);
 }
 void ABattleManager::DeployThisUnitNext(int index_)
 {
