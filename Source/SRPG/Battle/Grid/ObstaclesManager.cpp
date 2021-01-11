@@ -92,7 +92,8 @@ void AObstaclesManager::TellObstaclesAPhaseHasPassed(int phase_)
 {
 	for (int i = 0; i < obstacles.Num(); i++)
 	{
-		obstacles[i]->ATurnHasPassed(phase_);
+		if(obstacles[i])
+			obstacles[i]->ATurnHasPassed(phase_);
 	}
 
 }
@@ -103,9 +104,20 @@ void AObstaclesManager::RemoveObstacle(AObstacle* obstacle_)
 	{
 		if (obstacles[i] == obstacle_)
 		{
-			obstacles.Remove(obstacle_);
+			obstacles.RemoveAt(i);
 			obstacle_->Destroy();
 		}
 	}
+}
+
+AObstacle* AObstaclesManager::GetAnObstacleAtRandom()
+{
+	if (obstacles.Num() > 0)
+	{
+		int index = FMath::RandRange(0, obstacles.Num() - 1);
+
+		return obstacles[index];
+	}
+	return nullptr;
 }
 

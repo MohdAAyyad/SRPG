@@ -7,11 +7,15 @@
 #include "../AI/AIManager.h"
 #include "../Grid/GridManager.h"
 #include "../Grid/Tile.h"
+#include "../Grid/ObstaclesManager.h"
+#include "../BattlePawn.h"
 #include "Definitions.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/World.h"
+#include "TimerManager.h"
 #include "CrowdItem.h"
 #include "../Player/PlayerGridCharacter.h"
+
 
 // Sets default values
 ABattleCrowd::ABattleCrowd()
@@ -36,6 +40,14 @@ ABattleCrowd::ABattleCrowd()
 	champion = nullptr;
 	villain = nullptr;
 	bReplicates = true;
+
+	maxNumOfObstaclesToDestroy = 2;
+	currentNumOfObstaclesDestroyed = 0;
+
+	numOfTurnsToAnDestroyObstacle = 3;
+	numOfTurnsPassedSinceLastObstacleWasDestroyed = 0;
+
+	chosenObstacle = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -57,6 +69,8 @@ void ABattleCrowd::Tick(float DeltaTime)
 
 void ABattleCrowd::StartCrowdPhase()
 {
+	numOfTurnsPassedSinceLastObstacleWasDestroyed++; //Add 1 to it every turn
+
 	//If favor is higher than 70  or less than 30, and we don't have a champion or a villain then elect a champion and/or a villain
 	if (playerFavor >= 0.7f || playerFavor <= 0.3f && !bPermaChampion)
 	{
@@ -122,7 +136,89 @@ void ABattleCrowd::StartCrowdPhase()
 		spawnedItems.RemoveAt(itemsToBeRemoved[i]);
 	}
 
-	SpawnItems();
+	DecideOnActionForCurrentPhase();
+}
+
+void ABattleCrowd::DecideOnActionForCurrentPhase()
+{
+	//Check for obstacles first
+
+	if (numOfTurnsPassedSinceLastObstacleWasDestroyed >= numOfTurnsToAnDestroyObstacle && currentNumOfObstaclesDestroyed < maxNumOfObstaclesToDestroy)
+	{
+		numOfTurnsPassedSinceLastObstacleWasDestroyed = 0; //Reset the count
+		MoveBattlePawnOverObstacle();
+	}
+	else //Otherwise, just spawns items
+	{
+		SpawnItems();
+	}
+
+}
+
+void ABattleCrowd::MoveBattlePawnOverObstacle()
+{
+	if (obstacleManager)
+	{
+		//Choose the obstacle
+		chosenObstacle = obstacleManager->GetAnObstacleAtRandom();
+
+		if (chosenObstacle)
+		{
+			//Tell the battle pawn to move over the chosenObstacle
+			ABattlePawn* btlPawn = Cast<ABattlePawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+			if (btlPawn)
+			{
+				btlPawn->LockOnActor(this, chosenObstacle);
+			}
+		}
+		else
+		{
+			SpawnItems();
+		}
+	}
+	else //Just being cautious
+	{
+		SpawnItems();
+	}
+}
+
+void ABattleCrowd::DestroyObstacle()
+{
+	FTimerHandle endHandle;
+	FVector spawnLoc = chosenObstacle->GetActorLocation();
+	spawnLoc.Z += 600.0f;
+	//First check if the obstacle is an elemental hazard
+	AElementalHazard* hazard = Cast<AElementalHazard>(chosenObstacle);
+	if (hazard)
+	{
+		int projIndex = PickProjectileBasedOnHazardCurrentState(hazard->GetCurrentState());
+		if (projIndex >= 0 && projIndex < crowdProjectiles.Num())
+		{
+			currentNumOfObstaclesDestroyed++;
+			GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[projIndex], spawnLoc, FRotator::ZeroRotator);
+			GetWorld()->GetTimerManager().SetTimer(endHandle, this, &ABattleCrowd::EndPhase, 4.0f, false);
+		}
+		else
+		{
+			SpawnItems(); //We couldn't find a suitable action, so just spawn items
+		}
+	}
+	else //If it's not a hazard, spawn the first projectile above the obstacle
+	{
+		currentNumOfObstaclesDestroyed++;
+		GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[0], spawnLoc, FRotator::ZeroRotator);
+		GetWorld()->GetTimerManager().SetTimer(endHandle, this, &ABattleCrowd::EndPhase, 4.0f, false);
+	}
+
+	chosenObstacle = nullptr;
+
+
+}
+
+void ABattleCrowd::BattlePawnHasFinishedMoving()
+{
+	FTimerHandle actionHandle;
+	GetWorld()->GetTimerManager().SetTimer(actionHandle, this, &ABattleCrowd::DestroyObstacle, 1.0f, false);
 }
 
 void ABattleCrowd::SpawnItems()
@@ -176,25 +272,27 @@ void ABattleCrowd::SpawnItems()
 		tileChoice = FMath::RandRange(0, highlightedTiles_.Num() - 1);
 		if (highlightedTiles_[tileChoice])
 		{
-			if (!highlightedTiles_[tileChoice]->GetOccupied())
+			if (!highlightedTiles_[tileChoice]->GetOccupied() && highlightedTiles_[tileChoice]->GetTraversable())
 			{
 				FVector loc = highlightedTiles_[tileChoice]->GetActorLocation();
 				loc.Z += 50.0f;
 				if (crowdItems[itemChoice])
 				{
 					ACrowdItem* item_ =GetWorld()->SpawnActor<ACrowdItem>(crowdItems[itemChoice], loc, FRotator::ZeroRotator);
-					spawnedItems.Push(item_);
-					item_->SetBtlAndCrdManagers(btlManager, this);
+					if (item_)
+					{
+						spawnedItems.Push(item_);
+						item_->SetBtlAndCrdManagers(btlManager, this);
+					}
 				}
 			}
 		}
 	}
 
-	if (btlManager)
-		btlManager->NextPhase();
+	EndPhase();
 }
 
-void ABattleCrowd::SpawnItemsAtLoc_Implementation(FVector loc_)
+void ABattleCrowd::SpawnItemsAtLoc(FVector loc_)
 {
 	ACrowdItem* item_ = GetWorld()->SpawnActor<ACrowdItem>(crowdItems[1], loc_, FRotator::ZeroRotator);
 	spawnedItems.Push(item_);
@@ -379,4 +477,54 @@ void ABattleCrowd::UnElect(bool champ_)
 bool ABattleCrowd::GetPermaStatus()
 {
 	return bPermaChampion;
+}
+
+
+void ABattleCrowd::EndPhase()
+{
+	if (btlManager)
+		btlManager->NextPhase();
+}
+
+int ABattleCrowd::PickProjectileBasedOnHazardCurrentState(CurrentElemntalStat state_)
+{
+	int chance = 0;
+	switch (state_)
+	{
+	case CurrentElemntalStat::NONE:
+	case CurrentElemntalStat::PARALYSIS:
+	case CurrentElemntalStat::EXPLOSION:
+	case CurrentElemntalStat::STEAM:
+		return -1;
+
+	case CurrentElemntalStat::OIL:
+		return EFFECT_BURN; //Can only use fire on oil
+	case CurrentElemntalStat::WATER:
+		//Water can either be "burned" "frozen" or "electrified"
+		chance = FMath::RandRange(0, 99);
+
+		if (chance >= 0 && chance < 33)
+			return EFFECT_BURN;
+		else if (chance >= 33 && chance < 66)
+			return EFFECT_FREEZE - 1;//FREEZE is 5, the array's max size is 4. There was a mix up here cause bleeding is 4, and it should've been 5 but I don't want to go change the UI to accomodate that so 4 it is
+		else
+			return EFFECT_PARALYSIS;
+
+	case CurrentElemntalStat::POISON:
+		return EFFECT_BURN;
+
+	case CurrentElemntalStat::FIRE:
+
+		chance = FMath::RandRange(0, 100);
+
+		if (chance >= 0 && chance < 50)
+			return EFFECT_FREEZE - 1;
+		else
+			return EFFECT_POISON;
+
+	case CurrentElemntalStat::FROZEN:
+		return EFFECT_BURN;
+	default:
+		return -1;
+	}
 }

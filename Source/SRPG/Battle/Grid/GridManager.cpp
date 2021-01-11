@@ -145,7 +145,7 @@ void AGridManager::UpdateCurrentTile(ATile* tile_, int rowSpeed_, int depth_,int
 
 void AGridManager::HighlightTiles(int rowSpeed_, int depth_, int index_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Highlight Tiles Index %d"), index_);
+	//UE_LOG(LogTemp, Warning, TEXT("Highlight Tiles Index %d"), index_);
 	int localDepth = depth_;
 	columnOffset = tileIndexInColumn - ConvertRowTocolumn(tileIndexInRows);
 	//Rows going upwards

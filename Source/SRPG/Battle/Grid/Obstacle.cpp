@@ -17,6 +17,7 @@ AObstacle::AObstacle()
 
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = root;
+	root->SetMobility(EComponentMobility::Static);
 
 	mesh = CreateDefaultSubobject<UDestructibleComponent>(TEXT("Mesh"));
 	mesh->SetupAttachment(root);
@@ -82,8 +83,6 @@ void AObstacle::DelayedDestroy()
 	//Tell the obstacle manager that you're done
 	if (obstacleManager)
 		obstacleManager->RemoveObstacle(this);
-	else
-		Destroy();
 }
 
 bool AObstacle::IsAnyOfMyTilesHighlighted(int highlightIndex_)

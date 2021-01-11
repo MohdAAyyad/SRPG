@@ -308,27 +308,6 @@ void ABattleController::HandleMousePress()
 
 				}
 			}
-			else
-			{
-				targetTile = Cast<ATile>(hit.Actor);
-				if (targetTile)
-				{
-					FVector loc = targetTile->GetActorLocation();
-					loc.Z += 50.0f;
-					if (battlePawn)
-					{
-						battlePawn->SpawnItems(btlManager, loc);
-					}
-				}
-				//else
-				//{
-				//	AGridCharacter* gchar = Cast<AGridCharacter>(hit.Actor);
-				//	if (gchar)
-				//	{
-				//		gchar->Selected();
-				//	}
-				//}
-		    }
 		}
 	}
 }

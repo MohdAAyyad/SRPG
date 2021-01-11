@@ -115,7 +115,7 @@ void UDecisionComp::UpdateEnemySkills()
 
 ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Choose tile based on possible offesen actions"));
+	//UE_LOG(LogTemp, Warning, TEXT("Choose tile based on possible offesen actions"));
 
 	//Check skills first. If one of our skills can reach the player, we got the tile
 	//If not or if we don't enough pips, then check regular attacks
@@ -135,11 +135,11 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleOffenseActions(ATile* myTile_)
 	movementTiles = gridManager->GetHighlightedTiles();
 	gridManager->ClearHighlighted();
 
-	UE_LOG(LogTemp, Warning, TEXT("offsenseSkills.Num() %d"), offsenseSkills.Num());
-	UE_LOG(LogTemp, Warning, TEXT("statsComp->GetStatValue(STAT_PIP) %d"), statsComp->GetStatValue(STAT_PIP));
-	UE_LOG(LogTemp, Warning, TEXT("offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip %d"), offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip);
+	//UE_LOG(LogTemp, Warning, TEXT("offsenseSkills.Num() %d"), offsenseSkills.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("statsComp->GetStatValue(STAT_PIP) %d"), statsComp->GetStatValue(STAT_PIP));
+	//UE_LOG(LogTemp, Warning, TEXT("offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip %d"), offsenseSkills[offenseSkillWithTheMaxRangeIndex].pip);
 
-	UE_LOG(LogTemp, Warning, TEXT("bCanUseSkill %d"), bCanUseSkill);
+	//UE_LOG(LogTemp, Warning, TEXT("bCanUseSkill %d"), bCanUseSkill);
 
 	if (offsenseSkills.Num() > 0)
 	{
@@ -260,13 +260,13 @@ ATile* UDecisionComp::ChooseTileBasedOnPossibleSupportActions(ATile* myTile_)
 void UDecisionComp::FindDefensiveSkillThatUpdatesThisStatAndHasTheHighestRange(int statIndex_, int currentPips_)
 {
 	int maxRange = FLT_MIN;
-	UE_LOG(LogTemp, Warning, TEXT("statindex_ %d"), statIndex_);
+	//UE_LOG(LogTemp, Warning, TEXT("statindex_ %d"), statIndex_);
 	for (int i = 0; i < defenseSkills.Num(); i++)
 	{
 		//Get the skill that matches the stat we're looking for, has the highest range, and usable
 		if (defenseSkills[i].statIndex == statIndex_ && defenseSkills[i].rge > maxRange && defenseSkills[i].pip <= currentPips_)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("defenseSkills[i].statIndex %d"), defenseSkills[i].statIndex);
+			//UE_LOG(LogTemp, Warning, TEXT("defenseSkills[i].statIndex %d"), defenseSkills[i].statIndex);
 			defenseSkillWithTheMaxRangeIndex = i;
 		}
 	}
@@ -278,7 +278,7 @@ bool UDecisionComp::CheckIfTargetIsInRangeOfSkill(AGridManager* grid_, class UPa
 	grid_->ClearHighlighted();
 	if (currentTarget)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Got a current target inside CheckIfTargetIsInRangeOfSkill "));
+		//UE_LOG(LogTemp, Warning, TEXT("Got a current target inside CheckIfTargetIsInRangeOfSkill "));
 		if (offense_)
 		{
 			grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
@@ -353,7 +353,7 @@ bool UDecisionComp::CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* gr
 void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 	TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Picking attack based on least range"));
+	//UE_LOG(LogTemp, Warning, TEXT("Picking attack based on least range"));
 	if (statsComp_->GetStatValue(STAT_WRS) <= offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge)
 	{
 		//Find an non-occupied range tile
@@ -366,7 +366,7 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 		}
 		if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Yeah went with regular attack"));
+			//UE_LOG(LogTemp, Warning, TEXT("Yeah went with regular attack"));
 			//Reset skills first
 			*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
 		}
@@ -393,8 +393,8 @@ void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_
 		}
 	}
 
-	if(*resultTile_)
-		UE_LOG(LogTemp, Warning, TEXT("Got the tile based on least range"));
+	//if(*resultTile_)
+		//UE_LOG(LogTemp, Warning, TEXT("Got the tile based on least range"));
 }
 
 

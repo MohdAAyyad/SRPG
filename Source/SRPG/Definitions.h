@@ -270,6 +270,10 @@
 #define BTL_ACT_CHG_ENM 6
 #endif
 
+#ifndef BTLPAWN_SPD
+#define BTLPAWN_SPD 600.0f;
+#endif
+
 #pragma endregion
 
 #pragma region Crowd

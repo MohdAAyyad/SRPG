@@ -33,12 +33,15 @@ public:
 
 	void ATurnHasPassed(int turnType_) override;
 
+	CurrentElemntalStat GetCurrentState();
+
 protected:
 
 	int turnsSinceStateChanged;
 	int turnThatStatChangeOccuredIn;
 	bool bDying;
 	bool bShrinkingMesh;
+	float delayUntilDead;
 	class UParticleSystemComponent* currentParticles;
 	FVector particleLocation;
 
@@ -58,5 +61,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		CurrentElemntalStat currentStat;
+
 	
 };

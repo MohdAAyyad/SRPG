@@ -33,6 +33,7 @@ AElementalHazard::AElementalHazard():AObstacle()
 	staticMesh->SetCollisionProfileName("OverlapAll");
 
 	bShrinkingMesh = false;
+	delayUntilDead = 2.0f;
 	
 }
 
@@ -96,6 +97,9 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 	//Switch state according to the current and incoming status effects
 	//Turn off collider and turn it back on to detect any characters on top of it
 
+	//If we have particles already, that means we're changing the state, so we should destroy the original one first
+	if (currentParticles)
+		currentParticles->DestroyComponent();
 	switch (currentStat)
 	{
 		case CurrentElemntalStat::OIL:
@@ -138,7 +142,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					turnsSinceStateChanged = 0;
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
 
 
 			}
@@ -203,7 +207,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					}
 					//Give the explosion some time to play out then destroy the object
 					FTimerHandle timeToDestroyHandle;
-					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
 				}
 
 			}
@@ -224,7 +228,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					turnsSinceStateChanged = 0;
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
 
 			}
 			else if (statusEffect_ == EFFECT_POISON)
@@ -246,7 +250,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 
 					//Give the explosion some time to play out then destroy the object
 					FTimerHandle timeToDestroyHandle;
-					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
 				}
 			}
 			break;
@@ -264,7 +268,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					turnsSinceStateChanged = 0;
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 3.0f, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
 
 			}
 			break;
@@ -291,7 +295,8 @@ void AElementalHazard::DelayedDestroy()
 	//Decrease the size of the particle effect until it is very small then destroy it if the current state is not none or explosion. Otherwise, just get destroyed
 	if (currentStat == CurrentElemntalStat::EXPLOSION || currentStat == CurrentElemntalStat::STEAM || currentStat == CurrentElemntalStat::NONE)
 	{
-		Destroy(this);
+		if (obstacleManager)
+			obstacleManager->RemoveObstacle(this);
 	}
 	else
 	{
@@ -357,4 +362,9 @@ void AElementalHazard::ATurnHasPassed(int turnType_)
 			DelayedDestroy();
 		}
 	}
+}
+
+CurrentElemntalStat AElementalHazard::GetCurrentState()
+{
+	return currentStat;
 }
