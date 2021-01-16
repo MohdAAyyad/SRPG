@@ -76,9 +76,6 @@ protected:
 		class ABattleCrowd* crdManager;
 
 	UPROPERTY(EditAnywhere, Category = "Emitters")
-		TArray<UParticleSystem*> skillEmitters;
-
-	UPROPERTY(EditAnywhere, Category = "Emitters")
 		TArray<UParticleSystem*> weaponEmitters;
 
 	UPROPERTY(EditAnywhere, Category = "Obstacles")
@@ -92,6 +89,8 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite) //Checked by the UI to play phase animation
 		bool bHasUpdatedPhase;
+	UPROPERTY(BlueprintReadWrite) //Checked by the UI to play hub events animation
+		TArray<int> hubEvents;
 
 	class ABattleController* btlCtrl;
 

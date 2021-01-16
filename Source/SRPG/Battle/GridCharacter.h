@@ -93,6 +93,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Skill") //Used by the UI
 		FSkillTableStruct chosenSkill;
+	UPROPERTY(BlueprintReadOnly,EditAnywhere, Category = "Skill")
+		TArray<UParticleSystem*> inAnimationSkillEmitters; //Called by the animation instance to play particles specific for each grid character
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Skill")
+		TArray<UParticleSystem*> onTargetskillEmitters; //Spawned on the target when activating the skills
 
 	//Every turn a character can move and do an action. They can move as much as they want until they do an action.
 	//If they do an action before moving, they can still move once.
@@ -103,6 +108,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 		TArray<TSubclassOf<class AWeaponBase>> weaponMeshes;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Weapon")
+		TArray<TSubclassOf<class AProjectileGridCharacter>> projectiles;
+
+	TArray <AWeaponBase*> equippedWeapons;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -187,5 +198,8 @@ public:
 
 protected:
 	virtual void AddEquipmentStats(int tableIndex_); 
+
+	UFUNCTION(BlueprintCallable)
+		void SpawnProjectile(int index_, FVector spawnLoc_); //Called from anim bp
 
 };

@@ -192,7 +192,7 @@ void ABattleManager::EndDeployment()
 
 	if (changeStatsCheck == CHG_STAT_PLY)
 	{
-		phase = BTL_ACT_CHG_PLY; //Used by the UI
+		hubEvents.Push(CHG_STAT_PLY); //Used by the UI
 		UE_LOG(LogTemp, Warning, TEXT("PLY"));
 	}
 
@@ -206,7 +206,7 @@ void ABattleManager::EndDeployment()
 	if (changeStatsCheck == CHG_STAT_ENM) //Check if the enemies have a changeStatCheck
 	{
 		aiManager->TellEnemiesToCheckChangedStats();
-		phase = BTL_ACT_CHG_ENM; //Needed for UI indicators
+		hubEvents.Push(CHG_STAT_ENM); //Needed for UI indicators
 		UE_LOG(LogTemp, Warning, TEXT("ENM"));
 	}
 
@@ -218,7 +218,7 @@ void ABattleManager::EndDeployment()
 	else //Otherwise, delay the next phase a bit
 	{
 		FTimerHandle nextPhaseHandle;
-		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 3.0f, false);
 
 		Intermediate::GetInstance()->ResetChangeStats(); //Reset the values
 	}
@@ -329,14 +329,6 @@ void ABattleManager::UpdatePlayerEXP()
 	{
 		if (deployedUnits[i])
 			deployedUnits[i]->UpdateCurrentEXP();
-	}
-}
-
-void ABattleManager::SpawnSkillEmitter(FVector loc_, int emitterIndex_)
-{
-	if (emitterIndex_ >= 0 && emitterIndex_ < skillEmitters.Num())
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), skillEmitters[emitterIndex_], loc_, FRotator::ZeroRotator);
 	}
 }
 

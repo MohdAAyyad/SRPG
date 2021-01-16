@@ -36,6 +36,7 @@
 #include "ExternalFileReader/FighterTableStruct.h"
 #include "Weapons/WeaponBase.h"
 #include "Grid/Obstacle.h"
+#include "ProjectileGridCharacter.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -155,6 +156,7 @@ void AGridCharacter::BeginPlay()
 			FName weaponSocketName = TEXT("WeaponSocket");
 			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[0]);
 			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocketName);
+			equippedWeapons.Push(weapon);
 		}
 	}
 
@@ -165,6 +167,7 @@ void AGridCharacter::BeginPlay()
 			FName shieldSocketName = TEXT("ShieldSocket");
 			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[1]);
 			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, shieldSocketName);
+			equippedWeapons.Push(weapon);
 		}
 	}
 
@@ -816,4 +819,15 @@ void AGridCharacter::ResetActionTargets()
 {
 	if(actionTargets.Num() > 0)
 		actionTargets.Empty();
+}
+
+void AGridCharacter::SpawnProjectile(int index_, FVector spawnLoc_)
+{
+	if (index_ >= 0 && index_ < projectiles.Num())
+	{
+		if (projectiles[index_])
+		{ 
+			GetWorld()->SpawnActor<AProjectileGridCharacter>(projectiles[index_], spawnLoc_, GetActorRotation());
+		}
+	}
 }

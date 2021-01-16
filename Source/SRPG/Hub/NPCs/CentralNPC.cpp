@@ -218,7 +218,7 @@ void ACentralNPC::SetChanceOfSuccess(int chance_)
 bool ACentralNPC::IsActivityAffordable()
 {
 	// see if we can both afford the money cost and the time cost
-	if (Intermediate::GetInstance()->GetCurrentMoney() - moneyCost > 0 && hubManager->GetCurrentTimeSlotsCount() > timeCost && spentUnits == unitCost)
+	if (Intermediate::GetInstance()->GetCurrentMoney() - moneyCost > 0 && hubManager->GetCurrentTimeSlotsCount() >= timeCost && spentUnits == unitCost)
 	{
 		Intermediate::GetInstance()->SpendMoney(moneyCost);
 		return true;

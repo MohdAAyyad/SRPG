@@ -26,6 +26,8 @@
 #include "SimpleDecisionComp.h"
 #include "AssasinDecisionComp.h"
 #include "SupportDecisionComp.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Weapons/WeaponBase.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -483,8 +485,9 @@ void AEnemyBaseGridCharacter::ActivateSkillAttack()
 					chosenSkill.statusEffect, this, crit_);
 
 				//Tell the battlemanager to spawn the emitter on the action target
-				if (btlManager)
-					btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
+				if (chosenSkill.emitterIndex >= 0 && chosenSkill.emitterIndex < onTargetskillEmitters.Num())
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), onTargetskillEmitters[chosenSkill.emitterIndex], actionTargets[i]->GetActorLocation(), FRotator::ZeroRotator);
+
 
 
 				if (statsComp->AddTempCRD(CRD_SKL))
@@ -726,6 +729,12 @@ void AEnemyBaseGridCharacter::GridCharReatToElemental(float damage_, int statusE
 
 			if (animInstance)
 				animInstance->DeathAnim();
+
+			for (int i =0;i< equippedWeapons.Num();i++)
+			{
+				if (equippedWeapons[i])
+					equippedWeapons[i]->Destroy();
+			}
 		}
 
 		//TODO
@@ -769,6 +778,12 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 			if (animInstance)
 				animInstance->DeathAnim();
 
+			for (int i = 0; i < equippedWeapons.Num(); i++)
+			{
+				if (equippedWeapons[i])
+					equippedWeapons[i]->Destroy();
+			}
+
 
 			//Handle champion/villain death
 			switch (championIndex)
@@ -786,6 +801,7 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
 				break;
 			}
+
 		}
 	}
 	else
@@ -795,6 +811,12 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 
 		if (animInstance)
 			animInstance->DeathAnim();
+
+		for (int i = 0; i < equippedWeapons.Num(); i++)
+		{
+			if (equippedWeapons[i])
+				equippedWeapons[i]->Destroy();
+		}
 	}
 }
 
@@ -832,6 +854,11 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 			if (animInstance)
 				animInstance->DeathAnim();
 
+			for (int i = 0; i < equippedWeapons.Num(); i++)
+			{
+				if (equippedWeapons[i])
+					equippedWeapons[i]->Destroy();
+			}
 
 			//Handle champion/villain death
 			switch (championIndex)
