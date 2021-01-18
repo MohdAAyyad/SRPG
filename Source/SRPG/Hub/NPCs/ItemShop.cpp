@@ -30,7 +30,7 @@ Money check is always handled in the blueprints because we need to give the play
 
 void AItemShop::BuyItem(int itemId_, int amountToBuy_, int price_)
 {
-	Intermediate::GetInstance()->SpendMoney(price_ * amountToBuy_);
+	Intermediate::GetInstance()->SpendShards(price_ * amountToBuy_);
 	if (fileReader)
 	{
 		fileReader->AddOwnedValueItemTable(0, itemId_, amountToBuy_);
@@ -40,7 +40,7 @@ void AItemShop::BuyItem(int itemId_, int amountToBuy_, int price_)
 
 void AItemShop::BuyEquipment(int equipmentIndex_, int equipId_, int amountToBuy_, int price_)
 {
-	Intermediate::GetInstance()->SpendMoney(price_ * amountToBuy_);
+	Intermediate::GetInstance()->SpendShards(price_ * amountToBuy_);
 	int tableIndex = equipmentIndex_ + 1;
 	if (fileReader)
 	{

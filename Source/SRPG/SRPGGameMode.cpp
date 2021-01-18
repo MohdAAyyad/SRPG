@@ -6,7 +6,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-#include "Networking/SRPGGameState.h"
 
 ASRPGGameMode::ASRPGGameMode()
 {
@@ -19,8 +18,6 @@ ASRPGGameMode::ASRPGGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-
-	GameStateClass = ASRPGGameState::StaticClass();
 }
 
 void ASRPGGameMode::SwitchLevel(FName levelName_)

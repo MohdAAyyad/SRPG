@@ -127,7 +127,7 @@ void ABattlePawn::MoveUpDown(float rate_)
 	if (!bLockedOnToCharacter && !bLockedOnToStaticActor)
 	{
 		FVector loc = GetActorLocation();
-		loc.X += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
+		loc.X += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }
@@ -136,7 +136,7 @@ void ABattlePawn::MoveRightLeft(float rate_)
 	if (!bLockedOnToCharacter && !bLockedOnToStaticActor)
 	{
 		FVector loc = GetActorLocation();
-		loc.Y += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
+		loc.Y += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }

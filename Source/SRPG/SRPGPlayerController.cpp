@@ -68,6 +68,8 @@ void ASRPGPlayerController::BeginPlay()
 
 	shouldMove = false;
 	radius = 100.0f;
+
+	SetInputMode(FInputModeGameAndUI());
 }
 
 void ASRPGPlayerController::PlayerTick(float DeltaTime)

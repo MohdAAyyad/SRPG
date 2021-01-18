@@ -18,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UnrealNetwork.h"
 #include "Grid/ObstaclesManager.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -32,11 +33,13 @@ ABattleManager::ABattleManager()
 	widgetComp->SetupAttachment(root);
 	widgetComp->SetVisibility(false);
 	
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
 	totalNumberOfPhasesElapsed = 1;
 	indexOfSelectedFighterInSelectedFighters = 0;
 
 	bBattleHasEnded = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -47,11 +50,11 @@ void ABattleManager::BeginPlay()
 
 	if (ctrl)
 		ctrl->SetBattleManager(this);
-	if (widgetComp && HasAuthority())
+	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->AddToViewport();
 	if (aiManager)
 		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
-	if (gridManager && HasAuthority())
+	if (gridManager)
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 
 
@@ -153,8 +156,6 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
 	if (bpidOfUnitToBeDeployedNext != -1)
 	{
-		if (!HasAuthority())
-			UE_LOG(LogTemp, Warning, TEXT("YELLLOOOOWWWW"));
 		numberOfUnitsDeployed++;
 		tileLoc_.Z += 50.0f;
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
@@ -168,7 +169,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			deployedUnits.Push(unit);
 			unit->bpID = bpidOfUnitToBeDeployedNext;
 		}
-		if (widgetComp && HasAuthority())
+		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
 		deployedFightersIndexes.Push(indexOfSelectedFighterInSelectedFighters);
@@ -311,15 +312,26 @@ void ABattleManager::EndBattle(bool victory_)
 		FTimerHandle timeToUpdateExpHandle;
 		float timeToUpdateEXP = 0.7f;
 		GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &ABattleManager::UpdatePlayerEXP, timeToUpdateEXP, false);
+
+		if (fileReader)
+		{
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			Intermediate::GetInstance()->Victory(dayInfo.moneyReward, dayInfo.shardsReward + deployedUnits.Num() * BTL_SHRD_RWRD_PER_UNIT);
+		}
 	}
 	else
 	{
 		//End on a defeat
 		if (EndWidgets[1])
 			widgetComp->SetWidgetClass(EndWidgets[1]);
+
+		if (fileReader)
+		{
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
+		}
 		
 	}
-	if(HasAuthority())
 	widgetComp->GetUserWidgetObject()->AddToViewport();
 }
 

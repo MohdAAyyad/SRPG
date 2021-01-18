@@ -263,7 +263,11 @@
 #endif
 
 #ifndef BTLPAWN_SPD
-#define BTLPAWN_SPD 600.0f;
+#define BTLPAWN_SPD 600.0f
+#endif
+
+#ifndef BTL_SHRD_RWRD_PER_UNIT //Shard reward per surviving unit
+#define BTL_SHRD_RWRD_PER_UNIT 5
 #endif
 
 #pragma endregion

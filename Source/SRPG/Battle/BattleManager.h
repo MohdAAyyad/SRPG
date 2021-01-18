@@ -46,6 +46,9 @@ protected:
 	
 	int numberOfUnitsDeployed;
 
+	UPROPERTY(EditAnywhere, Category = "File Reader")
+		class UExternalFileReader* fileReader;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 		class UWidgetComponent* widgetComp;

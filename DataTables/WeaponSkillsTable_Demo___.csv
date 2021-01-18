@@ -1,17 +1,17 @@
 ,name,description,weaponIndex,value,pip,atk,inti,crit,hit,levelToUnlock,fls,rge,rows,depths,animationIndex,statusEffect,emitterIndex,statIndex,EquipmentSkillsIndex,Pure
 0,Ki punch,Gather your ki in your fist and unleash it,1,10,1,0.2,0,2,5,1,10,3,1,0,0,0,0,0,0,0
 1,Uppercut,A simple yet effective uppercut,1,15,2,0.3,0,3,6,2,15,3,1,0,0,0,0,0,1,0
-2,Whirlwind kick,Ride the wind for a strong kick,1,15,2,0.3,0,2,6,3,15,4,2,2,0,0,0,0,1,0
-3,Flame punch,Turn your ki into fire and focus it for a quick KO,1,20,3,0.4,0,4,7,4,20,4,1,0,0,1,0,0,0,0
+2,Whirlwind kick,Ride the wind for a strong kick,1,15,2,0.3,0,2,6,3,15,4,2,2,0,0,0,0,0,0
+3,Flame punch,Turn your ki into fire and focus it for a quick KO,1,20,3,0.4,0,4,7,4,20,4,1,0,0,1,0,0,1,0
 4,Heavy slash,A heavy slash that does moderate damage,2,10,1,0.1,0,1,5,1,10,3,1,0,0,0,0,0,0,0
-5,Thunder slash,Coat your sword with lightning and slash your foes,2,15,2,0.1,0.1,1,6,2,15,3,1,0,0,2,0,0,0,0
+5,Thunder slash,Coat your sword with lightning and slash your foes,2,15,2,0.1,0.1,1,6,2,15,3,1,0,0,2,0,0,1,0
 6,Fierce stab,Rain arrows on your foes,2,20,3,0.2,0,3,6,3,15,4,1,0,0,4,0,0,0,1
-7,Cutter,Unleash a slash that cuts through 3 enemies,2,15,3,0.3,0,2,7,4,20,3,1,1,0,4,0,0,0,0
+7,Cutter,Unleash a slash that cuts through 3 enemies,2,15,3,0.3,0,2,7,4,20,3,1,1,0,4,0,0,1,0
 8,Fireball,Shoot a fire ball to burn your foes,3,10,1,0,0.1,1,5,1,10,4,1,0,0,1,0,0,0,0
-9,Slow,Reduces the speed of one target,3,2,1,0,0.2,0,1000,2,5,4,1,0,0,6,0,0,0,1
+9,Slow,Reduces the speed of one target,3,2,1,0,0.2,0,1000,2,5,4,1,0,0,6,0,0,1,1
 10,Lightning strike,Summon lightning to electrify your foes,3,20,2,0,0.3,2,6,3,20,5,1,1,0,2,0,0,0,0
-11,Disintegration,A powerful magic orb that disintegrates foes,3,30,3,0,0.4,3,7,4,15,5,1,0,0,1,0,0,0,0
+11,Disintegration,A powerful magic orb that disintegrates foes,3,30,3,0,0.4,3,7,4,15,5,1,0,0,1,0,0,1,0
 12,Piercing Arrow,Unleash a powerful arrow that pierces armor. Causes bleeding.,4,15,1,0.1,0,3,6,1,10,4,1,0,0,4,0,0,0,1
-13,Double shot,Shoot three targets at one time,4,5,2,0.2,0,2,6,2,15,4,1,1,0,0,0,0,0,1
+13,Double shot,Shoot three targets at one time,4,5,2,0.2,0,2,6,2,15,4,1,1,0,0,0,0,1,1
 14,Poison arrow,Shoot an arrow that poisons foes,4,5,2,0.1,0.1,1,8,3,10,3,1,0,0,3,0,0,0,0
-15,Arrow Rain,Rain arrows on your foes,4,15,3,0.2,0,2,8,4,20,3,3,2,0,0,0,0,0,0
+15,Arrow Rain,Rain arrows on your foes,4,15,3,0.2,0,2,8,4,20,3,3,2,0,0,0,0,1,0

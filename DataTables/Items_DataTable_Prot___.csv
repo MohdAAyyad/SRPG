@@ -1,0 +1,5 @@
+,ID,Name,Description,Value,StatIndex,Owned,Level,Price
+0,0,Minor Health Potion,Restores 20 HP,20,0,0,1,1
+1,1,Mega Health potion,Restores 50 HP,50,0,0,4,4
+2,2,Minor Pip Potion,Restores 2 Pips,2,1,0,1,2
+3,3,Mega Pip potion,Restores 4 Pips,4,1,0,4,6

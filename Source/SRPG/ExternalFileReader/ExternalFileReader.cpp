@@ -501,7 +501,7 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableInde
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
 	int skillsAddedSoFar = 0;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
+	rowNames = tables[tableIndex_]->GetRowNames();
 
 	for (auto n : rowNames)
 	{
@@ -1124,5 +1124,31 @@ void UExternalFileReader::SellItem(int tableIndex_, int itemID_, int amount_)
 			}
 		}
 	}
+}
+
+
+FDayTableStruct UExternalFileReader::GetCurrentDayInfo(int tableIndex_,int dayId_)
+{
+	static const FString contextString(TEXT("Getting current day info"));
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			rowNames = tables[tableIndex_]->GetRowNames();
+
+			for (auto n : rowNames)
+			{
+				FDayTableStruct* row = tables[tableIndex_]->FindRow<FDayTableStruct>(n, contextString, true);
+
+				if (row->id == dayId_)
+				{
+					return *row;
+				}
+			}
+		}
+	}
+
+	return FDayTableStruct();
 }
 

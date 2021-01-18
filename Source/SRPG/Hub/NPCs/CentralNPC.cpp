@@ -298,7 +298,7 @@ void ACentralNPC::SimulateActivity()
 				// augment the money of the player, the amount is arbitrary but we can set it later
 				// this case is specifically for Russian Roulette 
 				FActivityDialogueTableStruct endReward = fileReader->GetActivityEndDialogue(activityIndex, 0);
-				Intermediate::GetInstance()->AddMoney(Intermediate::GetInstance()->GetCurrentMoney() * (endReward.rewardMoneyPercent / 100));
+				Intermediate::GetInstance()->SpendMoney(- Intermediate::GetInstance()->GetCurrentMoney() * (endReward.rewardMoneyPercent / 100));
 				UE_LOG(LogTemp, Warning, TEXT("Money Added!"));
 			}
 				break;

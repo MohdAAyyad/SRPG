@@ -53,6 +53,9 @@ void ATransitionToBattle::BeginPlay()
 		box->OnComponentBeginOverlap.AddDynamic(this, &ATransitionToBattle::OverlapWithPlayer);
 
 	gameMode = Cast<ASRPGGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (fileReader)
+		dayInfo = fileReader->GetCurrentDayInfo(1, Intermediate::GetInstance()->GetCurrentDay());
 	
 }
 
@@ -188,12 +191,7 @@ void ATransitionToBattle::FinalizeFighterSelection(bool online_)
 
 }
 
-void ATransitionToBattle::LookForOnlineSession()
+void ATransitionToBattle::InitiateAReRun()
 {
-
-}
-
-void ATransitionToBattle::JoinAnOnlineSession()
-{
-
+	Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
 }

@@ -10,15 +10,17 @@ Intermediate::Intermediate()
 {
 	maxRosterSize = 20; //Arbitrary number
 	currentRosterSize = 5; //Starts with 5 main characters
-	storyProgress = 0;
+	dayCounter = 0; //Matches the day ID in the tables hence why it's zero. 1 is added to the value when displayed on the UI
 	protagonistLevel = 1;
 	currentMoney = 50000;
+	currentShards = 25;
 	affectedParty = CHG_STAT_NON; //Affected by change stats function call. -1 neither 0 enemy 1 player
 	statIndex = -1;
 	changeCrowdValue = 0.0f;
 	maxDeploymentSize = 10;
 	currentDeploymentSize = 0;
 	latestFighterID = 4;
+	bRewardsWereGiven = false;
 }
 
 Intermediate::~Intermediate()
@@ -33,12 +35,34 @@ Intermediate* Intermediate::GetInstance()
 	return instance.Get();
 }
 
-void Intermediate::Victory() //Adds 1 to the story progress //Called from the battle manager
+void Intermediate::Victory(int moneyReward_, int shardsReward_) //Adds 1 to the day counter //Called from the battle manager
 {
+	currentMoney += moneyReward_;
+	currentShards += shardsReward_;
+	dayCounter++;
+	bRewardsWereGiven = true;
 }
-int Intermediate::GetStoryProgress()
+
+void Intermediate::Defeat(int moneyCompensation_, int shardsCompensation_)
 {
-	return storyProgress;
+	currentMoney += moneyCompensation_;
+	currentShards += shardsCompensation_;
+	dayCounter = 0;
+	bRewardsWereGiven = true;
+}
+int Intermediate::GetCurrentDay()
+{
+	return dayCounter + 1; // Matches the day ID in the tables hence why it's zero-based. 1 is added to the value when displayed on the UI
+}
+
+bool Intermediate::GetRewardsWereGiven()
+{
+	return bRewardsWereGiven;
+}
+
+void Intermediate::ResetRewardsWereGiven()
+{
+	bRewardsWereGiven = false;
 }
 int Intermediate::GetProtagonistLevel()
 {
@@ -71,22 +95,16 @@ int Intermediate::GetCurrentMoney()
 {
 	return currentMoney;
 }
+int Intermediate::GetCurrentShards()
+{
+	return currentShards;
+}
 void Intermediate::AddFighterToSelected(FFighterTableStruct fighter_)
 {
 	if (currentDeploymentSize < maxDeploymentSize)
 	{
 		selectedFighters.Push(fighter_);
 	}
-}
-
-void Intermediate::PutUnitOnHold(int index_)
-{
-
-}
-
-void Intermediate::PlayerUnitsAreRemoved(bool remove_)
-{
-
 }
 TArray<FFighterTableStruct> Intermediate::GetSelectedFighters() //Called by the battle manager
 {
@@ -109,16 +127,17 @@ void Intermediate::SpendMoney(int money_)
 		currentMoney = 0;
 	}
 }
-void Intermediate::AddMoney(int money_)
+
+void Intermediate::SpendShards(int shards_)
 {
-	// if a negative number was input make it positive
-	if (money_ < 0)
+	if (currentShards - shards_ > 0)
 	{
-		money_ *= -1;
+		currentShards -= shards_;
 	}
-
-	currentMoney += money_;
-
+	else
+	{
+		currentShards = 0;
+	}
 }
 
 void Intermediate::SetNextOpponent(FOpponentStruct op_)

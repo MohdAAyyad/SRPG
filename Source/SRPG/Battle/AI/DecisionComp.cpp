@@ -79,6 +79,7 @@ void UDecisionComp::UpdateEnemySkills()
 		{
 			TArray<FSkillTableStruct*> weaponSkills = fileReader->GetOffesniveSkills(0, statsComp->GetStatValue(STAT_WPI), statsComp->GetStatValue(STAT_WSN), statsComp->GetStatValue(STAT_WSI), statsComp->GetStatValue(STAT_LVL));
 			TArray<FSkillTableStruct*> armorSkills = fileReader->GetDefensiveSkills(1, statsComp->GetStatValue(STAT_ARI), statsComp->GetStatValue(STAT_ASN), statsComp->GetStatValue(STAT_ASI), statsComp->GetStatValue(STAT_LVL));
+
 			for (auto w : weaponSkills)
 			{
 				offsenseSkills.Push(*w);
@@ -353,46 +354,48 @@ bool UDecisionComp::CheckIfPlayerIsInRangeOfRegularAttack(class AGridManager* gr
 void UDecisionComp::PickAttackOrSkillBasedOnLeastRange(class AGridManager* grid_, UStatsComponent* statsComp_, class UPathComponent*path_,
 	TArray<ATile*>& movementTiles, TArray<ATile*>& rangeTiles_, ATile** myTile_, ATile** resultTile_)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Picking attack based on least range"));
-	if (statsComp_->GetStatValue(STAT_WRS) <= offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge)
+	if (offenseSkillWithTheMaxRangeIndex >= 0)
 	{
-		//Find an non-occupied range tile
-		for (int i = rangeTiles_.Num() - 1; i > -1; i--)
+		//UE_LOG(LogTemp, Warning, TEXT("Picking attack based on least range"));
+		if (statsComp_->GetStatValue(STAT_WRS) <= offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge)
 		{
-			if (rangeTiles_[i]->GetOccupied())
+			//Find an non-occupied range tile
+			for (int i = rangeTiles_.Num() - 1; i > -1; i--)
 			{
-				rangeTiles_.RemoveAt(i);
+				if (rangeTiles_[i]->GetOccupied())
+				{
+					rangeTiles_.RemoveAt(i);
+				}
+			}
+			if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Yeah went with regular attack"));
+				//Reset skills first
+				*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
+			}
+
+		}
+		else //Do the same for skills. 
+		{
+			grid_->ClearHighlighted();
+			grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
+			rangeTiles_ = grid_->GetHighlightedTiles();
+			grid_->ClearHighlighted();
+
+			//Find a non-occupied range tile
+			for (int i = rangeTiles_.Num() - 1; i > -1; i--)
+			{
+				if (rangeTiles_[i]->GetOccupied())
+				{
+					rangeTiles_.RemoveAt(i);
+				}
+			}
+			if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
+			{
+				*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
 			}
 		}
-		if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Yeah went with regular attack"));
-			//Reset skills first
-			*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
-		}
-		
 	}
-	else //Do the same for skills. 
-	{
-		grid_->ClearHighlighted();
-		grid_->UpdateCurrentTile(currentTarget->GetMyTile(), offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge, offsenseSkills[offenseSkillWithTheMaxRangeIndex].rge + 1, TILE_ENMA, offsenseSkills[offenseSkillWithTheMaxRangeIndex].pure);
-		rangeTiles_ = grid_->GetHighlightedTiles();
-		grid_->ClearHighlighted();
-
-		//Find a non-occupied range tile
-		for (int i = rangeTiles_.Num() - 1; i > -1; i--)
-		{
-			if (rangeTiles_[i]->GetOccupied())
-			{
-				rangeTiles_.RemoveAt(i);
-			}
-		}
-		if (rangeTiles_.Num() > 0) //If there's a non-occupied range tile then return it
-		{
-			*resultTile_ = rangeTiles_[rangeTiles_.Num() - 1];
-		}
-	}
-
 	//if(*resultTile_)
 		//UE_LOG(LogTemp, Warning, TEXT("Got the tile based on least range"));
 }

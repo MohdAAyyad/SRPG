@@ -89,12 +89,6 @@ protected:
 	TArray<TSubclassOf<ANPC>> regularNPCs;
 	UPROPERTY(EditAnywhere)
 	TArray<USkeletalMesh*> meshes;
-	//UPROPERTY(EditAnywhere)
-	//TArray<TSubclassOf<ATournament>> tournamentNPCs;
-	//UPROPERTY(EditAnywhere)
-	//TArray<TSubclassOf<AItemShop>> itemShopNPCs;
-	//UPROPERTY(EditAnywhere)
-	//TArray<TSubclassOf<AFightersShop>> fighterShopNPCs;
 
 	UPROPERTY(EditAnywhere)
 	class ATournament* tournament;
@@ -105,6 +99,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UWidgetComponent* pauseMenuWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UWidgetComponent* generalWidget;
 
 	// initialises at level 2. Used by shops to determine what they can sell.
 	int hubWorldLevel;
@@ -133,9 +130,16 @@ public:
 	bool GetNextIsAStoryMission();
 	int GetHubWorldLevel();
 	UFUNCTION(BlueprintCallable)
-	int GetCurrentTimeSlotsCount();
+		int GetCurrentTimeSlotsCount();
 	UFUNCTION(BlueprintCallable)
-	int GetCurrentMoney();
+		int GetCurrentMoney();
+	UFUNCTION(BlueprintCallable)
+		int GetCurrentShards();
+	UFUNCTION(BlueprintCallable)
+		int GetCurrentDay();
+
+	UFUNCTION(BlueprintCallable)
+		bool CheckForRewards();
 	void UpdateTimeSlots(int value_);
 	void UpdateJournal(bool battle_, FString line_);
 	// how many NPC's to spawn and what type

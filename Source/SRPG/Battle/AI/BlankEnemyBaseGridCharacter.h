@@ -19,14 +19,6 @@ public:
 	void StartEnemyTurn() override;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Equipment")
-		uint32 equippedWeapon;
-	UPROPERTY(EditAnywhere, Category = "Equipment")
-		uint32 equippedArmor;
-	UPROPERTY(EditAnywhere, Category = "Equipment")
-		uint32 equippedAccessory;
-
 	void BeginPlay() override;
-	void AddEquipmentStats(int tableIndex_) override;
 	
 };

@@ -18,7 +18,7 @@ public:
 
 protected:
 
-	int storyProgress; //Determines whether the next fight is a story fight or not. Increased by 1 after every victory.
+	int dayCounter;
 	int protagonistLevel;
 	TArray<FFighterTableStruct> selectedFighters; //The indexes of the fighters that are going to be used in the next battle
 	TArray<int> unitsOnHold; //When the player engages in activities that use units, these units become on hold. If the activity fails, these units are removed from the currentRoster. The array saves the index of the units in the currentRoster array.
@@ -28,6 +28,7 @@ protected:
 	int maxDeploymentSize;
 	int currentDeploymentSize;
 	int currentMoney;
+	int currentShards;
 	FOpponentStruct nextOpponent; //Value is passed on to the battle manager which passes it onto the enemy manager 
 							//to spawn the enemies.Used for enemy stat decrease activities 	
 	int enemyStatDecreaseValue;
@@ -40,10 +41,13 @@ protected:
 	int statIndex = -1;
 	float changeCrowdValue = 0;
 
+	bool bRewardsWereGiven; //Checked the hub world manager general UI on begin play to see if a notification should be played
+
 public:
 
-	void Victory(); //Adds 1 to the story progress //Called from the battle manager
-	int GetStoryProgress();
+	void Victory(int moneyReward_, int shardsReward_); //Adds 1 to the story progress //Called from the battle manager
+	void Defeat(int moneyCompensation_, int shardsCompensation_);
+	int GetCurrentDay();
 	int GetProtagonistLevel();
 	void SetProtagonistLevel(int value_);
 	void UpdateCurrentRosterSize(int value_); //Value_ can be + or -. 
@@ -54,11 +58,12 @@ public:
 	void SetLatestFighterID(int id_);
 	int GetCurrentDeploymentSize();
 	int GetCurrentMoney();
+	int GetCurrentShards();
 	void AddFighterToSelected(FFighterTableStruct fighter_);
 	void ResetSelectedFighters();
 	TArray<FFighterTableStruct> GetSelectedFighters(); //Called by the battle manager
 	void SpendMoney(int money_);
-	void AddMoney(int money_);
+	void SpendShards(int shards_);
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.
 	FOpponentStruct GetNextOpponent(); //Called by enemy manager to know the details of the next opponent.
@@ -66,15 +71,25 @@ public:
 
 	TArray<int>& GetDeadUnits();
 	void PushUnitToDead(int unitId_);
-	void PutUnitOnHold(int index_); //Called from hubplayer or from tournament npc uictrl.
 
-	void PlayerUnitsAreRemoved(bool remove_); //Called from central NPC when activity fails. 
-											  //True means remove the units put on hold. 
-											  //False means return those units to the roster and remove them from the hold array.
 	static Intermediate* GetInstance();
 
 	void ChangeStats(int partyIndex_, int statIndex_);
 	int GetStatsChange(int partyIndex_);
 	int GetAffecteParty();
 	void ResetChangeStats(); //Make sure change stats variables are reset
+
+	bool GetRewardsWereGiven();
+	void ResetRewardsWereGiven();
 };
+
+
+//Add a days counter
+//Add a days table. The table contains day ID, day rewards, max # of players, # of enemies, level of enemies, whether it's a boss fight or not
+//The world level must be equal to the highest level player and must no go down (WL is at 5, player dies, it should stay at 5)
+//Add a notification when the world level changes
+//Add a shard counter
+//Change the item shop to use shards instead of gold
+//Add the ability to get the shards and use them
+//Add the day counter level
+//Add the ability to force a re-run
