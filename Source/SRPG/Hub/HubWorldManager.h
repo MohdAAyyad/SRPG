@@ -88,6 +88,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ANPC>> regularNPCs;
 	UPROPERTY(EditAnywhere)
+	TArray<class ACutscene*> cutscenes;
+	UPROPERTY(EditAnywhere)
 	TArray<USkeletalMesh*> meshes;
 	//UPROPERTY(EditAnywhere)
 	//TArray<TSubclassOf<ATournament>> tournamentNPCs;

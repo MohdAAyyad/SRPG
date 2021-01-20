@@ -90,6 +90,21 @@ FEquipmentTableStruct UExternalFileReader::FindEquipmentTableRow(FName name_, in
 	}
 }
 
+FCutsceneTableStruct UExternalFileReader::FindCutsceneTableRow(FName name_, int index_)
+{
+	static const FString contextString(TEXT("Cutscene Table"));
+	if (tables[index_])
+	{
+		FCutsceneTableStruct* result = tables[index_]->FindRow<FCutsceneTableStruct>(name_, contextString, true);
+		return *result;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Cutscene Table returned NULL"));
+		return FCutsceneTableStruct();
+	}
+}
+
 FFighterTableStruct UExternalFileReader::FindEquippedFighterTableRow(FName name_, int index_)
 {
 	static const FString contextString(TEXT("Equipped Fighters Table"));

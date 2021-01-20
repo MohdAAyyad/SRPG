@@ -12,6 +12,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "../SRPGCharacter.h"
 #include "TimerManager.h"
+#include "Hub/Cutscene.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -54,6 +55,12 @@ void AHubWorldManager::BeginPlay()
 	FTimerHandle timerHandle;
 
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AHubWorldManager::GetPlayerFromController, 1.0f, false);
+
+
+
+	// THIS IS JUST FOR TEST PURPOSES
+
+	//cutscenes[0]->StartCutscene();
 }
 
 // Called every frame

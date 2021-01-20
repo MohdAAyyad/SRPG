@@ -1,0 +1,8 @@
+,Name,Dialogue,TextSpeed,Model1Name,Model2Name,LineNum,ModelAnim1,ModelAnim2
+0,Test1,"Hello, This is a test",0.03,Test1,Test1,6,Idle,Walking
+1,Test2,No... i wouldn't be working if it was a test,0.03,Test1,Test1,6,Idle,Walking
+2,Test1,But you wouldn't know if it worked if there wasn't a test,0.03,Test1,Test1,6,Idle,Walking
+3,Test2,Here's  the thing a test isn't necessary if you understood what the fuck you wrote,0.03,Test1,Test1,6,Idle,Walking
+4,Test1,Here's the thing about that. I never understand what i write,0.03,Test2,Test2,6,Walking,Idle
+5,Test2,That's coool!,0.03,Test2,Test2,6,Walking,Idle
+6,Test1,Look how slow I can talk.....,0.09,Test2,Test2,6,Walking,Idle

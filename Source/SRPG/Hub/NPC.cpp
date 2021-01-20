@@ -185,13 +185,13 @@ void ANPC::Tick(float DeltaTime)
 		FRotator result = UKismetMathLibrary::FindLookAtRotation(npcRot, playerRot);
 
 		FRotator distance = GetActorRotation() - result;
-		if (GetActorRotation().Yaw > result.Yaw + 2)
+		if (GetActorRotation().Yaw > result.Yaw + 10)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Rotating Negative!"));
 			FRotator rot = FRotator(0, -400 * DeltaTime, 0);
 			AddActorLocalRotation(rot);
 		}
-		else if (GetActorRotation().Yaw < result.Yaw - 2)
+		else if (GetActorRotation().Yaw < result.Yaw - 10)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Rotating Positive!"));
 			FRotator rot = FRotator(0, 400 * DeltaTime, 0);
