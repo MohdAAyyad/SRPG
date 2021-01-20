@@ -13,6 +13,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "Kismet/GameplayStatics.h"
 #include "Definitions.h"
+#include "SRPGPlayerController.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -52,6 +53,9 @@ void ATransitionToBattle::BeginPlay()
 		box->OnComponentBeginOverlap.AddDynamic(this, &ATransitionToBattle::OverlapWithPlayer);
 
 	gameMode = Cast<ASRPGGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (fileReader)
+		dayInfo = fileReader->GetCurrentDayInfo(1, Intermediate::GetInstance()->GetCurrentDay());
 	
 }
 
@@ -105,6 +109,12 @@ void ATransitionToBattle::EndDay()
 
 	if (tourney)
 		Intermediate::GetInstance()->SetNextOpponent(tourney->SimulateMatch());
+
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (control)
+	{
+		control->SetInputMode(FInputModeUIOnly());
+	}
 }
 
 void ATransitionToBattle::UpdateRecruitedFighters() //Called when the player collides with the actor
@@ -181,12 +191,7 @@ void ATransitionToBattle::FinalizeFighterSelection(bool online_)
 
 }
 
-void ATransitionToBattle::LookForOnlineSession()
+void ATransitionToBattle::InitiateAReRun()
 {
-
-}
-
-void ATransitionToBattle::JoinAnOnlineSession()
-{
-
+	Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
 }

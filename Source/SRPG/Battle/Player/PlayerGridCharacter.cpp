@@ -29,6 +29,8 @@
 #include "../../ExternalFileReader/ExternalFileReader.h"
 #include "TimerManager.h"
 #include "../Grid/Obstacle.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Weapons/WeaponBase.h"
 
 
 
@@ -61,26 +63,18 @@ void APlayerGridCharacter::EndPlayerTurn()
 
 void APlayerGridCharacter::Selected()
 {
-	if (!HasAuthority())
-	{
-		if (widgetComp)
-			widgetComp->GetUserWidgetObject()->AddToViewport();
-		return;
-	}
-
 	if (btlManager->GetPhase() == BTL_PLY) //Player phase
 	{
-		if (currentState != EGridCharState::FINISHED)
-		{
-			if (widgetComp)
+		if (widgetComp)
+			if(!widgetComp->GetUserWidgetObject()->IsInViewport())
 				widgetComp->GetUserWidgetObject()->AddToViewport();
-		}
 	}
 }
 void APlayerGridCharacter::NotSelected()
 {
-	if(widgetComp->GetUserWidgetObject()->IsInViewport())
-		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	if(widgetComp)
+		if(widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 
 	if (originTile)
 		originTile->GetGridManager()->ClearHighlighted();
@@ -92,7 +86,7 @@ void APlayerGridCharacter::HighlightMovementPath()
 {
 	if (originTile)
 	{
-		currentState = EGridCharState::IDLE;
+		currentState = EGridCharState::MOVING;
 
 		originTile->GetGridManager()->ClearHighlighted();
 
@@ -272,9 +266,9 @@ void APlayerGridCharacter::ActivateSkillAttack()
 					actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled) * critModifier, chosenSkill.statIndex,
 						chosenSkill.statusEffect, this, crit_);
 
-					//Tell the battlemanager to spawn the emitter on the action target
-					if (btlManager)
-						btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
+					//Spawn The skill emitter
+					if(chosenSkill.emitterIndex>=0 && chosenSkill.emitterIndex< onTargetskillEmitters.Num())
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), onTargetskillEmitters[chosenSkill.emitterIndex], actionTargets[i]->GetActorLocation(), FRotator::ZeroRotator);
 
 					//Get CRD_SKL per target hit
 					if (statsComp->AddTempCRD(CRD_SKL))
@@ -296,9 +290,10 @@ void APlayerGridCharacter::ActivateSkillAttack()
 				actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled), chosenSkill.statIndex,
 					chosenSkill.statusEffect, this, false);
 
-				//Tell the battlemanager to spawn the emitter on the action target
-				if (btlManager)
-					btlManager->SpawnSkillEmitter(actionTargets[i]->GetActorLocation(), chosenSkill.emitterIndex);
+				//Spawn The skill emitter
+				if (chosenSkill.emitterIndex >= 0 && chosenSkill.emitterIndex < onTargetskillEmitters.Num())
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), onTargetskillEmitters[chosenSkill.emitterIndex], actionTargets[i]->GetActorLocation(), FRotator::ZeroRotator);
+
 
 				//Get CRD_SKL per target hit
 				if (statsComp->AddTempCRD(CRD_SKL))
@@ -447,6 +442,12 @@ void APlayerGridCharacter::GridCharReatToElemental(float damage_, int statusEffe
 				animInstance->DeathAnim();
 		}
 
+		for (int i = 0; i < equippedWeapons.Num(); i++)
+		{
+			if (equippedWeapons[i])
+				equippedWeapons[i]->Destroy();
+		}
+
 		//TODO
 		//Handle champion and villain situation
 	}
@@ -500,6 +501,11 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 			attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
 			break;
 		}
+		for (int i = 0; i < equippedWeapons.Num(); i++)
+		{
+			if (equippedWeapons[i])
+				equippedWeapons[i]->Destroy();
+		}
 			
 	}
 }
@@ -527,7 +533,8 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 			GetMyTile()->SetOccupied(false);
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
-				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
+				if(TargetedByTheseCharacters[i])
+					TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
 			}
 			Intermediate::GetInstance()->PushUnitToDead(fighterID);
 			attacker_->YouHaveKilledYouTarget(true);
@@ -558,6 +565,12 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 				crdManager->SetPermaChampion(false);
 				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
 				break;
+			}
+
+			for (int i = 0; i < equippedWeapons.Num(); i++)
+			{
+				if (equippedWeapons[i])
+					equippedWeapons[i]->Destroy();
 			}
 		}
 	}
@@ -612,4 +625,9 @@ void APlayerGridCharacter::CheckChangeStats()
 		statsComp->AddToStat(changedStat, static_cast<float>(statsComp->GetStatValue(changedStat))*PLY_IMP_STAT);
 		animInstance->ChangeStats(true);
 	}
+}
+
+ABattleManager* APlayerGridCharacter::GetBattleManager()
+{
+	return btlManager;
 }

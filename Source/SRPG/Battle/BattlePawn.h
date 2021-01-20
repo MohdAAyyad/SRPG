@@ -33,11 +33,15 @@ protected:
 		class UDecalComponent* CursorToWorld;
 
 	class ABattleController* pController;
-	bool bUnderControl;
-	bool bLockedOn;
+	bool bLockedOnToStaticActor;
+	bool bLockedOnToCharacter;
 	AActor* lockedOnTarget;
 	float lockOnRate;
 	float originalFOV;
+	FVector targetDest;
+
+	//Final Destination
+	class ABattleCrowd* btlCrowd;
 
 public:
 	// Called every frame
@@ -47,8 +51,6 @@ public:
 	void MoveRightLeft(float rate_);
 	void Zoom(float rate_);
 	void LockOnActor(AActor* target_);
+	void LockOnActor(ABattleCrowd* btlCrd_, AActor* target_); //A different version used by the battle crowd. We need a ref to the btl crowd because we need to tell it when we've arrived
 	void ResetLock();
-	UFUNCTION(Server, Reliable)
-	void SpawnItems(class ABattleManager* btl_, FVector loc_);
-	void SpawnItems_Implementation(class ABattleManager* btl_, FVector loc_);
 };

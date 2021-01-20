@@ -18,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UnrealNetwork.h"
 #include "Grid/ObstaclesManager.h"
+#include "ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -32,11 +33,13 @@ ABattleManager::ABattleManager()
 	widgetComp->SetupAttachment(root);
 	widgetComp->SetVisibility(false);
 	
+	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
 	totalNumberOfPhasesElapsed = 1;
 	indexOfSelectedFighterInSelectedFighters = 0;
 
 	bBattleHasEnded = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -47,11 +50,11 @@ void ABattleManager::BeginPlay()
 
 	if (ctrl)
 		ctrl->SetBattleManager(this);
-	if (widgetComp && HasAuthority())
+	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->AddToViewport();
 	if (aiManager)
 		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
-	if (gridManager && HasAuthority())
+	if (gridManager)
 		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 
 
@@ -81,46 +84,54 @@ void ABattleManager::NextPhase()
 	{
 
 		phase++;
+		bHasUpdatedPhase = true; //The UI checks this to paly the phase text animation
 
-		if (phase == BTL_ENM)	//Enemy phase
-		{
-			for (int i = 0; i < deployedUnits.Num(); i++)
-			{
-				deployedUnits[i]->EndPlayerTurn();
-			}
-			if (aiManager)
-				aiManager->BeginEnemyTurn();
-		}
-		else if (phase == BTL_CRD)
-		{
-			if (crdManager)
-			{
-				if (totalNumberOfPhasesElapsed == 1)
-				{
-					crdManager->CalculateFavorForTheFirstTime();
-					crdManager->AddCrowdWidgetToViewPort();
-				}
-				crdManager->StartCrowdPhase();
-			}
-		}
-		else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
-		{
-			phase = BTL_PLY;
-			totalNumberOfPhasesElapsed++;
-			for (int i = 0; i < deployedUnits.Num(); i++)
-			{
-				deployedUnits[i]->StartPlayerTurn();
-			}
-		}
-
-		if (btlCtrl)
-			btlCtrl->ResetControlledCharacter();
-
-		//We tell the obstacled maanger
-		if (obstacleManager)
-			obstacleManager->TellObstaclesAPhaseHasPassed(phase);
+		//Adding delay before activating the phase to allow for the UI to do its thing
+		FTimerHandle nextPhaseHandle;
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::PhaseAction, 2.0f, false);
 	}
 			
+}
+
+void ABattleManager::PhaseAction()
+{
+	if (phase == BTL_ENM)	//Enemy phase
+	{
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->EndPlayerTurn();
+		}
+		if (aiManager)
+			aiManager->BeginEnemyTurn();
+	}
+	else if (phase == BTL_CRD)
+	{
+		if (crdManager)
+		{
+			if (totalNumberOfPhasesElapsed == 1)
+			{
+				crdManager->CalculateFavorForTheFirstTime();
+				crdManager->AddCrowdWidgetToViewPort();
+			}
+			crdManager->StartCrowdPhase();
+		}
+	}
+	else if (phase > BTL_CRD) //When the crowd phase ends, go back to the player phase
+	{
+		phase = BTL_PLY;
+		totalNumberOfPhasesElapsed++;
+		for (int i = 0; i < deployedUnits.Num(); i++)
+		{
+			deployedUnits[i]->StartPlayerTurn();
+		}
+	}
+
+	if (btlCtrl)
+		btlCtrl->ResetControlledCharacter();
+
+	//We tell the obstacled maanger
+	if (obstacleManager)
+		obstacleManager->TellObstaclesAPhaseHasPassed(phase);
 }
 void ABattleManager::DeployThisUnitNext(int index_)
 {
@@ -145,8 +156,6 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 	//Actual deployment of characters. Called when the mouses clicks on a deployment tile
 	if (bpidOfUnitToBeDeployedNext != -1)
 	{
-		if (!HasAuthority())
-			UE_LOG(LogTemp, Warning, TEXT("YELLLOOOOWWWW"));
 		numberOfUnitsDeployed++;
 		tileLoc_.Z += 50.0f;
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
@@ -160,7 +169,7 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 			deployedUnits.Push(unit);
 			unit->bpID = bpidOfUnitToBeDeployedNext;
 		}
-		if (widgetComp && HasAuthority())
+		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
 
 		deployedFightersIndexes.Push(indexOfSelectedFighterInSelectedFighters);
@@ -184,7 +193,7 @@ void ABattleManager::EndDeployment()
 
 	if (changeStatsCheck == CHG_STAT_PLY)
 	{
-		phase = BTL_ACT_CHG_PLY; //Used by the UI
+		hubEvents.Push(CHG_STAT_PLY); //Used by the UI
 		UE_LOG(LogTemp, Warning, TEXT("PLY"));
 	}
 
@@ -198,7 +207,7 @@ void ABattleManager::EndDeployment()
 	if (changeStatsCheck == CHG_STAT_ENM) //Check if the enemies have a changeStatCheck
 	{
 		aiManager->TellEnemiesToCheckChangedStats();
-		phase = BTL_ACT_CHG_ENM; //Needed for UI indicators
+		hubEvents.Push(CHG_STAT_ENM); //Needed for UI indicators
 		UE_LOG(LogTemp, Warning, TEXT("ENM"));
 	}
 
@@ -210,7 +219,7 @@ void ABattleManager::EndDeployment()
 	else //Otherwise, delay the next phase a bit
 	{
 		FTimerHandle nextPhaseHandle;
-		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 3.0f, false);
 
 		Intermediate::GetInstance()->ResetChangeStats(); //Reset the values
 	}
@@ -303,15 +312,26 @@ void ABattleManager::EndBattle(bool victory_)
 		FTimerHandle timeToUpdateExpHandle;
 		float timeToUpdateEXP = 0.7f;
 		GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &ABattleManager::UpdatePlayerEXP, timeToUpdateEXP, false);
+
+		if (fileReader)
+		{
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			Intermediate::GetInstance()->Victory(dayInfo.moneyReward, dayInfo.shardsReward + deployedUnits.Num() * BTL_SHRD_RWRD_PER_UNIT);
+		}
 	}
 	else
 	{
 		//End on a defeat
 		if (EndWidgets[1])
 			widgetComp->SetWidgetClass(EndWidgets[1]);
+
+		if (fileReader)
+		{
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
+		}
 		
 	}
-	if(HasAuthority())
 	widgetComp->GetUserWidgetObject()->AddToViewport();
 }
 
@@ -321,14 +341,6 @@ void ABattleManager::UpdatePlayerEXP()
 	{
 		if (deployedUnits[i])
 			deployedUnits[i]->UpdateCurrentEXP();
-	}
-}
-
-void ABattleManager::SpawnSkillEmitter(FVector loc_, int emitterIndex_)
-{
-	if (emitterIndex_ >= 0 && emitterIndex_ < skillEmitters.Num())
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), skillEmitters[emitterIndex_], loc_, FRotator::ZeroRotator);
 	}
 }
 

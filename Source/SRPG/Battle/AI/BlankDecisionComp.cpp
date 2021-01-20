@@ -111,7 +111,7 @@ ATile* UBlankDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 //Used for changing targets after failing to find the optimal one
 AGridCharacter* UBlankDecisionComp::FindNextOptimalTargetCharacter(AGridCharacter* ignoreThis_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Find next"));
+	//UE_LOG(LogTemp, Warning, TEXT("Find next"));
 	bWillUseSkill = false;
 	skillType = -1;
 
@@ -172,7 +172,7 @@ AGridCharacter* UBlankDecisionComp::FindOffenseTarget_SmallestDistance(AGridChar
 		if (currentTarget)
 		{
 			
-			UE_LOG(LogTemp, Warning, TEXT("CURRENT TARGETTTT %s"), *currentTarget->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("CURRENT TARGETTTT %s"), *currentTarget->GetName());
 			currentTarget->YouAreTargetedByMeNow(ownerEnemy);
 			return currentTarget;
 		}

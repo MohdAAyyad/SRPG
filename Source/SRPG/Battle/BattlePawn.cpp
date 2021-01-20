@@ -13,6 +13,7 @@
 #include "Engine/World.h"
 #include "BattleManager.h"
 #include "Crowd/BattleCrowd.h"
+#include "Definitions.h"
 
 // Sets default values
 ABattlePawn::ABattlePawn()
@@ -45,12 +46,14 @@ ABattlePawn::ABattlePawn()
 	}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
-	bUnderControl = true;
 	lockedOnTarget = nullptr;
-	bLockedOn = false;
+	bLockedOnToCharacter = false; //Used when we want the battle pawn to follow a playercharacter while they're moving
+	bLockedOnToStaticActor = false; //Used when we want the battle pawn to focus on a static object like an obstacle
 	lockOnRate = 0.075f;
 	originalFOV = 0.0f;
 	bReplicates = true;
+	btlCrowd = nullptr;
+	targetDest = FVector::ZeroVector;
 
 }
 
@@ -83,9 +86,11 @@ void ABattlePawn::BeginPlay()
 void ABattlePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bLockedOn)
+	if (bLockedOnToCharacter)
 	{
 		//Follow the locked on target in the x-y plane
+		//Used when player characters move so we can see where they're going
+		//bLockedOnToCharacter  becomes false when the player character has no more tiles to move
 		if (lockedOnTarget)
 		{
 			FVector loc = GetActorLocation();
@@ -97,24 +102,41 @@ void ABattlePawn::Tick(float DeltaTime)
 			SetActorLocation(loc);
 		}
 	}
+	else if (bLockedOnToStaticActor)
+	{
+		//Used to focus on a static object like an obstacle
+		if (lockedOnTarget)
+		{
+			FVector loc = GetActorLocation();
+			loc = FMath::Lerp(loc, targetDest, lockOnRate);
+			if (mainCamera->FieldOfView != originalFOV)
+				mainCamera->SetFieldOfView(FMath::Lerp(mainCamera->FieldOfView, originalFOV, lockOnRate));
+			SetActorLocation(loc);
+			if (FMath::Abs(loc.X - targetDest.X) <= 0.3f || FMath::Abs(loc.Y - targetDest.Y) <= 0.3f) //See if we're close enough to stop moving
+			{
+				btlCrowd->BattlePawnHasFinishedMoving(); //Tell the btl crd that you've reached your destination
+				ResetLock();
+			}
+		}
+	}
 
 }
 
 void ABattlePawn::MoveUpDown(float rate_)
 {
-	if (!bLockedOn)
+	if (!bLockedOnToCharacter && !bLockedOnToStaticActor)
 	{
 		FVector loc = GetActorLocation();
-		loc.X += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
+		loc.X += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }
 void ABattlePawn::MoveRightLeft(float rate_)
 {
-	if (!bLockedOn)
+	if (!bLockedOnToCharacter && !bLockedOnToStaticActor)
 	{
 		FVector loc = GetActorLocation();
-		loc.Y += rate_ * 600.0f * GetWorld()->DeltaTimeSeconds;
+		loc.Y += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
 		SetActorLocation(loc);
 	}
 }
@@ -122,32 +144,36 @@ void ABattlePawn::MoveRightLeft(float rate_)
 
 void ABattlePawn::Zoom(float rate_)
 {
-	if (bUnderControl)
+	if (FMath::Abs(rate_) > 0)
 	{
-		if (FMath::Abs(rate_) > 0)
-		{
-			mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
-		}
+		mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
 	}
 }
 
 void ABattlePawn::LockOnActor(AActor* target_)
 {
 	lockedOnTarget = target_;
-	bLockedOn = true;
+	bLockedOnToCharacter = true;
+}
+
+void ABattlePawn::LockOnActor(ABattleCrowd* btlCrd_, AActor* target_) //Called from the battle crowd
+{
+	btlCrowd = btlCrd_;
+	lockedOnTarget = target_;
+	if (lockedOnTarget)
+	{
+		targetDest = lockedOnTarget->GetActorLocation();
+		targetDest.Z = GetActorLocation().Z;
+		bLockedOnToStaticActor = true;
+	}
+
 }
 
 void ABattlePawn::ResetLock()
 {
-	bLockedOn = false;
+	bLockedOnToCharacter = false;
+	bLockedOnToStaticActor = false;
 	lockedOnTarget = nullptr;
-}
-
-void ABattlePawn::SpawnItems_Implementation(ABattleManager* btl_, FVector loc_)
-{
-	if (btl_)
-	{
-		btl_->GetCrowdRef()->SpawnItemsAtLoc(loc_);
-	}
+	btlCrowd = nullptr;
 }
 

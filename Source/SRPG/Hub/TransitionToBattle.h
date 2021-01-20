@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Interactable.h"
 #include "../ExternalFileReader/FighterTableStruct.h"
+#include "../ExternalFileReader/FDayTableStruct.h"
 #include "TransitionToBattle.generated.h"
 
 UCLASS()
@@ -41,6 +42,10 @@ protected:
 		class UExternalFileReader* fileReader;
 
 	TArray<FFighterTableStruct> recruitedFighters;
+
+	UPROPERTY(BlueprintReadOnly)
+		FDayTableStruct dayInfo;
+
 	UPROPERTY(BlueprintReadOnly)
 		TArray<int> indexesOfSelectedFighters; //Saves the indexes of fighters selected for the battle from the recruited fighters array
 
@@ -67,12 +72,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void FinalizeFighterSelection(bool online_); //Passes in the indexes to the intermediate
 
+	UFUNCTION(BlueprintCallable)
+		void InitiateAReRun();
+
 	void UpdateRecruitedFighters();
-	
-	UFUNCTION(BlueprintCallable)
-		void LookForOnlineSession();
-	UFUNCTION(BlueprintCallable)
-		void JoinAnOnlineSession();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

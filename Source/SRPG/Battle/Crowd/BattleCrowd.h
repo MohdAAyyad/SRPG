@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Grid/ElementalHazard.h"
 #include "BattleCrowd.generated.h"
 
 UCLASS()
@@ -31,7 +32,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget")
 		class UWidgetComponent* widgetComp;
 
+	class ABattlePawn* battlePawn;
 
+
+	//Items
 	UPROPERTY(EditAnywhere, Category = "Items")
 		TArray<TSubclassOf<class ACrowdItem>> crowdItems;
 	TArray<ACrowdItem*> spawnedItems;
@@ -50,6 +54,21 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Items")
 		int maxNumOfItemsSpawnedPerTurn;
 
+	//Obstacles
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		class AObstaclesManager* obstacleManager;
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		TArray<TSubclassOf<class ACrowdProjectile>> crowdProjectiles;
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		int maxNumOfObstaclesToDestroy; //Can only destroy this number of obstacles
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		int currentNumOfObstaclesDestroyed;
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+		int numOfTurnsToAnDestroyObstacle; //Every time this number of turns pass, the crowd will attempt to destroy an obstacle
+		
+	int numOfTurnsPassedSinceLastObstacleWasDestroyed;
+	class AObstacle* chosenObstacle;
+
 	class ATile* neutralItemsTile;
 
 	class AGridCharacter* champion;
@@ -58,11 +77,16 @@ protected:
 	int turnsSinceChampionAndVillainWereElected;
 	bool bPermaChampion;
 protected:
-	// Called when the game starts or when spawned
+	void DecideOnActionForCurrentPhase();
 	virtual void BeginPlay() override;
+	void MoveBattlePawnOverObstacle();
+	void DestroyObstacle();
 	void SpawnItems();
 	void ElectChampion();
 	void ElectVillain();
+	void EndPhase();
+	int PickProjectileBasedOnHazardCurrentState(CurrentElemntalStat state_);
+
 
 public:	
 	// Called every frame
@@ -80,9 +104,15 @@ public:
 	void FlipFavorMeter(AGridCharacter* gchar_); //Overriden. Flip the meter against the character in the parameters
 	void UpdateFavorForChamp(AGridCharacter* gchar_, int times_); //Update the favor in favor of the champ
 	bool GetPermaStatus();
-
-	UFUNCTION(Server, Reliable)
 	void SpawnItemsAtLoc(FVector loc_);
-	void SpawnItemsAtLoc_Implementation(FVector loc_);
+	void BattlePawnHasFinishedMoving();
+
+
+	//Reference to obstacle manager
+	//Reference to battlepawn
+	//Decide on what you're gonna do
+	//If elemental action, ask obstacle what status effect can change it then pick a suitable projectile
+	//Move the battle pawn to the location then spawn the projectile
+	//Return the battlepawn to the original location
 
 };

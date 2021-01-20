@@ -26,6 +26,8 @@ AHubWorldManager::AHubWorldManager()
 
 	pauseMenuWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 
+	generalWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("General Widget"));
+
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
 	
 }
@@ -56,11 +58,9 @@ void AHubWorldManager::BeginPlay()
 
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AHubWorldManager::GetPlayerFromController, 1.0f, false);
 
-
-
-	// THIS IS JUST FOR TEST PURPOSES
-
-	//cutscenes[0]->StartCutscene();
+	if (generalWidget)
+		if (generalWidget->GetUserWidgetObject())
+			generalWidget->GetUserWidgetObject()->AddToViewport();
 }
 
 // Called every frame
@@ -102,6 +102,26 @@ int AHubWorldManager::GetCurrentTimeSlotsCount()
 int AHubWorldManager::GetCurrentMoney()
 {
 	return Intermediate::GetInstance()->GetCurrentMoney();
+}
+
+int AHubWorldManager::GetCurrentShards()
+{
+	return Intermediate::GetInstance()->GetCurrentShards();
+}
+
+int AHubWorldManager::GetCurrentDay()
+{
+	return Intermediate::GetInstance()->GetCurrentDay();
+}
+
+bool AHubWorldManager::CheckForRewards()
+{
+	//Get rewards and if true reset the bool
+	bool bValue = Intermediate::GetInstance()->GetRewardsWereGiven();
+	if (bValue)
+		Intermediate::GetInstance()->ResetRewardsWereGiven();
+
+	return bValue;
 }
 
 void AHubWorldManager::UpdateTimeSlots(int value_)

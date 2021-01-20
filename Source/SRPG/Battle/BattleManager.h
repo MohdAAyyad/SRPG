@@ -46,6 +46,9 @@ protected:
 	
 	int numberOfUnitsDeployed;
 
+	UPROPERTY(EditAnywhere, Category = "File Reader")
+		class UExternalFileReader* fileReader;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 		class UWidgetComponent* widgetComp;
@@ -76,9 +79,6 @@ protected:
 		class ABattleCrowd* crdManager;
 
 	UPROPERTY(EditAnywhere, Category = "Emitters")
-		TArray<UParticleSystem*> skillEmitters;
-
-	UPROPERTY(EditAnywhere, Category = "Emitters")
 		TArray<UParticleSystem*> weaponEmitters;
 
 	UPROPERTY(EditAnywhere, Category = "Obstacles")
@@ -90,12 +90,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		int totalNumberOfPhasesElapsed;
 
+	UPROPERTY(BlueprintReadWrite) //Checked by the UI to play phase animation
+		bool bHasUpdatedPhase;
+	UPROPERTY(BlueprintReadWrite) //Checked by the UI to play hub events animation
+		TArray<int> hubEvents;
+
 	class ABattleController* btlCtrl;
 
 	void UpdatePlayerEXP();
 
 public:	
-	// Called every frame
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		TArray<UTexture*> itemTextures;
+
 	virtual void Tick(float DeltaTime) override;
 
 	void DeplyUnitAtThisLocation(FVector tileLoc_); //Called from controller
@@ -103,6 +111,8 @@ public:
 	int GetPhase();
 	UFUNCTION(BlueprintCallable)
 		void NextPhase();
+
+	void PhaseAction();
 
 	UFUNCTION(BlueprintCallable)
 		void EndDeployment(); //Called from the UI
@@ -122,5 +132,6 @@ public:
 	void SpawnWeaponEmitter(FVector loc_, int emitterIndex_);
 
 	ABattleCrowd* GetCrowdRef();
+
 
 };

@@ -11,6 +11,7 @@
 #include "ActivityDialogueTableStruct.h"
 #include "FSkillTableStruct.h"
 #include "CutsceneTableStruct.h"
+#include "FDayTableStruct.h"
 #include "ExternalFileReader.generated.h"
 
 
@@ -93,6 +94,6 @@ public:
 	void SellEquipment(int tableIndex_, int equipId_, int amount_);
 	void SellItem(int tableIndex_, int itemID_, int amount_);
 
-//	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
+	FDayTableStruct GetCurrentDayInfo(int tableIndex_,int dayId_);
 		
 };

@@ -262,12 +262,12 @@
 #define BTL_END 4
 #endif
 
-#ifndef BTL_ACT_CHG_PLY // Change stats to improve the player activity
-#define BTL_ACT_CHG_PLY 5
+#ifndef BTLPAWN_SPD
+#define BTLPAWN_SPD 600.0f
 #endif
 
-#ifndef BTL_ACT_CHG_ENM // Change stats affecting enemies
-#define BTL_ACT_CHG_ENM 6
+#ifndef BTL_SHRD_RWRD_PER_UNIT //Shard reward per surviving unit
+#define BTL_SHRD_RWRD_PER_UNIT 5
 #endif
 
 #pragma endregion
@@ -338,12 +338,12 @@
 #define ENM_DEC_STAT 0.2f
 #endif
 
-#ifndef CHG_STAT_PLY  //Change stat party index
-#define CHG_STAT_PLY 1
+#ifndef CHG_STAT_ENM  //Change enemy stats
+#define CHG_STAT_ENM 0
 #endif
 
-#ifndef CHG_STAT_ENM 
-#define CHG_STAT_ENM 0
+#ifndef CHG_STAT_PLY  //Change stat party index
+#define CHG_STAT_PLY 1
 #endif
 
 #ifndef CHG_STAT_NON 
@@ -386,8 +386,6 @@
 #ifndef ACT_INDX_HIGH
 #define ACT_INDX_HIGH 3 // highest activity index possible
 #endif
-
-
 #pragma endregion
 
 

@@ -53,7 +53,7 @@ void AAIManager::SetBattleGridCrdManagers(ABattleManager* btl_, AGridManager* gr
 }
 
 
-void AAIManager::DeployEnemies_Implementation()
+void AAIManager::DeployEnemies()
 {
 
 	TArray<ATile*> enemyDeploymentTiles;
@@ -122,7 +122,6 @@ void AAIManager::DeployEnemies_Implementation()
 
 
 			}
-
 
 			//Loop through the remaining nodes to spawn the support enemies
 			while (deployedEnemies.Num() < nextOp.numberOfTroops && nodeIndex < depNodes.Num())
