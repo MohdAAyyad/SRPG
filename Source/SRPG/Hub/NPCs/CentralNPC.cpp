@@ -54,21 +54,25 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 					if (control)
 					{
 						control->SetInputMode(FInputModeUIOnly());
-
-						// don't know what the rate supposed to be but here it is
-						float rate = 0.45f;
-
-						control->FocusOnThisNPC(this, rate);
-
-						FTimerHandle timeToAddWidgetHandle;
-
-						GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, rate + 0.1f, false);
+						control->FocusOnThisNPC(this, 0.45f);
 					}
 
+					FTimerHandle timeToAddWidgetHandle;
+					GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, 0.45f + 0.1f, false);
+
 				}
-				else
+				else if(widget && activityAlreadyDone && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
-					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
+					line = "I've done all I can";
+
+					ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+					if (control)
+					{
+						control->SetInputMode(FInputModeUIOnly());
+					}
+
+					FTimerHandle timeToAddWidgetHandle;
+					GetWorld()->GetTimerManager().SetTimer(timeToAddWidgetHandle, this, &ANPC::DelayedAddWidgetToViewPort, 0.45f + 0.1f, false);
 				}
 			}
 		}
@@ -122,26 +126,29 @@ FString ACentralNPC::WarningText(int warningType_)
 	{
 		//units too high
 		case 1:
-			return FString("Too Many Units Selected");
+			return FString("Too Many Units Selected!");
 			break;
 		//units too low
 		case 2:
-			return FString("Not Enough Units Selected");
+			return FString("Not Enough Units Selected!");
 			break;
 		// not enough money
 		case 3:
-			return FString("Not Enough Money");
+			return FString("Not Enough Money!");
 			break;
 		// not enough money and too few units
 		case 4:
-			return FString("Not Enough Units Selected. Not Enough Money");
+			return FString("Not Enough Units Selected. Not Enough Money!");
 			break;
 		// too many units not enough money
 		case 5:
-			return FString("Too Many Units Selected. Not Enough Money");
+			return FString("Too Many Units Selected. Not Enough Money!");
 			break;
 		// reset the warning string
 		case 6:
+			return FString("Not Enough Time Slots!");
+			break;
+		case 7:
 			warning = FString();
 			return warning;
 			break;
@@ -215,6 +222,11 @@ void ACentralNPC::SetChanceOfSuccess(int chance_)
 	chanceOfSuccess = chance_;
 }
 
+int ACentralNPC::GetCurrentMoneyFromIntermediate()
+{
+	return Intermediate::GetInstance()->GetCurrentMoney();
+}
+
 bool ACentralNPC::IsActivityAffordable()
 {
 	// see if we can both afford the money cost and the time cost
@@ -264,6 +276,10 @@ void ACentralNPC::SpendCost()
 			else if (spentUnits == unitCost && Intermediate::GetInstance()->GetCurrentMoney() - moneyCost <= 0)
 			{
 				warning = WarningText(3);
+			}
+			else if (hubManager->GetCurrentTimeSlotsCount() - timeCost < 0)
+			{
+				warning = WarningText(6);
 			}
 		}
 	}

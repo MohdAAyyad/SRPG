@@ -234,7 +234,7 @@ void ANPC::SetHubManager(AHubWorldManager* manager_)
 void ANPC::EndDialogue()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("UnInteracted!"));
-	if (widget)
+	if (widget->GetUserWidgetObject()->IsInViewport())
 	{
 		widget->GetUserWidgetObject()->RemoveFromViewport();
 

@@ -56,7 +56,7 @@ void ACutscene::BeginPlay()
 	prevAnim1 = "";
 	prevAnim2 = "";
 
-	StartCutscene();
+	//StartCutscene();
 }
 
 void ACutscene::LoadInfo()

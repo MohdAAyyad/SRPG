@@ -376,7 +376,7 @@
 
 
 #ifndef BRNC_SPWN
-#define BRNC_SPWN 20 // percent chance to spawn a branch NPC 
+#define BRNC_SPWN 50 // percent chance to spawn a branch NPC 
 #endif
 
 #ifndef ACT_INDX_LOW
