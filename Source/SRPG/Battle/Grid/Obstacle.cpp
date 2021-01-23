@@ -8,6 +8,8 @@
 #include "Components/BoxComponent.h"
 #include "Tile.h"
 #include "ObstaclesManager.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/PostProcessComponent.h"
 
 // Sets default values
 AObstacle::AObstacle()
@@ -19,16 +21,22 @@ AObstacle::AObstacle()
 	RootComponent = root;
 	root->SetMobility(EComponentMobility::Static);
 
-	mesh = CreateDefaultSubobject<UDestructibleComponent>(TEXT("Mesh"));
-	mesh->SetupAttachment(root);
+	staticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+	staticMesh->SetupAttachment(root);
+	staticMesh->SetRenderCustomDepth(true);
+	staticMesh->SetCustomDepthStencilValue(0);
 
 	box = CreateDefaultSubobject<UBoxComponent>(TEXT("bOX"));
 	box->SetupAttachment(root);
 	box->SetCollisionProfileName("DestructibleBox");
 
-	hp = 30.0f;
+
 
 	bCanBeRemoved = true;
+	bCanBeTargeted = false;
+
+	ppComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcess"));
+	ppComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -48,7 +56,10 @@ void AObstacle::BeginPlay()
 void AObstacle::AddObstacleToObstacleManager()
 {
 	if (obstacleManager)
-		obstacleManager->AddObstacle(this, bCanBeRemoved);
+	{
+		if(bCanBeTargeted) //Only add obstacles that can be targeted
+			obstacleManager->AddObstacle(this, bCanBeRemoved);
+	}
 }
 
 bool AObstacle::AddObstructedTile(ATile* tile_) //Called the tiles the obstacle obstructs
@@ -62,15 +73,7 @@ bool AObstacle::AddObstructedTile(ATile* tile_) //Called the tiles the obstacle 
 
 void AObstacle::ObstacleTakeDamage(float damage_, int statusEffect_)
 {
-	hp -= damage_;
-	if (hp <= 0.5f)
-	{
-		FTimerHandle timeToDestroyHandle;
-		mesh->ApplyDamage(5.0f, GetActorLocation(), FVector::ZeroVector, 1.0f);
-		mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, 2.0f, false);
-	}
+//overriden in children
 }
 
 void AObstacle::DelayedDestroy()
@@ -100,4 +103,29 @@ bool AObstacle::IsAnyOfMyTilesHighlighted(int highlightIndex_)
 TArray<ATile*> AObstacle::GetObstructedTiles()
 {
 	return obstructedTiles;
+}
+
+bool AObstacle::GetCanBeTargted()
+{
+	return bCanBeTargeted;
+}
+
+
+void AObstacle::ActivateOutline(bool value_)
+{
+	if (bCanBeTargeted)
+	{
+		if (value_)
+			staticMesh->SetCustomDepthStencilValue(6);
+		else
+			staticMesh->SetCustomDepthStencilValue(0);
+	}
+}
+
+void AObstacle::TargetedOutline()
+{
+	if (bCanBeTargeted)
+	{
+		staticMesh->SetCustomDepthStencilValue(2);
+	}
 }

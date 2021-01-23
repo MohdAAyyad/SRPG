@@ -37,6 +37,9 @@ protected:
 		void UseSkill(int index_);
 
 
+	UPROPERTY(BlueprintReadOnly)
+		FString endText;
+
 
 	void UpdateCharacterSkills();
 

@@ -60,7 +60,6 @@ void ABattleManager::BeginPlay()
 
 	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
 	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
-	maxNumberOfUnitsToDeploy = Intermediate::GetInstance()->GetMaxDeploymentSize();
 
 	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
@@ -138,16 +137,12 @@ void ABattleManager::DeployThisUnitNext(int index_)
 	//Index of the element inside selectedFighters
 	if (index_ >= 0 && index_ < selectedFighters.Num())
 	{
-		//Used to keep track of which characters the player chooses to deploy
-		if (numberOfUnitsDeployed < maxNumberOfUnitsToDeploy)
+		bpidOfUnitToBeDeployedNext = selectedFighters[index_].bpid;
+		indexOfSelectedFighterInSelectedFighters = index_;
+		if (bpidOfUnitToBeDeployedNext < fighters.Num() && bpidOfUnitToBeDeployedNext >= 0)
 		{
-			bpidOfUnitToBeDeployedNext = selectedFighters[index_].bpid;
-			indexOfSelectedFighterInSelectedFighters = index_;
-			if (bpidOfUnitToBeDeployedNext < fighters.Num() && bpidOfUnitToBeDeployedNext >= 0)
-			{
-				if (widgetComp)
-					widgetComp->GetUserWidgetObject()->RemoveFromViewport();
-			}
+			if (widgetComp)
+				widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 		}
 	}
 }
@@ -355,4 +350,18 @@ void ABattleManager::SpawnWeaponEmitter(FVector loc_, int emitterIndex_)
 ABattleCrowd* ABattleManager::GetCrowdRef()
 {
 	return crdManager;
+}
+
+void ABattleManager::ActivateOutlines(bool value_)
+{
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if(deployedUnits[i])
+			deployedUnits[i]->ActivateOutline(value_);
+	}
+	if (aiManager)
+		aiManager->ActivateOutlines(value_);
+
+	if(obstacleManager)
+		obstacleManager->ActivateOutlines(value_);
 }

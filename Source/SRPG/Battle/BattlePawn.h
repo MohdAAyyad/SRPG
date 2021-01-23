@@ -40,6 +40,10 @@ protected:
 	float originalFOV;
 	FVector targetDest;
 
+	//Limits of the battle pawn movement range
+	FVector maxMovement;
+	FVector minMovement;
+
 	//Final Destination
 	class ABattleCrowd* btlCrowd;
 
@@ -53,4 +57,6 @@ public:
 	void LockOnActor(AActor* target_);
 	void LockOnActor(ABattleCrowd* btlCrd_, AActor* target_); //A different version used by the battle crowd. We need a ref to the btl crowd because we need to tell it when we've arrived
 	void ResetLock();
+
+	void SetMinMaxMovement(FVector minMovement_, FVector maxMovment_);
 };

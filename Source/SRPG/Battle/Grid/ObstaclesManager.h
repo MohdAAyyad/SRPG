@@ -38,5 +38,6 @@ public:
 	void TellObstaclesAPhaseHasPassed(int phase_);
 	void RemoveObstacle(AObstacle* obstacle_);
 	AObstacle* GetAnObstacleAtRandom();
+	void ActivateOutlines(bool value_);
 
 };

@@ -121,3 +121,12 @@ AObstacle* AObstaclesManager::GetAnObstacleAtRandom()
 	return nullptr;
 }
 
+void AObstaclesManager::ActivateOutlines(bool value_)
+{
+	for (int i = 0; i < obstacles.Num(); i++)
+	{
+		if (obstacles[i])
+			obstacles[i]->ActivateOutline(value_);
+	}
+}
+

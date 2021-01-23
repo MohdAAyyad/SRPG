@@ -351,3 +351,13 @@ TArray<AEnemyBaseGridCharacter*> AAIManager::GetDeployedEnemies()
 {
 	return deployedEnemies;
 }
+
+
+void AAIManager::ActivateOutlines(bool value_)
+{
+	for (int i = 0; i < deployedEnemies.Num(); i++)
+	{
+		if(deployedEnemies[i])
+			deployedEnemies[i]->ActivateOutline(value_);
+	}
+}

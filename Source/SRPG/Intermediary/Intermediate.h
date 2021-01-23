@@ -82,14 +82,3 @@ public:
 	bool GetRewardsWereGiven();
 	void ResetRewardsWereGiven();
 };
-
-
-//Add a days counter
-//Add a days table. The table contains day ID, day rewards, max # of players, # of enemies, level of enemies, whether it's a boss fight or not
-//The world level must be equal to the highest level player and must no go down (WL is at 5, player dies, it should stay at 5)
-//Add a notification when the world level changes
-//Add a shard counter
-//Change the item shop to use shards instead of gold
-//Add the ability to get the shards and use them
-//Add the day counter level
-//Add the ability to force a re-run

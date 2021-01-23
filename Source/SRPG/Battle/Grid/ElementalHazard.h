@@ -48,8 +48,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 		float explosionDamage;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-		class UStaticMeshComponent* staticMesh;
+	UPROPERTY(EditAnywhere, Category = "DecalActor")
+		TSubclassOf<class ADecalActor> decal;
+	
+	UPROPERTY(EditAnywhere, Category = "DecalActor")
+		UMaterialInterface* decalMaterial;
+
+	ADecalActor* decalact;
 
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;

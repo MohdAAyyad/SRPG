@@ -31,7 +31,7 @@
 #include "../Grid/Obstacle.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Weapons/WeaponBase.h"
-
+#include "PCameraShake.h"
 
 
 APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
@@ -44,6 +44,10 @@ APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 void APlayerGridCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if(overheadWidgetComp)
+		if(overheadWidgetComp->GetUserWidgetObject())
+			if(!overheadWidgetComp->GetUserWidgetObject()->IsInViewport())
+					overheadWidgetComp->GetUserWidgetObject()->AddToViewport();
 }
 
 void APlayerGridCharacter::StartPlayerTurn()
@@ -58,7 +62,7 @@ void APlayerGridCharacter::StartPlayerTurn()
 
 void APlayerGridCharacter::EndPlayerTurn()
 {
-	overheadWidgetComp->SetVisibility(false);
+	endText = "";
 }
 
 void APlayerGridCharacter::Selected()
@@ -81,6 +85,9 @@ void APlayerGridCharacter::NotSelected()
 
 	if (currentState != EGridCharState::FINISHED)
 			currentState = EGridCharState::IDLE;
+
+	if (btlManager)
+		btlManager->ActivateOutlines(false);
 }
 void APlayerGridCharacter::HighlightMovementPath()
 {
@@ -105,6 +112,10 @@ void APlayerGridCharacter::HighlightRegularAttackPath()
 		tile->GetGridManager()->ClearHighlighted();
 		//UE_LOG(LogTemp, Warning, TEXT("Highlighting attack row %d depth %d"), statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS));
 		tile->GetGridManager()->UpdateCurrentTile(tile, statsComp->GetStatValue(STAT_WRS), statsComp->GetStatValue(STAT_WDS), TILE_ATK, statsComp->GetStatValue(STAT_PURE));
+		if(btlCtrl)
+			btlCtrl->SetHoverTargeting(true);
+		if (btlManager)
+			btlManager->ActivateOutlines(true);
 	}
 }
 
@@ -141,6 +152,10 @@ void APlayerGridCharacter::ActivateWeaponAttack()
 
 			//Add exp
 			statsComp->AddToStat(STAT_EXP, ATK_RWRD);
+
+			//Play camera shake
+			if (btlCtrl && cameraShake)
+				btlCtrl->PlayerCameraManager->PlayCameraShake(cameraShake, CAM_SHAKE_RATE);
 		}
 		else
 		{
@@ -219,7 +234,13 @@ void APlayerGridCharacter::UseSkill(int index_)
 				currentState = EGridCharState::SKILLING;
 				ABattleController* btlctrl = Cast< ABattleController>(GetWorld()->GetFirstPlayerController());
 				if (btlctrl)
+				{
 					btlctrl->SetTargetingWithSkill(true, skills[index_].rows, skills[index_].depths, skills[index_].pure);
+					btlCtrl->SetHoverTargeting(true);
+				}
+
+				if (btlManager)
+					btlManager->ActivateOutlines(true);
 			}
 		}
 		//TODO
@@ -277,6 +298,9 @@ void APlayerGridCharacter::ActivateSkillAttack()
 							crdManager->UpdateFavor(true);
 					}
 
+					//Play camera shake
+					if (btlCtrl && cameraShake)
+						btlCtrl->PlayerCameraManager->PlayCameraShake(cameraShake, CAM_SHAKE_RATE);
 				}
 				else
 				{
@@ -408,7 +432,7 @@ void APlayerGridCharacter::RemoveWidgetFromVP()
 void APlayerGridCharacter::FinishState()
 {
 	currentState = EGridCharState::FINISHED;
-	overheadWidgetComp->SetVisibility(true);
+	endText = "E";
 
 	if (btlCtrl)
 		btlCtrl->ResetControlledCharacter(); //Also calls NotSelected()
@@ -420,7 +444,6 @@ void APlayerGridCharacter::GridCharReatToElemental(float damage_, int statusEffe
 	{
 		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 		animInstance->SetDamage(static_cast<int> (damage_));
-		overheadWidgetComp->SetVisibility(true);
 		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 
 
@@ -461,7 +484,6 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	//update stats component
 	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
 	animInstance->SetDamage(static_cast<int> (damage_));
-	overheadWidgetComp->SetVisibility(true);
 	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 	statsComp->CheckIfAffectedByStatusEffect(statusEffect_);
 	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
@@ -525,7 +547,6 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 			animInstance->SetDamage(static_cast<int> (damage_));
 		}
 
-		overheadWidgetComp->SetVisibility(true);
 		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 		//Check if dead
 		if (statsComp->GetStatValue(STAT_HP) <= 1)

@@ -138,7 +138,7 @@ FActivityDialogueTableStruct UExternalFileReader::FindActivityDialogueTableRow(F
 
 FActivityDialogueTableStruct UExternalFileReader::GetPositiveBranch(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -168,7 +168,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetPositiveBranch(int activity
 
 FActivityDialogueTableStruct UExternalFileReader::GetNegativeBranch(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -198,7 +198,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetNegativeBranch(int activity
 
 FActivityDialogueTableStruct UExternalFileReader::GetPositiveCentral(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -228,7 +228,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetPositiveCentral(int activit
 
 FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -258,7 +258,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetNegativeCentral(int activit
 
 FActivityDialogueTableStruct UExternalFileReader::GetStartingDialogue(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -283,7 +283,7 @@ FActivityDialogueTableStruct UExternalFileReader::GetStartingDialogue(int activi
 
 FActivityDialogueTableStruct UExternalFileReader::GetActivityEndDialogue(int activityIndex_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		TArray<FName> rowNames;
 		rowNames = tables[tableIndex_]->GetRowNames();
@@ -365,15 +365,19 @@ FFighterTableStruct UExternalFileReader::FindFighterRowById(int tableIndex_, int
 {
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
-	rowNames = tables[tableIndex_]->GetRowNames();
 
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames();
 
-		if (row->id == fighterId_)
+		for (auto n : rowNames)
 		{
-			return *row;
+			FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(n, contextString, true);
+
+			if (row->id == fighterId_)
+			{
+				return *row;
+			}
 		}
 	}
 
@@ -385,14 +389,17 @@ void UExternalFileReader::RemoveFightersDueToPermaDeath(TArray<int>& ids_, int t
 {
 	static const FString contextString(TEXT("Trying to remove fighters from the recruited fighters table"));
 	TArray<FName> rowNames;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
-
-	for (int i = rowNames.Num()-1; i>-1; i--)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
-		if (ids_.Contains(row->id)) //Is the fighter in the table part of the array of dead units?
+		rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
+
+		for (int i = rowNames.Num() - 1; i > -1; i--)
 		{
-			tables[tableIndex_]->RemoveRow(rowNames[i]);
+			FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+			if (ids_.Contains(row->id)) //Is the fighter in the table part of the array of dead units?
+			{
+				tables[tableIndex_]->RemoveRow(rowNames[i]);
+			}
 		}
 	}
 }
@@ -402,25 +409,28 @@ void UExternalFileReader::IncreaseTheStatsOfThisFigheter(FFighterTableStruct fig
 {
 	static const FString contextString(TEXT("Trying to increase the stats of the fighters in the recruited fighters table"));
 	TArray<FName> rowNames;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
-
-	for (int i = rowNames.Num() - 1; i > -1; i--)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
-		if (fighter_.id == row->id)
+		rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
+
+		for (int i = rowNames.Num() - 1; i > -1; i--)
 		{
-			row->hp = fighter_.hp;
-			row->pip = fighter_.pip;
-			row->atk = fighter_.atk;
-			row->def = fighter_.def;
-			row->intl = fighter_.intl;
-			row->spd = fighter_.spd;
-			row->agl = fighter_.agl;
-			row->crit = fighter_.crit;
-			row->crd = fighter_.crd;
-			row->currentEXP = fighter_.currentEXP;
-			row->neededEXPToLevelUp = fighter_.neededEXPToLevelUp;
-			row->level = fighter_.level;
+			FFighterTableStruct* row = tables[tableIndex_]->FindRow<FFighterTableStruct>(rowNames[i], contextString, true); //Get the fighter struct row
+			if (fighter_.id == row->id)
+			{
+				row->hp = fighter_.hp;
+				row->pip = fighter_.pip;
+				row->atk = fighter_.atk;
+				row->def = fighter_.def;
+				row->intl = fighter_.intl;
+				row->spd = fighter_.spd;
+				row->agl = fighter_.agl;
+				row->crit = fighter_.crit;
+				row->crd = fighter_.crd;
+				row->currentEXP = fighter_.currentEXP;
+				row->neededEXPToLevelUp = fighter_.neededEXPToLevelUp;
+				row->level = fighter_.level;
+			}
 		}
 	}
 
@@ -430,18 +440,21 @@ void UExternalFileReader::AddOwnedValueItemTable(int tableIndex_, int itemId_, i
 {
 	static const FString contextString(TEXT("Trying to buy items"));
 	TArray<FName> rowNames;
-	rowNames = tables[tableIndex_]->GetRowNames();
-
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames();
 
-		if (row->id == itemId_)
+		for (auto n : rowNames)
 		{
-			row->owned += amountToAdd_;
-			break;
-		}
+			FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
 
+			if (row->id == itemId_)
+			{
+				row->owned += amountToAdd_;
+				break;
+			}
+
+		}
 	}
 }
 
@@ -449,14 +462,10 @@ void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_
 {
 	static const FString contextString(TEXT("Equipment Table"));
 
-	if (tables[index_])
+	if (index_ >= 0 && index_ < tables.Num())
 	{
 		FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(rowName_, contextString, true);
 		row->owned += value_;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Item Table returned NULL"));
 	}
 }
 
@@ -516,25 +525,29 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetOffesniveSkills(int tableInde
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
 	int skillsAddedSoFar = 0;
-	rowNames = tables[tableIndex_]->GetRowNames();
 
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
-		{
-			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames();
 
-			//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
-			if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
-			{
-				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-				skills.Push(row);
-				skillsAddedSoFar++;
-			}
-		}
-		else //We've got enough skills, break
+		for (auto n : rowNames)
 		{
-			break;
+			if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
+			{
+				FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+				//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
+				if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
+				{
+					//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+					skills.Push(row);
+					skillsAddedSoFar++;
+				}
+			}
+			else //We've got enough skills, break
+			{
+				break;
+			}
 		}
 	}
 
@@ -548,25 +561,28 @@ TArray<FSkillTableStruct*> UExternalFileReader::GetDefensiveSkills(int tableInde
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct*> skills;
 	int skillsAddedSoFar = 0;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
-
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
-		{
-			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
 
-			//If we have the right armor type, the correct skill index and the correct level, then this is valid information
-			if ( row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
-			{
-				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-				skills.Push(row);
-				skillsAddedSoFar++;
-			}
-		}
-		else //We've got enough skills, break
+		for (auto n : rowNames)
 		{
-			break;
+			if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
+			{
+				FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+				//If we have the right armor type, the correct skill index and the correct level, then this is valid information
+				if (row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_ && row->levelToUnlock <= currentLevel_)
+				{
+					//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+					skills.Push(row);
+					skillsAddedSoFar++;
+				}
+			}
+			else //We've got enough skills, break
+			{
+				break;
+			}
 		}
 	}
 
@@ -580,28 +596,30 @@ TArray<FSkillTableStruct> UExternalFileReader::GetOffesniveSkillsForBP(int table
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct> skills;
 	int skillsAddedSoFar = 0;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
-
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
-		{
-			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
 
-			//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
-			if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???"
+		for (auto n : rowNames)
+		{
+			if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
 			{
-				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-				skills.Push(*row);
-				skillsAddedSoFar++;
+				FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+				//If we have the right weapon type, the correct skill index and the correct level, then this is valid information
+				if (row->weaponIndex == weaponIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???"
+				{
+					//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+					skills.Push(*row);
+					skillsAddedSoFar++;
+				}
+			}
+			else //We've got enough skills, break
+			{
+				break;
 			}
 		}
-		else //We've got enough skills, break
-		{
-			break;
-		}
 	}
-
 	return skills;
 }
 TArray<FSkillTableStruct> UExternalFileReader::GetDefensiveSkillsForBP(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_)
@@ -610,25 +628,28 @@ TArray<FSkillTableStruct> UExternalFileReader::GetDefensiveSkillsForBP(int table
 	TArray<FName> rowNames;
 	TArray<FSkillTableStruct> skills;
 	int skillsAddedSoFar = 0;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
-
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
-		{
-			FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 0 for skills.
 
-			//If we have the right armor type, the correct skill index and the correct level, then this is valid information
-			if (row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???")
-			{
-				//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
-				skills.Push(*row);
-				skillsAddedSoFar++;
-			}
-		}
-		else //We've got enough skills, break
+		for (auto n : rowNames)
 		{
-			break;
+			if (skillsAddedSoFar < skillNum_) //Each weapon gives a set number of skills
+			{
+				FSkillTableStruct* row = tables[tableIndex_]->FindRow<FSkillTableStruct>(n, contextString, true);
+
+				//If we have the right armor type, the correct skill index and the correct level, then this is valid information
+				if (row->weaponIndex == armorIndex_ && row->equipmentSkillsIndex == skillsIndex_) //We don't check for the level here as skills of higher level will be shown as "???")
+				{
+					//UE_LOG(LogTemp,Warning,TEXT("Pushed into skills"));
+					skills.Push(*row);
+					skillsAddedSoFar++;
+				}
+			}
+			else //We've got enough skills, break
+			{
+				break;
+			}
 		}
 	}
 
@@ -640,28 +661,32 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllOwnedItems(int tableIndex_)
 	static const FString contextString(TEXT("Trying to get the items from the table"));
 	TArray<FName> rowNames;
 	TArray<FItemTableStruct> items;
-	rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 5 for items.
-
-	for (auto n : rowNames)
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
-		if (row->owned > 0)
+		rowNames = tables[tableIndex_]->GetRowNames(); //Will only be accessed by fighters in the battle. 5 for items.
+
+		for (auto n : rowNames)
 		{
-			items.Push(*row);
+			FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+			if (row->owned > 0)
+			{
+				items.Push(*row);
+			}
 		}
 	}
-
 	return items;
 }
 
 int UExternalFileReader::GetItemStatIndex(int tableIndex_, FName itemName_)
 {
 	static const FString contextString(TEXT("Trying to get item's stat index from table"));
-	FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(itemName_, contextString, true);
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(itemName_, contextString, true);
 
-	if(row)
-		return row->statIndex;
-
+		if (row)
+			return row->statIndex;
+	}
 	return 0;
 }
 int UExternalFileReader::GetItemValue(FName itemName_)
@@ -678,16 +703,10 @@ int UExternalFileReader::GetItemValue(FName itemName_)
 
 void UExternalFileReader::RemoveFighterTableRow(FName rowName_, int tableIndex_)
 {
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Fighter row  removed"));
 		tables[tableIndex_]->RemoveRow(rowName_);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Fighter Table returned NULL"));
-	}
-
 }
 
 FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int equipID_, int equipIndex_, int subIndex_)
@@ -812,7 +831,7 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllItemsConditionedByWorldLevel
 	static const FString contextString(TEXT("Getting all items"));
 	TArray<FItemTableStruct> results;
 	TArray<FName> rowNames;
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		rowNames = tables[tableIndex_]->GetRowNames();
 
@@ -838,7 +857,7 @@ TArray<FEquipmentTableStruct> UExternalFileReader::FindAllOwnedEquipment(int tab
 	static const FString contextString(TEXT("Getting all owned equipment"));
 	TArray<FEquipmentTableStruct> results;
 	TArray<FName> rowNames;
-	if (tables[tableIndex_])
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
 		rowNames = tables[tableIndex_]->GetRowNames();
 

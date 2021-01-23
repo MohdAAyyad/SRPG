@@ -29,6 +29,7 @@ ATile::ATile()
 	gCost = hCost = fCost = 0;
 	bTraversable = true;
 	parentTile = nullptr;
+	bEditMode = false;
 }
 
 // Called when the game starts or when spawned
@@ -54,7 +55,7 @@ void ATile::BeginPlay()
 		}
 	}
 
-	//SetActorHiddenInGame(true);
+
 }
 
 AGridManager* ATile::GetGridManager()
@@ -64,6 +65,9 @@ AGridManager* ATile::GetGridManager()
 void ATile::SetGridManager(AGridManager* gridManager_)
 {
 	gridManager = gridManager_;
+
+	if (!bEditMode) //Set to true by the grid manager. Should be true when we are building maps to see how the tiles are distributed
+		SetActorHiddenInGame(true);
 }
 
 void ATile::Highlighted(int index_)
@@ -72,7 +76,10 @@ void ATile::Highlighted(int index_)
 	{
 		if (index_ != HighlightedIndex)
 			previousHighlightIndex = HighlightedIndex;
-		SetActorHiddenInGame(false);
+
+		if (!bEditMode && index_ != TILE_ENM && index_ != TILE_CRD && index_ != TILE_ENMA)
+				SetActorHiddenInGame(false);
+
 		if (index_ == TILE_MOV) //Move
 		{
 			if (pathMaterial)
@@ -132,7 +139,6 @@ void ATile::Highlighted(int index_)
 }
 void ATile::NotHighlighted()
 {
-	//SetActorHiddenInGame(true);
 	if (originalMaterial)
 		mesh->SetMaterial(1, originalMaterial);
 
@@ -140,6 +146,9 @@ void ATile::NotHighlighted()
 
 	previousHighlightIndex = HighlightedIndex = -1;
 	gCost = hCost = fCost = 0; //Reset fCost. The starting tile always has 0 fcost
+
+	if (!bEditMode)
+		SetActorHiddenInGame(true);
 }
 
 int ATile::GetHighlighted()
