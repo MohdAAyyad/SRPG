@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "OutlineInterface.h"
 #include "Obstacle.generated.h"
 
 UCLASS()
-class SRPG_API AObstacle : public AActor
+class SRPG_API AObstacle : public AActor, public IOutlineInterface
 {
 	GENERATED_BODY()
 	
@@ -21,18 +22,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Obstacle")
 		USceneComponent* root;
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+		class UStaticMeshComponent* staticMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Destructible Mesh")
-		class UDestructibleComponent* mesh;
-
-	UPROPERTY(EditAnywhere, Category = "Destructible Mesh")
-		float hp;
 
 	UPROPERTY(EditAnywhere, Category = "Obstacle")
 		class UBoxComponent* box;
 
 	UPROPERTY(EditAnywhere, Category = "Persistence")
 		bool bCanBeRemoved; //If true, the obstacle manager will have the chance to destroy this obstacle at begin play
+
+	UPROPERTY(EditAnywhere, Category = "Persistence")
+		bool bCanBeTargeted; //If true, the player can target it with their attacks
 
 	UPROPERTY(EditAnywhere, Category = "ObstacleManager")
 		class AObstaclesManager* obstacleManager;
@@ -41,12 +42,9 @@ protected:
 
 	void AddObstacleToObstacleManager();
 
-	//TODO
-	//Update obstacle take damage to take a status effect
-	//Override the function in elementals
-	//Finish up the elemental code
-	//Update the grid character take damage functions to take into account status effects
-	//Update the stats component to make use of the status effects
+
+	UPROPERTY(EditAnywhere, Category = "Postprocess")
+		class UPostProcessComponent* ppComponent;
 
 
 
@@ -59,6 +57,11 @@ public:
 	virtual void DelayedDestroy();
 
 	virtual void ATurnHasPassed(int turnType_) {};//Overriden in elementals
+
+	bool GetCanBeTargted();
+
+	virtual void ActivateOutline(bool value_) override;
+	virtual void TargetedOutline() override;
 
 
 };

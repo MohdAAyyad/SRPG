@@ -12,11 +12,11 @@
 #include "../StatsComponent.h"
 #include "DestructibleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/DecalActor.h"
 
 AElementalHazard::AElementalHazard():AObstacle()
 {
 	currentStat = CurrentElemntalStat::NONE;
-	hp = 0.0f;
 	turnsSinceStateChanged = 0;
 	turnThatStatChangeOccuredIn = 0;
 	particleLocation = FVector::ZeroVector;
@@ -25,15 +25,12 @@ AElementalHazard::AElementalHazard():AObstacle()
 	PrimaryActorTick.bCanEverTick = true;
 	explosionDamage = 15.0f;
 
-	mesh->RemoveFromRoot();
-	mesh->DestroyComponent();
-
-	staticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-	staticMesh->SetupAttachment(root);
 	staticMesh->SetCollisionProfileName("OverlapAll");
 
 	bShrinkingMesh = false;
 	delayUntilDead = 2.0f;
+
+	decalact = nullptr;
 	
 }
 
@@ -45,6 +42,15 @@ void AElementalHazard::BeginPlay()
 		box->OnComponentBeginOverlap.AddDynamic(this, &AElementalHazard::OverlapWithGridCharacter);
 
 	particleLocation = GetActorLocation();
+
+	if (decal)
+		decalact = GetWorld()->SpawnActor<ADecalActor>(GetActorLocation(), FRotator::ZeroRotator);
+
+	if (decalact)
+	{
+		if (decalMaterial)
+			decalact->SetDecalMaterial(decalMaterial);
+	}
 }
 
 void AElementalHazard::Tick(float DeltaTime)
@@ -119,7 +125,6 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 						currentParticles = obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
 						turnThatStatChangeOccuredIn = obstacleManager->GetBattlePhase();
 						turnsSinceStateChanged = 3;
-
 					}
 					
 				}
@@ -140,6 +145,8 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					bShrinkingMesh = true;
 					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
 					turnsSinceStateChanged = 0;
+					if (decalact)
+						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
 				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
@@ -204,6 +211,9 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 						bShrinkingMesh = true;
 						obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
 						turnsSinceStateChanged = 0;
+
+						if (decalact)
+							decalact->Destroy();
 					}
 					//Give the explosion some time to play out then destroy the object
 					FTimerHandle timeToDestroyHandle;
@@ -226,6 +236,9 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					bShrinkingMesh = true;
 					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
 					turnsSinceStateChanged = 0;
+
+					if (decalact)
+						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
 				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
@@ -246,6 +259,9 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 						bShrinkingMesh = true;
 						obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
 						turnsSinceStateChanged = 0;
+
+						if (decalact)
+							decalact->Destroy();
 					}
 
 					//Give the explosion some time to play out then destroy the object
@@ -266,6 +282,9 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					bShrinkingMesh = true;
 					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
 					turnsSinceStateChanged = 0;
+
+					if (decalact)
+						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
 				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
@@ -329,6 +348,9 @@ void AElementalHazard::OverlapWithGridCharacter(UPrimitiveComponent* OverlappedC
 				{
 					switch (currentStat)
 					{
+					case CurrentElemntalStat::OIL:
+						gChar->GridCharReatToElemental(0.0f, EFFECT_SLOW);
+						break;
 					case CurrentElemntalStat::POISON:
 						gChar->GridCharReatToElemental(0.0f, EFFECT_POISON);
 						break;

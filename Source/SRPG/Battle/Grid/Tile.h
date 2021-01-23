@@ -88,4 +88,6 @@ public:
 	void NightBlues();
 
 	void SetTraversable(bool value_);
+
+	bool bEditMode;
 };

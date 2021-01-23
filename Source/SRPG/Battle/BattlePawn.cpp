@@ -127,8 +127,11 @@ void ABattlePawn::MoveUpDown(float rate_)
 	if (!bLockedOnToCharacter && !bLockedOnToStaticActor)
 	{
 		FVector loc = GetActorLocation();
-		loc.X += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
-		SetActorLocation(loc);
+			loc.X += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
+		if (loc.X >= minMovement.X && loc.X <= maxMovement.X)
+		{
+			SetActorLocation(loc);
+		}
 	}
 }
 void ABattlePawn::MoveRightLeft(float rate_)
@@ -137,7 +140,10 @@ void ABattlePawn::MoveRightLeft(float rate_)
 	{
 		FVector loc = GetActorLocation();
 		loc.Y += rate_ * BTLPAWN_SPD * GetWorld()->DeltaTimeSeconds;
-		SetActorLocation(loc);
+		if (loc.Y >= minMovement.Y && loc.Y <= maxMovement.Y)
+		{
+			SetActorLocation(loc);
+		}
 	}
 }
 
@@ -146,7 +152,11 @@ void ABattlePawn::Zoom(float rate_)
 {
 	if (FMath::Abs(rate_) > 0)
 	{
-		mainCamera->SetFieldOfView(mainCamera->FieldOfView + rate_ * 30.0f * GetWorld()->DeltaTimeSeconds);
+		float newFoV = mainCamera->FieldOfView + rate_ * BTLPAWN_ZOOM * GetWorld()->DeltaTimeSeconds;
+		if (newFoV <= BTLPAWN_ZOOM_MAX && newFoV >= BTLPAWN_ZOOM_MIN)
+		{
+			mainCamera->SetFieldOfView(newFoV);
+		}
 	}
 }
 
@@ -175,5 +185,11 @@ void ABattlePawn::ResetLock()
 	bLockedOnToStaticActor = false;
 	lockedOnTarget = nullptr;
 	btlCrowd = nullptr;
+}
+
+void ABattlePawn::SetMinMaxMovement(FVector minMovement_, FVector maxMovment_)
+{
+	minMovement = minMovement_;
+	maxMovement = maxMovment_;
 }
 

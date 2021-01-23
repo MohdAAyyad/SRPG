@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		TSubclassOf<class ATile> tileRef;
 
+	UPROPERTY(EditAnywhere, Category = "Grid")
+		bool bEditMode;
+
 	TArray<ATile*> rowTiles;
 	TArray<ATile*> columnTiles;
 	TArray<ATile*> highlightedTiles;

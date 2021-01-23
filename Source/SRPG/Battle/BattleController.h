@@ -30,6 +30,7 @@ protected:
 
 	/** Input handlers for SetDestination action. */
 		void HandleMousePress();
+		void HandleMouseHover();
 
 	class AGridCharacter* controlledCharacter;
 	ABattlePawn* battlePawn;
@@ -38,6 +39,10 @@ protected:
 
 	//Deployment
 	bool bReDeployingUnit; //Used to know whether the player wants to change the position of a deployed unit
+	
+	//Outlines
+	class IOutlineInterface* currentHoverTarget;
+	bool bHoverTargeting;
 
 	//Skill targeting
 	bool bTargetingWithASkill;
@@ -57,6 +62,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ResetFocus();
 	void ResetControlledCharacter();
+	void SetHoverTargeting(bool value_);
 
 	float focusRate;
 };

@@ -266,8 +266,24 @@
 #define BTLPAWN_SPD 600.0f
 #endif
 
+#ifndef BTLPAWN_ZOOM
+#define BTLPAWN_ZOOM 30.0f
+#endif
+
+#ifndef BTLPAWN_ZOOM_MAX
+#define BTLPAWN_ZOOM_MAX 120.0f
+#endif
+
+#ifndef BTLPAWN_ZOOM_MIN
+#define BTLPAWN_ZOOM_MIN 60.0f
+#endif
+
 #ifndef BTL_SHRD_RWRD_PER_UNIT //Shard reward per surviving unit
 #define BTL_SHRD_RWRD_PER_UNIT 5
+#endif
+
+#ifndef CAM_SHAKE_RATE
+#define CAM_SHAKE_RATE 0.5f
 #endif
 
 #pragma endregion
@@ -478,7 +494,7 @@
 #endif
 
 #ifndef MAP_BATTLE 
-#define MAP_BATTLE FName(TEXT("BTL_00_Test"))
+#define MAP_BATTLE FName(TEXT("BTL_0"))
 #endif
 #pragma endregion
 

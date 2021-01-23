@@ -6,6 +6,8 @@
 #include "Engine/World.h"
 #include "Definitions.h"
 #include "Obstacle.h"
+#include "../BattleController.h"
+#include "../BattlePawn.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -20,6 +22,7 @@ AGridManager::AGridManager()
 	tileIndexInColumn = 0;
 	tileIndexInRows = 0;
 	columnOffset = 0;
+	bEditMode = false;
 
 }
 
@@ -39,16 +42,35 @@ void AGridManager::BeginPlay()
 		{
 			rowTileLoc = FVector(r*TILE_SIZE + GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 			ATile* tiler = GetWorld()->SpawnActor<ATile>(tileRef, rowTileLoc, FRotator::ZeroRotator);
-			tiler->SetGridManager(this);
 			rowTiles.Push(tiler);
+			tiler->SetGridManager(this);
+
+			tiler->bEditMode = bEditMode;
 			for (int c = 1; c < columnsNum; c++) //We start at 1 because the row tiles have already created one column
 			{
 				columnTileLoc = FVector(rowTileLoc.X, c*TILE_SIZE + rowTileLoc.Y, rowTileLoc.Z);
 
 				ATile* tilec = GetWorld()->SpawnActor<ATile>(tileRef, columnTileLoc, FRotator::ZeroRotator);
+				tilec->bEditMode = bEditMode;
 				tilec->SetGridManager(this);
 				columnTiles.Push(tilec);
+
 			}
+		}
+
+		ABattlePawn* btlPawn = Cast<ABattlePawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+		if (btlPawn)
+		{
+			FVector min_ = rowTiles[0]->GetActorLocation();
+			min_.X -= 200.0f;
+			min_.Y -= 200.0f;
+
+			FVector max_ = columnTiles[columnTiles.Num() - 1]->GetActorLocation();
+			max_.X += 200.0f;
+			max_.Y += 200.0f;
+
+			btlPawn->SetMinMaxMovement(min_, max_);
 		}
 
 		//Update neighbors in column tile (rows are only anchors)

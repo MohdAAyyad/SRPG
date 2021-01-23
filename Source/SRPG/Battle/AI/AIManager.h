@@ -89,6 +89,8 @@ public:
 	void TellEnemiesToCheckChangedStats();
 	TArray<AEnemyBaseGridCharacter*> GetDeployedEnemies();
 
+	void ActivateOutlines(bool value_);
+
 protected:
 
 	void TellRegularEnemiesToMove();

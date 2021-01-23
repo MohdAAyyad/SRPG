@@ -39,8 +39,6 @@ protected:
 		int deploymentDepth;
 	UPROPERTY(EditAnywhere, Category = "Deployment")
 		int bpidOfUnitToBeDeployedNext;
-	UPROPERTY(EditAnywhere, Category = "Deployment")
-		int maxNumberOfUnitsToDeploy;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Deployment")
 		TArray<UMaterialInterface*> fighterMaterials; //Ordered in the same way as the fighter BPs. Used by UI
 	
@@ -128,10 +126,11 @@ public:
 	void EndBattle(bool victory_);
 	void HandlePlayerDeath(APlayerGridCharacter* player_);
 
-	void SpawnSkillEmitter(FVector loc_, int emitterIndex_);
 	void SpawnWeaponEmitter(FVector loc_, int emitterIndex_);
 
 	ABattleCrowd* GetCrowdRef();
+
+	void ActivateOutlines(bool value_);
 
 
 };

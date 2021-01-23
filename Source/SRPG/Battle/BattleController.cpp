@@ -19,6 +19,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Crowd/BattleCrowd.h"
 #include "Battle/Grid/Obstacle.h"
+#include "OutlineInterface.h"
 
 ABattleController::ABattleController()
 {
@@ -34,15 +35,17 @@ ABattleController::ABattleController()
 	focusRate = 0.35f;
 
 	bReDeployingUnit = false;
+	bHoverTargeting = false;
+	currentHoverTarget = nullptr;
 }
 
 void ABattleController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
-	if (bTargetingWithASkill) //Player is targeting with a skill. We need to show the tiles that can be attacked by the skill.
+	if (bHoverTargeting)
 	{
-		TargetingWithASkill();
+		HandleMouseHover();
 	}
 
 	if (bReDeployingUnit)
@@ -68,6 +71,41 @@ void ABattleController::SetupInputComponent()
 	InputComponent->BindAction("Cancel", IE_Pressed, this, &ABattleController::CancelCommand);
 }
 
+
+void ABattleController::HandleMouseHover()
+{
+
+	//Check  what the mouse is hovering over and update the outline accordingly
+	FHitResult hit;
+	GetHitResultUnderCursor(ECC_Camera, false, hit);
+
+	if (hit.bBlockingHit)
+	{
+		IOutlineInterface* target = Cast<IOutlineInterface>(hit.Actor);
+		if (target)
+		{
+			if (currentHoverTarget)
+				currentHoverTarget->ActivateOutline(true);
+
+			currentHoverTarget = target;
+			currentHoverTarget->TargetedOutline();
+		}
+		else
+		{
+			//If you hover away from the currenthovertarget then disable the targeting outline
+			if (currentHoverTarget)
+			{
+				currentHoverTarget->ActivateOutline(true);
+				currentHoverTarget = nullptr;
+			}
+		}
+	}
+
+	if (bTargetingWithASkill) //Player is targeting with a skill. We need to show the tiles that can be attacked by the skill.
+	{
+		TargetingWithASkill();
+	}
+}
 void ABattleController::HandleMousePress()
 {
 	FHitResult hit;
@@ -196,11 +234,14 @@ void ABattleController::HandleMousePress()
 
 							if (targetObstacle)
 							{
-								if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_ATK)) //Make sure at least one the obstacle's tiles are within attack 
+								if (targetObstacle->GetCanBeTargted())
 								{
-									UE_LOG(LogTemp, Warning, TEXT("Attacking obstacle"));
-									FocusOnGridCharacter(controlledCharacter, focusRate);
-									controlledCharacter->AttackUsingWeapon(targetObstacle, focusRate);
+									if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_ATK)) //Make sure at least one the obstacle's tiles are within attack 
+									{
+										UE_LOG(LogTemp, Warning, TEXT("Attacking obstacle"));
+										FocusOnGridCharacter(controlledCharacter, focusRate);
+										controlledCharacter->AttackUsingWeapon(targetObstacle, focusRate);
+									}
 								}
 							}
 						}
@@ -233,6 +274,9 @@ void ABattleController::HandleMousePress()
 										else if(!targetObstacle) //Otherwise check if there's an obstacle on top of the tile if we haven't already got one
 										{
 											targetObstacle = targetingTiles[i]->GetMyObstacle();
+											if (targetObstacle)
+												if (!targetObstacle->GetCanBeTargted()) //Make sure it can be targeted
+													targetObstacle = nullptr;
 										}
 									}
 									UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle as well"));
@@ -249,12 +293,15 @@ void ABattleController::HandleMousePress()
 
 							if (targetObstacle)
 							{
-								if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_SKL)) //SKL not SKLT as we only need the obstacle to be targetable
+								if (targetObstacle->GetCanBeTargted())
 								{
-									UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle"));
-									FocusOnGridCharacter(controlledCharacter, focusRate);
-									controlledCharacter->AttackUsingSkill(TArray<AGridCharacter*>(), focusRate, targetObstacle);
-									bTargetingWithASkill = false;
+									if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_SKL)) //SKL not SKLT as we only need the obstacle to be targetable
+									{
+										UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle"));
+										FocusOnGridCharacter(controlledCharacter, focusRate);
+										controlledCharacter->AttackUsingSkill(TArray<AGridCharacter*>(), focusRate, targetObstacle);
+										bTargetingWithASkill = false;
+									}
 								}
 							}
 						}
@@ -439,6 +486,12 @@ void ABattleController::TargetingWithASkill()
 
 void ABattleController::CancelCommand()
 {
+	bHoverTargeting = false;
+	if (currentHoverTarget)
+	{
+		currentHoverTarget->ActivateOutline(false);
+		currentHoverTarget = nullptr;
+	}
 	//Return to the idle UI state
 	if (controlledCharacter)
 	{
@@ -461,6 +514,7 @@ void ABattleController::ResetFocus()
 {
 	if (battlePawn)
 		SetViewTargetWithBlend(battlePawn, focusRate);
+	bHoverTargeting = false;
 }
 
 void ABattleController::ResetControlledCharacter()
@@ -468,4 +522,9 @@ void ABattleController::ResetControlledCharacter()
 	if (controlledCharacter)
 		controlledCharacter->NotSelected();
 	controlledCharacter = nullptr;
+}
+
+void ABattleController::SetHoverTargeting(bool value_)
+{
+	bHoverTargeting = value_;
 }

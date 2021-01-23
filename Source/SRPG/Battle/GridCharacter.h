@@ -6,10 +6,11 @@
 #include "GameFramework/Character.h"
 #include "../ExternalFileReader/FSkillTableStruct.h"
 #include "../ExternalFileReader/ItemTableStruct.h"
+#include "OutlineInterface.h"
 #include "GridCharacter.generated.h"
 
 UCLASS()
-class SRPG_API AGridCharacter : public ACharacter
+class SRPG_API AGridCharacter : public ACharacter, public IOutlineInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +38,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category ="Info Panel")
 		FString pName;
+
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+		TSubclassOf<class UPCameraShake> cameraShake;
+
+	UPROPERTY(EditAnywhere, Category = "Postprocess")
+		class UPostProcessComponent* ppComponent;
 
 protected:
 	/** Top down camera */
@@ -195,6 +202,9 @@ public:
 	virtual void IamDeadStopTargetingMe();//Used to stop characters from targeting a dead character
 
 	void ResetActionTargets(); //Used by blank enemy when switching functions
+
+	virtual void ActivateOutline(bool value_) override;
+	void TargetedOutline() override;
 
 protected:
 	virtual void AddEquipmentStats(int tableIndex_); 

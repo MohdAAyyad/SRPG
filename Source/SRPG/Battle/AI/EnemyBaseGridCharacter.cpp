@@ -28,6 +28,7 @@
 #include "SupportDecisionComp.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Weapons/WeaponBase.h"
+#include "PCameraShake.h"
 
 
 AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
@@ -70,7 +71,7 @@ void AEnemyBaseGridCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bCannotFindTile) //Necessary in case the enemy needed a new destiantion while transitioning between tiles
+	/*if (bCannotFindTile) //Necessary in case the enemy needed a new destiantion while transitioning between tiles
 	{
 		ATile* myTile_ = GetMyTile();
 
@@ -78,9 +79,10 @@ void AEnemyBaseGridCharacter::Tick(float DeltaTime)
 		{
 			bCannotFindTile = false;
 			bMoving = false;
-			MoveCloserToTargetPlayer(myTile_);
+			//MoveCloserToTargetPlayer(myTile_);
 		}
 	}
+	*/
 }
 void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_, ABattleManager* bref_, ABattleCrowd* cref_)
 {
@@ -193,9 +195,19 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 void AEnemyBaseGridCharacter::MoveCloserToTargetPlayer(ATile* startingTile_)
 {
 	ATile* myTile_ = startingTile_;
-	if (!myTile_)
+	if (!myTile_) //Make sure we have a tile
 	{
-		bCannotFindTile = true;//Only calculate the path if we have our current tile, otherwise, find your tile
+		myTile_ = GetMyTile();
+		if (myTile_ && bWillMoveAgain)
+		{
+			bMoving = false;
+			MoveCloserToTargetPlayer(myTile_);
+		}
+		else if (!myTile_) //Could not find a tile, give up
+		{
+			aiManager->FinishedMoving();
+		}
+		//bCannotFindTile = true;//Only calculate the path if we have our current tile, otherwise, find your tile
 	}
 	else
 	{
@@ -291,8 +303,6 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 							//Get all the characters on top of the hilighted tiles
 							TArray<ATile*> skillTiles = gridManager->GetHighlightedTiles();
 
-							UE_LOG(LogTemp, Warning, TEXT("Skill tiles num: %d"), skillTiles.Num());
-							UE_LOG(LogTemp, Warning, TEXT("Skill type is: %d"), skillType);
 							for (int i = 0; i < skillTiles.Num(); i++)
 							{
 							
@@ -302,7 +312,6 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 									APlayerGridCharacter* tar = Cast<APlayerGridCharacter>(skillTiles[i]->GetMyGridCharacter());
 									if (tar)
 									{
-										UE_LOG(LogTemp, Warning, TEXT("Found player tar"));
 										if(!actionTargets.Contains(tar))
 											actionTargets.Push(tar);
 									}
@@ -319,7 +328,6 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 								}
 
 							}
-							UE_LOG(LogTemp, Warning, TEXT("Animation index: %d"), chosenSkill.animationIndex);
 							btlCtrl->FocusOnGridCharacter(this, btlCtrl->focusRate);
 							chosenSkillAnimIndex = chosenSkill.animationIndex;
 							AttackUsingSkill(btlCtrl->focusRate);
@@ -327,10 +335,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 						else
 						{
 							bHasDoneAnAction = true;
-							if (aiManager)
-							{
-								aiManager->FinishedAttacking();
-							}
+							EndTurn();
 
 							if(decisionComp) //Look for new items on your next turn as someone may take your item on their turn
 								decisionComp->ClearCrdItems();
@@ -353,10 +358,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 								else
 								{
 									bHasDoneAnAction = true;
-									if (aiManager)
-									{
-										aiManager->FinishedAttacking();
-									}
+									EndTurn();
 
 									if (decisionComp) //Look for new items on your next turn as someone may take your item on their turn
 										decisionComp->ClearCrdItems();
@@ -366,10 +368,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 						else
 						{
 							bHasDoneAnAction = true;
-							if (aiManager)
-							{
-								aiManager->FinishedAttacking();
-							}
+							EndTurn();
 
 							if (decisionComp) //Look for new items on your next turn as someone may take your item on their turn
 								decisionComp->ClearCrdItems();
@@ -381,10 +380,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 			else //Could not find the tile, don't break, finish the turn instead
 			{
 				bHasDoneAnAction = true;
-				if (aiManager)
-				{
-					aiManager->FinishedAttacking();
-				}
+				EndTurn();
 
 				if (decisionComp)
 					decisionComp->ClearCrdItems();
@@ -393,10 +389,7 @@ void AEnemyBaseGridCharacter::ExecuteChosenAction()
 		else //If you don't have a target yet, finish the attacking phase
 		{
 			bHasDoneAnAction = true;
-			if (aiManager)
-			{
-				aiManager->FinishedAttacking();
-			}
+			EndTurn();
 			if (decisionComp)
 				decisionComp->ClearCrdItems();
 		}
@@ -409,35 +402,42 @@ void AEnemyBaseGridCharacter::ActivateWeaponAttack()
 	int hitModifier = statsComp->GetStatValue(STAT_WHT) / 2; //Every 2 points in hit, gives us one point in HM
 	int critModifier = 1; //Crit starts at 1 (not a critical attack)
 	bool crit_ = false;
-	if (actionTargets[0])
+	if (actionTargets.Num() > 0)
 	{
-		if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[0]->GetStat(STAT_HIT)))
+		if (actionTargets[0])
 		{
-			if (statsComp->GetStatValue(STAT_CRT) >= FMath::RandRange(0, HIT_CRIT_BASE))
+			if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[0]->GetStat(STAT_HIT)))
 			{
-				critModifier = 2;
-				//Show crit
-				crit_ = true;
+				if (statsComp->GetStatValue(STAT_CRT) >= FMath::RandRange(0, HIT_CRIT_BASE))
+				{
+					critModifier = 2;
+					//Show crit
+					crit_ = true;
+				}
+
+				//Spawn an emitter based on the weapon index
+				if (btlManager)
+					btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
+
+				//Damage the target
+				actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) *critModifier, this, crit_, statsComp->GetStatValue(STAT_WPN_EFFECT));
+
+				//Affect the crowd
+				if (statsComp->AddTempCRD(CRD_ATK))
+				{
+					if (crdManager)
+						crdManager->UpdateFavor(false);
+				}
+
+				//Play camera shake
+				if (btlCtrl && cameraShake)
+					btlCtrl->PlayerCameraManager->PlayCameraShake(cameraShake, CAM_SHAKE_RATE);
 			}
-
-			//Spawn an emitter based on the weapon index
-			if (btlManager)
-				btlManager->SpawnWeaponEmitter(actionTargets[0]->GetActorLocation(), statsComp->GetStatValue(STAT_WPI));
-
-			//Damage the target
-			actionTargets[0]->GridCharTakeDamage(statsComp->GetStatValue(STAT_ATK) *critModifier, this, crit_, statsComp->GetStatValue(STAT_WPN_EFFECT));
-
-			//Affect the crowd
-			if (statsComp->AddTempCRD(CRD_ATK))
+			else
 			{
-				if (crdManager)
-					crdManager->UpdateFavor(false);
+				//Show miss
+				actionTargets[0]->GridCharReactToMiss();
 			}
-		}
-		else
-		{
-			//Show miss
-			actionTargets[0]->GridCharReactToMiss();
 		}
 	}
 	if (gridManager)
@@ -467,19 +467,19 @@ void AEnemyBaseGridCharacter::ActivateSkillAttack()
 	//Affect the crowd
 	for (int i = 0; i < actionTargets.Num(); i++)
 	{
-		//Check if we hit the action target
-		if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[i]->GetStat(STAT_HIT)))
+		if (actionTargets[i])
 		{
-			bool crit_ = false;
-			if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
+			//Check if we hit the action target
+			if (FMath::RandRange(0, HIT_CRIT_BASE) + hitModifier >= static_cast<int>(actionTargets[i]->GetStat(STAT_HIT)))
 			{
-				critModifier = 2;
-				//Show crit
-				crit_ = true;
-			}
+				bool crit_ = false;
+				if (chosenSkill.crit >= FMath::RandRange(0, HIT_CRIT_BASE))
+				{
+					critModifier = 2;
+					//Show crit
+					crit_ = true;
+				}
 
-			if (actionTargets[i])
-			{
 				//Affect the action target
 				actionTargets[i]->GridCharReactToSkill((skillValue + atkScaled + intiScaled) * critModifier, chosenSkill.statIndex,
 					chosenSkill.statusEffect, this, crit_);
@@ -495,12 +495,16 @@ void AEnemyBaseGridCharacter::ActivateSkillAttack()
 					if (crdManager)
 						crdManager->UpdateFavor(false);
 				}
+
+				//Play camera shake
+				if (btlCtrl && cameraShake)
+					btlCtrl->PlayerCameraManager->PlayCameraShake(cameraShake, CAM_SHAKE_RATE);
 			}
-		}
-		else
-		{
-			//Show miss
-			actionTargets[i]->GridCharReactToMiss();
+			else
+			{
+				//Show miss
+				actionTargets[i]->GridCharReactToMiss();
+			}
 		}
 	}
 
@@ -520,7 +524,7 @@ void AEnemyBaseGridCharacter::ResetCameraFocus()
 	Super::ResetCameraFocus();
 	FTimerHandle finishedAttackingHandle;
 	//This way we allow the camera to defocus from one enemy before focusing on the next
-	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, aiManager, &AAIManager::FinishedAttacking, btlCtrl->focusRate * 3.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(finishedAttackingHandle, this, &AEnemyBaseGridCharacter::EndTurn, btlCtrl->focusRate * 3.5f, false);
 }
 
 void AEnemyBaseGridCharacter::MoveAccordingToPath()
@@ -543,7 +547,9 @@ void AEnemyBaseGridCharacter::MoveAccordingToPath()
 				{
 					if (aiManager)
 					{
-						GetMyTile()->SetOccupied(true);
+						ATile* tile_ = GetMyTile();
+						if(tile_)
+							tile_->SetOccupied(true);
 						aiManager->FinishedMoving();
 					}
 				}
@@ -601,15 +607,15 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 
 		if (movementPath.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Movement path is larger than zero"));
 			bMoving = true;
 		}
 		else
 		{
 			if (aiManager)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Called finished moving"));
-				GetMyTile()->SetOccupied(true);
+				ATile* tile_ = GetMyTile();
+				if (tile_)
+					tile_->SetOccupied(true);
 				aiManager->FinishedMoving();
 			}
 		}
@@ -619,7 +625,9 @@ void AEnemyBaseGridCharacter::MoveToTheTileWithinRangeOfThisTile(ATile* starting
 	{
 		if (aiManager)
 		{
-			GetMyTile()->SetOccupied(true);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+				tile_->SetOccupied(true);
 			aiManager->FinishedMoving();
 		}
 	}
@@ -714,7 +722,9 @@ void AEnemyBaseGridCharacter::GridCharReatToElemental(float damage_, int statusE
 
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			GetMyTile()->SetOccupied(false);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+				tile_->SetOccupied(false);
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
 				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
@@ -760,7 +770,9 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 		//Check if dead
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			GetMyTile()->SetOccupied(false);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+				tile_->SetOccupied(false);
 
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
@@ -838,7 +850,9 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 		//Check if dead
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			GetMyTile()->SetOccupied(false);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+				tile_->SetOccupied(false);
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
 				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
@@ -922,6 +936,20 @@ void AEnemyBaseGridCharacter::IamDeadStopTargetingMe()
 void AEnemyBaseGridCharacter::UpdateTargetCharacter(AGridCharacter* newTarget_)
 { //Called from the decision component when changing targets
 	targetCharacter = newTarget_;
+}
+
+void AEnemyBaseGridCharacter::EndTurn()
+{
+	if (aiManager)
+		aiManager->FinishedAttacking();
+}
+
+void AEnemyBaseGridCharacter::ActivateOutline(bool value_)
+{
+	if (value_)
+		GetMesh()->SetCustomDepthStencilValue(3);
+	else
+		GetMesh()->SetCustomDepthStencilValue(0);
 }
 
 ///Summary of movement

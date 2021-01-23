@@ -37,6 +37,7 @@
 #include "Weapons/WeaponBase.h"
 #include "Grid/Obstacle.h"
 #include "ProjectileGridCharacter.h"
+#include "Components/PostProcessComponent.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -86,7 +87,6 @@ AGridCharacter::AGridCharacter()
 
 	overheadWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget Component"));
 	overheadWidgetComp->SetupAttachment(RootComponent);
-	overheadWidgetComp->SetVisibility(false);
 	overheadWidgetComp->AddRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 
 	champParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Champion Particles"));
@@ -129,6 +129,12 @@ AGridCharacter::AGridCharacter()
 	bReplicates = true;
 	bReplicateMovement = true;
 
+	//Post process
+	GetMesh()->SetRenderCustomDepth(true);
+	GetMesh()->SetCustomDepthStencilValue(0);
+
+	ppComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcess"));
+	ppComponent->SetupAttachment(RootComponent);
 }
 
 void AGridCharacter::BeginPlay()
@@ -395,9 +401,10 @@ ATile* AGridCharacter::GetMyTile()
 	{
 		ATile* tile_ = Cast<ATile>(hit.Actor);
 		if (tile_)
+		{
 			return tile_;
+		}
 	}
-
 	return nullptr;
 }
 
@@ -468,6 +475,7 @@ void AGridCharacter::HighlightItemUsage(FItemTableStruct item_)
 		tile_->GetGridManager()->UpdateCurrentTile(tile_, 1, 2, TILE_ITM, 0); //Items always cover 1 tile only
 		chosenItem = item_;
 		currentState = EGridCharState::HEALING;
+		btlCtrl->SetHoverTargeting(true);
 	}
 }
 
@@ -830,4 +838,17 @@ void AGridCharacter::SpawnProjectile(int index_, FVector spawnLoc_)
 			GetWorld()->SpawnActor<AProjectileGridCharacter>(projectiles[index_], spawnLoc_, GetActorRotation());
 		}
 	}
+}
+
+void AGridCharacter::ActivateOutline(bool value_)
+{
+	if(value_)
+		GetMesh()->SetCustomDepthStencilValue(1);
+	else
+		GetMesh()->SetCustomDepthStencilValue(0);
+}
+
+void  AGridCharacter::TargetedOutline()
+{
+	GetMesh()->SetCustomDepthStencilValue(2);
 }

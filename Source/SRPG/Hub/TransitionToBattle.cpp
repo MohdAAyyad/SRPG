@@ -155,7 +155,7 @@ void ATransitionToBattle::AddFighterToSelectedFighters(int index_)
 	}
 }
 
-void ATransitionToBattle::FinalizeFighterSelection(bool online_)
+void ATransitionToBattle::FinalizeFighterSelection()
 {
 	//Pass in the BPIDs to the intermediate
 	for (int i = 0; i < indexesOfSelectedFighters.Num(); i++)
@@ -167,27 +167,11 @@ void ATransitionToBattle::FinalizeFighterSelection(bool online_)
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 
-
-	if (!bOnlinePlay)
-	{
-		if (gameMode)
+	if (gameMode)
 			gameMode->SwitchLevel(MAP_BATTLE);
-	}
 
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
-	/*if (gameMode)
-		gameMode->SwitchLevel(MAP_BATTLE);*/
-
-	if (online_)
-	{
-		// add in the "listen" command so it sets up a listen server
-		UGameplayStatics::OpenLevel(GetWorld(), MAP_BATTLE, true, "?listen");
-	}
-	else if(gameMode) 
-	{
-			gameMode->SwitchLevel(MAP_BATTLE);
-	}
 
 }
 
