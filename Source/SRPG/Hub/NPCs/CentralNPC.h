@@ -95,4 +95,7 @@ public:
 	void SetMoneyCost(int cost_);
 	void SetUnitCost(int cost_);
 	void SetChanceOfSuccess(int chance_);
+
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentMoneyFromIntermediate();
 };

@@ -152,3 +152,15 @@ void ASRPGPlayerController::FocusOnThisNPC(AActor* npc_, float rate_)
 	}
 }
 
+ASRPGCharacter* ASRPGPlayerController::GetPlayerReference()
+{
+	if (player)
+	{
+		return player;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+

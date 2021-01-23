@@ -10,6 +10,7 @@
 #include "EquipmentTableStruct.h"
 #include "ActivityDialogueTableStruct.h"
 #include "FSkillTableStruct.h"
+#include "CutsceneTableStruct.h"
 #include "FDayTableStruct.h"
 #include "ExternalFileReader.generated.h"
 
@@ -41,6 +42,7 @@ public:
 	FFighterTableStruct FindFighterTableRow(FName name_, int index_);
 	FItemTableStruct FindItemTableRow(FName name_, int index_);
 	FEquipmentTableStruct FindEquipmentTableRow(FName name_, int index_);
+	FCutsceneTableStruct FindCutsceneTableRow(FName name_, int index_);
 
 	FFighterTableStruct FindEquippedFighterTableRow(FName name_, int index_);
 	FActivityDialogueTableStruct FindActivityDialogueTableRow(FName name_, int index_);

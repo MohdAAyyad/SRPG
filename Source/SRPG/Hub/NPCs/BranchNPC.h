@@ -16,12 +16,20 @@ class SRPG_API ABranchNPC : public ANPC
 protected:
 	UPROPERTY(EditAnywhere)
 	class ACentralNPC* central;
+	UPROPERTY(BlueprintReadOnly)
 	bool hasUpdatedCentral;
 	float chanceOfSuccessEffect;
 
 	void EndDialogue() override;
 	void LoadText() override;
 	void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString information;
+
+	virtual void OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_,
+									 UPrimitiveComponent * otherComp_, int32 otherBodyIndex_,
+									 bool bFromSweepO, const FHitResult & sweepResult_) override;
 
 public:
 	void SetCentralNPC(class ACentralNPC* ref_);

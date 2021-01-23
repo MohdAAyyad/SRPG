@@ -23,6 +23,8 @@ public:
 
 	void FocusOnThisNPC(AActor* npc_, float rate_);
 
+	class ASRPGCharacter* GetPlayerReference();
+
 protected:
 
 	/** True if the controlled character should navigate to the mouse cursor. */

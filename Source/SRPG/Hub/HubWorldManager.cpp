@@ -12,6 +12,7 @@
 #include "ExternalFileReader/ExternalFileReader.h"
 #include "../SRPGCharacter.h"
 #include "TimerManager.h"
+#include "Hub/Cutscene.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -558,7 +559,7 @@ void AHubWorldManager::SpawnCentralNPCs(int amount_)
 				// make it impossible for the branch to spawn
 				rando = 1000000;
 			}
-			if (rando < BRNC_SPWN && activityIndex != 2)
+			else if (rando < BRNC_SPWN)
 			{
 				if (ABranchNPC* branch = SpawnBranchNPC())
 				{
