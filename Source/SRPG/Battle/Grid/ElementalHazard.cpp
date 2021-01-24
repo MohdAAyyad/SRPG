@@ -204,6 +204,8 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 				if (box)
 				{
 					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					FVector scale_ = box->GetComponentScale();
+					box->SetWorldScale3D(scale_*3.0f);
 					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 					if (obstacleManager)
@@ -252,7 +254,10 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 				if (box)
 				{
 					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					FVector scale_ = box->GetComponentScale();
+					box->SetWorldScale3D(scale_*3.0f);
 					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					
 
 					if (obstacleManager)
 					{
@@ -389,4 +394,27 @@ void AElementalHazard::ATurnHasPassed(int turnType_)
 CurrentElemntalStat AElementalHazard::GetCurrentState()
 {
 	return currentStat;
+}
+
+void AElementalHazard::ActivateOutline(bool value_)
+{
+	if (bCanBeTargeted)
+	{
+		if (value_)
+		{
+			staticMesh->SetCustomDepthStencilValue(6);
+			box->SetCollisionProfileName("DestructibleBox"); //The collision should be enabled only when targeting as not to affect movement
+		}
+		else
+		{
+			staticMesh->SetCustomDepthStencilValue(0);
+			box->SetCollisionProfileName("OverlapAllDynamic");
+		}
+	}
+}
+
+void AElementalHazard::AddObstacleToObstacleManager()
+{
+	Super::AddObstacleToObstacleManager();
+	box->SetCollisionProfileName("OverlapAllDynamic");
 }

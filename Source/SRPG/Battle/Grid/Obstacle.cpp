@@ -49,7 +49,7 @@ void AObstacle::BeginPlay()
 	//Delay adding to obstacle maanger to ensure the tiles have been added to the obstacle's tile array in case the obstacle manager decides to destroy the obstacle
 	//This is to avoid a race condition where the obstacle is destroyed before the tiles are added to the array potentially causing the tiles to remain non-traversable
 	FTimerHandle timeToAddHandle;
-	GetWorld()->GetTimerManager().SetTimer(timeToAddHandle, this, &AObstacle::AddObstacleToObstacleManager, 1.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(timeToAddHandle, this, &AObstacle::AddObstacleToObstacleManager, 2.0f, false);
 
 }
 

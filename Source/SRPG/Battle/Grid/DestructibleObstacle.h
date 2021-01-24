@@ -28,6 +28,8 @@ protected:
 		UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Widget")
 			class UWidgetComponent* widgetComp;
 
+		void AddObstacleToObstacleManager() override;
+
 public:
 
 	void ObstacleTakeDamage(float damage_, int statusEffect_) override;

@@ -426,10 +426,6 @@ void AGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* attacker_
 	rot.Roll = GetActorRotation().Roll;
 	rot.Pitch = GetActorRotation().Pitch;
 	SetActorRotation(rot);
-	if (animInstance)
-	{
-		animInstance->GotHit(crit_);
-	}
 
 	//Health details are handled inside the children's code
 }

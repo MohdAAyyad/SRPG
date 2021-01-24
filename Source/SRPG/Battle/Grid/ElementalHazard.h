@@ -59,6 +59,10 @@ protected:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 
+	void AddObstacleToObstacleManager() override;
+
+	void ActivateOutline(bool value_) override;
+
 	UFUNCTION()
 		void OverlapWithGridCharacter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,

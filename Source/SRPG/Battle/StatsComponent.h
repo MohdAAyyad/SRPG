@@ -36,7 +36,8 @@ protected:
 
 	TArray<int> turnsSinceLastStatChange;
 	TArray<int> tempStatChange;
-	TArray<int> activeStatusEffects;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<int> activeStatusEffects;
 	TArray<int> turnsSinceStatusEffect;
 
 

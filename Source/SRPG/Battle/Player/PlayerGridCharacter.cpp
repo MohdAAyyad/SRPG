@@ -39,15 +39,12 @@ APlayerGridCharacter::APlayerGridCharacter() :AGridCharacter()
 	overheadWidgetComp->AddRelativeRotation(FRotator(90.0f, -178.0f, 1.25f));
 	fighterID = 0;
 	chosenSkillAnimIndex = 0;
+	endText = "";
 }
 
 void APlayerGridCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if(overheadWidgetComp)
-		if(overheadWidgetComp->GetUserWidgetObject())
-			if(!overheadWidgetComp->GetUserWidgetObject()->IsInViewport())
-					overheadWidgetComp->GetUserWidgetObject()->AddToViewport();
 }
 
 void APlayerGridCharacter::StartPlayerTurn()
@@ -443,13 +440,20 @@ void APlayerGridCharacter::GridCharReatToElemental(float damage_, int statusEffe
 	if (damage_ > 0)
 	{
 		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-		animInstance->SetDamage(static_cast<int> (damage_));
+		if (animInstance)
+		{
+			animInstance->GotHit(false);
+			animInstance->SetDamage(static_cast<int> (damage_));
+		}
 		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 
 
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			GetMyTile()->SetOccupied(false);
+			ATile* tile_ = GetMyTile();
+			if(tile_)
+				tile_->SetOccupied(false);
+
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
 				TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
@@ -483,14 +487,20 @@ void APlayerGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* att
 	Super::GridCharTakeDamage(damage_, attacker_,crit_, statusEffect_);
 	//update stats component
 	damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-	animInstance->SetDamage(static_cast<int> (damage_));
+	if (animInstance)
+	{
+		animInstance->GotHit(crit_);
+		animInstance->SetDamage(static_cast<int> (damage_));
+	}
 	statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 	statsComp->CheckIfAffectedByStatusEffect(statusEffect_);
 	//UE_LOG(LogTemp, Warning, TEXT("Actually  Health after taking damage %d"), statsComp->GetStatValue(STAT_HP));
 	//Check if dead
 	if (statsComp->GetStatValue(STAT_HP) <= 1)
 	{
-		GetMyTile()->SetOccupied(false);
+		ATile* tile_ = GetMyTile();
+		if (tile_)
+			tile_->SetOccupied(false);
 		for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 		{
 			TargetedByTheseCharacters[i]->IamDeadStopTargetingMe();
@@ -551,7 +561,9 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 		//Check if dead
 		if (statsComp->GetStatValue(STAT_HP) <= 1)
 		{
-			GetMyTile()->SetOccupied(false);
+			ATile* tile_ = GetMyTile();
+			if (tile_)
+				tile_->SetOccupied(false);
 			for (int i = 0; i < TargetedByTheseCharacters.Num(); i++)
 			{
 				if(TargetedByTheseCharacters[i])
