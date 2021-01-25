@@ -40,7 +40,7 @@ protected:
 
 	TArray<class ATile*> obstructedTiles;
 
-	void AddObstacleToObstacleManager();
+	virtual void AddObstacleToObstacleManager();
 
 
 	UPROPERTY(EditAnywhere, Category = "Postprocess")

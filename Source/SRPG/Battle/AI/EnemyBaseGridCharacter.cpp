@@ -715,7 +715,11 @@ void AEnemyBaseGridCharacter::GridCharReatToElemental(float damage_, int statusE
 	if (damage_ > 0)
 	{
 		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-		animInstance->SetDamage(static_cast<int> (damage_));
+		if (animInstance)
+		{
+			animInstance->GotHit(false);
+			animInstance->SetDamage(static_cast<int> (damage_));
+		}
 		overheadWidgetComp->SetVisibility(true);
 		statsComp->AddToStat(STAT_HP, static_cast<int>(-damage_));
 
@@ -760,7 +764,11 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 	if (attacker_ != this)
 	{
 		damage_ = damage_ - ((static_cast<float>(statsComp->GetStatValue(STAT_DEF)) / (damage_ + static_cast<float>(statsComp->GetStatValue(STAT_DEF)))) * damage_);
-		animInstance->SetDamage(static_cast<int> (damage_));
+		if (animInstance)
+		{
+			animInstance->GotHit(crit_);
+			animInstance->SetDamage(static_cast<int> (damage_));
+		}
 		overheadWidgetComp->SetVisibility(true);
 
 		statsComp->CheckIfAffectedByStatusEffect(statusEffect);

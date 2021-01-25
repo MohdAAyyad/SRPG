@@ -21,7 +21,7 @@ UStatsComponent::UStatsComponent()
 
 	turnsSinceLastStatChange.Reserve(6);
 	tempStatChange.Reserve(6);
-	activeStatusEffects.Reserve(2); //Will only save status effects that do hp damage. And right now only burn and poison do that
+	activeStatusEffects.Reserve(6);
 	turnsSinceStatusEffect.Reserve(2);
 
 	for (int i = 0; i < 6; i++)
@@ -30,7 +30,7 @@ UStatsComponent::UStatsComponent()
 		tempStatChange.Push(0);
 	}
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		activeStatusEffects.Push(0);
 		turnsSinceStatusEffect.Push(0);
@@ -352,6 +352,7 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 	//Check for status effects
 	for (int i = 0; i < activeStatusEffects.Num(); i++)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("activeStatusEffects[i] %d"), activeStatusEffects[i]);
 		if (activeStatusEffects[i] != 0)
 		{
 			turnsSinceStatusEffect[i]--;
@@ -364,11 +365,13 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 			{
 				if (activeStatusEffects[i] == EFFECT_BURN)
 				{
-					currentStats[STAT_HP] -= BURN_DAMAGE;
+					if (ownerChar)
+						ownerChar->GridCharReatToElemental(BURN_DAMAGE, EFFECT_NONE);
 				}
 				else if (activeStatusEffects[i] == EFFECT_POISON)
 				{
-					currentStats[STAT_HP] -= POISON_DAMAGE;
+					if (ownerChar)
+						ownerChar->GridCharReatToElemental(POISON_DAMAGE, EFFECT_NONE);
 				}
 			}
 		}
@@ -456,39 +459,36 @@ int UStatsComponent::ConvertTempStatIndexToStatIndex(int tempStatIndex_)
 
 void UStatsComponent::CheckIfAffectedByStatusEffect(int effect_)
 {
-	int resistanceChance = EFFECT_RES_CHANCE_BASE;
-	int effectChance = FMath::RandRange(0, 101);
+	if (effect_ != EFFECT_NONE)
+	{
+		int resistanceChance = EFFECT_RES_CHANCE_BASE;
+		int effectChance = FMath::RandRange(0, 101);
 
-	//Check for the character's resistance to the effect
-	if (currentStats[STAT_ARM_EFFECT] == effect_)
-	{
-		resistanceChance += EFFECT_RES_CHANCE_ARM_INC;
-	}
-	if (currentStats[STAT_ACC_EFFECT] == effect_)
-	{
-		resistanceChance += EFFECT_RES_CHANCE_ACC_INC;
-	}
-
-	if (effectChance > resistanceChance)
-	{
-		if (effect_ == EFFECT_BURN || effect_ == EFFECT_POISON) //Damage effects should be added to the array
+		//Check for the character's resistance to the effect
+		if (currentStats[STAT_ARM_EFFECT] == effect_)
 		{
-			//Push the stat
+			resistanceChance += EFFECT_RES_CHANCE_ARM_INC;
+		}
+		if (currentStats[STAT_ACC_EFFECT] == effect_)
+		{
+			resistanceChance += EFFECT_RES_CHANCE_ACC_INC;
+		}
+
+		if (effectChance > resistanceChance)
+		{
 			if (!activeStatusEffects.Contains(effect_))
 			{
-				activeStatusEffects.Push(effect_);
+				activeStatusEffects.Push(effect_); //Need to push it here as this is read by the UI
 				turnsSinceStatusEffect.Push(4);
-			}
-		}
-		else //Non-damage act like nerfs
-		{
-			if (effect_ == EFFECT_FREEZE || effect_ == EFFECT_PARALYSIS)
-			{
-				AddTempToStat(STAT_SPD, -currentStats[STAT_SPD]); //Speed reduced to 1
-			}
-			else if (effect_ == EFFECT_SLOW)
-			{
-				AddTempToStat(STAT_SPD, - SLOW_DAMAGE); //Reduce the speed by the slow effect
+
+				if (effect_ == EFFECT_FREEZE || effect_ == EFFECT_PARALYSIS)
+				{
+					AddTempToStat(STAT_SPD, -currentStats[STAT_SPD]); //Speed reduced to 1
+				}
+				else if (effect_ == EFFECT_SLOW)
+				{
+					AddTempToStat(STAT_SPD, -SLOW_DAMAGE); //Reduce the speed by the slow effect
+				}
 			}
 		}
 	}

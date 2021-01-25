@@ -46,9 +46,15 @@ void ADestructibleObstacle::ActivateOutline(bool value_)
 	if (bCanBeTargeted)
 	{
 		if (value_)
+		{
 			mesh->SetCustomDepthStencilValue(6);
+			box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //The collision should be enabled only when targeting as not to affect movement
+		}
 		else
+		{
 			mesh->SetCustomDepthStencilValue(0);
+			box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
 }
 
@@ -63,4 +69,10 @@ void  ADestructibleObstacle::TargetedOutline()
 float ADestructibleObstacle::GetHealthPercentage()
 {
 	return (hp / maxHp);
+}
+
+void ADestructibleObstacle::AddObstacleToObstacleManager()
+{
+	Super::AddObstacleToObstacleManager();
+	box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
