@@ -26,7 +26,6 @@ void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 			
 			def += increment;
 			intl += increment;
-			spd += increment;
 			crit += increment;
 			agl += increment;
 			crd += increment;
@@ -37,7 +36,6 @@ void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 
 			atk += increment;
 			intl += increment;
-			spd += increment;
 			crit += increment;
 			agl += increment;
 			crd += increment;
@@ -47,7 +45,6 @@ void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 
 			atk += increment;
 			def += increment;
-			spd += increment;
 			crit += increment;
 			agl += increment;
 			crd += increment;
@@ -82,7 +79,6 @@ void FFighterTableStruct::ScaleStatsByLevelDown(int targetLevel_)
 
 			def -= increment;
 			intl -= increment;
-			spd -= increment;
 			crit -= increment;
 			agl -= increment;
 			crd -= increment;
@@ -93,7 +89,6 @@ void FFighterTableStruct::ScaleStatsByLevelDown(int targetLevel_)
 
 			atk -= increment;
 			intl -= increment;
-			spd -= increment;
 			crit -= increment;
 			agl -= increment;
 			crd -= increment;
@@ -103,7 +98,6 @@ void FFighterTableStruct::ScaleStatsByLevelDown(int targetLevel_)
 
 			atk -= increment;
 			def -= increment;
-			spd -= increment;
 			crit -= increment;
 			agl -= increment;
 			crd -= increment;

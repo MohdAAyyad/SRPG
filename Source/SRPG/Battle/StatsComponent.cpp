@@ -3,6 +3,7 @@
 
 #include "StatsComponent.h"
 #include "Definitions.h"
+#include "PathComponent.h"
 #include "GridCharacter.h"
 
 // Sets default values for this component's properties
@@ -221,20 +222,29 @@ void UStatsComponent::ScaleLevelWithArchetype(int targetLevel_, int archetype_)
 		case ARCH_ATK:
 			currentStats[STAT_ATK]++;
 			for (int i = STAT_ATK + 1; i < STAT_LVL; i++)
-				currentStats[i] += increment;
+			{
+				if(i != STAT_SPD) //Spd is not affected by leveling up
+					currentStats[i] += increment;
+			}
 			break;
 		case ARCH_DEF:
 			currentStats[STAT_ATK]+=increment;
 			currentStats[STAT_DEF]++;
 			for (int i = STAT_DEF + 1; i < STAT_LVL; i++)
-				currentStats[i] += increment;
+			{
+				if (i != STAT_SPD) //Spd is not affected by leveling up
+					currentStats[i] += increment;
+			}
 			break;
 		case ARCH_INT:
 			currentStats[STAT_ATK] += increment;
 			currentStats[STAT_DEF] += increment;
 			currentStats[STAT_INT]++;
 			for (int i = STAT_INT + 1; i < STAT_LVL; i++)
-				currentStats[i] += increment;
+			{
+				if (i != STAT_SPD) //Spd is not affected by leveling up
+					currentStats[i] += increment;
+			}
 			break;
 		default:
 			break;
@@ -344,6 +354,10 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 				AddToStat(statIndex_, -tempStatChange[i]);
 				tempStatChange[i] = 0;
 				turnsSinceLastStatChange[i] = 0;
+
+				if(statIndex_ == STAT_SPD) //Make sure the path component is aware of the speed change
+					if (ownerChar)
+						ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 			}
 		}
 	}
@@ -358,8 +372,12 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 			turnsSinceStatusEffect[i]--;
 			if (turnsSinceStatusEffect[i] <= 0)
 			{
+				if(activeStatusEffects[i] == EFFECT_SLOW) //If the effect was slow then make sure to update the speed. The speed will have been updated here because it's treated as a nerf
+					if (ownerChar)
+						ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 				activeStatusEffects[i] = EFFECT_NONE;
 				turnsSinceStatusEffect[i] = 0;
+
 			}
 			else //Damage the character if the status effect causes damage
 			{
@@ -401,7 +419,9 @@ void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs ne
 		}
 		AddToStat(statIndex_, value_); //Update the stat
 	}
-
+	if(statIndex_ == STAT_SPD) //If the affected stat is speed, make sure to tell the path component
+		if (ownerChar)
+			ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 	//No double buffing or nerfing to the same stat
 
 }
@@ -479,7 +499,7 @@ void UStatsComponent::CheckIfAffectedByStatusEffect(int effect_)
 			if (!activeStatusEffects.Contains(effect_))
 			{
 				activeStatusEffects.Push(effect_); //Need to push it here as this is read by the UI
-				turnsSinceStatusEffect.Push(4);
+				turnsSinceStatusEffect.Push(3);
 
 				if (effect_ == EFFECT_FREEZE || effect_ == EFFECT_PARALYSIS)
 				{
@@ -488,6 +508,8 @@ void UStatsComponent::CheckIfAffectedByStatusEffect(int effect_)
 				else if (effect_ == EFFECT_SLOW)
 				{
 					AddTempToStat(STAT_SPD, -SLOW_DAMAGE); //Reduce the speed by the slow effect
+					if(ownerChar)
+						ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 				}
 			}
 		}

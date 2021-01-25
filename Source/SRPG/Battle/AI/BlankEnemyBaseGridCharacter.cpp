@@ -44,6 +44,7 @@ void ABlankEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* g
 	statsComp->InitStatsAtZero();
 	statsComp->AddToStat(STAT_WPI, weaponIndex);
 	statsComp->AddToStat(STAT_ARI, armorIndex);
+	statsComp->AddToStat(STAT_SPD, speed);
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 	AddEquipmentStats(2);
 	decisionComp->SetRefs(aiManager, btlManager, this);

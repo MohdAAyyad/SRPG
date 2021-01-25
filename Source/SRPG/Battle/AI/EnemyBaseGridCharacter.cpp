@@ -46,6 +46,7 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	bCannotFindTile = false;
 	weaponIndex = 0;
 	armorIndex = 0;
+	speed = 0;
 	bHealer = false; //Changed to true if the decision tree used is that of a support character.
 	bLookForANewTargetMidAttack = false;
 	tree = EDecisionTrees::DISTANCEBASED;
@@ -95,6 +96,7 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 	statsComp->InitStatsAtZero();
 	statsComp->AddToStat(STAT_WPI, weaponIndex);
 	statsComp->AddToStat(STAT_ARI, armorIndex);
+	statsComp->AddToStat(STAT_SPD, speed);
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 	AddEquipmentStats(2);
 
@@ -245,6 +247,8 @@ void AEnemyBaseGridCharacter::StartEnemyTurn()
 	{
 		MoveCloserToTargetPlayer(nullptr);
 	}
+
+	TargetedByTheseCharacters.Empty();
 }
 
 void AEnemyBaseGridCharacter::Selected()

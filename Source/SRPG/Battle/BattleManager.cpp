@@ -294,8 +294,9 @@ void ABattleManager::HandlePlayerDeath(APlayerGridCharacter* player_)
 
 void ABattleManager::EndBattle(bool victory_)
 {
-	if (widgetComp->GetUserWidgetObject()->IsInViewport())
-		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	if (widgetComp->GetUserWidgetObject())
+		if (widgetComp->GetUserWidgetObject()->IsInViewport())
+			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 
 	phase = BTL_END;
 	if (victory_)

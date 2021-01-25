@@ -40,6 +40,8 @@ protected:
 		int weaponIndex;
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 		int armorIndex;
+	UPROPERTY(EditAnywhere, Category = "Equipment")
+		int speed;
 	UPROPERTY(EditAnywhere, Category = "Decision Trees")
 		EDecisionTrees tree;
 	UPROPERTY(EditAnywhere, Category = "Decision Trees")

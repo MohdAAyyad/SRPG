@@ -55,6 +55,8 @@ void APlayerGridCharacter::StartPlayerTurn()
 	currentState = EGridCharState::IDLE;
 
 	statsComp->CheckStatBuffNerfStatus();
+
+	TargetedByTheseCharacters.Empty(); //Clear the array at the start of every turn to prevent potential nullptrs
 }
 
 void APlayerGridCharacter::EndPlayerTurn()

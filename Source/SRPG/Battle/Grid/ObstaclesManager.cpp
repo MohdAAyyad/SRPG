@@ -57,7 +57,7 @@ UParticleSystemComponent* AObstaclesManager::SpawnElemntalEmitterAtLocation(FVec
 
 	if (index_ >= 0 && index_ < elementalEmitters.Num())
 	{
-		return UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), elementalEmitters[index_], loc_, FRotator::ZeroRotator, FVector(3.0f,3.0f,3.0f));
+		return UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), elementalEmitters[index_], loc_, FRotator::ZeroRotator);
 	}
 	return nullptr;
 }
@@ -106,8 +106,12 @@ void AObstaclesManager::RemoveObstacle(AObstacle* obstacle_)
 		{
 			obstacles.RemoveAt(i);
 			obstacle_->Destroy();
+			obstacle_ = nullptr;
 		}
 	}
+
+	if(obstacle_) //Check for the obstacle again. This is needed when the obstacle is removed due to removal chance
+		obstacle_->Destroy();
 }
 
 AObstacle* AObstaclesManager::GetAnObstacleAtRandom()
