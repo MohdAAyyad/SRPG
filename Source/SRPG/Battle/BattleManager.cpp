@@ -18,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UnrealNetwork.h"
 #include "Grid/ObstaclesManager.h"
+#include "../Audio/AudioMnager.h"
 #include "ExternalFileReader/ExternalFileReader.h"
 
 // Sets default values
@@ -179,6 +180,8 @@ int ABattleManager::GetBpidOfUnitToBeDeployedNext()
 
 void ABattleManager::EndDeployment()
 {
+	if (audioMgr) //Start battle music
+		audioMgr->SwitchMusic(0);
 	if (gridManager)
 		gridManager->ClearHighlighted();
 

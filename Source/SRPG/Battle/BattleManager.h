@@ -39,6 +39,7 @@ protected:
 		int deploymentDepth;
 	UPROPERTY(EditAnywhere, Category = "Deployment")
 		int bpidOfUnitToBeDeployedNext;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Deployment")
 		TArray<UMaterialInterface*> fighterMaterials; //Ordered in the same way as the fighter BPs. Used by UI
 	
@@ -81,6 +82,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Obstacles")
 		class AObstaclesManager* obstacleManager;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+		class AAudioMnager* audioMgr;
 
 	UFUNCTION(BlueprintCallable)
 		void DeployThisUnitNext(int bpid_); //Called from the UI

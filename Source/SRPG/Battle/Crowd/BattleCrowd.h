@@ -65,6 +65,9 @@ protected:
 		int currentNumOfObstaclesDestroyed;
 	UPROPERTY(EditAnywhere, Category = "Obstacles")
 		int numOfTurnsToAnDestroyObstacle; //Every time this number of turns pass, the crowd will attempt to destroy an obstacle
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+		class AAudioMnager* audioMgr;
 		
 	int numOfTurnsPassedSinceLastObstacleWasDestroyed;
 	class AObstacle* chosenObstacle;

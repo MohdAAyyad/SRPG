@@ -308,9 +308,12 @@ FActivityDialogueTableStruct UExternalFileReader::GetActivityEndDialogue(int act
 
 void UExternalFileReader::AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_)
 {
-	if (tables[index_])
+	if (index_ >= 0 && index_ < tables.Num())
 	{
-		tables[index_]->AddRow(rowName_, row_);
+		if (tables[index_])
+		{
+			tables[index_]->AddRow(rowName_, row_);
+		}
 	}
 }
 
@@ -401,6 +404,23 @@ void UExternalFileReader::RemoveFightersDueToPermaDeath(TArray<int>& ids_, int t
 				tables[tableIndex_]->RemoveRow(rowNames[i]);
 			}
 		}
+	}
+}
+
+void UExternalFileReader::ClearRecruitedFightersTable(int tableIndex_)
+{
+	static const FString contextString(TEXT("Trying to clear all fighters from the recruited fighters table"));
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		//rowNames = tables[tableIndex_]->GetRowNames(); //Get all the rows
+
+		//for (int i = rowNames.Num() - 1; i > -1; i--)
+		//{
+		//	tables[tableIndex_]->RemoveRow(rowNames[i]);
+		//}
+		tables[tableIndex_]->EmptyTable();
+		UE_LOG(LogTemp, Warning, TEXT("Clearing table"));
 	}
 }
 

@@ -26,7 +26,7 @@ AFightersShop::AFightersShop():ANPC()
 void AFightersShop::BeginPlay()
 {
 	Super::BeginPlay();
-	fighterID = Intermediate::GetInstance()->GetLatestFighterID();
+	fighterID = Intermediate::GetInstance()->GetLatestFighterID(); //Assuming we do not have any fighters yet
 	GetAllFightersForSale();
 
 	if (Intermediate::GetInstance()->GetDeadUnits().Num() > 0)
@@ -40,21 +40,32 @@ void AFightersShop::BeginPlay()
 		/*When the player decides to level up we save a copy of the SFighter
 		so that when the player fluctuates between the levels the results no longer follow a random chance
 		and are consistent i.e. this is used to make sure the random chance is only run once on level up.*/
+	TArray<FFighterTableStruct> fighters;
 	if (Intermediate::GetInstance()->GetSelectedFighters().Num() > 0)
 	{
-		TArray<FFighterTableStruct> fighters = Intermediate::GetInstance()->GetSelectedFighters();
+		fighters = Intermediate::GetInstance()->GetSelectedFighters();
 		Intermediate::GetInstance()->ResetSelectedFighters();
-
-		for (int i = 0; i < fighters.Num(); i++)
+	}
+	if (fileReader)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Gonna try it out"));
+		//We need to need to check if we have recruited fighters and update the fighterID accordingyl
+		TArray<FFighterTableStruct> allRecruitedFighters = fileReader->GetAllRecruitedFighters(1);
+		if (allRecruitedFighters.Num() > 0)
 		{
-			if (fileReader)
-			{
-				fileReader->IncreaseTheStatsOfThisFigheter(fighters[i], 1); //Update the stats of these fighters in the recruited fighters table
-			}
+			fighterID = allRecruitedFighters[allRecruitedFighters.Num() - 1].id; //We already have fighters, so update the fighter id to match the id of the last fighter we have
+			Intermediate::GetInstance()->SetLatestFighterID(fighterID);
 		}
 
-		fighters.Empty();
+		if (fighters.Num() > 0)
+		{
+			for (int j = 0; j < fighters.Num(); j++)
+			{
+				fileReader->IncreaseTheStatsOfThisFigheter(fighters[j], 1); //Update the stats of these fighters in the recruited fighters table
+			}
 
+			fighters.Empty();
+		}
 	}
 }
 

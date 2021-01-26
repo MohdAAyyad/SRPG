@@ -14,6 +14,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "CrowdItem.h"
+#include "../../Audio/AudioMnager.h"
 #include "../Player/PlayerGridCharacter.h"
 
 
@@ -306,10 +307,14 @@ void ABattleCrowd::ElectChampion()
 		if (playerFavor >= 0.7f) //Elect a champ from the player camp
 		{
 			champion = btlManager->GetPlayerWithHighestStat(STAT_CRD,champion);
+			if (audioMgr)
+				audioMgr->SwitchMusic(1);
 		}
 		else //Otherwise, elect an enemy to be the champ
 		{
 			champion = aiManager->GetEnemyWithHighestStat(STAT_CRD, champion);
+			if (audioMgr)
+				audioMgr->SwitchMusic(2);
 		}
 
 		//Call the needed functions on the champ
@@ -359,10 +364,14 @@ void ABattleCrowd::UpdateFavor(bool bPlayerOrEnemy_) //Called when the player or
 	if (bPlayerOrEnemy_) //True player, false enemy
 	{
 		playerFavor += favorIncrement;
+		if (playerFavor >= 1.0f)
+			playerFavor = 1.0f;
 	}
 	else
 	{
 		playerFavor -= favorIncrement;
+		if (playerFavor <= 0.0f)
+			playerFavor = 0.0f;
 	}
 
 	//playerFavor = int(playerFavor * 100) * 0.01;
@@ -412,6 +421,16 @@ void ABattleCrowd::IAmTheNewChampion(AGridCharacter* gchar_)
 
 void ABattleCrowd::FlipFavorMeter()
 {
+	if (playerFavor >= 70.0f)//Meter has flipped from player to enemy so switch music to villain theme
+	{
+		if (audioMgr)
+			audioMgr->SwitchMusic(2);
+	}
+	else
+	{
+		if (audioMgr)
+			audioMgr->SwitchMusic(1);
+	}
 	playerFavor = 1 - playerFavor;
 }
 
