@@ -170,7 +170,7 @@ void UStatsComponent::CheckLevelUp(bool hasLeveledUp_)
 		}
 		else
 		{
-			expOffset = 1.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
+			expOffset = 5.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
 			bLevelingUp = true;
 		}
 	}

@@ -38,6 +38,8 @@
 #include "Grid/Obstacle.h"
 #include "ProjectileGridCharacter.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 
 // Sets default values
 AGridCharacter::AGridCharacter()
@@ -108,6 +110,9 @@ AGridCharacter::AGridCharacter()
 
 
 	fileReader = CreateDefaultSubobject<UExternalFileReader>(TEXT("File Reader"));
+
+	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Component"));
+	audioComponent->SetupAttachment(RootComponent);
 
 	statsComp = CreateDefaultSubobject<UStatsComponent>(TEXT("Stats Component"));
 
@@ -848,4 +853,16 @@ void AGridCharacter::ActivateOutline(bool value_)
 void  AGridCharacter::TargetedOutline()
 {
 	GetMesh()->SetCustomDepthStencilValue(2);
+}
+
+void AGridCharacter::PlaySoundEffect(int index_)
+{
+	if (index_ >= 0 && index_ < soundEffects.Num())
+	{
+		if (!audioComponent->IsPlaying())
+		{
+			audioComponent->Sound = soundEffects[index_];
+			audioComponent->Play();
+		}
+	}
 }

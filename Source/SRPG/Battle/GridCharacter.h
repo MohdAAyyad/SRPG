@@ -75,6 +75,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category="File Reader")
 		class UExternalFileReader* fileReader;
 
+	UPROPERTY(EditAnywhere, Category = "AudioComponent")
+		class UAudioComponent* audioComponent;
+	UPROPERTY(EditAnywhere, Category = "AudioComponent")
+		TArray<class USoundBase*> soundEffects;
+
 
 	bool bMoving;
 	TArray<FVector> movementPath;
@@ -211,5 +216,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void SpawnProjectile(int index_, FVector spawnLoc_); //Called from anim bp
+
+	UFUNCTION(BlueprintCallable)
+		void PlaySoundEffect(int index_);
 
 };

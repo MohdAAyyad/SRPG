@@ -357,7 +357,7 @@ void ABattleCrowd::CalculateFavorForTheFirstTime()
 
 	playerFavor = playerCRD / totalCRD;
 
-	playerFavor = int(playerFavor * 100) * 0.01;
+	playerFavor = int(playerFavor * 100) * 0.01f;
 }
 void ABattleCrowd::UpdateFavor(bool bPlayerOrEnemy_) //Called when the player or the enemy gain a CRD point
 {
@@ -421,15 +421,15 @@ void ABattleCrowd::IAmTheNewChampion(AGridCharacter* gchar_)
 
 void ABattleCrowd::FlipFavorMeter()
 {
-	if (playerFavor >= 70.0f)//Meter has flipped from player to enemy so switch music to villain theme
+	if (playerFavor >= 0.7f)//Meter has flipped from player to enemy so switch music to villain theme
 	{
 		if (audioMgr)
-			audioMgr->SwitchMusic(2);
+			audioMgr->SwitchMusic(3);
 	}
 	else
 	{
 		if (audioMgr)
-			audioMgr->SwitchMusic(1);
+			audioMgr->SwitchMusic(2);
 	}
 	playerFavor = 1 - playerFavor;
 }
@@ -457,7 +457,7 @@ void ABattleCrowd::FlipFavorMeter(AGridCharacter* gchar_)
 		{
 			FlipFavorMeter();
 		}
-		else //If it's higher than 0.3f, then make the enemy's favor into 0.7f
+		else //If it's lower than 0.7f, then make the enemy's favor into 0.7f
 		{
 			playerFavor = 0.3f;
 		}

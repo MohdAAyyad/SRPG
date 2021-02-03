@@ -58,5 +58,7 @@ public:
 		int equipmentSkillsIndex;
 	UPROPERTY(BlueprintReadOnly)
 		int pure; //Pure vertical horizontal
+	UPROPERTY(BlueprintReadOnly)
+		int soundEffectIndex;
 
 };
