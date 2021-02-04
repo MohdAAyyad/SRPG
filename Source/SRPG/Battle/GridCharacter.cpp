@@ -503,6 +503,17 @@ void  AGridCharacter::UseItemOnOtherChar(AGridCharacter* target_)
 
 void AGridCharacter::GridCharReactToItem(int statIndex_, int value_)
 {
+	if (audioComponent)
+	{
+		if (!audioComponent->IsPlaying())
+		{
+			if (soundEffects.Num() >= 6)
+			{
+				audioComponent->Sound = soundEffects[5];
+				audioComponent->Play();
+			}
+		}
+	}
 	if (animInstance)
 		animInstance->SetUseItem();
 

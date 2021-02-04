@@ -192,7 +192,6 @@ void ABattleManager::EndDeployment()
 	if (changeStatsCheck == CHG_STAT_PLY)
 	{
 		hubEvents.Push(CHG_STAT_PLY); //Used by the UI
-		UE_LOG(LogTemp, Warning, TEXT("PLY"));
 	}
 
 	for (int i = 0; i < deployedUnits.Num(); i++)

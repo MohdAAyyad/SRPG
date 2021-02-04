@@ -78,5 +78,5 @@ void AAudioMnager::PlayNextPiece()
 
 void AAudioMnager::FadeOutCurrentAudio()
 {
-	audioComponent->FadeOut(8.0f, 0.0f);
+	audioComponent->FadeOut(1.2f, 0.0f);
 }
