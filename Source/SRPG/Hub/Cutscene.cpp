@@ -175,6 +175,7 @@ void ACutscene::LoadModels()
 		int modelNum2 = 0;
 
 		// model 1 list
+
 		if (model1Name == "Test1")
 		{
 			modelNum1 = 0;
@@ -183,6 +184,10 @@ void ACutscene::LoadModels()
 		else if (model1Name == "Test2")
 		{
 			modelNum1 = 1;
+		}
+		else if (model1Name == "Protagonist")
+		{
+			modelNum1 = 3;
 		}
 
 
@@ -194,10 +199,33 @@ void ACutscene::LoadModels()
 		{
 			modelNum2 = 1;
 		}
+		else if (model2Name == "Protagonist")
+		{
+			modelNum1 = 3;
+		}
 
 		//change up the actual models
-		model1->SetMesh(models[modelNum2]);
-		model2->SetMesh(models[modelNum2]);
+		if (model1Name != "")
+		{
+			model1->SetMesh(models[modelNum2]);
+		}
+		else
+		{
+			// set to no mesh if we don't want a mesh
+			model1->SetMesh(nullptr);
+		}
+
+		if (model2Name != "")
+		{
+			model2->SetMesh(models[modelNum2]);
+		}
+		else
+		{
+			// set to no mesh if we don't want a mesh
+			model2->SetMesh(nullptr);
+		}
+
+
 	}
 	
 
@@ -239,13 +267,13 @@ void ACutscene::LoadAnimations()
 		}
 	}
 
-	if(play1)
+	if(play1 && modelAnim1 != "")
 	{
 		model1->PlayAnimation(anims[animNum1]);
 		// get the new previous animation tag
 		prevAnim1 = modelAnim1;
 	}
-	if (play2)
+	if (play2 && modelAnim1 != "")
 	{
 		model2->PlayAnimation(anims[animNum2]);
 		// get the new previous animation tag

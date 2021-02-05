@@ -42,10 +42,10 @@ void AHubWorldManager::BeginPlay()
 	hasSpawned.Init(false, npcLocations.Num());
 	hubWorldLevel = 3;
 
-
-	SpawnNPCs(1, 0);
+	int rand = FMath::RandRange(NPC_SPWN_LOW, NPC_SPWN_HIGH);
+	SpawnNPCs(rand, 0);
 	//SpawnNPCs(1, true);
-	int rand = FMath::RandRange(CNTR_SPWN_LOW, CNTR_SPWN_HIGH);
+	rand = FMath::RandRange(CNTR_SPWN_LOW, CNTR_SPWN_HIGH);
 	
 	SpawnCentralNPCs(rand);
 
@@ -61,6 +61,13 @@ void AHubWorldManager::BeginPlay()
 	if (generalWidget)
 		if (generalWidget->GetUserWidgetObject())
 			generalWidget->GetUserWidgetObject()->AddToViewport();
+
+
+	// start the intro cutscene
+	if (cutscenes[0])
+	{
+		cutscenes[0]->StartCutscene();
+	}
 }
 
 // Called every frame

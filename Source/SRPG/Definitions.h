@@ -382,6 +382,14 @@
 
 #pragma region HubWorldManager
 
+#ifndef NPC_SPWN_LOW
+#define NPC_SPWN_LOW 2
+#endif
+
+#ifndef NPC_SPWN_HIGH
+#define NPC_SPWN_HIGH 4
+#endif
+
 #ifndef CNTR_SPWN_LOW  // how many central NPCs to spawn, minimum
 #define CNTR_SPWN_LOW 1
 #endif
@@ -400,7 +408,7 @@
 #endif
 
 #ifndef ACT_INDX_HIGH
-#define ACT_INDX_HIGH 3 // highest activity index possible
+#define ACT_INDX_HIGH 5 // highest activity index possible
 #endif
 #pragma endregion
 

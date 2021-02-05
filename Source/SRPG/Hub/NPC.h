@@ -30,7 +30,8 @@ protected:
 	bool interactedWith;
 	//which opponent are they talking about
 	int talkingAboutOpponent;
-	// 0 tournament, 1 story, 2 random, determined by the hub manager after spawning them
+	// 0 tournament, 1 story, 2 random, determined by the hub manager after spawning them, or can be set to be static
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int npcLineIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MeshComponent")

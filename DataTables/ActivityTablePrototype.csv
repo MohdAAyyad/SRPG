@@ -1,0 +1,29 @@
+,ID,Dialogue,ActivityIndex,BranchOrCentral,PositiveOrNegative,UnitCost,MoneyCostPercentage,StartingDialogue,EndDialogue,TimeCost,RewardMoneyPercent,RewardIndex
+0,0,The shops keep all their gold unguarded. I could sneak in and steal some for you. But I need some gold as insurance.,1,0,0,0,12,1,0,1,0,0
+1,1,Looks like your faith in me has paid off. Have at the riches!,1,1,1,0,12,0,0,1,0,0
+2,2,I was spotted by some guards and ran away. We'll get it next time,1,1,0,0,12,0,0,1,0,0
+3,3,There's a theif in town. He's been talking about stealing from the shops. I think he has the know how to pull it off.,1,0,1,0,12,0,0,1,0,0
+4,4,There's a theif in town. He's been talking about stealing from the shops. Don't think about throwing in with him. I can hear him from a mile away.,1,0,0,0,12,0,0,1,0,0
+5,5,I've said my piece.,1,1,0,0,12,0,1,1,0,0
+6,6,"COME ONE COME ALL TO THE DANGEROUS AND CHANCY GAME OF FLAMEBALL! THE GAME IS DEADLY, DANGEROUS AND CAN WIN YOU ALOT OF GOLD!",2,1,0,1,10,1,0,1,25,0
+7,7,WOW! YOU ACTUALLY SURVIVED..... here's the prize.,2,1,1,1,10,0,0,1,25,0
+8,8,OUCH! AND ANOTHER ONE DIED IN THE FICKLE GAME OF FLAMEBALL!,2,1,0,1,10,0,0,1,25,0
+9,9,"Games over and my voice hurts, leave.",2,0,0,1,10,0,1,1,25,0
+10,10,Hey. I'm a bard that plays for the tournament crowds. If you were to give me some money I'd be willing to sing your praises to the captivating crowd.,3,1,0,0,15,1,0,1,0,3
+11,11,They loved my performance. Hope it helps you in the fight.,3,1,1,0,15,0,0,1,0,3
+12,12,They... didn't like my performance at all. I really need to start actually practicing my music.,3,1,0,0,15,0,0,1,0,3
+13,13,I hear there's a bard around here willing to sing your praises to the crowd. I've heard he's pretty good.,3,0,1,0,15,0,0,1,0,3
+14,14,"There's a bard around here willing to sing your praises to the crowd. I wouldn't waste your time, he's not any good.",3,0,0,0,15,0,0,1,0,3
+15,15,Look I've done all I can just leave me alone,3,1,0,0,15,0,1,1,0,3
+16,16,I'm a travelling trainer. I train the best fighters in all the land. I can train them in everything I know.,4,1,0,0,20,1,0,1,0,1
+17,17,You're now stronger than before. I hope you take my teaching to the fields of battle.,4,1,1,0,20,0,0,1,0,1
+18,18,I CAN'T DEAL WITH STUDENTS WHO CAN'T PAY ATTENTION FOR FIVE MINUTES WITHOUT TRYING TO WHACK EACH OTHER WITH A SWORD!,4,1,0,0,20,0,0,1,0,1
+19,19,There's a travelling battlemaster in town. I've heard he's very patient with new students.,4,0,1,0,20,0,0,1,0,1
+20,20,There's a travelling battlemaster in town. I've heard he's not very good with students.,4,0,0,0,20,0,0,1,0,1
+21,21,...,4,1,0,0,20,0,1,1,0,1
+22,22,I'm an apothecary. I can slip the opposing team some medicine to make them drowsy.  ,5,1,0,0,12,1,0,1,0,2
+23,23,They all drank the medicine. Hope that helps in the upcoming fight.,5,1,1,0,12,0,0,1,0,2
+24,24,"They caught me, I couldn't do it.",5,1,0,0,12,0,0,1,0,2
+25,25,There's an apothecary in town. Heard he's good at making people feel drowsy.,5,0,1,0,12,0,0,1,0,2
+26,26,There's an apothecary in town. Heard he's a charlatan.,5,0,0,0,12,0,0,1,0,2
+27,27,...,5,1,0,0,12,0,1,1,0,2

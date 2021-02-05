@@ -73,11 +73,8 @@ ANPC::ANPC()
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
+
 	startDialogueBox->OnComponentBeginOverlap.AddDynamic(this, &ANPC::OnOverlapWithPlayer);
-	// load a default conversation if nothing is selected
-	npcLineIndex = 0;
-
-
 	
 	animator = Cast<UNPCCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
@@ -87,8 +84,8 @@ void ANPC::BeginPlay()
 
 }
 
-void ANPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AActor * otherActor_, 
-						       UPrimitiveComponent * otherComp_, int32 otherBodyIndex_, 
+void ANPC::OnOverlapWithPlayer(UPrimitiveComponent* overlappedComp_, AActor* otherActor_, 
+						       UPrimitiveComponent* otherComp_, int32 otherBodyIndex_, 
 							bool bFromSweepO, const FHitResult & sweepResult_)
 {
 
@@ -209,7 +206,6 @@ void ANPC::Interact()
 void ANPC::UnInteract()
 {
 	interactedWith = false;
-	//EndDialogue();
 }
 
 void ANPC::SetLine(FString line_)
