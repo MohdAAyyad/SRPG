@@ -135,6 +135,11 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 		decisionComp->SetRefs(aiManager, btlManager, this);
 		decisionComp->SetPersistence(bPersistent);
 	}
+
+	myHoverInfo.targetIndex = HOVER_ENM;
+	myHoverInfo.hpPercentage = 1.0f;
+	myHoverInfo.pipPercentage = 1.0f;
+	myHoverInfo.textureID = bpID;
 }
 
 void AEnemyBaseGridCharacter::ChooseDecisionTreeBasedBasedOnLevel()

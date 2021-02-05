@@ -76,3 +76,9 @@ void ADestructibleObstacle::AddObstacleToObstacleManager()
 	Super::AddObstacleToObstacleManager();
 	box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
+
+FHoverInfo ADestructibleObstacle::GetMyHoverInfo()
+{
+	myHoverInfo.hpPercentage = GetHealthPercentage();
+	return myHoverInfo;
+}

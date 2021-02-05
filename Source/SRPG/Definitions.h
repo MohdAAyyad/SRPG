@@ -286,6 +286,22 @@
 #define CAM_SHAKE_RATE 0.5f
 #endif
 
+#ifndef HOVER_NONE
+#define HOVER_NONE -1
+#endif
+
+#ifndef HOVER_PLY
+#define HOVER_PLY 0
+#endif
+
+#ifndef HOVER_ENM
+#define HOVER_ENM 1
+#endif
+
+#ifndef HOVER_OBS
+#define HOVER_OBS 2
+#endif
+
 #pragma endregion
 
 #pragma region Crowd

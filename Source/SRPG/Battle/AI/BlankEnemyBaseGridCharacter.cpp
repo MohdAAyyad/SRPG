@@ -48,4 +48,9 @@ void ABlankEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* g
 	statsComp->ScaleLevelWithArchetype(Intermediate::GetInstance()->GetNextOpponent().level, Intermediate::GetInstance()->GetNextOpponent().archtype);
 	AddEquipmentStats(2);
 	decisionComp->SetRefs(aiManager, btlManager, this);
+
+	myHoverInfo.targetIndex = HOVER_ENM;
+	myHoverInfo.hpPercentage = 1.0f;
+	myHoverInfo.pipPercentage = 1.0f;
+	myHoverInfo.textureID = bpID;
 }

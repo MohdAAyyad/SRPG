@@ -308,13 +308,13 @@ void ABattleCrowd::ElectChampion()
 		{
 			champion = btlManager->GetPlayerWithHighestStat(STAT_CRD,champion);
 			if (audioMgr)
-				audioMgr->SwitchMusic(1);
+				audioMgr->SwitchMusic(2);
 		}
 		else //Otherwise, elect an enemy to be the champ
 		{
 			champion = aiManager->GetEnemyWithHighestStat(STAT_CRD, champion);
 			if (audioMgr)
-				audioMgr->SwitchMusic(2);
+				audioMgr->SwitchMusic(3);
 		}
 
 		//Call the needed functions on the champ

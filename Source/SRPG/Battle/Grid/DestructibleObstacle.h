@@ -44,4 +44,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		float damageTaken;
+
+	FHoverInfo GetMyHoverInfo() override;
 };

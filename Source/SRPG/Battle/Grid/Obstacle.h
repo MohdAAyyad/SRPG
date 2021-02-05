@@ -48,6 +48,7 @@ protected:
 
 
 
+
 public:
 	virtual void ObstacleTakeDamage(float damage_, int statusEffect_);
 	virtual bool AddObstructedTile(ATile* tile_); //Returns true if the tiles are blocked and false otherwise.
@@ -62,6 +63,8 @@ public:
 
 	virtual void ActivateOutline(bool value_) override;
 	virtual void TargetedOutline() override;
+
+	virtual FHoverInfo GetMyHoverInfo() override;
 
 
 };

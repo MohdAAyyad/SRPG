@@ -199,6 +199,11 @@ void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCr
 	ATile* tile = GetMyTile();
 	if(tile)
 		tile->SetOccupied(true);
+
+	myHoverInfo.targetIndex = HOVER_PLY;
+	myHoverInfo.hpPercentage = 1.0f;
+	myHoverInfo.pipPercentage = 1.0f;
+	myHoverInfo.textureID = bpID;
 }
 
 // Called every frame
@@ -876,4 +881,17 @@ void AGridCharacter::PlaySoundEffect(int index_)
 			audioComponent->Play();
 		}
 	}
+}
+
+//Hover info is used to update the hover UI
+FHoverInfo AGridCharacter::GetMyHoverInfo()
+{
+	myHoverInfo.hpPercentage = statsComp->GetHPPercentage();
+	myHoverInfo.pipPercentage = statsComp->GetPIPPercentage();
+	return myHoverInfo;
+}
+
+void AGridCharacter::SetTargetHoverInfo(FHoverInfo info_)
+{
+	targetHoverInfo = info_;
 }
