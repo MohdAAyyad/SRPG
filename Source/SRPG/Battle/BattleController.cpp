@@ -89,6 +89,17 @@ void ABattleController::HandleMouseHover()
 
 			currentHoverTarget = target;
 			currentHoverTarget->TargetedOutline();
+			
+			//Target hover info is used to update hover info UI panel
+			if (controlledCharacter)
+				controlledCharacter->SetTargetHoverInfo(currentHoverTarget->GetMyHoverInfo());
+
+			//TODO
+			//Get struct from interface
+			//The struct contains target index, hp percentage, pip percentage and texture ID
+			// Make the ref to the ai manager from the battlemanager blueprint readonly
+			//Pass the struct to the controller character
+			//Use the struct to update the UI
 		}
 		else
 		{
@@ -97,6 +108,9 @@ void ABattleController::HandleMouseHover()
 			{
 				currentHoverTarget->ActivateOutline(true);
 				currentHoverTarget = nullptr;
+				//Disable the hover info UI panel
+				if (controlledCharacter)
+					controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 			}
 		}
 	}

@@ -22,8 +22,12 @@ protected:
 		USceneComponent* root;
 	UPROPERTY(EditAnywhere, Category = "AudioComponent")
 		class UAudioComponent* audioComponent;
+	UPROPERTY(EditAnywhere, Category = "SoundEffectsAudioComponent")
+		class UAudioComponent* soundEffectAudioComponent;
 	UPROPERTY(EditAnywhere, Category = "AudioComponent")
 		TArray<class USoundBase*> music;
+	UPROPERTY(EditAnywhere, Category = "SoundEffectsAudioComponent")
+		TArray<USoundBase*> soundEffects;
 	UPROPERTY(EditAnywhere, Category = "AudioComponent")
 		int musicIndex;
 	UPROPERTY(EditAnywhere, Category = "AudioComponent")
@@ -36,5 +40,6 @@ public:
 	void SwitchMusic(int musicIndex_);
 	void PlayNextPiece();
 	void FadeOutCurrentAudio();
+	void PlayCommonSoundEffect(int index_); //No fading out
 
 };

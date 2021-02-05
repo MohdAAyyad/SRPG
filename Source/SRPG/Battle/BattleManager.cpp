@@ -193,7 +193,6 @@ void ABattleManager::EndDeployment()
 	{
 		hubEvents.Push(CHG_STAT_PLY); //Used by the UI
 	}
-
 	for (int i = 0; i < deployedUnits.Num(); i++)
 	{
 		deployedUnits[i]->UpdateOriginTile();
@@ -215,6 +214,9 @@ void ABattleManager::EndDeployment()
 	}
 	else //Otherwise, delay the next phase a bit
 	{
+		if (audioMgr) //Play Event sound effect
+			audioMgr->PlayCommonSoundEffect(0);
+
 		FTimerHandle nextPhaseHandle;
 		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::NextPhase, 3.0f, false);
 

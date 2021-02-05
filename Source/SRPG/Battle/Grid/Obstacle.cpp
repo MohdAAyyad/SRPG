@@ -50,6 +50,11 @@ void AObstacle::BeginPlay()
 	//This is to avoid a race condition where the obstacle is destroyed before the tiles are added to the array potentially causing the tiles to remain non-traversable
 	FTimerHandle timeToAddHandle;
 	GetWorld()->GetTimerManager().SetTimer(timeToAddHandle, this, &AObstacle::AddObstacleToObstacleManager, 2.0f, false);
+	
+	myHoverInfo.targetIndex = 2;
+	myHoverInfo.hpPercentage = 1.0f;
+	myHoverInfo.pipPercentage = -1.0f;
+	myHoverInfo.textureID = 0;
 
 }
 
@@ -128,4 +133,9 @@ void AObstacle::TargetedOutline()
 	{
 		staticMesh->SetCustomDepthStencilValue(2);
 	}
+}
+
+FHoverInfo AObstacle::GetMyHoverInfo()
+{
+	return myHoverInfo;
 }

@@ -15,6 +15,11 @@ AAudioMnager::AAudioMnager()
 
 	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Component"));
 	audioComponent->SetupAttachment(root);
+
+	soundEffectAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Sound Effects Audio Component"));
+	soundEffectAudioComponent->SetupAttachment(root);
+
+	
 	musicIndex = 0;
 	fadeOutTime = 2.5f;
 	musicVolume = 0.8f;
@@ -79,4 +84,16 @@ void AAudioMnager::PlayNextPiece()
 void AAudioMnager::FadeOutCurrentAudio()
 {
 	audioComponent->FadeOut(1.2f, 0.0f);
+}
+
+void AAudioMnager::PlayCommonSoundEffect(int index_) //No fading out
+{
+	if (index_ >= 0 && index_ < soundEffects.Num())
+	{
+		if (soundEffects[index_])
+		{
+			soundEffectAudioComponent->Sound = soundEffects[index_];
+			soundEffectAudioComponent->Play();
+		}
+	}
 }

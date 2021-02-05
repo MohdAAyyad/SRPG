@@ -6,6 +6,27 @@
 #include "UObject/Interface.h"
 #include "OutlineInterface.generated.h"
 
+USTRUCT(BlueprintType)
+struct SRPG_API FHoverInfo
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	FHoverInfo()
+	{
+		targetIndex = -1; //0 for player, 1 for enemy, and 2 for obstacles
+		hpPercentage = pipPercentage = 0.0f;
+		textureID = -1;
+	}
+	UPROPERTY(BlueprintReadWrite)
+		int targetIndex;
+	UPROPERTY(BlueprintReadWrite)
+		float hpPercentage;
+	UPROPERTY(BlueprintReadWrite)
+		float pipPercentage;
+	UPROPERTY(BlueprintReadWrite)
+		int textureID;
+};
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UOutlineInterface : public UInterface
@@ -20,4 +41,7 @@ class SRPG_API IOutlineInterface
 public:
 	virtual void ActivateOutline(bool value_) = 0;
 	virtual void TargetedOutline() = 0;
+	virtual FHoverInfo GetMyHoverInfo() = 0;
+protected:
+	FHoverInfo myHoverInfo;
 };

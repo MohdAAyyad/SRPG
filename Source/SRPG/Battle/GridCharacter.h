@@ -126,6 +126,9 @@ protected:
 
 	TArray <AWeaponBase*> equippedWeapons;
 
+	UPROPERTY(BlueprintReadOnly) //Used by the UI
+		FHoverInfo targetHoverInfo;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -211,6 +214,9 @@ public:
 	virtual void ActivateOutline(bool value_) override;
 	void TargetedOutline() override;
 
+	FHoverInfo GetMyHoverInfo() override;
+	void SetTargetHoverInfo(FHoverInfo info_);
+
 protected:
 	virtual void AddEquipmentStats(int tableIndex_); 
 
@@ -218,6 +224,6 @@ protected:
 		void SpawnProjectile(int index_, FVector spawnLoc_); //Called from anim bp
 
 	UFUNCTION(BlueprintCallable)
-		void PlaySoundEffect(int index_);
+		void PlaySoundEffect(int index_);	
 
 };

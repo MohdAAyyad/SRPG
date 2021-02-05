@@ -71,7 +71,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Deployed units")
 		TArray<class APlayerGridCharacter*> deployedUnits;
 
-	UPROPERTY(EditAnywhere, Category = "AI")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 		class AAIManager* aiManager;
 
 	UPROPERTY(EditAnywhere, Category = "Crowd")
