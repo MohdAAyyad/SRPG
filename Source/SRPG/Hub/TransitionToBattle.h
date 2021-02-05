@@ -40,6 +40,8 @@ protected:
 		class UWidgetComponent* widgetComp;
 	UPROPERTY(EditAnywhere, Category = "FileReader")
 		class UExternalFileReader* fileReader;
+	UPROPERTY(EditAnywhere, Category = "Audio Manager")
+		class AAudioMnager* audioMgr;
 
 	TArray<FFighterTableStruct> recruitedFighters;
 

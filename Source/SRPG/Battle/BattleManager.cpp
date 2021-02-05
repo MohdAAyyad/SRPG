@@ -181,7 +181,7 @@ int ABattleManager::GetBpidOfUnitToBeDeployedNext()
 void ABattleManager::EndDeployment()
 {
 	if (audioMgr) //Start battle music
-		audioMgr->SwitchMusic(0);
+		audioMgr->SwitchMusic(1);
 	if (gridManager)
 		gridManager->ClearHighlighted();
 
@@ -192,7 +192,6 @@ void ABattleManager::EndDeployment()
 	if (changeStatsCheck == CHG_STAT_PLY)
 	{
 		hubEvents.Push(CHG_STAT_PLY); //Used by the UI
-		UE_LOG(LogTemp, Warning, TEXT("PLY"));
 	}
 
 	for (int i = 0; i < deployedUnits.Num(); i++)
@@ -306,6 +305,8 @@ void ABattleManager::EndBattle(bool victory_)
 	{
 		//End on a victory
 
+		if (audioMgr) //Start victory
+			audioMgr->SwitchMusic(4);
 		if(EndWidgets[0])
 			widgetComp->SetWidgetClass(EndWidgets[0]);
 		FTimerHandle timeToUpdateExpHandle;
@@ -320,6 +321,9 @@ void ABattleManager::EndBattle(bool victory_)
 	}
 	else
 	{
+		if (audioMgr) //Start defeat music
+			audioMgr->SwitchMusic(5);
+
 		//End on a defeat
 		if (EndWidgets[1])
 			widgetComp->SetWidgetClass(EndWidgets[1]);

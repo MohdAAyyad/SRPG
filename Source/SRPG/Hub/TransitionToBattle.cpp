@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Definitions.h"
 #include "SRPGPlayerController.h"
+#include "../Audio/AudioMnager.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -167,11 +168,8 @@ void ATransitionToBattle::FinalizeFighterSelection()
 	if (widgetComp)
 		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
 
-	if (gameMode)
-			gameMode->SwitchLevel(MAP_BATTLE);
-
-	if (widgetComp)
-		widgetComp->GetUserWidgetObject()->RemoveFromViewport();
+	if (audioMgr)
+		audioMgr->FadeOutCurrentAudio();
 
 }
 

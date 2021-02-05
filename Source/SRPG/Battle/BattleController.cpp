@@ -283,6 +283,8 @@ void ABattleController::HandleMousePress()
 									FocusOnGridCharacter(controlledCharacter, focusRate);
 									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate, targetObstacle);
 									bTargetingWithASkill = false;
+									if (targetingTiles.Num() > 0) //Reset the targeting tiles
+										targetingTiles.Empty();
 								}
 							}
 						}
@@ -301,6 +303,8 @@ void ABattleController::HandleMousePress()
 										FocusOnGridCharacter(controlledCharacter, focusRate);
 										controlledCharacter->AttackUsingSkill(TArray<AGridCharacter*>(), focusRate, targetObstacle);
 										bTargetingWithASkill = false;
+										if(targetingTiles.Num()>0) //Reset the targeting tiles
+											targetingTiles.Empty();
 									}
 								}
 							}
@@ -427,7 +431,7 @@ void ABattleController::TargetingWithASkill()
 					lastIndexOfCurrentlyHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles().Num();
 					targetTile_->GetGridManager()->UpdateCurrentTile(targetTile_, targetingRowSpeed, targetingDepthSpeed, TILE_SKLT, targetingPure);
 					allHighlightedTiles = targetTile_->GetGridManager()->GetHighlightedTiles();
-					//Push the tiles into the targetingTiles array
+					//Push the new SKLT tiles into the targetingTiles array
 					for (int i = lastIndexOfCurrentlyHighlightedTiles; i < allHighlightedTiles.Num(); i++)
 					{
 						targetingTiles.Push(allHighlightedTiles[i]);
@@ -501,6 +505,9 @@ void ABattleController::CancelCommand()
 		else
 			controlledCharacter = nullptr; //Reset
 	}
+
+	if (targetingTiles.Num() > 0) //Reset the targeting tiles
+		targetingTiles.Empty();
 }
 
 void ABattleController::ResetViewLock()

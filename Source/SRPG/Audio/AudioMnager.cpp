@@ -38,8 +38,7 @@ void AAudioMnager::BeginPlay()
 	{
 		if (music[musicIndex])
 		{
-			audioComponent->Sound = music[musicIndex];
-			audioComponent->Play();
+			PlayNextPiece();
 		}
 	}
 }
@@ -71,12 +70,13 @@ void AAudioMnager::PlayNextPiece()
 		if (music[musicIndex])
 		{
 			audioComponent->Sound = music[musicIndex];
-			audioComponent->Play();
+			//audioComponent->Play();
+			audioComponent->FadeIn(8.0f, musicVolume);
 		}
 	}
 }
 
 void AAudioMnager::FadeOutCurrentAudio()
 {
-	audioComponent->FadeOut(8.0f, 0.0f);
+	audioComponent->FadeOut(1.2f, 0.0f);
 }
