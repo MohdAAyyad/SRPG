@@ -22,13 +22,20 @@ ASRPGGameMode::ASRPGGameMode()
 
 void ASRPGGameMode::SwitchLevel(FName levelName_)
 {
-
-	//TODO
-	//Add a level sequence
 	UGameplayStatics::OpenLevel(GetWorld(), levelName_);
 }
 
 void ASRPGGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ASRPGGameMode::SwitchToNextLevel()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), nextLevelName);
+}
+
+void ASRPGGameMode::SetNextLevelName(FName levelName_)
+{
+	nextLevelName = levelName_;
 }

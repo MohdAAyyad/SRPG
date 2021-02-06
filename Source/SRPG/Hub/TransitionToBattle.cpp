@@ -177,3 +177,24 @@ void ATransitionToBattle::InitiateAReRun()
 {
 	Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
 }
+
+
+void ATransitionToBattle::UpdateNextLevelName()
+{
+	int currentDay = Intermediate::GetInstance()->GetCurrentDay();
+	if (gameMode)
+	{
+		switch (currentDay)
+		{
+		case 1:
+			gameMode->SetNextLevelName(MAP_BATTLE_DAY1);
+			break;
+		case 2:
+			gameMode->SetNextLevelName(MAP_BATTLE_DAY2);
+			break;
+		default:
+			gameMode->SetNextLevelName(MAP_BATTLE_DAY1);
+			break;
+		}
+	}
+}
