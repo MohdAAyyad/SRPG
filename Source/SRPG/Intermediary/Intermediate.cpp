@@ -21,6 +21,7 @@ Intermediate::Intermediate()
 	currentDeploymentSize = 0;
 	latestFighterID = 4;
 	bRewardsWereGiven = false;
+	shouldPlayIntro = true;
 }
 
 Intermediate::~Intermediate()
@@ -49,7 +50,10 @@ void Intermediate::Defeat(int moneyCompensation_, int shardsCompensation_)
 	currentShards += shardsCompensation_;
 	dayCounter = 0;
 	bRewardsWereGiven = true;
+	shouldPlayIntro = false;
 }
+
+
 int Intermediate::GetCurrentDay()
 {
 	return dayCounter + 1; // Matches the day ID in the tables hence why it's zero-based. 1 is added to the value when displayed on the UI
@@ -64,6 +68,12 @@ void Intermediate::ResetRewardsWereGiven()
 {
 	bRewardsWereGiven = false;
 }
+
+bool Intermediate::GetShouldPlayIntro()
+{
+	return shouldPlayIntro;
+}
+
 int Intermediate::GetProtagonistLevel()
 {
 	return protagonistLevel;

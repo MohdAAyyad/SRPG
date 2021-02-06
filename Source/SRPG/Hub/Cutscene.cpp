@@ -17,7 +17,9 @@
 ACutscene::ACutscene()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	//PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
+
+
 
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = root;
@@ -93,15 +95,24 @@ void ACutscene::SpawnActors()
 void ACutscene::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	// I truly hate doing this
+	if (done == false)
+	{
+		ShowUI();
+	}
+
 
 }
 
 void ACutscene::ShowUI()
 {
 	 
-	if (widget && widget->GetUserWidgetObject()->IsInViewport() == false)
+	if (widget && widget->GetUserWidgetObject())
 	{
-		widget->GetUserWidgetObject()->AddToViewport();
+		if (widget->GetUserWidgetObject()->IsInViewport() == false)
+		{
+			widget->GetUserWidgetObject()->AddToViewport();
+		}
 	}
 }
 
@@ -146,10 +157,11 @@ void ACutscene::AdvanceDialogue()
 {
 	// check to see if we are at the last line
 	FCutsceneTableStruct row = fileReader->FindCutsceneTableRow(FName(*FString::FromInt(currentDialogue)), 0);
-	if (currentDialogue >= row.lineNum)
+	// trigger the end of the cutscene one line earlier so we don't have to go through it again
+	if (currentDialogue >= row.lineNum - 1)
 	{
 		done = true;
-
+		//EndCutscene();
 	}
 	else
 	{
@@ -187,7 +199,7 @@ void ACutscene::LoadModels()
 		}
 		else if (model1Name == "Protagonist")
 		{
-			modelNum1 = 3;
+			modelNum1 = 2;
 		}
 
 
@@ -201,13 +213,13 @@ void ACutscene::LoadModels()
 		}
 		else if (model2Name == "Protagonist")
 		{
-			modelNum1 = 3;
+			modelNum1 = 2;
 		}
 
 		//change up the actual models
 		if (model1Name != "")
 		{
-			model1->SetMesh(models[modelNum2]);
+			model1->SetMesh(models[modelNum1]);
 		}
 		else
 		{
@@ -273,7 +285,7 @@ void ACutscene::LoadAnimations()
 		// get the new previous animation tag
 		prevAnim1 = modelAnim1;
 	}
-	if (play2 && modelAnim1 != "")
+	if (play2 && modelAnim2 != "")
 	{
 		model2->PlayAnimation(anims[animNum2]);
 		// get the new previous animation tag
@@ -300,17 +312,25 @@ void ACutscene::EndCutscene()
 	}
 
 	// remove any pesky ui elements left
-	if (widget->GetUserWidgetObject()->IsInViewport())
-	{
-		widget->GetUserWidgetObject()->RemoveFromViewport();
-	}
+	widget->GetUserWidgetObject()->RemoveFromViewport();
+
 
 	// go and delete the actors
-	model1->DeleteActor();
-	model2->DeleteActor();
+	if (model1)
+	{
+		model1->DeleteActor();
+		model1 = nullptr;
+	}
 
-	model1 = nullptr;
-	model2 = nullptr;
+	if (model2)
+	{
+		model2->DeleteActor();
+		model2 = nullptr;
+	}
+
+
+
+
 
 	
 }

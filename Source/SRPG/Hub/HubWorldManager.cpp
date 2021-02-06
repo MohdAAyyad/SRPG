@@ -64,7 +64,7 @@ void AHubWorldManager::BeginPlay()
 
 
 	// start the intro cutscene
-	if (cutscenes[0])
+	if (Intermediate::GetInstance()->GetShouldPlayIntro() && cutscenes[0])
 	{
 		cutscenes[0]->StartCutscene();
 	}

@@ -33,11 +33,15 @@ protected:
 	float maxWander;
 	UPROPERTY(EditAnywhere)
 	float waitTime;
+	// time which will wait as the npc wanders to find a new target so it doesn't get stuck
+	UPROPERTY(EditAnywhere)
+	float findNewTargetTime;
 	UPROPERTY(EditAnywhere)
 	int maxDistance;
 	UPROPERTY(EditAnywhere)
 	float radius;
 	FTimerHandle newTargetTimerHandle;
+	FTimerHandle findNewTargetTimerHandle;
 	UPROPERTY(EditAnywhere)
 	float timeToArrive;
 

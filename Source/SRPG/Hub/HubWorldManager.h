@@ -162,6 +162,8 @@ public:
 	void DeleteNPCs();
 	void SpawnCentralNPCs(int amount_);
 
+	void PlayCutscene(int index_);
+
 
 	void SpawnInfoNPC(int archetype_, FOpponentStruct opp_);
 

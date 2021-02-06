@@ -41,6 +41,7 @@ void UNPCWanderComponent::Wander()
 
 	if (shouldMove)
 	{
+		GetWorld()->GetTimerManager().SetTimer(findNewTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, findNewTargetTime, true);
 		FVector direction;
 		// this function is going to calculate how the npc needs to move
 		direction = target - chara->GetActorLocation();
@@ -51,6 +52,7 @@ void UNPCWanderComponent::Wander()
 		{
 			shouldMove = false;
 			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
+			GetWorld()->GetTimerManager().ClearTimer(findNewTargetTimerHandle);
 			//UE_LOG(LogTemp, Warning, TEXT("Arrived"));
 			return;
 		}
