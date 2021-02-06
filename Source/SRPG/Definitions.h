@@ -517,8 +517,12 @@
 #define MAP_HUB FName(TEXT("HubLevel_S11"))
 #endif
 
-#ifndef MAP_BATTLE 
-#define MAP_BATTLE FName(TEXT("BTL_0"))
+#ifndef MAP_BATTLE_DAY1 
+#define MAP_BATTLE_DAY1 FName(TEXT("BTL_0"))
+#endif
+
+#ifndef MAP_BATTLE_DAY2 
+#define MAP_BATTLE_DAY2 FName(TEXT("BTL_1"))
 #endif
 #pragma endregion
 

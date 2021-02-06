@@ -77,6 +77,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void InitiateAReRun();
 
+
+	UFUNCTION(BlueprintCallable)
+		void UpdateNextLevelName();
+
 	void UpdateRecruitedFighters();
 public:	
 	// Called every frame

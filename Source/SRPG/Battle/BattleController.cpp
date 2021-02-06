@@ -94,24 +94,6 @@ void ABattleController::HandleMouseHover()
 			if (controlledCharacter)
 				controlledCharacter->SetTargetHoverInfo(currentHoverTarget->GetMyHoverInfo());
 
-			//TODO
-			//Get struct from interface
-			//The struct contains target index, hp percentage, pip percentage and texture ID
-			// Make the ref to the ai manager from the battlemanager blueprint readonly
-			//Pass the struct to the controller character
-			//Use the struct to update the UI
-		}
-		else
-		{
-			//If you hover away from the currenthovertarget then disable the targeting outline
-			if (currentHoverTarget)
-			{
-				currentHoverTarget->ActivateOutline(true);
-				currentHoverTarget = nullptr;
-				//Disable the hover info UI panel
-				if (controlledCharacter)
-					controlledCharacter->SetTargetHoverInfo(FHoverInfo());
-			}
 		}
 	}
 
@@ -193,12 +175,9 @@ void ABattleController::HandleMousePress()
 						controlledCharacter = Cast<AGridCharacter>(hit.Actor);
 						if (controlledCharacter)
 						{
-							//Don't store a reference to a character who's finished their turn
-						//	if (controlledCharacter->GetCurrentState() != AGridCharacter::EGridCharState::FINISHED)
-								controlledCharacter->Selected();
-							//else
-								//controlledCharacter = nullptr;
-						}//
+							controlledCharacter->Selected();
+							currentHoverTarget = nullptr; //Reset the hover target once you control a new character
+						}
 
 					}
 					else if (controlledCharacter->GetCurrentState() == AGridCharacter::EGridCharState::MOVING)
@@ -236,6 +215,8 @@ void ABattleController::HandleMousePress()
 								//See if the tile is within attack range
 								if (tile_->GetHighlighted() == TILE_ATK)
 								{
+									bHoverTargeting = false;
+									controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 									FocusOnGridCharacter(controlledCharacter, focusRate);
 									controlledCharacter->AttackUsingWeapon(targetChar, focusRate);
 								}
@@ -252,7 +233,8 @@ void ABattleController::HandleMousePress()
 								{
 									if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_ATK)) //Make sure at least one the obstacle's tiles are within attack 
 									{
-										UE_LOG(LogTemp, Warning, TEXT("Attacking obstacle"));
+										bHoverTargeting = false;
+										controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 										FocusOnGridCharacter(controlledCharacter, focusRate);
 										controlledCharacter->AttackUsingWeapon(targetObstacle, focusRate);
 									}
@@ -275,6 +257,8 @@ void ABattleController::HandleMousePress()
 								//See if the tile is within attack range and has been targeted
 								if (tile_->GetHighlighted() == TILE_SKLT)
 								{
+									bHoverTargeting = false;
+									controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 									TArray<AGridCharacter*> targetedCharacters;
 
 									for (int i = 0; i < targetingTiles.Num(); i++)
@@ -293,7 +277,6 @@ void ABattleController::HandleMousePress()
 													targetObstacle = nullptr;
 										}
 									}
-									UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle as well"));
 									FocusOnGridCharacter(controlledCharacter, focusRate);
 									controlledCharacter->AttackUsingSkill(targetedCharacters, focusRate, targetObstacle);
 									bTargetingWithASkill = false;
@@ -313,7 +296,8 @@ void ABattleController::HandleMousePress()
 								{
 									if (targetObstacle->IsAnyOfMyTilesHighlighted(TILE_SKL)) //SKL not SKLT as we only need the obstacle to be targetable
 									{
-										UE_LOG(LogTemp, Warning, TEXT("Skilling obstacle"));
+										bHoverTargeting = false;
+										controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 										FocusOnGridCharacter(controlledCharacter, focusRate);
 										controlledCharacter->AttackUsingSkill(TArray<AGridCharacter*>(), focusRate, targetObstacle);
 										bTargetingWithASkill = false;
@@ -335,6 +319,8 @@ void ABattleController::HandleMousePress()
 							{
 								if (tile_->GetHighlighted() == TILE_ITM)
 								{
+									bHoverTargeting = false;
+									controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 									controlledCharacter->UseItemOnOtherChar(targetChar);
 								}
 							}
@@ -348,6 +334,8 @@ void ABattleController::HandleMousePress()
 						{
 							if (tile_->GetHighlighted() == TILE_SKLT)
 							{
+								bHoverTargeting = false;
+								controlledCharacter->SetTargetHoverInfo(FHoverInfo());
 								TArray<AGridCharacter*> targetedCharacters;
 
 								for (int i = 0; i < targetingTiles.Num(); i++)

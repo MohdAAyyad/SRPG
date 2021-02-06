@@ -16,10 +16,17 @@ protected:
 	UPROPERTY(EditAnywhere)
 		class AHubWorldManager* hubWorldManager;
 
+	FName nextLevelName;
+
 public:
 	ASRPGGameMode();
 	UFUNCTION(BlueprintCallable)
-		void SwitchLevel(FName levelName);
+		void SwitchLevel(FName levelName_);
+
+	UFUNCTION(BlueprintCallable)
+		void SwitchToNextLevel();
+
+	void SetNextLevelName(FName levelName_);
 
 
 	virtual void BeginPlay() override;

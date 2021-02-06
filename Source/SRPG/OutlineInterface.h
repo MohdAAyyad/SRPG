@@ -39,9 +39,9 @@ class SRPG_API IOutlineInterface
 	GENERATED_BODY()
 
 public:
-	virtual void ActivateOutline(bool value_) = 0;
-	virtual void TargetedOutline() = 0;
-	virtual FHoverInfo GetMyHoverInfo() = 0;
+	inline virtual void ActivateOutline(bool value_) {};
+	inline virtual void TargetedOutline() {};
+	inline virtual FHoverInfo GetMyHoverInfo() { return FHoverInfo(); };
 protected:
 	FHoverInfo myHoverInfo;
 };
