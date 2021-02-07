@@ -94,7 +94,7 @@ void ACentralNPC::PutUnitOnHold(int index_)
 
 TArray<FFighterTableStruct> ACentralNPC::GetAllAvailbleFighters()
 {
-	return fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+	return fileReader->GetAllRecruitedFighters(1);
 	//return fileReader->GetAllRecruitedFighters(1);
 }
 
@@ -112,7 +112,7 @@ bool ACentralNPC::ShouldAddUnitSacrificeUI()
 	}
 	else
 	{
-		if (fileReader->GetAllRecruitedFighters(fileReader->FindTableIndexInArray(FName("FighterTableStruct"))).Num() < unitCost)
+		if (fileReader->GetAllRecruitedFighters(1).Num() < unitCost)
 		{
 			warning = "Not enough Fighters to sacrifice for this activity";
 		}
@@ -357,7 +357,7 @@ void ACentralNPC::SimulateActivity()
 			{
 				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
 				FName converted = *FString::FromInt(i);
-				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+				fileReader->RemoveFighterTableRow(converted, 1);
 			}
 			// clear out the array
 			unitsOnHold.Empty();

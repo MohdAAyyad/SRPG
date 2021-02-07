@@ -157,7 +157,7 @@ FOpponentStruct ATournament::SimulateMatch()
 			{
 				Intermediate::GetInstance()->UpdateCurrentRosterSize(-1);
 				FName converted = *FString::FromInt(i);
-				fileReader->RemoveFighterTableRow(converted, fileReader->FindTableIndexInArray(FName("FighterTableStruct")));
+				fileReader->RemoveFighterTableRow(converted, 0);
 			}
 			// clear out the array
 			unitsOnHold.Empty();
