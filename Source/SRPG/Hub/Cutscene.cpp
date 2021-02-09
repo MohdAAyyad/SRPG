@@ -156,25 +156,17 @@ void ACutscene::StartCutscene()
 void ACutscene::AdvanceDialogue()
 {
 	// check to see if we are at the last line
-	FCutsceneTableStruct row = fileReader->FindCutsceneTableRow(FName(*FString::FromInt(currentDialogue)), 0);
+	
 	// trigger the end of the cutscene one line earlier so we don't have to go through it again
-	if (currentDialogue >= row.lineNum - 1)
-	{
-		done = true;
-		//EndCutscene();
-	}
-	else
-	{
-		// called from UI to advance to the next dialogue
-		currentDialogue++;
 
-		LoadInfo();
+	// called from UI to advance to the next dialogue
+	currentDialogue++;
 
-		LoadModels();
+	LoadInfo();
 
-		LoadAnimations();
-	}
+	LoadModels();
 
+	LoadAnimations();
 
 }
 
@@ -333,6 +325,22 @@ void ACutscene::EndCutscene()
 
 
 	
+}
+
+bool ACutscene::CheckDone()
+{
+	FCutsceneTableStruct row = fileReader->FindCutsceneTableRow(FName(*FString::FromInt(currentDialogue)), 0);
+	if (currentDialogue >= row.lineNum)
+	{
+		done = true;
+		//EndCutscene();
+	}
+	else
+	{
+		done = false;
+	}
+
+	return done;
 }
 
 

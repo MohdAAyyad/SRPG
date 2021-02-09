@@ -1,7 +1,7 @@
 ,Name,Dialogue,TextSpeed,Model1Name,Model2Name,LineNum,ModelAnim1,ModelAnim2
 0,,... and once again the cycle resets...,0.1,,,5,,
 1,Hrogir,Where.... where am I?,0.03,Protagonist,,5,Idle,
-2,Gladia,At the beginning of it all.,0.03,Protagonist,,5,Idle,
+2,Voice,At the beginning of it all.,0.03,Protagonist,,5,Idle,
 3,Hrogir,How do I escape... I keep coming back here time and time again.,0.03,Protagonist,,5,Idle,
-4,Test1,The tournament... you must win the tournament... earn the wish of the gods and break the cycle.,0.03,Protagonist,,5,Idle,
-5,Test2,Wait... how do I...,0.03,Protagonist,,5,Walking,
+4,Voice,The tournament... you must win the tournament... earn the wish of the gods and break the cycle.,0.03,Protagonist,,5,Idle,
+5,Hrogir,Wait... how do I...,0.03,Protagonist,,5,Walking,

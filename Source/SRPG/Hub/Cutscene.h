@@ -106,6 +106,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndCutscene();
 
+	UFUNCTION(BlueprintCallable)
+	bool CheckDone();
+
 
 
 
