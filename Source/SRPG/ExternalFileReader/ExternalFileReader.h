@@ -84,8 +84,6 @@ public:
 
 	UDataTable* GetTable(int index_);
 
-	// the name must match the class exactly
-	int FindTableIndexInArray(FName structName_);
 	int FindTableIndexByName(FName tableName_);
 
 	void Equip(int fighterTableIndex_, int equipTableIndex, int fighterID, int equipIndex, int equipID,int oldEquipID);

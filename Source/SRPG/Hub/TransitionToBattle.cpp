@@ -30,7 +30,7 @@ ATransitionToBattle::ATransitionToBattle()
 
 	box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	box->SetGenerateOverlapEvents(true);
-	box->SetCollisionProfileName("NPCDialogue");
+	box->SetCollisionProfileName("NPC");
 	box->SetupAttachment(root);
 
 	widgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));

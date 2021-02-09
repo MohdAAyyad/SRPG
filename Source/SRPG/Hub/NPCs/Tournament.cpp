@@ -168,7 +168,7 @@ FOpponentStruct ATournament::SimulateMatch()
 
 	hasSupportedTeam = false;
 
-	FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(1, Intermediate::GetInstance()->GetCurrentDay() - 1);
+	FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
 	op1.level = op2.level = dayInfo.enemyLevel;
 	op1.numberOfTroops = op2.numberOfTroops = dayInfo.numOfEnemies;
 	if (winner)

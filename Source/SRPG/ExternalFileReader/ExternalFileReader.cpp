@@ -500,27 +500,6 @@ UDataTable* UExternalFileReader::GetTable(int index_)
 	return tables[index_];
 }
 
-//NOTE:
-/* The name Input for the struct name must match the struct name. It is not case sensative. When you pass in the name make you 
-pass in the name of the file. EX: You would reference the item table struct as FItemTableStruct in code normally, but to pass
-it in here you would pass it in as ItemTableStruct since F is not part of the name. In short pass in the struct file name. */
-
-int UExternalFileReader::FindTableIndexInArray(FName structName_)
-{
-	int result = 0;
-	for (auto t : tables)
-	{
-		FName structQuery = t->GetRowStructName();
-		if (structQuery == structName_)
-		{
-			return result;
-		}
-		result++;
-	}
-	UE_LOG(LogTemp, Error, TEXT("Could not find valid table or invalid name input"));
-	return result;
-}
-
 // same story with the name one. Input the name correctly and you have nothing to worry about
 int UExternalFileReader::FindTableIndexByName(FName tableName_)
 {
