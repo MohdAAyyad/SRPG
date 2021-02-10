@@ -47,7 +47,6 @@ AEnemyBaseGridCharacter::AEnemyBaseGridCharacter() :AGridCharacter()
 	weaponIndex = 0;
 	armorIndex = 0;
 	speed = 0;
-	bHealer = false; //Changed to true if the decision tree used is that of a support character.
 	bLookForANewTargetMidAttack = false;
 	tree = EDecisionTrees::DISTANCEBASED;
 	bPersistent = false;
@@ -127,7 +126,6 @@ void AEnemyBaseGridCharacter::SetManagers(AAIManager* ref_, AGridManager* gref_,
 		{
 			decisionComp->RegisterComponent();
 		}
-		bHealer = true;
 		break;
 	}
 	if (decisionComp)
@@ -748,7 +746,7 @@ void AEnemyBaseGridCharacter::GridCharReatToElemental(float damage_, int statusE
 			}
 
 			if (aiManager)
-				aiManager->HandleEnemyDeath(this, bHealer);
+				aiManager->HandleEnemyDeath(this);
 
 			if (animInstance)
 				animInstance->DeathAnim();
@@ -802,7 +800,7 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 			}
 
 			if (aiManager)
-				aiManager->HandleEnemyDeath(this, bHealer);
+				aiManager->HandleEnemyDeath(this);
 
 			if (animInstance)
 				animInstance->DeathAnim();
@@ -836,7 +834,7 @@ void AEnemyBaseGridCharacter::GridCharTakeDamage(float damage_, AGridCharacter* 
 	else
 	{ //If the character killed itself, then just die and don't affect anytihng else
 		if (aiManager)
-			aiManager->HandleEnemyDeath(this, bHealer);
+			aiManager->HandleEnemyDeath(this);
 
 		if (animInstance)
 			animInstance->DeathAnim();
@@ -881,7 +879,7 @@ void AEnemyBaseGridCharacter::GridCharReactToSkill(float damage_, int statIndex_
 				crdManager->UpdateFavor(true);
 			}
 			if (aiManager)
-				aiManager->HandleEnemyDeath(this, bHealer);
+				aiManager->HandleEnemyDeath(this);
 			if (animInstance)
 				animInstance->DeathAnim();
 

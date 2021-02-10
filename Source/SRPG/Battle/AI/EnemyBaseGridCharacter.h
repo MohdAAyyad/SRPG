@@ -79,8 +79,6 @@ protected:
 
 	bool bLookForANewTargetMidAttack; //In case the current target is dead then look for another target in your attack phase
 
-	bool bHealer;
-
 	virtual void EndTurn();
 
 public:

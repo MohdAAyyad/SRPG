@@ -21,7 +21,6 @@ Intermediate::Intermediate()
 	currentDeploymentSize = 0;
 	latestFighterID = 4;
 	bRewardsWereGiven = false;
-	shouldPlayIntro = true;
 }
 
 Intermediate::~Intermediate()
@@ -50,7 +49,6 @@ void Intermediate::Defeat(int moneyCompensation_, int shardsCompensation_)
 	currentShards += shardsCompensation_;
 	dayCounter = 0;
 	bRewardsWereGiven = true;
-	shouldPlayIntro = false;
 }
 
 
@@ -67,11 +65,6 @@ bool Intermediate::GetRewardsWereGiven()
 void Intermediate::ResetRewardsWereGiven()
 {
 	bRewardsWereGiven = false;
-}
-
-bool Intermediate::GetShouldPlayIntro()
-{
-	return shouldPlayIntro;
 }
 
 int Intermediate::GetProtagonistLevel()

@@ -372,9 +372,9 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 			turnsSinceStatusEffect[i]--;
 			if (turnsSinceStatusEffect[i] <= 0)
 			{
-				if(activeStatusEffects[i] == EFFECT_SLOW) //If the effect was slow then make sure to update the speed. The speed will have been updated here because it's treated as a nerf
-					if (ownerChar)
-						ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
+				//if(activeStatusEffects[i] == EFFECT_SLOW || activeStatusEffects[i] == EFFECT_FREEZE || activeStatusEffects[i] == EFFECT_PARALYSIS ) //If the effect was slow then make sure to update the speed. The speed will have been updated here because it's treated as a nerf
+				//	if (ownerChar)
+				//		ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 				activeStatusEffects[i] = EFFECT_NONE;
 				turnsSinceStatusEffect[i] = 0;
 
@@ -390,6 +390,11 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 				{
 					if (ownerChar)
 						ownerChar->GridCharReatToElemental(POISON_DAMAGE, EFFECT_NONE);
+				}
+				else if (activeStatusEffects[i] == EFFECT_BLEEDING)
+				{
+					if (ownerChar)
+						ownerChar->GridCharReatToElemental(BLEEDING_DAMAGE, EFFECT_NONE);
 				}
 			}
 		}
@@ -504,12 +509,14 @@ void UStatsComponent::CheckIfAffectedByStatusEffect(int effect_)
 				if (effect_ == EFFECT_FREEZE || effect_ == EFFECT_PARALYSIS)
 				{
 					AddTempToStat(STAT_SPD, -currentStats[STAT_SPD]); //Speed reduced to 1
+				//	if (ownerChar)
+					//	ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 				}
 				else if (effect_ == EFFECT_SLOW)
 				{
 					AddTempToStat(STAT_SPD, -SLOW_DAMAGE); //Reduce the speed by the slow effect
-					if(ownerChar)
-						ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
+					//if(ownerChar)
+					//	ownerChar->GetPathComponent()->UpdateSpeed(currentStats[STAT_SPD]);
 				}
 			}
 		}

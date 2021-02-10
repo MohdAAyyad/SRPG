@@ -63,8 +63,8 @@ void AHubWorldManager::BeginPlay()
 			generalWidget->GetUserWidgetObject()->AddToViewport();
 
 
-	// start the intro cutscene
-	if (Intermediate::GetInstance()->GetShouldPlayIntro() && cutscenes[0])
+	// start the intro cutscene if this is day 1
+	if (Intermediate::GetInstance()->GetCurrentDay() == 1 && cutscenes[0])
 	{
 		cutscenes[0]->StartCutscene();
 	}
