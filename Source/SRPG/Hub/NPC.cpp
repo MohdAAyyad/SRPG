@@ -80,7 +80,6 @@ void ANPC::BeginPlay()
 	
 	animator = Cast<UNPCCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 
-	wander->SetCharacterRef(this);
 	line = "";
 	hasSetLine = false;
 
@@ -225,10 +224,14 @@ void ANPC::SetNPCLinesIndex(int index_)
 
 void ANPC::SetHubManager(AHubWorldManager* manager_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Set Hubr ref"));
 	if (manager_)
 	{
 		hubManager = manager_;
 	}
+
+	if(wander)
+		wander->SetCharacterRef(this);
 }
 
 void ANPC::EndDialogue()

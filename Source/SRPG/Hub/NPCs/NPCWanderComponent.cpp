@@ -107,32 +107,35 @@ void UNPCWanderComponent::Wander()
 
 		//FVector direction;
 		// this function is going to calculate how the npc needs to move
-		direction = target - chara->GetActorLocation();
-		float dist = FVector::Dist(target, chara->GetActorLocation());
-		//UE_LOG(LogTemp, Warning, TEXT("Scooting"));
-		// if we are in the radius go home 
-		if (dist < radius)
+		if (chara)
 		{
-			shouldMove = false;
-			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
-			//UE_LOG(LogTemp, Warning, TEXT("Arrived"));
-			return;
+			direction = target - chara->GetActorLocation();
+			float dist = FVector::Dist(target, chara->GetActorLocation());
+			//UE_LOG(LogTemp, Warning, TEXT("Scooting"));
+			// if we are in the radius go home 
+			if (dist < radius)
+			{
+				shouldMove = false;
+				GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
+				//UE_LOG(LogTemp, Warning, TEXT("Arrived"));
+				return;
+			}
+
+			direction *= maxSpeed / timeToArrive;
+
+			// if we are far enough away just start booking it
+			if (direction.Size() > maxSpeed)
+			{
+				direction.Normalize();
+				direction *= maxSpeed;
+			}
+
+			// interpolate between the 
+			/*FVector interp = FMath::Lerp(chara->GetActorRotation().Vector(), direction, 5);
+			FRotator rot = FRotator(0, 0, interp.Z);*/
+			// finally take the movement input and add that in
+			chara->AddMovementInput(direction);
 		}
-
-		direction *= maxSpeed / timeToArrive;
-
-		// if we are far enough away just start booking it
-		if (direction.Size() > maxSpeed)
-		{
-			direction.Normalize();
-			direction *= maxSpeed;
-		}
-
-		// interpolate between the 
-		/*FVector interp = FMath::Lerp(chara->GetActorRotation().Vector(), direction, 5);
-		FRotator rot = FRotator(0, 0, interp.Z);*/
-		// finally take the movement input and add that in
-		chara->AddMovementInput(direction);
 	}
 }
 
@@ -168,9 +171,13 @@ bool UNPCWanderComponent::GetShouldMove()
 
 void UNPCWanderComponent::SetCharacterRef(ACharacter* chara_)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Set character ref"));
 	chara = chara_;
-	originalPos = chara->GetActorLocation();
-	SelectNewTargetLocation();
+	if (chara)
+	{
+		originalPos = chara->GetActorLocation();
+		SelectNewTargetLocation();
+	}
 }
 
 

@@ -18,6 +18,9 @@ protected:
 
 	FName nextLevelName;
 
+	void DelegateWindowClosed();
+	bool UpdateAltf4();
+
 public:
 	ASRPGGameMode();
 	UFUNCTION(BlueprintCallable)
