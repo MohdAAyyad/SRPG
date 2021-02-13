@@ -108,13 +108,13 @@ void ATournament::SupportTeam(bool op1_)
 			//PutUnitOnHold();
 			hasSupportedTeam = true;
 			hasBetOnOpponent = true;
-			UE_LOG(LogTemp, Warning, TEXT("Supported OP1"));
+			//UE_LOG(LogTemp, Warning, TEXT("Supported OP1"));
 		}
 		else
 		{
 			op1SuccessChance -= 5;
 			op2SuccessChance += 5;
-			UE_LOG(LogTemp, Warning, TEXT("Supported OP2"));
+			//UE_LOG(LogTemp, Warning, TEXT("Supported OP2"));
 			hasSupportedTeam = true; 
 			hasBetOnOpponent = false;
 		}
@@ -132,12 +132,12 @@ FOpponentStruct ATournament::SimulateMatch()
 		if (winningResult <= op1SuccessChance)
 		{
 			winner = true;
-			UE_LOG(LogTemp, Warning, TEXT("OP1 Won"));
+			//UE_LOG(LogTemp, Warning, TEXT("OP1 Won"));
 		}
 		else
 		{
 			winner = false;
-			UE_LOG(LogTemp, Warning, TEXT("OP2 Won"));
+			//UE_LOG(LogTemp, Warning, TEXT("OP2 Won"));
 		}
 
 		// If we bet and won
@@ -146,7 +146,7 @@ FOpponentStruct ATournament::SimulateMatch()
 			// award the player 1.5 * money cost
 			gainedMoney = moneyCost * 1.5;
 			Intermediate::GetInstance()->SpendMoney(-gainedMoney);
-			UE_LOG(LogTemp, Warning, TEXT("Bet Won, money added"));
+			//UE_LOG(LogTemp, Warning, TEXT("Bet Won, money added"));
 			moneyCost = 0;
 		}
 		else if (hasBetOnOpponent != winner && hasSupportedTeam && unitsOnHold.Num() > 0)
@@ -223,11 +223,11 @@ void ATournament::OnOverlapWithPlayer(UPrimitiveComponent * OverlappedComp, AAct
 				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					widget->GetUserWidgetObject()->AddToViewport();
-					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+					//UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
+					//UE_LOG(LogTemp, Error, TEXT("Widget is NULL"));
 				}
 			}
 		}

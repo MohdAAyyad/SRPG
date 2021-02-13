@@ -34,8 +34,8 @@ void ABranchNPC::EndDialogue()
 
 void ABranchNPC::LoadText()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Load Text on Branch"));
-	if (hasUpdatedCentral == false && central && chanceOfSuccessEffect >= 0)
+	//UE_LOG(LogTemp, Warning, TEXT("Load Text on Branch"));
+	if (hasUpdatedCentral == false && central && chanceOfSuccessEffect >= 0 && central->GetActivityAlreadyDone() == false)
 	{
 		//line = "I'm sure if you were to talk to the guy over there, things could go your way.";
 		FActivityDialogueTableStruct row = fileReader->GetPositiveBranch(central->GetCentralActivityIndex(), 0);
@@ -46,7 +46,7 @@ void ABranchNPC::LoadText()
 		information = "Chance of success of an activity has risen.";
 
 	}
-	else if (hasUpdatedCentral == false && central && chanceOfSuccessEffect < 0)
+	else if (hasUpdatedCentral == false && central && chanceOfSuccessEffect < 0 && central->GetActivityAlreadyDone() == false)
 	{
 		FActivityDialogueTableStruct row = fileReader->GetNegativeBranch(central->GetCentralActivityIndex(), 0);
 		line = row.dialogue;
@@ -55,7 +55,7 @@ void ABranchNPC::LoadText()
 		information = "Chance of success of an activity has decreased.";
 		
 	}
-	else if(hasUpdatedCentral == true)
+	else if(hasUpdatedCentral == true || central->GetActivityAlreadyDone())
 	{
 		line = "I've nothing else to say.";
 	}

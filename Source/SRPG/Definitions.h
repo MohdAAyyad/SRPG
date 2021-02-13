@@ -387,11 +387,11 @@
 #pragma region Dialogue
 
 #ifndef THROWAWAYLINES_MIN
-#define THROWAWAYLINES_MIN 0 
+#define THROWAWAYLINES_MIN 3 
 #endif
 
 #ifndef THROWAWAYLINES_MAX
-#define THROWAWAYLINES_MAX 8 
+#define THROWAWAYLINES_MAX 13 
 #endif
 
 #pragma endregion

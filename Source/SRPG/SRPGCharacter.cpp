@@ -119,7 +119,7 @@ void ASRPGCharacter::TriggerPauseMenu()
 
 void ASRPGCharacter::SetHubWorldManager(AHubWorldManager* ref_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Set hub world reference"));
+	//UE_LOG(LogTemp, Warning, TEXT("Set hub world reference"));
 	hubWorldManager = ref_;
 	SetupController();
 }

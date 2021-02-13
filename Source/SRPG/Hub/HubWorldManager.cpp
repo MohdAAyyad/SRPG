@@ -64,7 +64,7 @@ void AHubWorldManager::BeginPlay()
 
 
 	// start the intro cutscene
-	if (Intermediate::GetInstance()->GetShouldPlayIntro() && cutscenes[0])
+	if (Intermediate::GetInstance()->GetCurrentDay() == 1 && cutscenes[0])
 	{
 		cutscenes[0]->StartCutscene();
 	}
@@ -133,24 +133,30 @@ bool AHubWorldManager::CheckForRewards()
 
 void AHubWorldManager::UpdateTimeSlots(int value_)
 {
-	timeSlots -= value_;
-	if (timeSlots < 0)
-	{
-		// tell the intermediate that we're out of timeslots
 
-		timeSlots = 0;
+	if (timeSlots - value_ >= 0)
+	{
+		timeSlots -= value_;
 	}
 
 	// tell the tournament NPC to go simulate the match and spawn brand new NPCs that say dialogue lines that will correspond to the archetype
 
 	if (tournament && firstTimeInfoSpawn)
 	{
+
 		FOpponentStruct opp = tournament->SimulateMatch();
 
 		ANPC* npc = SpawnNPC(0);
+
+		//SpawnNPCs(1, 0);
 		// give the npc the line it needs
 		FDialogueTableStruct row = fileReader->FindDialogueTableRow(FName(*FString::FromInt(opp.archtype)), 0);
-		npc->SetLine(row.line);
+		if (npc)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("spawned info NPC"));
+			npc->SetNPCLinesIndex(opp.archtype);
+		}
+
 		firstTimeInfoSpawn = false;
 
 	}
@@ -217,7 +223,7 @@ void AHubWorldManager::SpawnNPCs(int num_, int type_)
 		if (totalLoopCount >= maxLoopCount)
 		{
 			// go home 
-			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. %d NPCs Failed to spawn. Make sure you have enough spawn points avaible."), num_ - spawned);
+			//UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. %d NPCs Failed to spawn. Make sure you have enough spawn points avaible."), num_ - spawned);
 			break;
 		}
 	}
@@ -295,7 +301,7 @@ ACentralNPC* AHubWorldManager::SpawnCentralNPC()
 		if (totalLoopCount >= maxLoopCount)
 		{
 			// go home 
-			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+			//UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
 			break;
 		}
 	}
@@ -344,7 +350,7 @@ ABranchNPC* AHubWorldManager::SpawnBranchNPC()
 		if (totalLoopCount >= maxLoopCount)
 		{
 			// go home 
-			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+			//UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
 			break;
 		}
 	}
@@ -409,7 +415,7 @@ void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
 						currentLoop2++;
 						if (currentLoop2 >= totalLoopMax2)
 						{
-							UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for Branch NPC. Branch NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
+							//UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for Branch NPC. Branch NPCs Failed to spawn. Make sure you have enough spawn points avaible."));
 							break;
 						}
 					}
@@ -425,7 +431,7 @@ void AHubWorldManager::SpawnNPCs(int num_, bool spawnBranch_)
 		if (totalLoopCount >= maxLoopCount)
 		{
 			// go home 
-			UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. %d NPCs Failed to spawn. Make sure you have enough spawn points avaible."), num_ - spawned);
+			//UE_LOG(LogTemp, Error, TEXT("Not able to find valid location for all NPCs. %d NPCs Failed to spawn. Make sure you have enough spawn points avaible."), num_ - spawned);
 			break;
 		}
 	}
@@ -449,7 +455,7 @@ ANPC* AHubWorldManager::SpawnDefaultNPCs(AActor* a_)
 		
 	}
 	return npc;
-	UE_LOG(LogTemp, Warning, TEXT("Spawned Default NPC"));
+	//UE_LOG(LogTemp, Warning, TEXT("Spawned Default NPC"));
 }
 
 ACentralNPC* AHubWorldManager::SpawnCentralNPCs(AActor* a_)
@@ -467,7 +473,7 @@ ACentralNPC* AHubWorldManager::SpawnCentralNPCs(AActor* a_)
 	}
 	return centralNpc;
 	// any information we need to give the NPC will be done here
-	UE_LOG(LogTemp, Warning, TEXT("Spawned Central NPC"));
+	//UE_LOG(LogTemp, Warning, TEXT("Spawned Central NPC"));
 }
 
 ABranchNPC* AHubWorldManager::SpawnBranchNPCs(AActor* a_)
@@ -484,7 +490,7 @@ ABranchNPC* AHubWorldManager::SpawnBranchNPCs(AActor* a_)
 		}
 	}
 	return branchNpc;
-	UE_LOG(LogTemp, Warning, TEXT("Spawned Branch NPC"));
+	//UE_LOG(LogTemp, Warning, TEXT("Spawned Branch NPC"));
 }
 
 //leaving this in here in case funcionality wants to be re-added
@@ -531,7 +537,7 @@ void AHubWorldManager::DeleteNPCs()
 		// run through and delete all of the added npcs
 		a->Destroy();
 		
-		UE_LOG(LogTemp, Warning, TEXT("Deleted NPC"));
+		//UE_LOG(LogTemp, Warning, TEXT("Deleted NPC"));
 	}
 
 	for (int i = npcs.Num() - 1; i >= 0; i--)

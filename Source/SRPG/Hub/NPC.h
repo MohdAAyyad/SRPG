@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool hasSetLine;
+
 
 public:	
 	// Called every frame
@@ -117,6 +120,5 @@ private:
 
 
 
-	bool hasSetLine;
 
 };

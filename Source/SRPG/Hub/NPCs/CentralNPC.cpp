@@ -44,9 +44,10 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 				if (widget && activityAlreadyDone == false && widget->GetUserWidgetObject()->IsInViewport() == false)
 				{
 					//widget->GetUserWidgetObject()->AddToViewport();
-					UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
+					//UE_LOG(LogTemp, Warning, TEXT("Added Widget To viewport"));
 					FActivityDialogueTableStruct startLine = fileReader->GetStartingDialogue(activityIndex, 0);
 					line = startLine.dialogue;
+					timeCost = startLine.timeCost;
 
 					// focus in on the npc
 
@@ -87,7 +88,7 @@ void ACentralNPC::PutUnitOnHold(int index_)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Too many units spent!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Too many units spent!"));
 	}
 
 }
@@ -176,7 +177,7 @@ void ACentralNPC::SetSpentUnits(int value_)
 void ACentralNPC::UpdateChanceOfSuccess(float value_)
 {
 	// adds to our current chance of success value by the input value
-	UE_LOG(LogTemp, Warning, TEXT("Updated Chance of Success by %f"), value_);
+	//UE_LOG(LogTemp, Warning, TEXT("Updated Chance of Success by %f"), value_);
 	chanceOfSuccess += value_;
 }
 
@@ -208,7 +209,7 @@ void ACentralNPC::SetActivityIndex(int activity_)
 
 void ACentralNPC::SetMoneyCost(int cost_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SET MONEY COST"));
+	//UE_LOG(LogTemp, Warning, TEXT("SET MONEY COST"));
 	moneyCost = cost_;
 }
 
@@ -220,6 +221,11 @@ void ACentralNPC::SetUnitCost(int cost_)
 void ACentralNPC::SetChanceOfSuccess(int chance_)
 {
 	chanceOfSuccess = chance_;
+}
+
+bool ACentralNPC::GetActivityAlreadyDone()
+{
+	return activityAlreadyDone;
 }
 
 int ACentralNPC::GetCurrentMoneyFromIntermediate()
@@ -315,7 +321,7 @@ void ACentralNPC::SimulateActivity()
 				// this case is specifically for Russian Roulette 
 				FActivityDialogueTableStruct endReward = fileReader->GetActivityEndDialogue(activityIndex, 0);
 				Intermediate::GetInstance()->SpendMoney(- Intermediate::GetInstance()->GetCurrentMoney() * (endReward.rewardMoneyPercent / 100));
-				UE_LOG(LogTemp, Warning, TEXT("Money Added!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Money Added!"));
 			}
 				break;
 			case 1:
@@ -323,14 +329,14 @@ void ACentralNPC::SimulateActivity()
 				// choose a stat to give one of to each party member
 				int stat = FMath::RandRange(STAT_ATK, STAT_CRD);
 				Intermediate::GetInstance()->ChangeStats(CHG_STAT_PLY, stat);
-				UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Stats added!"));
 			}
 			
 				break;
 			case 2:
 				//decrement a stat of the enemy
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Enemy Stat went down!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Enemy Stat went down!"));
 				int stat = FMath::RandRange(STAT_ATK, STAT_CRD);
 				Intermediate::GetInstance()->ChangeStats(CHG_STAT_ENM, stat);
 			}
@@ -338,7 +344,7 @@ void ACentralNPC::SimulateActivity()
 			case 3:
 				// augment the crowd value
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CRD value improved"));
+				//UE_LOG(LogTemp, Warning, TEXT("CRD value improved"));
 				Intermediate::GetInstance()->ImprovePlayerCRD(FMath::RandRange(IMP_CRD_LW, IMP_CRD_HG));
 			}
 			break;
@@ -378,7 +384,7 @@ void ACentralNPC::SpendTime()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Not enough time slots!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Not enough time slots!"));
 		}
 }
 

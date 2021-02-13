@@ -96,6 +96,8 @@ public:
 	void SetUnitCost(int cost_);
 	void SetChanceOfSuccess(int chance_);
 
+	bool GetActivityAlreadyDone();
+
 	UFUNCTION(BlueprintCallable)
 	int GetCurrentMoneyFromIntermediate();
 };

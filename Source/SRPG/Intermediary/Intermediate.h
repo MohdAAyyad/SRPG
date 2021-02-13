@@ -40,7 +40,6 @@ protected:
 	int affectedParty = -1;
 	int statIndex = -1;
 	float changeCrowdValue = 0;
-	bool shouldPlayIntro; // check to see if we've played the intro cutscene yet
 
 	bool bRewardsWereGiven; //Checked the hub world manager general UI on begin play to see if a notification should be played
 
@@ -82,6 +81,4 @@ public:
 
 	bool GetRewardsWereGiven();
 	void ResetRewardsWereGiven();
-
-	bool GetShouldPlayIntro();
 };

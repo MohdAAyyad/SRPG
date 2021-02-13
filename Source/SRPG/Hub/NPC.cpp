@@ -43,7 +43,9 @@ ANPC::ANPC()
 	/*widget->SetupAttachment(GetCapsuleComponent());
 	widget->SetVisibility(false);*/
 	// create the wander component
+
 	wander = CreateDefaultSubobject<UNPCWanderComponent>(TEXT("Wander Component"));
+
 	// set up the character movement 
 	// set this to true to rotate the character to the movement vector
 	GetCharacterMovement()->bOrientRotationToMovement = true; 
@@ -118,14 +120,11 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent* overlappedComp_, AActor* oth
 
 void ANPC::LoadText()
 {
-	file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
-	line = file.line;
-	skippable = file.skippable;
-	name = file.name;
-	textSpeed = file.textSpeed;
-
-	UE_LOG(LogTemp, Warning, TEXT("Line Loaded"));
-
+		file = fileReader->FindDialogueTableRow(FName(*FString::FromInt(npcLineIndex)), 0);
+		line = file.line;
+		skippable = file.skippable;
+		name = file.name;
+		textSpeed = file.textSpeed;
 }
 
 // Called every frame
@@ -133,27 +132,31 @@ void ANPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	// handle the wander
-	if (wander->GetShouldMove() && interactedWith == false && shouldWander)
+	if (wander)
 	{
-		wander->Wander();
-	}
+		if (wander->GetShouldMove() && interactedWith == false && shouldWander)
+		{
+			wander->Wander();
+		}
 
-	if (wander->GetShouldMove() && animator)
-	{
-		if (interactedWith)
+		if (wander->GetShouldMove() && animator)
+		{
+			if (interactedWith)
+			{
+				animator->SetIsWalking(false);
+			}
+			else
+			{
+				animator->SetIsWalking(true);
+			}
+
+		}
+		else if (animator && wander->GetShouldMove() == false)
 		{
 			animator->SetIsWalking(false);
 		}
-		else
-		{
-			animator->SetIsWalking(true);
-		}
-
 	}
-	else if(animator && wander->GetShouldMove() == false)
-	{
-		animator->SetIsWalking(false);
-	}
+	
 
 	//	FQuat npcRot = GetActorRotation().Quaternion();
 	//	FQuat playerRot = playerRef->GetActorRotation().Quaternion();
@@ -174,7 +177,7 @@ void ANPC::Tick(float DeltaTime)
 	//	SetActorRotation(rot);
 
 	// rotate the NPC to face the player
-	if (playerRef && interactedWith)
+	if (playerRef && interactedWith && shouldWander)
 	{
 		FVector npcRot = GetActorLocation();
 		FVector playerRot = playerRef->GetActorLocation();
@@ -215,8 +218,9 @@ void ANPC::SetLine(FString line_)
 
 void ANPC::SetNPCLinesIndex(int index_)
 {
+
 	npcLineIndex = index_;
-	hasSetLine = true;
+
 }
 
 void ANPC::SetHubManager(AHubWorldManager* manager_)

@@ -48,7 +48,7 @@ void AFightersShop::BeginPlay()
 	}
 	if (fileReader)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Gonna try it out"));
+		//UE_LOG(LogTemp, Warning, TEXT("Gonna try it out"));
 		//We need to need to check if we have recruited fighters and update the fighterID accordingyl
 		TArray<FFighterTableStruct> allRecruitedFighters = fileReader->GetAllRecruitedFighters(1);
 		if (allRecruitedFighters.Num() > 0)

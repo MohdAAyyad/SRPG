@@ -5,7 +5,10 @@
 
 #include "Engine/World.h"
 #include "Runtime/Engine/Public/TimerManager.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h" 	
+#include "DrawDebugHelpers.h"
+#include "Hub/NPC.h"
+
 
 // Sets default values for this component's properties
 UNPCWanderComponent::UNPCWanderComponent()
@@ -22,11 +25,63 @@ void UNPCWanderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	shouldMove = false;
+	shouldCheckVision = true;
 	//SelectNewTargetLocation();
 	// ...
 	
 }
 
+
+void UNPCWanderComponent::CheckVision()
+{
+	if (chara)
+	{
+		// set up initial values
+		FHitResult result;
+		FVector loc = chara->GetActorLocation();
+		FVector dir = direction;
+
+		dir.Normalize();
+		// mesh is rotated by an additional -90 at the start
+
+		/*FRotator rot(0.0f, 0.0f, -90.0f);
+		rot.RotateVector(dir);
+		chara->GetActorRotation().RotateVector(dir);*/
+
+		FVector start = loc + FVector(0.0f,0.0f, checkHeight);
+
+		FVector maxDist = start + (dir * checkDistance);
+
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(this->GetOwner());
+
+		// draw a debug line
+		//DrawDebugLine(GetWorld(), start, maxDist, FColor::Red, 1, 0, 1);
+
+		// if our raycast hit something
+		if (GetWorld()->LineTraceSingleByChannel(result, start, maxDist, ECC_GameTraceChannel2, params))
+		{
+			shouldMove = false;
+			shouldCheckVision = false;
+			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
+			GetWorld()->GetTimerManager().SetTimer(findNewTargetTimerHandle, this, &UNPCWanderComponent::FlipShouldCheckVision, waitTime * 1.5, true);
+		}
+
+	}
+}
+
+void UNPCWanderComponent::FlipShouldCheckVision()
+{
+	if (shouldCheckVision)
+	{
+		shouldCheckVision = false;
+	}
+	else if (shouldCheckVision == false)
+	{
+		shouldCheckVision = true;
+	}
+
+}
 
 // Called every frame
 void UNPCWanderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -38,11 +93,19 @@ void UNPCWanderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UNPCWanderComponent::Wander()
 {
+	
+
 
 	if (shouldMove)
 	{
-		GetWorld()->GetTimerManager().SetTimer(findNewTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, findNewTargetTime, true);
-		FVector direction;
+		if (shouldCheckVision)
+		{
+			CheckVision();
+		}
+
+
+
+		//FVector direction;
 		// this function is going to calculate how the npc needs to move
 		direction = target - chara->GetActorLocation();
 		float dist = FVector::Dist(target, chara->GetActorLocation());
@@ -52,7 +115,6 @@ void UNPCWanderComponent::Wander()
 		{
 			shouldMove = false;
 			GetWorld()->GetTimerManager().SetTimer(newTargetTimerHandle, this, &UNPCWanderComponent::SelectNewTargetLocation, waitTime, true);
-			GetWorld()->GetTimerManager().ClearTimer(findNewTargetTimerHandle);
 			//UE_LOG(LogTemp, Warning, TEXT("Arrived"));
 			return;
 		}

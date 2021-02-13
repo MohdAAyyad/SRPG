@@ -33,9 +33,6 @@ protected:
 	float maxWander;
 	UPROPERTY(EditAnywhere)
 	float waitTime;
-	// time which will wait as the npc wanders to find a new target so it doesn't get stuck
-	UPROPERTY(EditAnywhere)
-	float findNewTargetTime;
 	UPROPERTY(EditAnywhere)
 	int maxDistance;
 	UPROPERTY(EditAnywhere)
@@ -44,6 +41,17 @@ protected:
 	FTimerHandle findNewTargetTimerHandle;
 	UPROPERTY(EditAnywhere)
 	float timeToArrive;
+	UPROPERTY(EditAnywhere)
+	float checkHeight;
+	UPROPERTY(EditAnywhere)
+	float checkDistance;
+
+	FVector direction;
+
+	void CheckVision();
+
+	bool shouldCheckVision;
+	void FlipShouldCheckVision();
 
 public:	
 	// Called every frame
