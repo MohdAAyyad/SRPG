@@ -101,7 +101,7 @@ AGridCharacter* UBlankDecisionComp::FindTheOptimalTargetCharacter()
 }
 ATile* UBlankDecisionComp::FindOptimalTargetTile(ATile* myTile_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("FindOptimalTargetTile"));
+	//UE_LOG(LogTemp, Warning, TEXT("FindOptimalTargetTile"));
 	if (functionIndex >= 0 && functionIndex < tileFunctionPtrs.Num())
 	{
 		return (this->*(tileFunctionPtrs[functionIndex]))(myTile_);
@@ -412,7 +412,7 @@ AGridCharacter* UBlankDecisionComp::FindSupportTarget_SmallestDistance(AGridChar
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Called next from FindSupportTarget_SmallestDistance"));
+			//UE_LOG(LogTemp, Warning, TEXT("Called next from FindSupportTarget_SmallestDistance"));
 			//if you haven't found a suitable target, move on to the next function
 			functionIndex++;
 			if (functionIndex >= targetFunctionPtrs.Num())
@@ -707,7 +707,7 @@ ATile* UBlankDecisionComp::FindOptimalOffenseTile(ATile* myTile_)
 		//If all range tiles are occupied, Find another target
 		if (!targetTile)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Could not find target tile"));
+			//UE_LOG(LogTemp, Warning, TEXT("Could not find target tile"));
 			currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
 			AGridCharacter* ignoreThisTarget = currentTarget;
 			if (bPersistant) //If this enemy is persistent, we need to tell it to find another target and to do that, the current target needs to be made null but we still need to pass it in to avoid it
@@ -802,7 +802,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Moving the function index"));
+			//UE_LOG(LogTemp, Warning, TEXT("Moving the function index"));
 		
 			//Could not find a usable skill so check what the next rule is
 
@@ -815,7 +815,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Gonna call the next function"));
+				//UE_LOG(LogTemp, Warning, TEXT("Gonna call the next function"));
 				ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
 				return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
 			}
@@ -823,7 +823,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 		//If we could not find a feasable tile, then find a different target
 		if (!targetTile)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Tried to heal but couldn't get a tile. Gonna attempt to find another target to heal"));
+			//UE_LOG(LogTemp, Warning, TEXT("Tried to heal but couldn't get a tile. Gonna attempt to find another target to heal"));
 			currentTarget->YouAreNoLongerTargetedByMe(ownerEnemy);
 			AGridCharacter* ignoreThisTarget = currentTarget;
 			if (bPersistant) //If this enemy is persistent, we need to tell it to find another target and to do that, the current target needs to be made null but we still need to pass it in to avoid it
@@ -831,7 +831,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 				currentTarget = nullptr;
 			}
 
-			UE_LOG(LogTemp, Warning, TEXT("BLANK : Could not find a support target tile"));
+			//UE_LOG(LogTemp, Warning, TEXT("BLANK : Could not find a support target tile"));
 			//Increment the function index and check if you're out of bounds
 			functionIndex++;
 			if (functionIndex >= targetFunctionPtrs.Num())
@@ -841,7 +841,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Second one gonna call the next function"));
+				//UE_LOG(LogTemp, Warning, TEXT("Second one gonna call the next function"));
 				ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(ignoreThisTarget));
 				return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile
 			}
@@ -868,7 +868,7 @@ ATile* UBlankDecisionComp::FindOptimalDistanceBasedSupportTile(ATile* myTile_)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Third one gonna call the next function"));
+			//UE_LOG(LogTemp, Warning, TEXT("Third one gonna call the next function"));
 
 			ownerEnemy->UpdateTargetCharacter(FindNextOptimalTargetCharacter(nullptr));
 			return (FindOptimalTargetTile(myTile_)); //We've switched to a different target so run the function again and find a tile

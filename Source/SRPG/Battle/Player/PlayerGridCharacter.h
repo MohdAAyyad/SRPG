@@ -57,6 +57,7 @@ public:
 	void GridCharReactToSkill(float value_, int statIndex_, int statuEffectIndex_, AGridCharacter* attacker_, bool crit_) override;
 	void GridCharReatToElemental(float damage_, int statusEffectIndex_) override;
 	void UpdateCurrentEXP();
+	void SkipEXPUpdate();
 	void CheckChangeStats();
 
 	UFUNCTION(BlueprintCallable)

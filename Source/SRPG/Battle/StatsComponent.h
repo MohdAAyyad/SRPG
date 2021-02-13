@@ -47,6 +47,7 @@ public:
 	void AddToStat(int stat_, int value_);
 	bool AddTempCRD(int value_); //True if the CRD stat is increased
 	void CheckLevelUp(bool hasLeveledUp_);
+	void SkipLevelup(); //When the user presses Continue, the level up should conclude 
 	void ScaleLevelWithArchetype(int targetLevel_, int archetype_); //Mainly used by enemies
 	int GetStatValue(int stat_);
 	void InitStatsAtZero(); //Mainly used by enemies. Followed by a call to scalelevelwitharchetype

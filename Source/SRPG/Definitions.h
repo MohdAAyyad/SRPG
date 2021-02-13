@@ -448,11 +448,15 @@
 #endif
 
 #ifndef ATK_RWRD
-#define ATK_RWRD 20 
+#define ATK_RWRD 300 
 #endif
 
 #ifndef SKL_RWRD
-#define SKL_RWRD 30 
+#define SKL_RWRD 500 
+#endif
+
+#ifndef KILL_RWRD
+#define KILL_RWRD 1000 
 #endif
 
 #pragma endregion
@@ -583,7 +587,7 @@
 #endif
 
 #ifndef BLEEDING_DAMAGE //Bleeding
-#define BLEEDING_DAMAGE 2.0f
+#define BLEEDING_DAMAGE 10.0f
 #endif
 
 #ifndef SLOW_DAMAGE //Slow

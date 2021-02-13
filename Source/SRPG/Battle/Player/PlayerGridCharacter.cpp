@@ -75,6 +75,8 @@ void APlayerGridCharacter::Selected()
 }
 void APlayerGridCharacter::NotSelected()
 {
+	targetHoverInfo = FHoverInfo(); //Reset hover info
+
 	if(widgetComp)
 		if(widgetComp->GetUserWidgetObject()->IsInViewport())
 			widgetComp->GetUserWidgetObject()->RemoveFromViewport();
@@ -87,6 +89,7 @@ void APlayerGridCharacter::NotSelected()
 
 	if (btlManager)
 		btlManager->ActivateOutlines(false);
+
 }
 void APlayerGridCharacter::HighlightMovementPath()
 {
@@ -597,6 +600,7 @@ void APlayerGridCharacter::GridCharReactToSkill(float damage_, int statIndex_, i
 				attacker_->YouHaveJustKilledAChampion(1); //You've just killed a villain
 				break;
 			case 2: //perma champion dead
+				crdManager->ChampVillainIsDead(true);
 				crdManager->SetPermaChampion(false);
 				attacker_->YouHaveJustKilledAChampion(2); //You've just killed a perma champion
 				break;
@@ -649,6 +653,14 @@ void APlayerGridCharacter::UpdateCurrentEXP()
 		}
 		//Check for level up
 		statsComp->CheckLevelUp(false);
+	}
+}
+
+void APlayerGridCharacter::SkipEXPUpdate()
+{
+	if (statsComp)
+	{
+		statsComp->SkipLevelup();
 	}
 }
 

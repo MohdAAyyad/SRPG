@@ -5,7 +5,8 @@
 #include "Definitions.h"
 #include "PathComponent.h"
 #include "GridCharacter.h"
-
+#include "Engine/World.h"
+#include "TimerManager.h"
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
 {
@@ -46,10 +47,10 @@ void UStatsComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, F
 
 	if (bLevelingUp)
 	{
-		if (currentStats[STAT_EXP > 0])
+		if (currentStats[STAT_EXP] > 0)
 		{
-			currentStats[STAT_EXP]--;
-			addedEXP++;
+			currentStats[STAT_EXP]-=10;
+			addedEXP+=10;
 			expPercentage += expOffset;
 			if (addedEXP >= currentStats[STAT_NXP])
 			{
@@ -170,13 +171,43 @@ void UStatsComponent::CheckLevelUp(bool hasLeveledUp_)
 		}
 		else
 		{
-			expOffset = 5.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
+			expOffset = 10.0f / currentStats[STAT_NXP]; //The point here is to try to minimize the amount of divisions made.
 			bLevelingUp = true;
 		}
 	}
 	else
 	{
 		FinishLevlingUp(); //No move EXP, we're done
+	}
+}
+
+void UStatsComponent::SkipLevelup()
+{
+
+	if (bLevelingUp)
+	{
+		bLevelingUp = false;
+		FTimerHandle skipDelayHandle; //Delay a bit before skipping to avoid the race condition
+		float skipDelay = 0.3f;
+		GetWorld()->GetTimerManager().SetTimer(skipDelayHandle, this, &UStatsComponent::SkipLevelup, skipDelay, false);
+	}
+	else
+	{
+		if (currentStats[STAT_EXP] >= currentStats[STAT_NXP])
+		{
+			currentStats[STAT_EXP] -= currentStats[STAT_NXP];
+			expPercentage = 1.0f;
+			currentStats[STAT_NXP] *= 2;
+			ScaleLevelWithArchetype(currentStats[STAT_LVL] + 1, currentStats[STAT_ARCH]);
+			FTimerHandle timeToUpdateExpHandle;
+			float timeToUpdateEXP = 0.4f;
+			GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &UStatsComponent::SkipLevelup, timeToUpdateEXP, false);
+		}
+		else
+		{
+			expPercentage = static_cast<float>(currentStats[STAT_EXP]) / static_cast<float>(currentStats[STAT_NXP]);
+			FinishLevlingUp();
+		}
 	}
 }
 
@@ -366,7 +397,7 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 	//Check for status effects
 	for (int i = 0; i < activeStatusEffects.Num(); i++)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("activeStatusEffects[i] %d"), activeStatusEffects[i]);
+		//UE_LOG(LogTemp, Warning, TEXT("activeStatusEffects[i] %d"), activeStatusEffects[i]);
 		if (activeStatusEffects[i] != 0)
 		{
 			turnsSinceStatusEffect[i]--;
@@ -403,26 +434,29 @@ void UStatsComponent::CheckStatBuffNerfStatus()//Checks whether buffs and nerfs 
 void UStatsComponent::AddTempToStat(int statIndex_, int value_)//Handle buffs nerfs
 {
 	int tempindex = ConvertStatIndexToTempStatIndex(statIndex_); //Get the temp index
-	if (value_ * tempStatChange[tempindex] < 0) //If this stat has previously been nerfed/buffed and you want to negate it
+	if (tempindex >= 0 && tempindex < tempStatChange.Num())
 	{
-		//Negate the previous effect
-		AddToStat(statIndex_, -tempStatChange[tempindex]);
-		tempStatChange[tempindex] = 0; 
-		turnsSinceLastStatChange[tempindex] = 0;
-	}
-	else if (value_ * tempStatChange[tempindex] == 0) //No previous nerfs or buffs
-	{
-		//Store the value and turns to buff/nerf the stat
-		tempStatChange[tempindex] = value_; 
-		turnsSinceLastStatChange[tempindex] = 3;
-		if (currentStats[statIndex_] + value_ <= 0)
+		if (value_ * tempStatChange[tempindex] < 0) //If this stat has previously been nerfed/buffed and you want to negate it
 		{
-			//A stat cannot go below 1
-			int offsetToOne = 1 - (currentStats[statIndex_] + value_);
-			value_ += offsetToOne;
-			tempStatChange[tempindex] = value_;
+			//Negate the previous effect
+			AddToStat(statIndex_, -tempStatChange[tempindex]);
+			tempStatChange[tempindex] = 0;
+			turnsSinceLastStatChange[tempindex] = 0;
 		}
-		AddToStat(statIndex_, value_); //Update the stat
+		else if (value_ * tempStatChange[tempindex] == 0) //No previous nerfs or buffs
+		{
+			//Store the value and turns to buff/nerf the stat
+			tempStatChange[tempindex] = value_;
+			turnsSinceLastStatChange[tempindex] = 3;
+			if (currentStats[statIndex_] + value_ <= 0)
+			{
+				//A stat cannot go below 1
+				int offsetToOne = 1 - (currentStats[statIndex_] + value_);
+				value_ += offsetToOne;
+				tempStatChange[tempindex] = value_;
+			}
+			AddToStat(statIndex_, value_); //Update the stat
+		}
 	}
 	if(statIndex_ == STAT_SPD) //If the affected stat is speed, make sure to tell the path component
 		if (ownerChar)

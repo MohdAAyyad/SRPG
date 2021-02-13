@@ -123,6 +123,8 @@ protected:
 
 
 	void GetPlayerFromController();
+
+	void CheckForCutscene();
 	
 public:	
 	// Called every frame

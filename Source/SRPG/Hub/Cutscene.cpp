@@ -95,13 +95,6 @@ void ACutscene::SpawnActors()
 void ACutscene::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// I truly hate doing this
-	if (done == false)
-	{
-		ShowUI();
-	}
-
-
 }
 
 void ACutscene::ShowUI()
@@ -144,7 +137,7 @@ void ACutscene::StartCutscene()
 	ShowUI();
 
 	// grab a reference to the player
-	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (control)
 	{
 		// basically snap to this npc, in the future i'll work on a camera fade
@@ -288,7 +281,7 @@ void ACutscene::LoadAnimations()
 
 void ACutscene::EndCutscene()
 {
-	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (control)
 	{
 		
@@ -327,20 +320,19 @@ void ACutscene::EndCutscene()
 	
 }
 
-bool ACutscene::CheckDone()
+void ACutscene::CheckDone()
 {
 	FCutsceneTableStruct row = fileReader->FindCutsceneTableRow(FName(*FString::FromInt(currentDialogue)), 0);
 	if (currentDialogue >= row.lineNum)
 	{
 		done = true;
-		//EndCutscene();
+		EndCutscene();
 	}
 	else
 	{
-		done = false;
+		AdvanceDialogue();
 	}
 
-	return done;
 }
 
 

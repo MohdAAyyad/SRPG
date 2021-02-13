@@ -57,6 +57,7 @@ void AAIManager::DeployEnemies()
 	TArray<ATile*> enemyDeploymentTiles;
 	//Get the next opponent
 	nextOp = Intermediate::GetInstance()->GetNextOpponent();
+	//UE_LOG(LogTemp, Warning, TEXT("Num of troops AI %d"), nextOp.numberOfTroops);
 
 	int nodeIndex = 0;
 
@@ -95,10 +96,10 @@ void AAIManager::DeployEnemies()
 
 					if (enemy)
 					{
+						enemy->bpID = enemyIndex;
 						enemy->SetManagers(this, gridManager, btlManager, crdManager);
 						deployedEnemies.Push(enemy);
-						enemyDeploymentTiles[tileIndex]->SetOccupied(true);
-						enemy->bpID = enemyIndex;
+						enemyDeploymentTiles[tileIndex]->SetOccupied(true);						
 						depNodes[nodeIndex].currentNumOfEnemiesForThisNode++;
 
 						//If we have used up all the slots on this node, go to the next one

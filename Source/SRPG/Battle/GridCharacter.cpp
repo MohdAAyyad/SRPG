@@ -659,6 +659,8 @@ void AGridCharacter::YouHaveKilledYouTarget(bool killedAnEnemy_)
 		crdManager->UpdateFavor(!killedAnEnemy_);
 	}
 
+	statsComp->AddToStat(STAT_EXP, KILL_RWRD);
+
 }
 
 void AGridCharacter::SetFighterName(FString name_)
