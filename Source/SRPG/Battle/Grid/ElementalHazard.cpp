@@ -59,13 +59,16 @@ void AElementalHazard::Tick(float DeltaTime)
 	{
 		if (currentParticles)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Current particles"));
 			//Shrink the size of the particles steadily then destroy them
 			if (currentParticles->GetComponentScale().Size() > 0.3f)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Reducing size"));
 				currentParticles->SetWorldScale3D(FMath::VInterpTo(currentParticles->GetComponentScale(), FVector::ZeroVector, DeltaTime, 1.0f));
 			}
 			else
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Ded"));
 				bDying = false;
 				currentParticles->SetActive(false);
 				currentParticles->DestroyComponent();
@@ -74,6 +77,7 @@ void AElementalHazard::Tick(float DeltaTime)
 		}
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Destroy this"));
 			Destroy(this);
 		}
 	}
@@ -112,7 +116,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 			if (statusEffect_ == EFFECT_BURN)
 			{
 				currentStat = CurrentElemntalStat::FIRE;
-				if (box)
+				/*if (box)
 				{
 					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -127,6 +131,28 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 						turnsSinceStateChanged = 3;
 					}
 					
+				}*/
+				
+				//Changing the elementals to work like the explosion
+				if (box)
+				{
+					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					FVector scale_ = box->GetComponentScale();
+					box->SetWorldScale3D(scale_*3.0f);
+					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+					if (obstacleManager)
+					{
+						bShrinkingMesh = true;
+						currentParticles = obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
+
+
+						if (decalact)
+							decalact->Destroy();
+					}
+					//Give the explosion some time to play out then destroy the object
+					FTimerHandle timeToDestroyHandle;
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 				}
 			}
 			break;
@@ -143,20 +169,19 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 				if (obstacleManager)
 				{
 					bShrinkingMesh = true;
-					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
-					turnsSinceStateChanged = 0;
+					currentParticles = obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
 					if (decalact)
 						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 
 
 			}
 			else if (statusEffect_ == EFFECT_FREEZE)
 			{
 				currentStat = CurrentElemntalStat::FROZEN;
-				if (box)
+				/*(if (box)
 				{
 					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -172,11 +197,33 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 
 					}
 				}
+				*/
+
+				if (box)
+				{
+					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					FVector scale_ = box->GetComponentScale();
+					box->SetWorldScale3D(scale_*3.0f);
+					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+					if (obstacleManager)
+					{
+						bShrinkingMesh = true;
+						currentParticles = obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
+
+						if (decalact)
+							decalact->Destroy();
+					}
+					//Give the explosion some time to play out then destroy the object
+					FTimerHandle timeToDestroyHandle;
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
+				}
+
 			}
 			else if (statusEffect_ == EFFECT_PARALYSIS)
 			{
 				currentStat = CurrentElemntalStat::PARALYSIS;
-				if (box)
+				/*if (box)
 				{
 					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -192,6 +239,27 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 						turnsSinceStateChanged = 3;
 
 					}
+				}
+				*/
+
+				if (box)
+				{
+					box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					FVector scale_ = box->GetComponentScale();
+					box->SetWorldScale3D(scale_*3.0f);
+					box->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+					if (obstacleManager)
+					{
+						bShrinkingMesh = true;
+						currentParticles = obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
+
+						if (decalact)
+							decalact->Destroy();
+					}
+					//Give the explosion some time to play out then destroy the object
+					FTimerHandle timeToDestroyHandle;
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 				}
 			}
 			break;
@@ -212,14 +280,13 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					{
 						bShrinkingMesh = true;
 						obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
-						turnsSinceStateChanged = 0;
 
 						if (decalact)
 							decalact->Destroy();
 					}
 					//Give the explosion some time to play out then destroy the object
 					FTimerHandle timeToDestroyHandle;
-					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 				}
 
 			}
@@ -237,13 +304,12 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 				{
 					bShrinkingMesh = true;
 					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
-					turnsSinceStateChanged = 0;
 
 					if (decalact)
 						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 
 			}
 			else if (statusEffect_ == EFFECT_POISON)
@@ -263,7 +329,6 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 					{
 						bShrinkingMesh = true;
 						obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, currentStat);
-						turnsSinceStateChanged = 0;
 
 						if (decalact)
 							decalact->Destroy();
@@ -271,7 +336,7 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 
 					//Give the explosion some time to play out then destroy the object
 					FTimerHandle timeToDestroyHandle;
-					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
+					GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 				}
 			}
 			break;
@@ -286,13 +351,12 @@ void AElementalHazard::ObstacleTakeDamage(float damage_, int statusEffect_)
 				{
 					bShrinkingMesh = true;
 					obstacleManager->SpawnElemntalEmitterAtLocation(particleLocation, CurrentElemntalStat::STEAM);
-					turnsSinceStateChanged = 0;
 
 					if (decalact)
 						decalact->Destroy();
 				}
 				FTimerHandle timeToDestroyHandle;
-				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AObstacle::DelayedDestroy, delayUntilDead, false);
+				GetWorld()->GetTimerManager().SetTimer(timeToDestroyHandle, this, &AElementalHazard::DelayedDestroy, delayUntilDead, false);
 
 			}
 			break;
@@ -317,7 +381,7 @@ void AElementalHazard::DelayedDestroy()
 {
 	box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//Decrease the size of the particle effect until it is very small then destroy it if the current state is not none or explosion. Otherwise, just get destroyed
-	if (currentStat == CurrentElemntalStat::EXPLOSION || currentStat == CurrentElemntalStat::STEAM || currentStat == CurrentElemntalStat::NONE)
+	/*if (currentStat == CurrentElemntalStat::EXPLOSION || currentStat == CurrentElemntalStat::STEAM || currentStat == CurrentElemntalStat::NONE)
 	{
 		if (obstacleManager)
 			obstacleManager->RemoveObstacle(this);
@@ -326,6 +390,17 @@ void AElementalHazard::DelayedDestroy()
 	{
 		bDying = true;
 	}
+	*/
+
+	if (obstacleManager)
+		obstacleManager->RemoveObstacle(this);
+
+	if (currentParticles)
+	{
+		currentParticles->SetActive(false);
+		currentParticles->DestroyComponent();
+	}
+	Destroy(this);
 }
 
 void AElementalHazard::OverlapWithGridCharacter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -367,6 +442,30 @@ void AElementalHazard::OverlapWithGridCharacter(UPrimitiveComponent* OverlappedC
 						break;
 					case CurrentElemntalStat::PARALYSIS:
 						gChar->GridCharReatToElemental(0.0f, EFFECT_PARALYSIS);
+						break;
+					}
+				}
+			}
+			else
+			{
+				//Elementals should propagate their effects to other elementals
+				AElementalHazard* elem = Cast<AElementalHazard>(OtherActor);
+				if (elem)
+				{
+					switch (currentStat)
+					{
+					case CurrentElemntalStat::POISON:
+						elem->ObstacleTakeDamage(10.0f, EFFECT_POISON);
+						break;
+					case CurrentElemntalStat::FIRE:
+					case CurrentElemntalStat::EXPLOSION:
+						elem->ObstacleTakeDamage(10.0f, EFFECT_BURN);
+						break;
+					case CurrentElemntalStat::FROZEN:
+						elem->ObstacleTakeDamage(10.0f, EFFECT_FREEZE);
+						break;
+					case CurrentElemntalStat::PARALYSIS:
+						elem->ObstacleTakeDamage(10.0f, EFFECT_PARALYSIS);
 						break;
 					}
 				}

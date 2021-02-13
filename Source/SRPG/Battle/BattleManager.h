@@ -101,6 +101,9 @@ protected:
 
 	void UpdatePlayerEXP();
 
+	UFUNCTION(BlueprintCallable)
+		void SkipLevelUp();
+
 public:	
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)

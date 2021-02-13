@@ -107,7 +107,7 @@ public:
 	void EndCutscene();
 
 	UFUNCTION(BlueprintCallable)
-	bool CheckDone();
+		void CheckDone();
 
 
 

@@ -39,7 +39,8 @@ protected:
 public:
 	void SwitchMusic(int musicIndex_);
 	void PlayNextPiece();
-	void FadeOutCurrentAudio();
+	UFUNCTION(BlueprintCallable)
+		void FadeOutCurrentAudio();
 	void PlayCommonSoundEffect(int index_); //No fading out
 
 };

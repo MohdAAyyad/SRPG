@@ -57,7 +57,7 @@ UParticleSystemComponent* AObstaclesManager::SpawnElemntalEmitterAtLocation(FVec
 
 	if (index_ >= 0 && index_ < elementalEmitters.Num())
 	{
-		return UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), elementalEmitters[index_], loc_, FRotator::ZeroRotator);
+		return UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), elementalEmitters[index_], loc_, FRotator::ZeroRotator, FVector(2.0f,2.0f,2.0f));
 	}
 	return nullptr;
 }

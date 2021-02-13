@@ -91,6 +91,8 @@ void AObstacle::DelayedDestroy()
 	//Tell the obstacle manager that you're done
 	if (obstacleManager)
 		obstacleManager->RemoveObstacle(this);
+
+	UE_LOG(LogTemp, Warning, TEXT("Delayed Destroy in Parent"));
 }
 
 bool AObstacle::IsAnyOfMyTilesHighlighted(int highlightIndex_)

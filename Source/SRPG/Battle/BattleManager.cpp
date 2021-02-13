@@ -157,13 +157,12 @@ void ABattleManager::DeplyUnitAtThisLocation(FVector tileLoc_) //Called from bat
 		APlayerGridCharacter* unit = GetWorld()->SpawnActor<APlayerGridCharacter>(fighters[bpidOfUnitToBeDeployedNext], tileLoc_, FRotator::ZeroRotator);
 		if (unit)
 		{
-			
+			unit->bpID = bpidOfUnitToBeDeployedNext;
 			unit->SetBtlAndCrdManagers(this,crdManager);
 			unit->SetFighterIndex(indexOfSelectedFighterInSelectedFighters);
 			unit->SetFighterID(selectedFighters[indexOfSelectedFighterInSelectedFighters].id);
 			unit->SetFighterName(selectedFighters[indexOfSelectedFighterInSelectedFighters].name);
 			deployedUnits.Push(unit);
-			unit->bpID = bpidOfUnitToBeDeployedNext;
 		}
 		if (widgetComp)
 			widgetComp->GetUserWidgetObject()->AddToViewport();
@@ -312,12 +311,12 @@ void ABattleManager::EndBattle(bool victory_)
 		if(EndWidgets[0])
 			widgetComp->SetWidgetClass(EndWidgets[0]);
 		FTimerHandle timeToUpdateExpHandle;
-		float timeToUpdateEXP = 0.7f;
+		float timeToUpdateEXP = 0.2f;
 		GetWorld()->GetTimerManager().SetTimer(timeToUpdateExpHandle, this, &ABattleManager::UpdatePlayerEXP, timeToUpdateEXP, false);
 
 		if (fileReader)
 		{
-			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay());
 			Intermediate::GetInstance()->Victory(dayInfo.moneyReward, dayInfo.shardsReward + deployedUnits.Num() * BTL_SHRD_RWRD_PER_UNIT);
 		}
 	}
@@ -332,7 +331,7 @@ void ABattleManager::EndBattle(bool victory_)
 
 		if (fileReader)
 		{
-			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay() - 1);
+			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay());
 			Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
 		}
 		
@@ -346,6 +345,15 @@ void ABattleManager::UpdatePlayerEXP()
 	{
 		if (deployedUnits[i])
 			deployedUnits[i]->UpdateCurrentEXP();
+	}
+}
+
+void ABattleManager::SkipLevelUp()
+{
+	for (int i = 0; i < deployedUnits.Num(); i++)
+	{
+		if (deployedUnits[i])
+			deployedUnits[i]->SkipEXPUpdate();
 	}
 }
 

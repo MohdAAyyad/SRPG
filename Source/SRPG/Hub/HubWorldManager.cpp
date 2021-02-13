@@ -54,17 +54,24 @@ void AHubWorldManager::BeginPlay()
 	//SpawnNPCs(1, 5);
 	firstTimeInfoSpawn = true;
 
-	FTimerHandle timerHandle;
+	FTimerHandle ctrlTimerHandle;
 
-	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AHubWorldManager::GetPlayerFromController, 1.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(ctrlTimerHandle, this, &AHubWorldManager::GetPlayerFromController, 1.0f, false);
 
 	if (generalWidget)
 		if (generalWidget->GetUserWidgetObject())
 			generalWidget->GetUserWidgetObject()->AddToViewport();
 
+	FTimerHandle cutsceneTimerHandle;
 
-	// start the intro cutscene
-	if (Intermediate::GetInstance()->GetCurrentDay() == 1 && cutscenes[0])
+	GetWorld()->GetTimerManager().SetTimer(cutsceneTimerHandle, this, &AHubWorldManager::CheckForCutscene, 0.5f, false);
+
+}
+
+void AHubWorldManager::CheckForCutscene()
+{
+	// start the intro cutscene if this is day 1
+	if (Intermediate::GetInstance()->GetCurrentDay() <= 1 && cutscenes[0])
 	{
 		cutscenes[0]->StartCutscene();
 	}

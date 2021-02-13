@@ -10,9 +10,9 @@ Intermediate::Intermediate()
 {
 	maxRosterSize = 20; //Arbitrary number
 	currentRosterSize = 5; //Starts with 5 main characters
-	dayCounter = 0; //Matches the day ID in the tables hence why it's zero. 1 is added to the value when displayed on the UI
+	dayCounter = 1; //Matches the day ID in the tables hence why it's zero. 1 is added to the value when displayed on the UI
 	protagonistLevel = 1;
-	currentMoney = 50000;
+	currentMoney = 5000;
 	currentShards = 25;
 	affectedParty = CHG_STAT_NON; //Affected by change stats function call. -1 neither 0 enemy 1 player
 	statIndex = -1;
@@ -54,7 +54,7 @@ void Intermediate::Defeat(int moneyCompensation_, int shardsCompensation_)
 
 int Intermediate::GetCurrentDay()
 {
-	return dayCounter + 1; // Matches the day ID in the tables hence why it's zero-based. 1 is added to the value when displayed on the UI
+	return dayCounter; // Matches the day ID in the tables hence why it's zero-based. 1 is added to the value when displayed on the UI
 }
 
 bool Intermediate::GetRewardsWereGiven()
