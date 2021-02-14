@@ -148,20 +148,26 @@ void AGridCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	animInstance = Cast<UGridCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
-	if(champParticles)
+	FTimerHandle postInitHandle;
+	GetWorld()->GetTimerManager().SetTimer(postInitHandle, this, &AGridCharacter::PostInit, 0.3f, false);
+
+}
+
+void AGridCharacter::PostInit()
+{
+	if (champParticles)
 		champParticles->DeactivateSystem();
 
-	if(villainParticles)
+	if (villainParticles)
 		villainParticles->DeactivateSystem();
 
 	if (permaChampParticles)
 		permaChampParticles->DeactivateSystem();
 
-	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
-
 	//Spawn and attack the weapons
-	if (weaponMeshes.Num()>0)
+	if (weaponMeshes.Num() > 0)
 	{
 		if (weaponMeshes[0])
 		{
@@ -183,6 +189,7 @@ void AGridCharacter::BeginPlay()
 		}
 	}
 
+	UpdateOriginTile();
 }
 
 void AGridCharacter::SetBtlAndCrdManagers(ABattleManager* btlManager_, ABattleCrowd* crd_)

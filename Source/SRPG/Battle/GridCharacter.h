@@ -225,5 +225,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void PlaySoundEffect(int index_);	
+	void PostInit();
 
 };

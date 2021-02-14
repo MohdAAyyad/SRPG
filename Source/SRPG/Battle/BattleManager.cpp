@@ -61,7 +61,7 @@ void ABattleManager::BeginPlay()
 
 }
 
-void ABattleManager :: UpdateOtherManagers()
+void ABattleManager::UpdateOtherManagers()
 {
 	if (aiManager)
 		aiManager->SetBattleGridCrdManagers(this, gridManager, crdManager);

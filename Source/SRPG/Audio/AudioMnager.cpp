@@ -29,6 +29,12 @@ void AAudioMnager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FTimerHandle postInitHandle;
+	GetWorld()->GetTimerManager().SetTimer(postInitHandle, this, &AAudioMnager::PostInit, 0.3f, false);
+}
+
+void AAudioMnager::PostInit()
+{
 	for (int i = 0; i < music.Num(); i++)
 	{
 		//Load all the sound files at the beginning to prevent FPS drops when they're loaded

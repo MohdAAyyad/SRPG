@@ -43,4 +43,6 @@ public:
 		void FadeOutCurrentAudio();
 	void PlayCommonSoundEffect(int index_); //No fading out
 
+	void PostInit();
+
 };

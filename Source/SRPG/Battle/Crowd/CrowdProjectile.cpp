@@ -52,7 +52,7 @@ void ACrowdProjectile::OverlapWithObstacle(UPrimitiveComponent* OverlappedComp, 
 		if (obst)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), emitter, GetActorLocation(), FRotator::ZeroRotator);
-			obst->ObstacleTakeDamage(20.0f, statusEffect);
+			obst->ObstacleTakeDamage(30.0f, statusEffect);
 			//TODO, play sound effect
 			Destroy();
 
