@@ -63,6 +63,7 @@ public:
 	void ResetSelectedFighters();
 	TArray<FFighterTableStruct> GetSelectedFighters(); //Called by the battle manager
 	void SpendMoney(int money_);
+	void AddMoney(int money_);
 	void SpendShards(int shards_);
 	void SetNextOpponent(FOpponentStruct op_); //Called by transition to battle when the player collides with it and ends the day. 
 										 //Determines the next fight when the next fight is not a story one.

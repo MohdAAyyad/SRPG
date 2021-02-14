@@ -131,6 +131,11 @@ void Intermediate::SpendMoney(int money_)
 	}
 }
 
+void Intermediate::AddMoney(int money_)
+{
+	currentMoney += money_;
+}
+
 void Intermediate::SpendShards(int shards_)
 {
 	if (currentShards - shards_ > 0)
