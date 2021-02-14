@@ -47,23 +47,26 @@ ABattleManager::ABattleManager()
 void ABattleManager::BeginPlay()
 {
 	Super::BeginPlay();
-	ABattleController* ctrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
-	if (ctrl)
-		ctrl->SetBattleManager(this);
-	if (widgetComp)
-		widgetComp->GetUserWidgetObject()->AddToViewport();
-	if (aiManager)
-		aiManager->SetBattleGridCrdManagers(this, gridManager,crdManager);
-	if (gridManager)
-		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
+	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
 
+	if (btlCtrl)
+		btlCtrl->SetBattleManager(this);
+
+	FTimerHandle timerHandle;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &ABattleManager::UpdateOtherManagers, 2.0f, false);
 
 	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
 	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
 
-	btlCtrl = Cast<ABattleController>(GetWorld()->GetFirstPlayerController());
+}
 
+void ABattleManager :: UpdateOtherManagers()
+{
+	if (aiManager)
+		aiManager->SetBattleGridCrdManagers(this, gridManager, crdManager);
+	if (gridManager)
+		gridManager->HighlightDeploymentTiles(rowIndexOfStartingTile, offsetOfStartingTile, deploymentRowSpeed, deploymentDepth);
 }
 
 // Called every frame

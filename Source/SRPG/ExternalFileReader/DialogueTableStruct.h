@@ -17,7 +17,9 @@ public:
 
 	FDialogueTableStruct()
 	{
-
+		line = name = "";
+		textSpeed = 0.0f;
+		skippable = true;
 	}
 
 	UPROPERTY(BlueprintReadWrite)

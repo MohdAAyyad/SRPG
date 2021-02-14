@@ -12,6 +12,12 @@ struct SRPG_API FDayTableStruct : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 public:
 
+	FDayTableStruct()
+	{
+		id = enemyLevel = moneyReward = shardsReward = maxNumOfPlayers = numOfEnemies = specialFight = 
+			retryMoneyCompensation = retryShardsCompensation = 0;
+	}
+
 	UPROPERTY(BlueprintReadWrite)
 		int id;
 	UPROPERTY(BlueprintReadWrite)

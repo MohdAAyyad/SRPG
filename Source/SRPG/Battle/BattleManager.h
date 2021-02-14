@@ -104,6 +104,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void SkipLevelUp();
 
+	void UpdateOtherManagers();
+
 public:	
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)

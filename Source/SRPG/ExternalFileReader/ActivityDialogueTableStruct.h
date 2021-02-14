@@ -15,7 +15,9 @@ struct SRPG_API FActivityDialogueTableStruct : public FTableRowBase
 public:
 	FActivityDialogueTableStruct()
 	{
-
+		id = activityIndex = branchOrCentral = positiveOrNegative = unitCost = moneyCostPercentage = timeCost = startingDialogue =
+			endDialogue = rewardMoneyPercent = rewardIndex = 0;
+		dialogue = "";
 	}
 	UPROPERTY(BlueprintReadWrite)
 	int id; //EditAnywhere, BluePrintReadOnly

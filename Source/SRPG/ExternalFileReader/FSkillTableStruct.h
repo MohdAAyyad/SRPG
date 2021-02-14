@@ -15,7 +15,9 @@ public:
 
 	FSkillTableStruct()
 	{
-
+		weaponIndex = value = pip = atk = inti = crit = hit = levelToUnlock = fls = rge = rows = depths = animationIndex = statusEffect
+			= emitterIndex = statIndex = equipmentSkillsIndex = pure = soundEffectIndex = 0;
+		name = description = "";
 	}
 
 	UPROPERTY(BlueprintReadOnly)

@@ -224,7 +224,6 @@ void ANPC::SetNPCLinesIndex(int index_)
 
 void ANPC::SetHubManager(AHubWorldManager* manager_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Set Hubr ref"));
 	if (manager_)
 	{
 		hubManager = manager_;

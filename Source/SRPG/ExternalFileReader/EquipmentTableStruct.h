@@ -17,7 +17,7 @@ public:
 	{
 		hp = pip = atk = def = intl = spd = crit = hit = crd = 
 		range = equipmentIndex = weaponIndex = armorIndex = 
-		owned = level = value = skillsIndex = skillsN = id = 0;
+		owned = level = value = skillsIndex = skillsN = id = emitterIndex = pure = statusEffect = 0;
 	}
 	UPROPERTY(BlueprintReadWrite)
 	int hp; // EditAnywhere, BluePrintReadOnly

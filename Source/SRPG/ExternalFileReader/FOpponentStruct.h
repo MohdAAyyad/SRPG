@@ -13,7 +13,7 @@ struct SRPG_API FOpponentStruct
 
 	FOpponentStruct()
 	{
-
+		level = archtype = numberOfTroops = 0;
 	}
 
 	UPROPERTY(BlueprintReadOnly)

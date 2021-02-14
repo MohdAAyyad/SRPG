@@ -171,7 +171,6 @@ bool UNPCWanderComponent::GetShouldMove()
 
 void UNPCWanderComponent::SetCharacterRef(ACharacter* chara_)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Set character ref"));
 	chara = chara_;
 	if (chara)
 	{

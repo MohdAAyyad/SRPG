@@ -16,7 +16,11 @@ struct SRPG_API FCutsceneTableStruct : public FTableRowBase
 public:
 	FCutsceneTableStruct()
 	{
+		name = dialogue = model1Name = model2Name =  modelAnim1 = modelAnim2 = "";
+		textSpeed = 0.0f;
+		lineNum = 0;
 
+		
 	};
 
 	// character name

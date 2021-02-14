@@ -15,7 +15,8 @@ struct SRPG_API FItemTableStruct :  public FTableRowBase
 public:
 	FItemTableStruct()
 	{
-
+		id = value = statIndex = owned = level = price = 0;
+		name = description = "";
 	}
 	UPROPERTY(BlueprintReadWrite)
 		int id;
