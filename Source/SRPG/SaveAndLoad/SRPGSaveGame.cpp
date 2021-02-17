@@ -82,6 +82,10 @@ void USRPGSaveGame::InitialSave()
 	USRPGSaveGame* saveInstance_ = Cast<USRPGSaveGame>(UGameplayStatics::CreateSaveGameObject(USRPGSaveGame::StaticClass()));
 	if (saveInstance_)
 	{
+		if (UGameplayStatics::DoesSaveGameExist((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex))
+		{
+			UGameplayStatics::DeleteGameInSlot((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex);
+		}
 		UGameplayStatics::AsyncSaveGameToSlot(saveInstance_, saveSlotName, userIndex, FAsyncSaveGameToSlotDelegate());
 	}
 }
