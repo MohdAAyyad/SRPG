@@ -91,7 +91,7 @@ void ASaveLoadGameState::SaveNewDay(uint32 day_)
 
 void ASaveLoadGameState::InitialSave()
 {
-	Intermediate::GetInstance()->SetHasLoadedData(false);
+	Intermediate::GetInstance()->GoBackToInitialValues();
 	if (saveLoadObj)
 	{
 		saveLoadObj->InitialSave();

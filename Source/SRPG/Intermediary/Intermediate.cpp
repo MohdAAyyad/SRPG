@@ -9,7 +9,7 @@ TUniquePtr<Intermediate, TDefaultDelete<Intermediate>> Intermediate::instance = 
 Intermediate::Intermediate()
 {
 	maxRosterSize = 20; //Arbitrary number
-	currentRosterSize = 5; //Starts with 5 main characters
+	currentRosterSize = 0;
 	protagonistLevel = 1;
 	affectedParty = CHG_STAT_NON; //Affected by change stats function call. -1 neither 0 enemy 1 player
 	statIndex = -1;
@@ -19,10 +19,27 @@ Intermediate::Intermediate()
 	bRewardsWereGiven = false;
 	loadedData = FLoadData();
 	bVictory = false;
+	bHasLoadedData = false;
 }
 
 Intermediate::~Intermediate()
 {
+}
+
+void Intermediate::GoBackToInitialValues()
+{
+	maxRosterSize = 20; //Arbitrary number
+	currentRosterSize = 0;
+	protagonistLevel = 1;
+	affectedParty = CHG_STAT_NON; //Affected by change stats function call. -1 neither 0 enemy 1 player
+	statIndex = -1;
+	changeCrowdValue = 0.0f;
+	currentDeploymentSize = 0;
+	latestFighterID = 0;
+	bRewardsWereGiven = false;
+	loadedData = FLoadData();
+	bVictory = false;
+	bHasLoadedData = false;
 }
 
 Intermediate* Intermediate::GetInstance()

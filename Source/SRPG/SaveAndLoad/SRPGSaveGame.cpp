@@ -15,7 +15,9 @@ USRPGSaveGame::USRPGSaveGame()
 	currentArmorsState = TArray<FEquipmentTableStruct>();
 	currentAccessoriesState = TArray<FEquipmentTableStruct>();
 	currentItemsState = TArray<FItemTableStruct>();
-	currentDayState = currentGoldState = currentShardsState = 0;
+	currentDayState = 1;
+	currentGoldState = 4000;
+	currentShardsState = 40;
 	gameState = nullptr;
 	bWillNeedToSwitchLevelAfterSaving = false;
 }
@@ -27,7 +29,10 @@ void USRPGSaveGame::SaveCurrentGameState()
 	USRPGSaveGame* saveInstance_ = Cast<USRPGSaveGame>(UGameplayStatics::CreateSaveGameObject(USRPGSaveGame::StaticClass()));
 	if (saveInstance_)
 	{
-		
+		saveSlotName = TEXT("Save0");
+		userIndex = 0;
+		saveInstance_->saveSlotName = TEXT("Save0");
+		saveInstance_->userIndex = 0;
 		saveInstance_->currentRecruitedFightersState = currentRecruitedFightersState;
 		saveInstance_->currentWeaponsState = currentWeaponsState;
 		saveInstance_->currentArmorsState = currentArmorsState;
@@ -48,25 +53,11 @@ void USRPGSaveGame::SaveCurrentGameState()
 
 		if (!bWillNeedToSwitchLevelAfterSaving)
 		{
-			//Delete the current version of the save game first
-			if(UGameplayStatics::DoesSaveGameExist((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex))
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("Save game exists"));
-				if (UGameplayStatics::DeleteGameInSlot((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex))
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Deleted save game"));
-				}
-			}
 			//Write it again
 			UGameplayStatics::AsyncSaveGameToSlot(saveInstance_, saveSlotName, userIndex, FAsyncSaveGameToSlotDelegate());
 		}
 		else
 		{
-			//Delete the current version of the save game first
-			if (UGameplayStatics::DoesSaveGameExist((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex))
-			{
-				UGameplayStatics::DeleteGameInSlot((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex);
-			}
 			//Tell the game instance that you've finished saving
 			bWillNeedToSwitchLevelAfterSaving = false;
 			saveDelegate.BindUObject(gameState, &ASaveLoadGameState::FinishedSavingNowToHub);
@@ -82,10 +73,19 @@ void USRPGSaveGame::InitialSave()
 	USRPGSaveGame* saveInstance_ = Cast<USRPGSaveGame>(UGameplayStatics::CreateSaveGameObject(USRPGSaveGame::StaticClass()));
 	if (saveInstance_)
 	{
-		if (UGameplayStatics::DoesSaveGameExist((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex))
-		{
-			UGameplayStatics::DeleteGameInSlot((TEXT("%sSaveGames/%s.sav"), *FPaths::ProjectSavedDir(), saveSlotName), userIndex);
-		}
+		saveSlotName = TEXT("Save0");
+		userIndex = 0;
+		saveInstance_->saveSlotName = TEXT("Save0");
+		saveInstance_->userIndex = 0;
+		saveInstance_->currentRecruitedFightersState = TArray<FFighterTableStruct>();
+		saveInstance_->currentWeaponsState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentArmorsState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentAccessoriesState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentItemsState = TArray<FItemTableStruct>();
+		saveInstance_->currentDayState = 1;
+		saveInstance_->currentGoldState = 4000;
+		saveInstance_->currentShardsState = 40;
+
 		UGameplayStatics::AsyncSaveGameToSlot(saveInstance_, saveSlotName, userIndex, FAsyncSaveGameToSlotDelegate());
 	}
 }

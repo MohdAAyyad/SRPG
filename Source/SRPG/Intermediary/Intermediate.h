@@ -122,4 +122,6 @@ public:
 	bool GetVictory();
 
 	void ReadyDataForSavingAfterBattle(); //Removes dead fighters from the loaded list of fighters and levels up surviving fighters
+
+	void GoBackToInitialValues(); //Called when starting a new game
 };
