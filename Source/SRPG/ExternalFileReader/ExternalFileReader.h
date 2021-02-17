@@ -58,24 +58,31 @@ public:
 	TArray<FSkillTableStruct> GetOffesniveSkillsForBP(int tableIndex_, int weaponIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 	TArray<FSkillTableStruct> GetDefensiveSkillsForBP(int tableIndex_, int armorIndex_, int skillNum_, int skillsIndex_, int currentLevel_);
 
+
+	TArray<FItemTableStruct> GetAllItemsConditionedByWorldLevel(int tableIndex_, int worldLevel_);
+	TArray<FItemTableStruct> GetAllOwnedItems(int tableIndex_);
+	int GetItemStatIndex(int tableIndex_, FName itemName_);
+	int GetItemValue(FName itemName_);
+	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
+	void AddOwnedValueItemTable(int tableIndex_, int itemId_, int amountToAdd_);
+	void UpdateOwnedValueItemTableAfterLoad(int tableIndex, int itemID_, int newOwnedValue_);
+
+	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+	void UpdateOwnedValueEquipmentTableAfterLoad(int tableIndex, int equipID_, int newOwnedValue_);
 	FEquipmentTableStruct GetEquipmentById(int tableIndex_, int equipID_, int equipIndex_, int subIndex_);
 	FEquipmentTableStruct GetEquipmentByLevel(int tableIndex_, int level_, int equipIndex_, int subIndex_);
-	TArray<FItemTableStruct> GetAllItemsConditionedByWorldLevel(int tableIndex_, int worldLevel_);
 	TArray<FEquipmentTableStruct> FindAllOwnedEquipment(int tableIndex_);
 	TArray<FEquipmentTableStruct> GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_);
 	TArray<FEquipmentTableStruct> GetAllEquipmentOfACertainTypeConditionedByWorldLevel(int tableIndex_, int equipIndex_, int subIndex_, int worldLevel_);
+
+
 	TArray<FFighterTableStruct> GetAllRecruitedFighters(int tableIndex_);
 	TArray<FFighterTableStruct> GetAllFighters(int tableIndex_);
 	FFighterTableStruct FindFighterRowById(int tableIndex_, int fighterId_);
 	void RemoveFightersDueToPermaDeath(TArray<int>& ids_, int tableIndex_);
 	void ClearRecruitedFightersTable(int tableIndex_);
 	void IncreaseTheStatsOfThisFigheter(FFighterTableStruct fighter_, int tableIndex_);
-	TArray<FItemTableStruct> GetAllOwnedItems(int tableIndex_);
-	int GetItemStatIndex(int tableIndex_, FName itemName_);
-	int GetItemValue(FName itemName_);
-	void AddRowToRecruitedFighterTable(FName rowName_, int index_, FFighterTableStruct row_);
-	void AddOwnedValueItemTable(int tableIndex_, int itemId_, int amountToAdd_);
-	void AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_);
+
 	//void ClearRecruitedFightersTable(int tableIndex_);
 	void RemoveFighterTableRow(FName rowName_, int tableIndex_);
 
@@ -94,5 +101,7 @@ public:
 	void SellItem(int tableIndex_, int itemID_, int amount_);
 
 	FDayTableStruct GetCurrentDayInfo(int tableIndex_,int dayId_);
+
+	void ClearTable(int tableIndex_);
 		
 };

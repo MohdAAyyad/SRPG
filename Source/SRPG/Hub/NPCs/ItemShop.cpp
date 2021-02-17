@@ -11,6 +11,7 @@
 #include "SRPGCharacter.h"
 #include "SRPGPlayerController.h"
 #include "TimerManager.h"
+#include "../../SaveAndLoad/SaveLoadGameState.h"
 
 
 AItemShop::AItemShop() :ANPC()
@@ -21,6 +22,11 @@ AItemShop::AItemShop() :ANPC()
 void AItemShop::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (Intermediate::GetInstance()->GetHasLoadedData())
+	{
+		LoadEquipmentAndItems();
+	}
 }
 
 /*
@@ -165,18 +171,25 @@ TArray<FEquipmentTableStruct> AItemShop::GetAllOwnedEquipment()
 		
 		TArray<FEquipmentTableStruct> armor = fileReader->FindAllOwnedEquipment(2); //Armor
 
-		for (auto a : armor)
+		if (armor.Num() > 0)
 		{
-			allWpnsAndArmorAndAcc.Push(a);
+			for (auto a : armor)
+			{
+				allWpnsAndArmorAndAcc.Push(a);
+			}
+			armor.Empty();
 		}
 
-		armor.Empty();
+	
 
 		armor = fileReader->FindAllOwnedEquipment(3); //Acc
 
-		for (auto a : armor)
+		if (armor.Num() > 0)
 		{
-			allWpnsAndArmorAndAcc.Push(a);
+			for (auto a : armor)
+			{
+				allWpnsAndArmorAndAcc.Push(a);
+			}
 		}
 
 	}
@@ -193,4 +206,55 @@ TArray<FItemTableStruct> AItemShop::GetAllOwnedItems()
 
 	return  TArray<FItemTableStruct>();
 }
+
+void AItemShop::SaveNewEquipment() //Called from the UI when you leave the shop after buying equipment
+{
+	//Equipment will be passed on to the save object when we end the day
+	Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState = fileReader->FindAllOwnedEquipment(1);
+	Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState = fileReader->FindAllOwnedEquipment(2);
+	Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState = fileReader->FindAllOwnedEquipment(3);
+}
+
+void AItemShop::SaveNewItems() //Called from the UI when you leave the shop after buying items
+{
+	//Items will be passed onto the save object when we save
+	Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState = fileReader->GetAllOwnedItems(0);
+}
+
+void AItemShop::LoadEquipmentAndItems()
+{
+	TArray<FItemTableStruct> items_ = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;
+	TArray<FEquipmentTableStruct> weapons_ = Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState;
+	TArray<FEquipmentTableStruct> armors_ = Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState;
+	TArray<FEquipmentTableStruct> accessories_ = Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState;
+
+	for (int i = 0; i < items_.Num(); i++)
+	{
+		fileReader->UpdateOwnedValueItemTableAfterLoad(0, items_[i].id, items_[i].owned);
+	}
+
+	for (int i = 0; i < weapons_.Num(); i++)
+	{
+		fileReader->UpdateOwnedValueEquipmentTableAfterLoad(1, weapons_[i].id, weapons_[i].owned);
+	}
+	for (int i = 0; i < armors_.Num(); i++)
+	{
+		fileReader->UpdateOwnedValueEquipmentTableAfterLoad(2, armors_[i].id, armors_[i].owned);
+	}
+	for (int i = 0; i < accessories_.Num(); i++)
+	{
+		fileReader->UpdateOwnedValueEquipmentTableAfterLoad(3, accessories_[i].id, accessories_[i].owned);
+	}
+}
+
+//The data we're saving only includes the owned items, so when we load we should be adding the owned value to the table.
+
+//TODO
+/*
+* Check bHasLoaded in the intermediate and if true, load the data
+* Save the day data after loading into the hub world
+* Save the fighters data after finishing a battle
+* Save everything that's changed after exiting the pause menu
+
+*/
 

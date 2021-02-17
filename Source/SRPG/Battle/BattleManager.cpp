@@ -59,6 +59,8 @@ void ABattleManager::BeginPlay()
 	selectedFighters = Intermediate::GetInstance()->GetSelectedFighters();
 	numberOfUnitsDeployed = Intermediate::GetInstance()->GetCurrentDeploymentSize();
 
+	LoadItems(); //We need to load the items into the table or they will be unusable otherwise
+
 }
 
 void ABattleManager::UpdateOtherManagers()
@@ -321,6 +323,7 @@ void ABattleManager::EndBattle(bool victory_)
 		{
 			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay());
 			Intermediate::GetInstance()->Victory(dayInfo.moneyReward, dayInfo.shardsReward + deployedUnits.Num() * BTL_SHRD_RWRD_PER_UNIT);
+			Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState = fileReader->GetAllOwnedItems(1); //Update the current state of items for saving/loading purposes
 		}
 	}
 	else
@@ -336,6 +339,7 @@ void ABattleManager::EndBattle(bool victory_)
 		{
 			FDayTableStruct dayInfo = fileReader->GetCurrentDayInfo(0, Intermediate::GetInstance()->GetCurrentDay());
 			Intermediate::GetInstance()->Defeat(dayInfo.retryMoneyCompensation, dayInfo.retryShardsCompensation);
+			Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState = fileReader->GetAllOwnedItems(1);
 		}
 		
 	}
@@ -385,4 +389,15 @@ void ABattleManager::ActivateOutlines(bool value_)
 
 	if(obstacleManager)
 		obstacleManager->ActivateOutlines(value_);
+}
+
+
+void ABattleManager::LoadItems()
+{
+	TArray<FItemTableStruct> loadedItems_ = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;
+
+	for (int i = 0; i < loadedItems_.Num(); i++)
+	{
+		fileReader->UpdateOwnedValueItemTableAfterLoad(1, loadedItems_[i].id, loadedItems_[i].owned);
+	}
 }

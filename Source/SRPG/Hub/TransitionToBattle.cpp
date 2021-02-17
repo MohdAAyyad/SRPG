@@ -15,6 +15,7 @@
 #include "Definitions.h"
 #include "SRPGPlayerController.h"
 #include "../Audio/AudioMnager.h"
+#include "SRPGPlayerController.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -86,6 +87,10 @@ void ATransitionToBattle::OverlapWithPlayer(UPrimitiveComponent* overlappedCompo
 				UpdateRecruitedFighters();
 				if (widgetComp)
 					widgetComp->GetUserWidgetObject()->AddToViewport();
+
+				ASRPGPlayerController* control = Cast<ASRPGPlayerController>(GetWorld()->GetFirstPlayerController());
+				if (control)
+					control->StopMoving();
 			}
 		}
 	}
@@ -148,12 +153,9 @@ void ATransitionToBattle::RemoveRecruitedFighterAtIndex(int index_)
 void ATransitionToBattle::AddFighterToSelectedFighters(int index_)
 {
 	//Stores the index of the array entry of recruited fighters
-	if (indexesOfSelectedFighters.Num() < Intermediate::GetInstance()->GetMaxDeploymentSize())
-	{
-		//Should check whether the array contains in the index first, but we'll do that through the UI by changing the add button to remove and have it call a different function
-		if (index_ >= 0 && index_ < recruitedFighters.Num())
-			indexesOfSelectedFighters.Push(index_);
-	}
+	//Should check whether the array contains in the index first, but we'll do that through the UI by changing the add button to remove and have it call a different function
+	if (index_ >= 0 && index_ < recruitedFighters.Num())
+		indexesOfSelectedFighters.Push(index_);
 }
 
 void ATransitionToBattle::FinalizeFighterSelection()

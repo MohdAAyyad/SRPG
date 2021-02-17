@@ -38,6 +38,11 @@ protected:
 		FVector displayScale;
 	UPROPERTY(EditAnywhere, Category = "DisplayedFighter")
 		TArray<TSubclassOf<AFighterShopDisplayedFighter>> fightersToDisplay;
+
+	UFUNCTION(BlueprintCallable)
+		void SaveNewRecruitedFighters(); //Called from the UI when you leave the shop after buying one or more fighters
+
+	void LoadRecruitedFighters();
 public:
 	UFUNCTION(BlueprintCallable)
 		void SelectFighterToBuy(FFighterTableStruct fighter_); //Called by the UI

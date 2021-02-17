@@ -517,8 +517,13 @@
 #pragma endregion
 
 #pragma region Maps
+
+#ifndef MAP_DayMenu
+#define MAP_DayMenu FName(TEXT("MM_DayMenu"))
+#endif
+
 #ifndef MAP_HUB 
-#define MAP_HUB FName(TEXT("HubLevel_S11"))
+#define MAP_HUB FName(TEXT("HubWorldDesignedV6"))
 #endif
 
 #ifndef MAP_BATTLE_DAY1 

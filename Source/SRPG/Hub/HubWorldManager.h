@@ -164,9 +164,6 @@ public:
 	void DeleteNPCs();
 	void SpawnCentralNPCs(int amount_);
 
-	void PlayCutscene(int index_);
-
-
 	void SpawnInfoNPC(int archetype_, FOpponentStruct opp_);
 
 	UFUNCTION(BlueprintCallable)
@@ -190,6 +187,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FItemTableStruct> GetAllOwnedItems();
+		
+	TArray<FEquipmentTableStruct> GetAllOwnedEquipment();
+
+	UFUNCTION(BlueprintCallable)
+		void SaveAllData();
 
 
 };

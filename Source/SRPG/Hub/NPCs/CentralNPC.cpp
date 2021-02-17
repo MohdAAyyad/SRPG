@@ -57,6 +57,7 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 					{
 						control->SetInputMode(FInputModeUIOnly());
 						control->FocusOnThisNPC(this, 0.45f);
+						control->StopMoving();
 					}
 
 					FTimerHandle timeToAddWidgetHandle;
@@ -71,6 +72,7 @@ void ACentralNPC::OnOverlapWithPlayer(UPrimitiveComponent* OverlappedComp, AActo
 					if (control)
 					{
 						control->SetInputMode(FInputModeUIOnly());
+						control->StopMoving();
 					}
 
 					FTimerHandle timeToAddWidgetHandle;

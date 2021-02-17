@@ -106,6 +106,8 @@ protected:
 
 	void UpdateOtherManagers();
 
+	void LoadItems();
+
 public:	
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)

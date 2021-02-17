@@ -478,6 +478,28 @@ void UExternalFileReader::AddOwnedValueItemTable(int tableIndex_, int itemId_, i
 	}
 }
 
+void UExternalFileReader::UpdateOwnedValueItemTableAfterLoad(int tableIndex_, int itemId_, int newOwnedValue_)
+{
+	static const FString contextString(TEXT("Trying to load items"));
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		rowNames = tables[tableIndex_]->GetRowNames();
+
+		for (auto n : rowNames)
+		{
+			FItemTableStruct* row = tables[tableIndex_]->FindRow<FItemTableStruct>(n, contextString, true);
+
+			if (row->id == itemId_)
+			{
+				row->owned = newOwnedValue_;
+				break;
+			}
+
+		}
+	}
+}
+
 void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_, int value_)
 {
 	static const FString contextString(TEXT("Equipment Table"));
@@ -486,6 +508,28 @@ void UExternalFileReader::AddOwnedValueEquipmentTable(FName rowName_, int index_
 	{
 		FEquipmentTableStruct* row = tables[index_]->FindRow<FEquipmentTableStruct>(rowName_, contextString, true);
 		row->owned += value_;
+	}
+}
+
+void UExternalFileReader::UpdateOwnedValueEquipmentTableAfterLoad(int tableIndex_, int equipID_, int newOwnedValue_)
+{
+	static const FString contextString(TEXT("Loading Equipment Table"));
+	TArray<FName> rowNames;
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		rowNames = tables[tableIndex_]->GetRowNames();
+
+		for (auto n : rowNames)
+		{
+			FEquipmentTableStruct* row = tables[tableIndex_]->FindRow<FEquipmentTableStruct>(n, contextString, true);
+
+			if (row->id == equipID_)
+			{
+				row->owned = newOwnedValue_;
+				break;
+			}
+
+		}
 	}
 }
 
@@ -854,7 +898,7 @@ TArray<FItemTableStruct> UExternalFileReader::GetAllItemsConditionedByWorldLevel
 TArray<FEquipmentTableStruct> UExternalFileReader::FindAllOwnedEquipment(int tableIndex_)
 {
 	static const FString contextString(TEXT("Getting all owned equipment"));
-	TArray<FEquipmentTableStruct> results;
+	TArray<FEquipmentTableStruct> results = TArray<FEquipmentTableStruct>();
 	TArray<FName> rowNames;
 	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
 	{
@@ -1183,5 +1227,16 @@ FDayTableStruct UExternalFileReader::GetCurrentDayInfo(int tableIndex_,int dayId
 	}
 
 	return FDayTableStruct();
+}
+
+void UExternalFileReader::ClearTable(int tableIndex_)
+{
+	if (tableIndex_ >= 0 && tableIndex_ < tables.Num())
+	{
+		if (tables[tableIndex_])
+		{
+			tables[tableIndex_]->EmptyTable();
+		}
+	}
 }
 

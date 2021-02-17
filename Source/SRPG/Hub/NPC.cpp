@@ -107,6 +107,7 @@ void ANPC::OnOverlapWithPlayer(UPrimitiveComponent* overlappedComp_, AActor* oth
 					if (control)
 					{
 						control->SetInputMode(FInputModeUIOnly());
+						control->StopMoving();
 					}
 					
 				}

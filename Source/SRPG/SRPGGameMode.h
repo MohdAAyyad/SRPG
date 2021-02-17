@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SwitchToNextLevel();
 
+	UFUNCTION(BlueprintCallable)
+		void TellIntermediateThisIsANewGame(); //Called from the UI when the player chooses start game instead of continue
+
 	void SetNextLevelName(FName levelName_);
 
 

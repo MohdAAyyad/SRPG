@@ -25,6 +25,8 @@ public:
 
 	class ASRPGCharacter* GetPlayerReference();
 
+	void StopMoving();
+
 protected:
 
 	/** True if the controlled character should navigate to the mouse cursor. */

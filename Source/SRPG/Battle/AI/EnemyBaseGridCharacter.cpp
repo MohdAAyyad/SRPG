@@ -239,6 +239,7 @@ void AEnemyBaseGridCharacter::StartEnemyTurn()
 	bLookForANewTargetMidAttack = false;
 	statsComp->CheckStatBuffNerfStatus();
 	UpdateOriginTile();
+	decisionComp->ClearCrdItems();
 	targetItem = decisionComp->UpdateTargetItem(gridManager, originTile, pathComp->GetRowSpeed(), pathComp->GetDepth());
 
 	if (targetItem) //If we have a target item, then go there

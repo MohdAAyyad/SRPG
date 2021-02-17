@@ -164,3 +164,8 @@ ASRPGCharacter* ASRPGPlayerController::GetPlayerReference()
 	}
 }
 
+void ASRPGPlayerController::StopMoving()
+{
+	shouldMove = false;
+}
+

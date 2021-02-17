@@ -54,4 +54,12 @@ protected:
 		bool bFromSweep, const FHitResult& SweepResult) override;
 
 
+	UFUNCTION(BlueprintCallable)
+		void SaveNewEquipment(); //Called from the UI when you leave the shop after buying equipment
+	UFUNCTION(BlueprintCallable)
+		void SaveNewItems(); //Called from the UI when you leave the shop after buying items
+
+	void LoadEquipmentAndItems();
+
+
 };

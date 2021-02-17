@@ -89,6 +89,7 @@ void ABranchNPC::OnOverlapWithPlayer(UPrimitiveComponent * overlappedComp_, AAct
 					if (control)
 					{
 						control->SetInputMode(FInputModeUIOnly());
+						control->StopMoving();
 						if (hasUpdatedCentral == false)
 						{
 							control->FocusOnThisNPC(this, 0.45f);

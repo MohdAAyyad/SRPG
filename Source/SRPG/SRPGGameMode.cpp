@@ -9,6 +9,7 @@
 #include "TimerManager.h"
 #include "Engine/GameViewportClient.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
+#include "Intermediary/Intermediate.h"
 
 ASRPGGameMode::ASRPGGameMode()
 {
@@ -65,4 +66,10 @@ bool ASRPGGameMode::UpdateAltf4()
 {
 	FGenericPlatformProcess::LaunchURL(TEXT("https://docs.google.com/forms/d/e/1FAIpQLSdFOjLXzURcEbgA3qiofX0pP2YVlmWzlatUXHohjM-SjcVJpA/viewform"), NULL,NULL);
 	return true;
+}
+
+
+void ASRPGGameMode::TellIntermediateThisIsANewGame()
+{
+	Intermediate::GetInstance()->SetHasLoadedData(false);
 }

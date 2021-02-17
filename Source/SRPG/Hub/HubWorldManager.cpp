@@ -13,6 +13,7 @@
 #include "../SRPGCharacter.h"
 #include "TimerManager.h"
 #include "Hub/Cutscene.h"
+#include "../SaveAndLoad/SaveLoadGameState.h"
 
 // Sets default values
 AHubWorldManager::AHubWorldManager()
@@ -64,8 +65,7 @@ void AHubWorldManager::BeginPlay()
 
 	FTimerHandle cutsceneTimerHandle;
 
-	GetWorld()->GetTimerManager().SetTimer(cutsceneTimerHandle, this, &AHubWorldManager::CheckForCutscene, 0.5f, false);
-
+	GetWorld()->GetTimerManager().SetTimer(cutsceneTimerHandle, this, &AHubWorldManager::CheckForCutscene, 0.3f, false);
 }
 
 void AHubWorldManager::CheckForCutscene()
@@ -690,6 +690,36 @@ TArray<FSkillTableStruct>AHubWorldManager::FindSkillsByAPieceOfEquipment(int equ
 	return TArray<FSkillTableStruct>();
 }
 
+
+TArray<FEquipmentTableStruct> AHubWorldManager::GetAllOwnedEquipment()
+{
+	TArray<FEquipmentTableStruct> allWpnsAndArmorAndAcc = TArray<FEquipmentTableStruct>();
+
+	if (fileReader)
+	{
+		allWpnsAndArmorAndAcc = fileReader->FindAllOwnedEquipment(2); //Weapons
+
+		TArray<FEquipmentTableStruct> armor = fileReader->FindAllOwnedEquipment(3); //Armor
+
+		for (auto a : armor)
+		{
+			allWpnsAndArmorAndAcc.Push(a);
+		}
+
+		armor.Empty();
+
+		armor = fileReader->FindAllOwnedEquipment(4); //Acc
+
+		for (auto a : armor)
+		{
+			allWpnsAndArmorAndAcc.Push(a);
+		}
+
+	}
+
+	return allWpnsAndArmorAndAcc;
+}
+
 void AHubWorldManager::Equip(int fighterID, int equipIndex, int equipID, int oldEquipID)
 {
 	int equipTableIndex = equipIndex + 2;
@@ -709,4 +739,17 @@ TArray<FItemTableStruct> AHubWorldManager::GetAllOwnedItems()
 	return TArray<FItemTableStruct>();
 }
 
+
 #pragma endregion
+
+
+void AHubWorldManager::SaveAllData()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Save all data hub manager"));
+	ASaveLoadGameState* gState_ = Cast<ASaveLoadGameState>(GetWorld()->GetGameState());
+	if (gState_)
+	{
+		gState_->SaveData();
+	}
+
+}

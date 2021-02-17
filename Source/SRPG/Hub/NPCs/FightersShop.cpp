@@ -13,7 +13,25 @@
 #include "SRPGCharacter.h"
 #include "SRPGPlayerController.h"
 #include "TimerManager.h"
+#include "../../SaveAndLoad/SaveLoadGameState.h"
+#include "../HubWorldManager.h"
 
+//TODO
+/*
+During the loading screen between the battle and hub world:
++ Remove the dead units from the loaded current recruited fighters
++ Saving the recruits with the new stats can happen here as well
++ Save the new recruited fighters, the new gold, the new shards, the new day, and the new equip (which would still be the same)
+
+In the fighter shop on being play:
++ Clear the recruited table
++ Fill it with the loaded data
+
+When to save:
++ At the end of the loading screen from battle to hub
++ When you click End Day
+
+*/
 
 AFightersShop::AFightersShop():ANPC()
 {
@@ -26,45 +44,30 @@ AFightersShop::AFightersShop():ANPC()
 void AFightersShop::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Clear the recruited table on begin to get ready to load the data
+	if (fileReader)
+	{
+		fileReader->ClearTable(1);
+	}
+
 	fighterID = Intermediate::GetInstance()->GetLatestFighterID(); //Assuming we do not have any fighters yet
 	GetAllFightersForSale();
 
-	if (Intermediate::GetInstance()->GetDeadUnits().Num() > 0)
+	//Load all the saved recruited fighters
+	if (Intermediate::GetInstance()->GetHasLoadedData()) 
 	{
-		if (fileReader)
-		{
-			fileReader->RemoveFightersDueToPermaDeath(Intermediate::GetInstance()->GetDeadUnits(), 1); //Remove any dead units from the recruited fighters table
-		}
+		LoadRecruitedFighters();
 	}
-	//Check if we have selected fighters at begin play. If we do, then save their new stats for level up purposes
-		/*When the player decides to level up we save a copy of the SFighter
-		so that when the player fluctuates between the levels the results no longer follow a random chance
-		and are consistent i.e. this is used to make sure the random chance is only run once on level up.*/
-	TArray<FFighterTableStruct> fighters;
-	if (Intermediate::GetInstance()->GetSelectedFighters().Num() > 0)
-	{
-		fighters = Intermediate::GetInstance()->GetSelectedFighters();
-		Intermediate::GetInstance()->ResetSelectedFighters();
-	}
+
+	//We need to need to check if we have recruited fighters and update the fighterID accordingyl
 	if (fileReader)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Gonna try it out"));
-		//We need to need to check if we have recruited fighters and update the fighterID accordingyl
 		TArray<FFighterTableStruct> allRecruitedFighters = fileReader->GetAllRecruitedFighters(1);
 		if (allRecruitedFighters.Num() > 0)
 		{
 			fighterID = allRecruitedFighters[allRecruitedFighters.Num() - 1].id; //We already have fighters, so update the fighter id to match the id of the last fighter we have
 			Intermediate::GetInstance()->SetLatestFighterID(fighterID);
-		}
-
-		if (fighters.Num() > 0)
-		{
-			for (int j = 0; j < fighters.Num(); j++)
-			{
-				fileReader->IncreaseTheStatsOfThisFigheter(fighters[j], 1); //Update the stats of these fighters in the recruited fighters table
-			}
-
-			fighters.Empty();
 		}
 	}
 }
@@ -231,5 +234,23 @@ void AFightersShop::RemoveDisplayedFighter()
 	{
 		displayedFighter->Die();
 		displayedFighter = nullptr;
+	}
+}
+
+void AFightersShop::SaveNewRecruitedFighters()
+{
+	//Called from the UI when you leave the shop after buying one or more fighters
+	//Will only save to the intermediate for now. Everything gets saved when we end the day
+	Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState = fileReader->GetAllRecruitedFighters(1);;
+}
+
+void AFightersShop::LoadRecruitedFighters()
+{
+	TArray<FFighterTableStruct> fighters_ = Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState;
+
+	for (int i = 0; i < fighters_.Num(); i++)
+	{
+		FName rowName = FName(*FString::FromInt(fighters_[i].id));
+		fileReader->AddRowToRecruitedFighterTable(rowName, 1, fighters_[i]);
 	}
 }
