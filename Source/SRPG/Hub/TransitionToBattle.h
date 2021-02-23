@@ -43,6 +43,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Audio Manager")
 		class AAudioMnager* audioMgr;
 
+	UPROPERTY(EditAnywhere, Category = "Shops")
+		class AItemShop* itemShop;
+	UPROPERTY(EditAnywhere, Category = "Shops")
+		class AFightersShop* fighterShop;
+
+
 	TArray<FFighterTableStruct> recruitedFighters;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -80,6 +86,11 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 		void UpdateNextLevelName();
+
+	UFUNCTION(BlueprintCallable)
+		AItemShop* GetItemShopRef();
+	UFUNCTION(BlueprintCallable)
+		AFightersShop* GetFighterShopRef();
 
 	void UpdateRecruitedFighters();
 public:	

@@ -209,24 +209,56 @@ TArray<FItemTableStruct> AItemShop::GetAllOwnedItems()
 
 void AItemShop::SaveNewEquipment() //Called from the UI when you leave the shop after buying equipment
 {
+	TArray<FEquipmentTableStruct> weapons_ = fileReader->FindAllOwnedEquipment(1);
+	TArray<FEquipmentTableStruct>armors_ = fileReader->FindAllOwnedEquipment(2);
+	TArray<FEquipmentTableStruct>acc_ = fileReader->FindAllOwnedEquipment(3);
+	UE_LOG(LogTemp, Warning, TEXT("Got the equipment from FR"));
 	//Equipment will be passed on to the save object when we end the day
-	Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState = fileReader->FindAllOwnedEquipment(1);
-	Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState = fileReader->FindAllOwnedEquipment(2);
-	Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState = fileReader->FindAllOwnedEquipment(3);
+	Intermediate::GetInstance()->loadedData.currentWeaponsState = weapons_;
+	Intermediate::GetInstance()->loadedData.currentArmorsState = armors_;
+	Intermediate::GetInstance()->loadedData.currentAccessoriesState = acc_;
+	UE_LOG(LogTemp, Warning, TEXT("Update the intermediate's equipment"));
+
+	/*ASaveLoadGameState* gameState_ = Cast<ASaveLoadGameState>(GetWorld()->GetGameState());
+	if (gameState_)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found the game state"));
+		gameState_->SaveNewWeapons(weapons_);
+		gameState_->SaveNewArmors(armors_);
+		gameState_->SaveNewAccessories(acc_);
+	}
+	*/
 }
 
 void AItemShop::SaveNewItems() //Called from the UI when you leave the shop after buying items
 {
 	//Items will be passed onto the save object when we save
-	Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState = fileReader->GetAllOwnedItems(0);
+	TArray<FItemTableStruct> items_ = fileReader->GetAllOwnedItems(0);
+	Intermediate::GetInstance()->loadedData.currentItemsState = items_;
+
+  /* ASaveLoadGameState* gameState_ = Cast<ASaveLoadGameState>(GetWorld()->GetGameState());
+	if (gameState_)
+	{
+		gameState_->SaveNewItems(items_);
+	}
+	*/
 }
 
 void AItemShop::LoadEquipmentAndItems()
 {
-	TArray<FItemTableStruct> items_ = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;
-	TArray<FEquipmentTableStruct> weapons_ = Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState;
-	TArray<FEquipmentTableStruct> armors_ = Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState;
-	TArray<FEquipmentTableStruct> accessories_ = Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState;
+	TArray<FItemTableStruct> items_ = Intermediate::GetInstance()->loadedData.currentItemsState;
+	TArray<FEquipmentTableStruct> weapons_ = Intermediate::GetInstance()->loadedData.currentWeaponsState;
+	TArray<FEquipmentTableStruct> armors_ = Intermediate::GetInstance()->loadedData.currentArmorsState;
+	TArray<FEquipmentTableStruct> accessories_ = Intermediate::GetInstance()->loadedData.currentAccessoriesState;
+
+	if (Intermediate::GetInstance()->loadedData.currentItemsState.Num() > 0)
+		Intermediate::GetInstance()->loadedData.currentItemsState.Empty();
+	if (Intermediate::GetInstance()->loadedData.currentWeaponsState.Num() > 0)
+		Intermediate::GetInstance()->loadedData.currentWeaponsState.Empty();
+	if (Intermediate::GetInstance()->loadedData.currentArmorsState.Num() > 0)
+		Intermediate::GetInstance()->loadedData.currentArmorsState.Empty();
+	if (Intermediate::GetInstance()->loadedData.currentAccessoriesState.Num() > 0)
+		Intermediate::GetInstance()->loadedData.currentAccessoriesState.Empty();
 
 	for (int i = 0; i < items_.Num(); i++)
 	{

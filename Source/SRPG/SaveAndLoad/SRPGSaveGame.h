@@ -7,6 +7,7 @@
 #include "../ExternalFileReader/FighterTableStruct.h"
 #include "../ExternalFileReader/EquipmentTableStruct.h"
 #include "../ExternalFileReader/ItemTableStruct.h"
+#include "Kismet/GameplayStatics.h"
 #include "SRPGSaveGame.generated.h"
 
 /**
@@ -19,42 +20,28 @@ class SRPG_API USRPGSaveGame : public USaveGame
 public:
 	USRPGSaveGame();
 
-		void SaveCurrentGameState();
-		void InitLoad();
-	
-
-		bool bWillNeedToSwitchLevelAfterSaving; //When true, tells to move to hub world
-	
-		void InitialSave(); //When you start the game
-
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 		FString saveSlotName;
 
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 		uint32 userIndex;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Fighters)
 		TArray<FFighterTableStruct> currentRecruitedFightersState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 		TArray<FEquipmentTableStruct> currentWeaponsState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 		TArray<FEquipmentTableStruct> currentArmorsState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 		TArray<FEquipmentTableStruct> currentAccessoriesState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Items)
 		TArray<FItemTableStruct> currentItemsState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Day)
 		uint32 currentDayState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Day)
 		uint32 currentGoldState;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, Category = Day)
 		uint32 currentShardsState;
-
-		ASaveLoadGameState* gameState;
-
-		void FinishedSaving(const FString& SlotName, const int32 UserIndex_, bool bSuccess);
-
-		void LoadEveryStateDelegate(const FString& slotName_, const int32 userIndex_, USaveGame* saveRef_);
 
 
 

@@ -2,15 +2,16 @@
 
 
 #include "SaveLoadGameState.h"
-#include "SRPGSaveGame.h"
 #include "../Intermediary/Intermediate.h"
 #include "../SRPGGameMode.h"
 #include "Engine/World.h"
 #include "Definitions.h"
+#include "SaveLoadGameState.h"
+#include "SaveGameSystem.h"
 
 ASaveLoadGameState::ASaveLoadGameState()
 {
-	saveLoadObj = NewObject<USRPGSaveGame>();
+	bWillNeedToSwitchLevelAfterSaving = false;
 }
 
 #pragma region Save
@@ -18,105 +19,64 @@ ASaveLoadGameState::ASaveLoadGameState()
 void ASaveLoadGameState::SaveDuringLoadingScreenFromBattleToHub()
 {
 	Intermediate::GetInstance()->ReadyDataForSavingAfterBattle();
-	saveLoadObj->currentRecruitedFightersState = Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState;
-	saveLoadObj->currentWeaponsState = Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState;
-	saveLoadObj->currentArmorsState = Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState;
-	saveLoadObj->currentAccessoriesState = Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState;
-	saveLoadObj->currentItemsState = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;
-	saveLoadObj->currentGoldState = Intermediate::GetInstance()->GetLoadedDataObject().currentGoldState;
-	saveLoadObj->currentShardsState = Intermediate::GetInstance()->GetLoadedDataObject().currentShardsState;
-	saveLoadObj->currentDayState = Intermediate::GetInstance()->GetLoadedDataObject().currentDayState;
-	saveLoadObj->bWillNeedToSwitchLevelAfterSaving = true;
-	saveLoadObj->SaveCurrentGameState();
+	bWillNeedToSwitchLevelAfterSaving = true;
+	SaveData();
 }
-
-void ASaveLoadGameState::SaveNewRecruitedFighters(TArray<FFighterTableStruct> fighters_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentRecruitedFightersState = fighters_;
-	}
-}
-void ASaveLoadGameState::SaveNewWeapons(TArray<FEquipmentTableStruct> equip_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentWeaponsState = equip_;
-	}
-}
-
-void ASaveLoadGameState::SaveNewArmors(TArray<FEquipmentTableStruct> equip_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentArmorsState = equip_;
-	}
-}
-void ASaveLoadGameState::SaveNewAccessories(TArray<FEquipmentTableStruct> equip_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentAccessoriesState = equip_;
-	}
-}
-
-void ASaveLoadGameState::SaveNewItems(TArray<FItemTableStruct> items_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentItemsState = items_;
-	}
-}
-void ASaveLoadGameState::SaveNewGold(uint32 gold_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentGoldState = gold_;
-	}
-}
-void ASaveLoadGameState::SaveNewShards(uint32 shards_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentShardsState = shards_;
-	}
-}
-void ASaveLoadGameState::SaveNewDay(uint32 day_)
-{
-	if (saveLoadObj)
-	{
-		saveLoadObj->currentDayState = day_;
-	}
-}
-
 void ASaveLoadGameState::InitialSave()
 {
 	Intermediate::GetInstance()->GoBackToInitialValues();
-	if (saveLoadObj)
+	USRPGSaveGame* saveInstance_ = Cast<USRPGSaveGame>(UGameplayStatics::CreateSaveGameObject(USRPGSaveGame::StaticClass()));
+	if (saveInstance_)
 	{
-		saveLoadObj->InitialSave();
+		saveInstance_->saveSlotName = TEXT("Save0");
+		saveInstance_->userIndex = 0;
+		saveInstance_->currentRecruitedFightersState = TArray<FFighterTableStruct>();
+		saveInstance_->currentWeaponsState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentArmorsState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentAccessoriesState = TArray<FEquipmentTableStruct>();
+		saveInstance_->currentItemsState = TArray<FItemTableStruct>();
+		saveInstance_->currentDayState = 1;
+		saveInstance_->currentGoldState = 4000;
+		saveInstance_->currentShardsState = 40;
+
+		UGameplayStatics::AsyncSaveGameToSlot(saveInstance_, TEXT("Save0"), 0);
 	}
 }
 
 void ASaveLoadGameState::SaveData()
 {
-	if (saveLoadObj)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Yeah there's a saveloadobj"));
-		saveLoadObj->currentRecruitedFightersState = Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState;
-		saveLoadObj->currentWeaponsState = Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState;
-		saveLoadObj->currentArmorsState = Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState;
-		saveLoadObj->currentAccessoriesState = Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState;
-		saveLoadObj->currentItemsState = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;
-		saveLoadObj->currentGoldState = Intermediate::GetInstance()->GetLoadedDataObject().currentGoldState;
-		saveLoadObj->currentShardsState = Intermediate::GetInstance()->GetLoadedDataObject().currentShardsState;
-		saveLoadObj->currentDayState = Intermediate::GetInstance()->GetLoadedDataObject().currentDayState;
-		saveLoadObj->SaveCurrentGameState();
-	}
+	USRPGSaveGame* saveInstance_ = Cast<USRPGSaveGame>(UGameplayStatics::CreateSaveGameObject(USRPGSaveGame::StaticClass()));
+	if (saveInstance_)
+	{		
+		saveInstance_->saveSlotName = TEXT("Save0");
+		saveInstance_->userIndex = 0;
+		saveInstance_->currentRecruitedFightersState = Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState;
+		saveInstance_->currentWeaponsState = Intermediate::GetInstance()->GetLoadedDataObject().currentWeaponsState;
+		saveInstance_->currentArmorsState = Intermediate::GetInstance()->GetLoadedDataObject().currentArmorsState;
+		saveInstance_->currentAccessoriesState = Intermediate::GetInstance()->GetLoadedDataObject().currentAccessoriesState;
+		saveInstance_->currentItemsState = Intermediate::GetInstance()->GetLoadedDataObject().currentItemsState;		
+		saveInstance_->currentGoldState = Intermediate::GetInstance()->GetLoadedDataObject().currentGoldState;
+		saveInstance_->currentShardsState = Intermediate::GetInstance()->GetLoadedDataObject().currentShardsState;
+		saveInstance_->currentDayState = Intermediate::GetInstance()->GetLoadedDataObject().currentDayState;
 
+		FAsyncSaveGameToSlotDelegate saveDelegate;
+		saveDelegate.BindUObject(this, &ASaveLoadGameState::HandleSavingFinish);
+		UGameplayStatics::AsyncSaveGameToSlot(saveInstance_, TEXT("Save0"), 0, saveDelegate);
+
+	}
 }
 
-void ASaveLoadGameState::FinishedSavingNowToHub(const FString& SlotName, const int32 UserIndex, bool bSuccess)
+void ASaveLoadGameState::HandleSavingFinish(const FString& SlotName, const int32 UserIndex, bool bSuccess)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Finished saving"));
+	if (bWillNeedToSwitchLevelAfterSaving)
+	{
+		bWillNeedToSwitchLevelAfterSaving = false;
+		FinishedSavingNowToHub();
+	}
+}
+
+void ASaveLoadGameState::FinishedSavingNowToHub()
 {
 	ASRPGGameMode* gameMode = Cast<ASRPGGameMode>(GetWorld()->GetAuthGameMode());
 	if (gameMode)
@@ -139,35 +99,33 @@ void ASaveLoadGameState::FinishedSavingNowToHub(const FString& SlotName, const i
 void ASaveLoadGameState::LoadData()
 {
 	//Called from the level blueprint of the loading screen
-	if (saveLoadObj)
-	{
-		saveLoadObj->gameState = this;
-		saveLoadObj->InitLoad();
-	}
+	FAsyncLoadGameFromSlotDelegate LoadedDelegate;
+	LoadedDelegate.BindUObject(this, &ASaveLoadGameState::UpdateTheIntermediate);
+
+	UGameplayStatics::AsyncLoadGameFromSlot(TEXT("Save0"), 0, LoadedDelegate);
 }
 
-void ASaveLoadGameState::UpdateTheIntermediate()
+void ASaveLoadGameState::UpdateTheIntermediate(const FString& slotName_, const int32 userIndex_, USaveGame* saveRef_)
 {
 	//Called after the save load object finishes loading the data
-	if (saveLoadObj)
+	FLoadData loaded_ = FLoadData();
+	USRPGSaveGame* loadInstance_ = Cast<USRPGSaveGame>(saveRef_);
+	if (loadInstance_)
 	{
-		FLoadData loaded_ = FLoadData();
-
-		loaded_.currentDayState = saveLoadObj->currentDayState;
-		loaded_.currentGoldState = saveLoadObj->currentGoldState;
-		loaded_.currentShardsState = saveLoadObj->currentShardsState;
-		loaded_.currentRecruitedFightersState = saveLoadObj->currentRecruitedFightersState;
-		loaded_.currentWeaponsState = saveLoadObj->currentWeaponsState;
-		loaded_.currentArmorsState = saveLoadObj->currentArmorsState;
-		loaded_.currentAccessoriesState = saveLoadObj->currentAccessoriesState;
-		loaded_.currentItemsState = saveLoadObj->currentItemsState;
+		loaded_.currentDayState = loadInstance_->currentDayState;
+		loaded_.currentGoldState = loadInstance_->currentGoldState;
+		loaded_.currentShardsState = loadInstance_->currentShardsState;
+		loaded_.currentRecruitedFightersState = loadInstance_->currentRecruitedFightersState;
+		loaded_.currentWeaponsState = loadInstance_->currentWeaponsState;
+		loaded_.currentArmorsState = loadInstance_->currentArmorsState;
+		loaded_.currentAccessoriesState = loadInstance_->currentAccessoriesState;
+		loaded_.currentItemsState = loadInstance_->currentItemsState;
 
 		Intermediate::GetInstance()->SetLoadedDataObject(loaded_);
 		Intermediate::GetInstance()->SetHasLoadedData(true);
 		Intermediate::GetInstance()->SetCurrentMoney(loaded_.currentGoldState);
 		Intermediate::GetInstance()->SetCurrentShards(loaded_.currentShardsState);
 		Intermediate::GetInstance()->SetCurrentDay(loaded_.currentDayState);
-
 	}
 
 	//All the data has been moved to the intermediate so move to the hub map

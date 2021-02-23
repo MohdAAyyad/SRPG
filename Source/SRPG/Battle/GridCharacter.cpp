@@ -167,12 +167,14 @@ void AGridCharacter::PostInit()
 		permaChampParticles->DeactivateSystem();
 
 	//Spawn and attack the weapons
+	FVector loc_ = GetActorLocation();
+	loc_.X += 200.0f;
 	if (weaponMeshes.Num() > 0)
 	{
 		if (weaponMeshes[0])
 		{
 			FName weaponSocketName = TEXT("WeaponSocket");
-			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[0]);
+			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[0], loc_,FRotator::ZeroRotator);
 			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocketName);
 			equippedWeapons.Push(weapon);
 		}
@@ -183,7 +185,7 @@ void AGridCharacter::PostInit()
 		if (weaponMeshes[1])
 		{
 			FName shieldSocketName = TEXT("ShieldSocket");
-			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[1]);
+			AWeaponBase* weapon = GetWorld()->SpawnActor<AWeaponBase>(weaponMeshes[1], loc_, FRotator::ZeroRotator);
 			weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, shieldSocketName);
 			equippedWeapons.Push(weapon);
 		}

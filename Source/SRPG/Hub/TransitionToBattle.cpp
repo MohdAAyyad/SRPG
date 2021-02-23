@@ -16,6 +16,8 @@
 #include "SRPGPlayerController.h"
 #include "../Audio/AudioMnager.h"
 #include "SRPGPlayerController.h"
+#include "NPCs/ItemShop.h"
+#include "NPCs/FightersShop.h"
 
 // Sets default values
 ATransitionToBattle::ATransitionToBattle()
@@ -110,6 +112,7 @@ void ATransitionToBattle::UnInteract()
 
 void ATransitionToBattle::EndDay()
 {
+	UE_LOG(LogTemp, Warning, TEXT("End Day"));
 	//Called when player presses on End Day in the UI
 	//Gets the winner from tournament NPC and passes it to the intermediate
 
@@ -199,4 +202,13 @@ void ATransitionToBattle::UpdateNextLevelName()
 			break;
 		}
 	}
+}
+
+AItemShop* ATransitionToBattle::GetItemShopRef()
+{
+	return itemShop;
+}
+AFightersShop* ATransitionToBattle::GetFighterShopRef()
+{
+	return fighterShop;
 }

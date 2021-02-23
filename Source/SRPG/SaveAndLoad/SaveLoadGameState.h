@@ -7,6 +7,7 @@
 #include "../ExternalFileReader/FighterTableStruct.h"
 #include "../ExternalFileReader/EquipmentTableStruct.h"
 #include "../ExternalFileReader/ItemTableStruct.h"
+#include "SRPGSaveGame.h"
 #include "SaveLoadGameState.generated.h"
 
 /**
@@ -20,32 +21,25 @@ class SRPG_API ASaveLoadGameState : public AGameStateBase
 public:
 	ASaveLoadGameState();
 
-	void UpdateTheIntermediate(); //Called from the save/load object once loading has finished
-
-	void SaveNewRecruitedFighters(TArray<FFighterTableStruct> fighters_);
-	void SaveNewWeapons(TArray<FEquipmentTableStruct> equip_);
-	void SaveNewArmors(TArray<FEquipmentTableStruct> equip_);
-	void SaveNewAccessories(TArray<FEquipmentTableStruct> equip_);
-	void SaveNewItems(TArray<FItemTableStruct> items_);
-	void SaveNewGold(uint32 gold_);
-	void SaveNewShards(uint32 shards_);
-	void SaveNewDay(uint32 day_);
+	void UpdateTheIntermediate(const FString& slotName_, const int32 userIndex_, USaveGame* saveRef_); //Called from the save/load object once loading has finished
 
 	UFUNCTION(BlueprintCallable)
 		void SaveData();
 	UFUNCTION(BlueprintCallable)
 		void SaveDuringLoadingScreenFromBattleToHub();
 
-	UFUNCTION()
-		void FinishedSavingNowToHub(const FString& SlotName, const int32 UserIndex, bool bSuccess);
+		void FinishedSavingNowToHub();
 protected:
-	class USRPGSaveGame* saveLoadObj;
 
 	UFUNCTION(BlueprintCallable) //Called from the level blueprint
 		void LoadData();
 
 	UFUNCTION(BlueprintCallable)
 		void InitialSave(); //When you start the game
+
+	bool bWillNeedToSwitchLevelAfterSaving;
+
+	void HandleSavingFinish(const FString& SlotName, const int32 UserIndex, bool bSuccess);
 
 	
 	

@@ -913,13 +913,15 @@ TArray<FEquipmentTableStruct> UExternalFileReader::FindAllOwnedEquipment(int tab
 				results.Push(*row);
 			}
 		}
+
+		return results;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Equipment Table returned NULL"));
 	}
 
-	return results;
+	return TArray<FEquipmentTableStruct>();
 }
 
 TArray<FEquipmentTableStruct> UExternalFileReader::GetAllOwnedEquipmentOfACertainType(int tableIndex_, int equipIndex_, int subIndex_)

@@ -67,11 +67,11 @@ protected:
 
 	bool bRewardsWereGiven; //Checked the hub world manager general UI on begin play to see if a notification should be played
 
-	FLoadData loadedData;
 	bool bHasLoadedData;
 	bool bVictory;
 
 public:
+	FLoadData loadedData;
 
 	void Victory(int moneyReward_, int shardsReward_); //Adds 1 to the story progress //Called from the battle manager
 	void Defeat(int moneyCompensation_, int shardsCompensation_);

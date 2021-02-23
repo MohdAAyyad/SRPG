@@ -241,12 +241,23 @@ void AFightersShop::SaveNewRecruitedFighters()
 {
 	//Called from the UI when you leave the shop after buying one or more fighters
 	//Will only save to the intermediate for now. Everything gets saved when we end the day
-	Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState = fileReader->GetAllRecruitedFighters(1);;
+	TArray<FFighterTableStruct> fighters_ = fileReader->GetAllRecruitedFighters(1);
+	Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState = fighters_;
+
+	/*ASaveLoadGameState* gameState_ = Cast<ASaveLoadGameState>(GetWorld()->GetGameState());
+	if (gameState_)
+	{
+		gameState_->SaveNewRecruitedFighters(fighters_);
+	}
+	*/
 }
 
 void AFightersShop::LoadRecruitedFighters()
 {
-	TArray<FFighterTableStruct> fighters_ = Intermediate::GetInstance()->GetLoadedDataObject().currentRecruitedFightersState;
+	TArray<FFighterTableStruct> fighters_ = Intermediate::GetInstance()->loadedData.currentRecruitedFightersState;
+	
+	if(Intermediate::GetInstance()->loadedData.currentRecruitedFightersState.Num()>0)
+		Intermediate::GetInstance()->loadedData.currentRecruitedFightersState.Empty();
 
 	for (int i = 0; i < fighters_.Num(); i++)
 	{
