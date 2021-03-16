@@ -791,6 +791,7 @@ FEquipmentTableStruct UExternalFileReader::GetEquipmentById(int tableIndex_,int 
 						}
 					break;
 				case EQU_ACC: //Accessories don't have sub indexes
+					equip.id = -1; //The default for accessories is -1 i.e. not equipped
 					if (row->id == equipID_) //Is this the correct ID within the weapon/weaponclass tree?
 					{
 						equip = *row;

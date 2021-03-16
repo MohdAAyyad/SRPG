@@ -472,12 +472,12 @@ void APlayerGridCharacter::GridCharReatToElemental(float damage_, int statusEffe
 				btlManager->HandlePlayerDeath(this);
 			if (animInstance)
 				animInstance->DeathAnim();
-		}
 
-		for (int i = 0; i < equippedWeapons.Num(); i++)
-		{
-			if (equippedWeapons[i])
-				equippedWeapons[i]->Destroy();
+			for (int i = 0; i < equippedWeapons.Num(); i++)
+			{
+				if (equippedWeapons[i])
+					equippedWeapons[i]->Destroy();
+			}
 		}
 
 		//TODO

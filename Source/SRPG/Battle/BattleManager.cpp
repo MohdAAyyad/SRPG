@@ -93,7 +93,7 @@ void ABattleManager::NextPhase()
 
 		//Adding delay before activating the phase to allow for the UI to do its thing
 		FTimerHandle nextPhaseHandle;
-		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::PhaseAction, 2.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(nextPhaseHandle, this, &ABattleManager::PhaseAction, 0.5f, false);
 	}
 			
 }

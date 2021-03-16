@@ -16,8 +16,9 @@ public:
 	FFighterTableStruct()
 	{
 		bpid = hp = pip = atk = def = intl = spd = crit = agl = crd = weaponIndex = armorIndex = equippedWeapon = equippedAccessory =
-			equippedArmor = level = currentEXP = neededEXPToLevelUp = id = value = archetype = 0;
+			equippedArmor  = currentEXP = neededEXPToLevelUp = id = value = archetype = 0;
 		name = description = "";
+		level = 1;
 	}
 
 	UPROPERTY(BlueprintReadWrite)

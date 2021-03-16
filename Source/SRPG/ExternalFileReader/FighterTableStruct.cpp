@@ -14,7 +14,6 @@ void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 	int increment = currentLevel % 2;
 	while (currentLevel < targetLevel_)
 	{
-		increment = currentLevel % 2;
 		hp += increment;
 		pip += increment;
 		neededEXPToLevelUp *= 2;
@@ -61,13 +60,18 @@ void FFighterTableStruct::ScaleStatsByLevelUp(int targetLevel_)
 
 void FFighterTableStruct::ScaleStatsByLevelDown(int targetLevel_)
 {
-	//Binary increase based on archetype
+	//Binary decrease based on archetype
 // Non-archetype stats have 1 added every two levels while the archetype stat gets a 1 added for every level
 	int currentLevel = level;
-	int increment = currentLevel % 2;
+	int even = currentLevel % 2;
+	int increment = 0;
+	if (even == 0)
+	{
+		increment = 1;
+	}
+
 	while (currentLevel > targetLevel_)
 	{
-		increment = currentLevel % 2;
 		hp -= increment;
 		pip -= increment;
 		neededEXPToLevelUp /= 2;
