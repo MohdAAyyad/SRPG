@@ -62,6 +62,9 @@ void APlayerGridCharacter::StartPlayerTurn()
 void APlayerGridCharacter::EndPlayerTurn()
 {
 	endText = "";
+	bHasMoved = false;
+	bHasDoneAnAction = false;
+	currentState = EGridCharState::IDLE;
 }
 
 void APlayerGridCharacter::Selected()

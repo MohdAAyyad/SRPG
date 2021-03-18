@@ -135,7 +135,7 @@ void AAIManager::TellEnemiesToMove()
 {
 	if (deployedEnemies.Num() > 0)
 	{
-		if (numberOfEnemiesToldToMove < nextOp.numberOfTroops)
+		if (numberOfEnemiesToldToMove <= nextOp.numberOfTroops && numberOfEnemiesToldToMove < deployedEnemies.Num())
 		{
 			deployedEnemies[numberOfEnemiesToldToMove]->StartEnemyTurn();
 			actionQueue.Enqueue(deployedEnemies[numberOfEnemiesToldToMove]); //Add the enemy to the queue

@@ -190,6 +190,7 @@ void AEnemyBaseGridCharacter::AddEquipmentStats(int tableIndex_)
 		statsComp->AddToStat(STAT_WPN_EFFECT, weapon.statusEffect);
 		statsComp->AddToStat(STAT_ARM_EFFECT, armor.statusEffect);
 		statsComp->AddToStat(STAT_ACC_EFFECT, accessory.statusEffect);
+		statsComp->SetOwnerRef(this);
 	}
 
 	if (pathComp)

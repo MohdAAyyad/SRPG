@@ -89,10 +89,12 @@ void ABattleCrowd::StartCrowdPhase()
 			if (champion)
 			{
 				champion->UnElect();
+				champion = nullptr;
 			}
 			if (villain)
 			{
 				villain->UnElect();
+				villain = nullptr;
 			}
 			//Elect a new champion and a new villain
 			ElectChampion(); 
@@ -108,10 +110,12 @@ void ABattleCrowd::StartCrowdPhase()
 		if (champion)
 		{
 			champion->UnElect();
+			champion = nullptr;
 		}
 		if (villain)
 		{
 			villain->UnElect();
+			villain = nullptr;
 		}
 		turnsSinceChampionAndVillainWereElected = 0;
 	}
@@ -185,33 +189,36 @@ void ABattleCrowd::MoveBattlePawnOverObstacle()
 
 void ABattleCrowd::DestroyObstacle()
 {
-	FTimerHandle endHandle;
-	FVector spawnLoc = chosenObstacle->GetActorLocation();
-	spawnLoc.Z += 600.0f;
-	//First check if the obstacle is an elemental hazard
-	AElementalHazard* hazard = Cast<AElementalHazard>(chosenObstacle);
-	if (hazard)
+
+	if (chosenObstacle)
 	{
-		int projIndex = PickProjectileBasedOnHazardCurrentState(hazard->GetCurrentState());
-		if (projIndex >= 0 && projIndex < crowdProjectiles.Num())
+		FVector spawnLoc = chosenObstacle->GetActorLocation();
+		spawnLoc.Z += 600.0f;
+		//First check if the obstacle is an elemental hazard
+		AElementalHazard* hazard = Cast<AElementalHazard>(chosenObstacle);
+		if (hazard)
+		{
+			int projIndex = PickProjectileBasedOnHazardCurrentState(hazard->GetCurrentState());
+			if (projIndex >= 0 && projIndex < crowdProjectiles.Num())
+			{
+				currentNumOfObstaclesDestroyed++;
+				GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[projIndex], spawnLoc, FRotator::ZeroRotator);
+			}
+			else
+			{
+				SpawnItems(); //We couldn't find a suitable action, so just spawn items
+			}
+		}
+		else //If it's not a hazard, spawn the first projectile above the obstacle
 		{
 			currentNumOfObstaclesDestroyed++;
-			GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[projIndex], spawnLoc, FRotator::ZeroRotator);
-			GetWorld()->GetTimerManager().SetTimer(endHandle, this, &ABattleCrowd::EndPhase, 4.0f, false);
+			GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[0], spawnLoc, FRotator::ZeroRotator);
 		}
-		else
-		{
-			SpawnItems(); //We couldn't find a suitable action, so just spawn items
-		}
-	}
-	else //If it's not a hazard, spawn the first projectile above the obstacle
-	{
-		currentNumOfObstaclesDestroyed++;
-		GetWorld()->SpawnActor<ACrowdProjectile>(crowdProjectiles[0], spawnLoc, FRotator::ZeroRotator);
-		GetWorld()->GetTimerManager().SetTimer(endHandle, this, &ABattleCrowd::EndPhase, 4.0f, false);
-	}
 
-	chosenObstacle = nullptr;
+		chosenObstacle = nullptr;
+	}
+	FTimerHandle endHandle;
+	GetWorld()->GetTimerManager().SetTimer(endHandle, this, &ABattleCrowd::EndPhase, 4.0f, false);
 
 
 }
@@ -404,7 +411,10 @@ void ABattleCrowd::ChampVillainIsDead(bool bChamp_)
 	{
 		champion = nullptr;
 		if (villain)
+		{
 			villain->UnElect();
+			villain = nullptr;
+		}
 	}
 	else
 	{
@@ -449,6 +459,8 @@ void ABattleCrowd::FlipFavorMeter(AGridCharacter* gchar_)
 		else //If it's higher than 0.3f, then make the player's favor into 0.7f
 		{
 			playerFavor = 0.7f;
+			if (audioMgr)
+				audioMgr->SwitchMusic(2);
 		}
 	}
 	else
@@ -460,6 +472,8 @@ void ABattleCrowd::FlipFavorMeter(AGridCharacter* gchar_)
 		else //If it's lower than 0.7f, then make the enemy's favor into 0.7f
 		{
 			playerFavor = 0.3f;
+			if (audioMgr)
+				audioMgr->SwitchMusic(3);
 		}
 	}
 }
@@ -488,12 +502,18 @@ void ABattleCrowd::UnElect(bool champ_)
 	if (champ_)
 	{
 		if (champion)
+		{
 			champion->UnElect();
+			champion = nullptr;
+		}
 	}
 	else
 	{
 		if (villain)
+		{
 			villain->UnElect();
+			villain = nullptr;
+		}
 	}
 }
 
